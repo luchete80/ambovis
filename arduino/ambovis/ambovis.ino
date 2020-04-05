@@ -61,31 +61,31 @@ Adafruit_BMP280 bmp(
 #define speed_multiplier_reverse 2    // factor of speeed for releasing the pressure (runs motion in reverse at X this speed
 #define smear_factor 0                // 0 to do all cycle in 2.5 seconds and wait for the rest 1 to "smear" the motion profile on the whole cycle time 
 
-#if (full_configuration==0)  // no pot for UI, feedback pot on pulley
-  #define LCD_available 0 
-  #define pres_pot_available 0        // 1 if the system has 3 potentiometer and can control the inspirium pressure 
-  #define pin_SW3 7   // breath - On / Off / cal
-  #define pin_TST 1   // test mode - not in use //LUCIANO CHANGED
-  #define pin_LED_AMP 11   // amplitude LED
-  
-  //#define pin_LED_FREQ 9   // frequency LED - OCUPADO
-  
-  #define pin_LED_Fail 10  // FAIL and calib blue LED
-  #define pin_USR 12  // User LED
-  #define pin_FD 4    // freq Down
-  #define pin_FU 5    // freq Up
-  #define pin_AD 8    // Amp Down
-  #define pin_AU 6    // Amp Up
-  #define curr_sense 1 
-  #define control_with_pot 0    // 1 = control with potentiometers  0 = with push buttons
-  #define F 0.6       // motion control feed forward  
-  #define KP 0.2      // motion control propportional gain 
-  #define KI 2        // motion control integral gain 
-  #define integral_limit 6  // limits the integral of error 
-  #define f_reduction_up_val 0.65   // reduce feedforward by this factor when moving up 
-#endif
-
-#if (full_configuration==1) // feedback pot on arm, potentiometers for UI 
+//#if (full_configuration==0)  // no pot for UI, feedback pot on pulley
+//  #define LCD_available 0 
+//  #define pres_pot_available 0        // 1 if the system has 3 potentiometer and can control the inspirium pressure 
+//  #define pin_SW3 7   // breath - On / Off / cal
+//  #define pin_TST 1   // test mode - not in use //LUCIANO CHANGED
+//  #define pin_LED_AMP 11   // amplitude LED
+//  
+//  //#define pin_LED_FREQ 9   // frequency LED - OCUPADO
+//  
+//  #define pin_LED_Fail 10  // FAIL and calib blue LED
+//  #define pin_USR 12  // User LED
+//  #define pin_FD 4    // freq Down
+//  #define pin_FU 5    // freq Up
+//  #define pin_AD 8    // Amp Down
+//  #define pin_AU 6    // Amp Up
+//  #define curr_sense 1 
+//  #define control_with_pot 0    // 1 = control with potentiometers  0 = with push buttons
+//  #define F 0.6       // motion control feed forward  
+//  #define KP 0.2      // motion control propportional gain 
+//  #define KI 2        // motion control integral gain 
+//  #define integral_limit 6  // limits the integral of error 
+//  #define f_reduction_up_val 0.65   // reduce feedforward by this factor when moving up 
+//#endif
+//
+//#if (full_configuration==1) // feedback pot on arm, potentiometers for UI 
   #define LCD_available 1 
   #define pres_pot_available 1        // 1 if the system has 3 potentiometer and can control the inspirium pressure 
   #define pin_SW3 4         // breath - On / Off / cal
@@ -109,7 +109,7 @@ Adafruit_BMP280 bmp(
   #define KI 0      // motion control integral gain 
   #define integral_limit 5  // limits the integral of error 
   #define f_reduction_up_val 0.85    // reduce feedforward by this factor when moving up 
-#endif
+//#endif
 
 #define PIN_ENC_SW  9
 #define PIN_ENC_CL  2
@@ -240,7 +240,7 @@ float pressure_baseline, pot_rate, pot_pres, pot_comp;
 int pressure_abs,breath_cycle_time, max_pressure=0 , prev_max_pressure=0, min_pressure=100, prev_min_pressure=0, index_to_hold_breath;
 int comp_pot_low=0,comp_pot_high=1023,rate_pot_low=0,rate_pot_high=1023,pres_pot_low=0,pres_pot_high=1023;
 
-byte curr_sel;
+byte curr_sel,old_curr_sel;
 bool encoder_sw_state;
 
 //LUCIANO
@@ -321,7 +321,7 @@ void setup() {
     #endif
 
     //LUCIANO
-    curr_sel=0; //COMPRESSION
+    curr_sel=old_curr_sel=0; //COMPRESSION
 
     pinMode(pinA, INPUT_PULLUP); // set pinA as an input, pulled HIGH to the logic voltage (5V or 3.3V for most cases)
   pinMode(pinB, INPUT_PULLUP); // set pinB as an input, pulled HIGH to the logic voltage (5V or 3.3V for most cases)
@@ -335,39 +335,6 @@ void setup() {
 
 void loop() 
 {
-
-  //LUCIANO------------------------
-byte btnState = digitalRead(9);
-
-if (btnState == LOW) {
-    if (millis() - lastButtonPress > 50) {
-        Serial.println(curr_sel);
-        curr_sel++; //NOT +=1, is a byte
-        if (curr_sel>2)
-          curr_sel=0;
-    }
-    lastButtonPress = millis();
-}
-
-
-    if(oldEncPos != encoderPos) {
-      Serial.println(encoderPos);
-      oldEncPos = encoderPos;
-      A_comp=encoderPos;}
-
- switch (curr_sel){
-  case 0:
-    encoderPos=oldEncPos=A_comp;
-    break;
-  case 1:
-    encoderPos=oldEncPos=A_rate;
-    break;
-  case 2:
-    encoderPos=oldEncPos=A_pres;
-    break;
-  }
- //------------------------------
-    
  read_IO ();
  //LUCIANO---
  //run_profile=1;
@@ -760,6 +727,9 @@ void read_IO ()
   //encoder.updateValue(&counter);
   //Serial.println("counter" + String(counter));
 
+  check_encoder();
+ 
+
      //---------------- LUCIANO Changes until Here --
     Compression_perc= perc_of_lower_volume_display + int(float(A_comp)*(100-perc_of_lower_volume_display)/1023);
     Compression_perc=limit_int(Compression_perc,perc_of_lower_volume_display,100);
@@ -867,4 +837,52 @@ void print_tele ()  // UNCOMMENT THE TELEMETRY NEEDED
 // Serial.print(" P(mBar):"); Serial.println(pressure_abs);
 //  Serial.print(" RF:");  Serial.print(range_factor); 
     Serial.println("");
+}
+
+//LUCIANO
+void check_encoder()
+{
+      //LUCIANO------------------------
+byte btnState = digitalRead(9);
+
+if (btnState == LOW) {
+    if (millis() - lastButtonPress > 50) {
+        Serial.println(curr_sel);
+        curr_sel++; //NOT +=1, is a byte
+        if (curr_sel>2)
+          curr_sel=0;
+    }
+    lastButtonPress = millis();
+}
+
+
+    if(oldEncPos != encoderPos) {
+      Serial.println(encoderPos);
+      oldEncPos = encoderPos;
+      switch (curr_sel){
+        case 0:
+          A_comp=encoderPos;
+          break;
+        case 1:
+          A_rate=encoderPos;
+          break;
+        case 2:
+          A_pres=encoderPos;
+          break;        
+              }}
+
+if (curr_sel!=old_curr_sel){
+ switch (curr_sel){
+  case 0:
+    encoderPos=oldEncPos=A_comp;
+    break;
+  case 1:
+    encoderPos=oldEncPos=A_rate;
+    break;
+  case 2:
+    encoderPos=oldEncPos=A_pres;
+    break;
+  }
+  old_curr_sel=curr_sel;}
+ //----
 }
