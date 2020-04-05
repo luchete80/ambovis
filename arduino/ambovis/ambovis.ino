@@ -94,17 +94,17 @@ Adafruit_BMP280 bmp(
   #define pin_SW3 4         // breath - On / Off / cal
   #define pin_TST 1         // test mode - not in use
   #define pin_RST 5         // reset alarm - not in use
-  #define pin_LED_AMP 13    // amplitude LED
-  #define pin_LED_FREQ 13   // frequency LED
-  #define pin_LED_Fail 10   // FAIL and calib blue LED
+  #define pin_LED_AMP   99    // amplitude LED
+  #define pin_LED_FREQ  99   // frequency LED
+  #define pin_LED_Fail  99   // FAIL and calib blue LED
   
   //#define pin_USR 9         // User LED ------------LUCIANO HERE IS THE ENCODER ACCORDING TO REES
   #define pin_USR 99
   
-  #define pin_FD 13    // freq Down
-  #define pin_FU 13    // freq Up
-  #define pin_AD 13    // Amp Down
-  #define pin_AU 13    // Amp Up
+  #define pin_FD 99    // freq Down
+  #define pin_FU 99    // freq Up
+  #define pin_AD 99    // Amp Down
+  #define pin_AU 99    // Amp Up
   #define curr_sense 0
   #define control_with_pot 1    // 1 = control with potentiometers  0 = with push buttons
   #define F 5       // motion control feed forward  
@@ -114,10 +114,11 @@ Adafruit_BMP280 bmp(
   #define f_reduction_up_val 0.85    // reduce feedforward by this factor when moving up 
 //#endif
 
+//LUCIANO
 #define PIN_ENC_SW  9
 #define PIN_ENC_CL  2
 #define PIN_ENC_DIR 3
-
+#define PIN_ENDSTOP 4
 
 static int pinA = PIN_ENC_CL; // Our first hardware interrupt pin is digital pin 2
 static int pinB = PIN_ENC_DIR; // Our second hardware interrupt pin is digital pin 3
@@ -207,7 +208,7 @@ FlexyStepper stepper;
 #define STEPPER_MICROSTEPS_PER_REVOLUTION (STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS)
 //#define STEPPER_DIR 1
 #define STEPPER_HOMING_DIRECTION    (-1)
-#define STEPPER_HOMING_SPEED        (STEPPER_MICROSTEPS * 1000)   // Steps/s
+#define STEPPER_HOMING_SPEED        (STEPPER_MICROSTEPS * 100)   // Steps/s
 #define STEPPER_LOWEST_POSITION     (STEPPER_MICROSTEPS * -100)   // Steps
 #define STEPPER_HIGHEST_POSITION    (STEPPER_MICROSTEPS *   50)   // Steps
 #define STEPPER_SPEED_DEFAULT       (STEPPER_MICROSTEPS *  1600)   // Steps/s
@@ -287,7 +288,7 @@ void setup() {
 //  sparkfumPress.begin();
  if (bmp.begin())
   pressure_baseline = bmp.readPressure();
-  Serial.println("pressure_baseline: " + String(pressure_baseline));
+  Serial.print("pressure_baseline: ");Serial.println(pressure_baseline);
 //  pressure_baseline = sparkfumPress.getPressure(ADC_4096);
   }else
       Serial.println("Could not find a valid BMP280 sensor, check wiring!"); // Inicia el sensor
@@ -352,17 +353,22 @@ void setup() {
 
   pres_sens= Pressure_Sensor(A0);
 
+  
   //LUCIANO --------------------------
 }
 
+bool end=false;
+
+//run_profile=1;
 void loop() 
 {
- read_IO ();
- //LUCIANO---
- //run_profile=1;
- //-------------
- 
+//
+//  Serial.println("Loop begin");
+  read_IO ();
+  check_encoder();
+
   run_profile_func ();
+  
   find_min_max_pressure();
   if (index >= (profile_length-2)) if (sent_LCD==0) {sent_LCD=1; display_LCD();}
   if (index==1) sent_LCD=0;  
@@ -373,32 +379,30 @@ void loop()
       if (send_to_monitor) send_data_to_monitor();
       last_sent_data=millis();
   }
+//  Serial.print("index: ");Serial.println(index);
 ////
 //  if (TST==0) last_TST_not_pressed=millis();
 //  if (millis()-last_TST_not_pressed>5000) 
 //      if (pot_rate > 200 && pot_rate < 800) calibrate_arm_range();
 //      else calibrate_pot_range();
-  if (calibrated ==0) { run_profile=0;  calibrate_arm_range(); }
-
-  //sel: compression/pressure/rate
-//  if (encoder.readButton())
-//  Serial.println("Apretado!");  
-  //{
-//    curr_sel++;
-//    if (curr_sel>2)
-//      curr_sel=0;
-  
-    //  Serial.println("Apretado!");
-   // while(!encoder.readButton())
-//      encoder.updateValue(&counter);
-   //   Serial.println(counter);
-   //   Serial.print("Saliendo");
-  //}
-//      
-  stepper.processMovement(); //LUCIANO
+//  if (calibrated ==0) { run_profile=0;  calibrate_arm_range(); }
+   
 
 //@TODO: LUCIANO GUARDAR A_comp, A_pres y A_rate si cmbiron
 
+//HOMING
+//  bool success;
+//  if (!end)
+//    if (stepper.moveToHomeInSteps(
+//          STEPPER_HOMING_DIRECTION,
+//          STEPPER_HOMING_SPEED,
+//          STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS,
+//          PIN_ENDSTOP) == true)
+//            end=true;
+// 
+//  Serial.println(stepper.getCurrentPositionInSteps());
+  stepper.processMovement(); //LUCIANO
+  
 }//loop
 
 
@@ -704,7 +708,8 @@ void set_motor_speed (float wanted_vel_PWM)
   motorPWM = PWM_mid + int( wanted_vel_PWM );  
 
   stepper.setSpeedInStepsPerSecond((int)abs(motorPWM));
-  stepper.moveRelativeInSteps(10);
+  //stepper.moveRelativeInSteps(100);
+  stepper.setTargetPositionInSteps(2000);
   if (!stepper.motionComplete()&& wanted_vel_PWM==0)
       stepper.setTargetPositionToStop();
 }
@@ -771,7 +776,7 @@ void read_IO ()
   //encoder.updateValue(&counter);
   //Serial.println("counter" + String(counter));
 
-  check_encoder();
+  //check_encoder();
  
 
      //---------------- LUCIANO Changes until Here --
@@ -801,21 +806,27 @@ void read_IO ()
 //        if (AU==0 && AUFB==1) {insp_pressure+=5; if(insp_pressure>70) insp_pressure=70;}
 //        }
 //  }
-  range_factor = perc_of_lower_volume+(Compression_perc-perc_of_lower_volume_display)*(100-perc_of_lower_volume)/(100-perc_of_lower_volume_display);
-  range_factor = range_factor/100;
-  if (range_factor>1) range_factor=1;  if (range_factor<0) range_factor=0; 
 
-  if (pressure_sensor_available)  
-   {if (millis()-last_read_pres>100) 
-     {
-      last_read_pres = millis();  
+ range_factor = perc_of_lower_volume+(Compression_perc-perc_of_lower_volume_display)*(100-perc_of_lower_volume)/(100-perc_of_lower_volume_display);
+ range_factor = range_factor/100;
+ if (range_factor>1) range_factor=1;  if (range_factor<0) range_factor=0; 
+
+ if (pressure_sensor_available)  
+  {if (millis()-last_read_pres>100) 
+    {
+     last_read_pres = millis();  
 //      pressure_abs = int( sparkfumPress.getPressure(ADC_4096)-pressure_baseline);   // mbar
-    pressure_abs=bmp.readPressure();
-    //LUCIANO CONVERT TO P!A!!!
-      if (pressure_abs<0) pressure_abs=0;
-     }
-   }
-  if (prev_BPM != BPM || prev_Compression_perc!=Compression_perc)  display_LCD();
+   pressure_abs=bmp.readPressure();
+   //LUCIANO CONVERT TO P!A!!!
+     if (pressure_abs<0) pressure_abs=0;
+    }
+  }
+  //LUCIANO: NOT DISPLAY ALL AGAIN
+  //if (prev_BPM != BPM || prev_Compression_perc!=Compression_perc)  display_LCD();
+
+  lcd.setCursor(4,0);  lcd.print(byte(BPM));  
+  lcd.setCursor(8,0); lcd.print(byte(Compression_perc)); 
+  
   if (SW3==0 && SW3FB==1)  // start /  stop breathing motion   
       {
         run_profile=1-run_profile; 
