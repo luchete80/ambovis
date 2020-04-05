@@ -168,9 +168,9 @@ void PinB(){
 #define pin_PRE 6   // analog pin of pressure control
 
 // Talon SR or SPARK controller PWM settings ("angle" for Servo library) 
-#define PWM_mid 30  // mid value for PWM 0 motion - higher pushes up
-#define PWM_max 20  //WAS 85
-#define PWM_min -20 //LUCIANO: WAS 85
+#define PWM_mid  200  // mid value for PWM 0 motion - higher pushes up
+#define PWM_max  800  //WAS 85
+#define PWM_min -800 //LUCIANO: WAS 85
 #define max_allowed_current 100 // 10 Amps
 
 // motion control parameters
@@ -194,12 +194,12 @@ void PinB(){
 //Encoder encoder(2,3,9);  //SAME PINS AS REES
 
 //Servo motor;
-#ifdef ACCEL_STEPPER
+#include <AccelStepper.h>
 
-#else
-#include "src/FlexyStepper/FlexyStepper.h"
-FlexyStepper stepper;
-#endif
+ AccelStepper stepper(
+  1,
+  6,
+  7);
 
 // Valores motor
 #define STEPPER_MICROSTEPS 4
@@ -263,6 +263,10 @@ void writeLine(int line, String message = "", int offsetLeft = 0)
   lcd.setCursor(offsetLeft, line);
   lcd.print(message);
 }
+
+unsigned long cycle_time;
+unsigned long change_time;
+
 //LUCIANO
 void setup() {
  
@@ -327,18 +331,13 @@ void setup() {
   
   insp_pressure=insp_pressure_default;
 
-  //LUCIANO 
-    //IMPORTANT FROM https://github.com/Stan-Reifel/FlexyStepper/blob/master/Documentation.md
-    #ifdef ACCEL_STEPPER
-    #else
-    stepper.connectToPins(PIN_STEPPER_STEP, PIN_STEPPER_DIRECTION);
-    stepper.setStepsPerRevolution(STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS);
+  //http://www.airspayce.com/mikem/arduino/AccelStepper/classAccelStepper.html
+  stepper.setMaxSpeed(STEPPER_SPEED_DEFAULT);
+  stepper.setSpeed(STEPPER_SPEED_DEFAULT);
+  stepper.moveTo(1600);
+  stepper.setAcceleration(1000);
 
-    stepper.setSpeedInStepsPerSecond(STEPPER_SPEED_DEFAULT);
-    stepper.setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_INSUFFLATION);
-    stepper.setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
-    #endif
-
+  
     //LUCIANO
     curr_sel=old_curr_sel=0; //COMPRESSION
 
@@ -346,39 +345,50 @@ void setup() {
   pinMode(pinB, INPUT_PULLUP); // set pinB as an input, pulled HIGH to the logic voltage (5V or 3.3V for most cases)
   attachInterrupt(0,PinA,RISING); // set an interrupt on PinA, looking for a rising edge signal and executing the "PinA" Interrupt Service Routine (below)
   attachInterrupt(1,PinB,RISING); // set an interrupt on PinB, looking for a rising edge signal and executing the "PinB" Interrupt Service Routine (below)
-
+//
   pinMode(9, INPUT_PULLUP);
   encoder_sw_state=digitalRead(9);
   lastButtonPress=millis();
-
+//
   pres_sens= Pressure_Sensor(A0);
+//  change_time=millis();
 
   
+//HOMING
+  bool success=false;
+
+//HOMING
+ 
+  //Serial.println(stepper.getCurrentPositionInSteps());
+
+
   //LUCIANO --------------------------
 }
 
 bool end=false;
 
+int n=1;
 //run_profile=1;
 void loop() 
 {
 //
 //  Serial.println("Loop begin");
-  read_IO ();
-  check_encoder();
-
-  run_profile_func ();
+//  read_IO ();
+//  check_encoder();
+//
+//  run_profile=1;//LUCIANO
+//  run_profile_func ();
   
-  find_min_max_pressure();
-  if (index >= (profile_length-2)) if (sent_LCD==0) {sent_LCD=1; display_LCD();}
-  if (index==1) sent_LCD=0;  
-
-  if (millis()-last_sent_data>7)
-  { 
-      if (telemetry) print_tele();
-      if (send_to_monitor) send_data_to_monitor();
-      last_sent_data=millis();
-  }
+//  find_min_max_pressure();
+//  if (index >= (profile_length-2)) if (sent_LCD==0) {sent_LCD=1; display_LCD();}
+//  if (index==1) sent_LCD=0;  
+//
+//  if (millis()-last_sent_data>7)
+//  { 
+//      if (telemetry) print_tele();
+//      if (send_to_monitor) send_data_to_monitor();
+//      last_sent_data=millis();
+//  }
 //  Serial.print("index: ");Serial.println(index);
 ////
 //  if (TST==0) last_TST_not_pressed=millis();
@@ -389,19 +399,28 @@ void loop()
    
 
 //@TODO: LUCIANO GUARDAR A_comp, A_pres y A_rate si cmbiron
-
-//HOMING
-//  bool success;
-//  if (!end)
-//    if (stepper.moveToHomeInSteps(
-//          STEPPER_HOMING_DIRECTION,
-//          STEPPER_HOMING_SPEED,
-//          STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS,
-//          PIN_ENDSTOP) == true)
-//            end=true;
-// 
-//  Serial.println(stepper.getCurrentPositionInSteps());
-  stepper.processMovement(); //LUCIANO
+  //Serial.println(stepper.currentPosition());
+  //if stepper is at desired location
+ if (stepper.distanceToGo() == 0){
+  stepper.stop();
+  end=true;
+ }
+ if (!end){
+    stepper.moveTo(1600);   
+    stepper.setMaxSpeed(1000); 
+    stepper.setSpeed(600); 
+  stepper.run();   }
+//
+//
+  Serial.print("Sensor value: ");Serial.println(pres_sens.get_dp());
+  lcd.setCursor(0, 2); 
+  //lcd.print("Pmin:"); lcd.print(byte(analogRead(A0) * 5. / 1024.));
+  //writeLine(2, "dV: " + String(analogRead(A0) * 5. / 1024.) + " V");
+//  //writeLine(1, "dp: " + String(bmp1.get_dp()) + " Pa");
+//
+  Serial.print("Caudal: ");Serial.println(flux);
+  //writeLine(3, "fv: " + String(flux) + " ml/s");
+  //  writeLine(2, "fv: " + String(flux * 1000) + " ml/s");
   
 }//loop
 
@@ -449,6 +468,83 @@ void run_profile_func()
         { 
           planned_vel= profile_planned_vel;
         }
+      if (safety_pressure_detected) planned_vel=-speed_multiplier_reverse*planned_vel;          // to do the revese in case high pressure detected
+
+      error = wanted_pos-float(A_pot);    
+      if (100*abs(error)/(max_arm_pos - min_arm_pos)>motion_control_allowed_error && cycle_number>1) motion_failure=1;
+         
+      integral += error*float(wanted_cycle_time)/1000;
+      if (integral> integral_limit) integral= integral_limit;
+      if (integral<-integral_limit) integral=-integral_limit;
+      if (index<2 || index ==220 ) integral=0;   // zero the integral accumulator at the beginning of cycle and movement up
+
+      if (planned_vel<0) f_reduction_up = f_reduction_up_val; else f_reduction_up=1;  // reduce f for the movement up
+  
+      wanted_vel_PWM = F*planned_vel*f_reduction_up + KP*error+KI*integral;           // PID correction 
+      wanted_vel_PWM = wanted_vel_PWM*float(cycleTime)/float(wanted_cycle_time);      // reduce speed for longer cycles 
+ 
+      if (safety_pressure_detected) {index-=speed_multiplier_reverse*(1+cycles_lost);  }  // run in reverse if high pressure was detected
+      if (index<0) { if(safety_pressure_detected==1) safety_pressure_counter+=1;          // count the number of cases reaching safety pressure
+                     safety_pressure_detected=0; 
+                     wait_cycles=200*wait_time_after_resistance; 
+                     index=profile_length-2;                                               // set index to the point of waiting 
+                    }    // stop the reverse when reching the cycle start point
+
+      if (in_wait==0) index +=(1+cycles_lost);    // dont advance index while waiting at the end of cycle 
+      if (index >= (profile_length-2))            // wait for the next cycle to begin in this point -> 2 points befoe the last cycle index
+        {
+        if (millis()-start_wait < breath_cycle_time) { index = profile_length-2; in_wait=1;   }    // still need to wait ...
+        else {  index =0; cycle_number+=1; 
+                start_wait=millis(); 
+                in_wait=0; 
+                send_beep=1; 
+                high_pressure_detected=0;
+             }            // time has come ... start from index = 0 
+        }
+      blink_user_led ();
+    }
+    calc_failure();
+  }
+
+else  // not running profile
+  { wanted_vel_PWM=0;
+    if (USR_status) 
+      {if (millis()-lastUSRblink>10) {USR_status=0; lastUSRblink=millis(); LED_USR(0);}}
+      else {if (millis()-lastUSRblink>490) {USR_status=1; lastUSRblink=millis(); LED_USR(1);}}
+    cycle_number=0;
+    failure=0;
+    delay (1);
+  }
+//set_motor_PWM (wanted_vel_PWM);
+set_motor_speed (400);
+}
+
+void run_profile_func_vol()
+{
+  if (run_profile)
+  {
+     if (millis()-lastIndex >= wanted_cycle_time)                        // do when cycle time was reached
+     {
+      cycles_lost = (millis()-lastIndex)/wanted_cycle_time-1;  
+      cycles_lost=limit_int(cycles_lost,0,15);
+      lastIndex=millis();  // last start of cycle time
+
+      range = range_factor*(max_arm_pos - min_arm_pos);                 // range of movement in pot' readings
+      wanted_pos = float(pos[index])*range/255 + min_arm_pos;           // wanted pos in pot clicks
+      profile_planned_vel = (float(vel[index+1]) - 128.01)*range/255;   // in clicks per 0.2 second
+
+      Serial.println("Cycle Time Reached");//LUCIANO
+      if (hold_breath==1 && safety_pressure_detected==0) 
+        {   if (wanted_pos <= float (A_pot) || index ==0) hold_breath=0;
+            planned_vel=0; 
+            integral = 0;       
+            wanted_pos = float (A_pot);                                 // hold current position
+        }
+      else 
+        { 
+          planned_vel= profile_planned_vel;
+        }
+      
       if (safety_pressure_detected) planned_vel=-speed_multiplier_reverse*planned_vel;          // to do the revese in case high pressure detected
 
       error = wanted_pos-float(A_pot);    
@@ -656,15 +752,6 @@ void display_LCD()   // here function that sends data to LCD
    if (failure ==3) lcd.print("Motion Fail");}//calib on   
   }//LCD_av
 
-  dp = pres_sens.get_dp();
-  Serial.print("Sensor value: ");Serial.println(pres_sens.get_dp());
-  lcd.setCursor(0, 2); 
-  //lcd.print("Pmin:"); lcd.print(byte(analogRead(A0) * 5. / 1024.));
-  writeLine(2, "dV: " + String(analogRead(A0) * 5. / 1024.) + " V");
-//  //writeLine(1, "dp: " + String(bmp1.get_dp()) + " Pa");
-//
-//  calcularCaudalVenturi(dp, &flux);
-//  writeLine(2, "fv: " + String(flux * 1000) + " ml/s");
 }
 
 void reset_failures()
@@ -694,24 +781,25 @@ void set_motor_PWM (float wanted_vel_PWM)
 //LUCIANO
 void set_motor_speed (float wanted_vel_PWM)
 {
-  if (abs(A_pot-prevA_pot)>0 || abs(wanted_vel_PWM)<15) index_last_motion=index;
-  //if (index-index_last_motion>10 || A_pot==0 || A_pot==1023) motion_failure=1;
-  
-  if (calibON==1 ) wanted_vel_PWM=read_motion_for_calib();  // allows manual motion during calibration
-  if (invert_mot) wanted_vel_PWM=-wanted_vel_PWM;
-  if (curr_sense) {if (A_current>max_allowed_current)   wanted_vel_PWM=0;}
-  if (motion_failure==1 && calibON==0) wanted_vel_PWM=0;
-  if (wanted_vel_PWM > 0) wanted_vel_PWM+=3;   // undo controller dead band
-  if (wanted_vel_PWM < 0) wanted_vel_PWM-=3;   // undo controller dead band
-  if (wanted_vel_PWM > PWM_max) wanted_vel_PWM= PWM_max;  // limit PWM
-  if (wanted_vel_PWM < PWM_min) wanted_vel_PWM= PWM_min;  // limit PWM
-  motorPWM = PWM_mid + int( wanted_vel_PWM );  
+//  if (abs(A_pot-prevA_pot)>0 || abs(wanted_vel_PWM)<15) index_last_motion=index;
+//  //if (index-index_last_motion>10 || A_pot==0 || A_pot==1023) motion_failure=1;
+//  
+//  if (calibON==1 ) wanted_vel_PWM=read_motion_for_calib();  // allows manual motion during calibration
+//  if (invert_mot) wanted_vel_PWM=-wanted_vel_PWM;
+//  if (curr_sense) {if (A_current>max_allowed_current)   wanted_vel_PWM=0;}
+//  if (motion_failure==1 && calibON==0) wanted_vel_PWM=0;
+//  if (wanted_vel_PWM > 0) wanted_vel_PWM+=3;   // undo controller dead band
+//  if (wanted_vel_PWM < 0) wanted_vel_PWM-=3;   // undo controller dead band
+//  if (wanted_vel_PWM > PWM_max) wanted_vel_PWM= PWM_max;  // limit PWM
+//  if (wanted_vel_PWM < PWM_min) wanted_vel_PWM= PWM_min;  // limit PWM
+//  motorPWM = PWM_mid + int( wanted_vel_PWM );  
 
-  stepper.setSpeedInStepsPerSecond((int)abs(motorPWM));
-  //stepper.moveRelativeInSteps(100);
-  stepper.setTargetPositionInSteps(2000);
-  if (!stepper.motionComplete()&& wanted_vel_PWM==0)
-      stepper.setTargetPositionToStop();
+  stepper.setSpeed(wanted_vel_PWM);
+//  
+//  //stepper.moveRelativeInSteps(100);
+//  stepper.setTargetPositionInSteps(2000);
+//  if (!stepper.motionComplete()&& wanted_vel_PWM==0)
+//      stepper.setTargetPositionToStop();
 }
 
 int read_motion_for_calib()
@@ -750,8 +838,11 @@ void read_IO ()
   if (TSTtemp==1) {counter_TST_ON+=1;  if (counter_TST_ON>20)  {TST=1; counter_TST_ON=100; }} else counter_TST_ON=0;
   if (TSTtemp==0) {counter_TST_OFF+=1; if (counter_TST_OFF>20) {TST=0; counter_TST_OFF=100;}} else counter_TST_OFF=0;
  
-  A_pot= analogRead   (pin_POT);   if (invert_pot) A_pot=1023-A_pot;
+//LUCIANO
+ // A_pot= analogRead   (pin_POT);   if (invert_pot) A_pot=1023-A_pot;
+  A_pot=100;
   A_current= analogRead (pin_CUR)/8;  // in tenth Amps
+  A_current=100;
   //if(control_with_pot)
   //{ 
     ///___________________________
@@ -817,6 +908,11 @@ void read_IO ()
      last_read_pres = millis();  
 //      pressure_abs = int( sparkfumPress.getPressure(ADC_4096)-pressure_baseline);   // mbar
    pressure_abs=bmp.readPressure();
+
+       dp = pres_sens.get_dp();
+      calcularCaudalVenturi(dp, &flux);
+      flux*=1000;
+       
    //LUCIANO CONVERT TO P!A!!!
      if (pressure_abs<0) pressure_abs=0;
     }
