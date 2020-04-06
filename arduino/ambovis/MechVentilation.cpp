@@ -250,7 +250,7 @@ void MechVentilation::update(void)
 
         // time expired
         //if (currentTime > totalCyclesInThisState)
-        if(_msecTimerCnt > _msecTimeoutInsufflation)
+        if(_msecTimerCnt > _timeoutIns)
         {
             if (!_stepper->motionComplete())
             {
@@ -261,7 +261,7 @@ void MechVentilation::update(void)
 
             }
             _setState(Init_Exsufflation);
-            currentTime = millis();
+            //currentTime = millis();
             float dt=(float)(_msecTimerCnt-_msecLastUpdate)*1000.;
 
             if (_recruitmentMode) {
@@ -286,8 +286,8 @@ void MechVentilation::update(void)
             _stepper->setTargetPositionInSteps(-STEPPER_HIGHEST_POSITION);
             //_stepper->moveRelativeInSteps(200);
             #endif
-            Serial.println("CUrrtime"+String(currentTime));
-            Serial.println("Ciclos totales"+totalCyclesInThisState);
+            Serial.println("CUrrtime"+String(_msecTimerCnt));
+            Serial.println("timeour"+_msecTimeoutInsufflation);
             currentTime++;
         }
     }
@@ -358,7 +358,7 @@ void MechVentilation::update(void)
 //#endif
         // Time has expired
         //if (currentTime > totalCyclesInThisState)
-        if(_msecTimerCnt > _msecTimeoutExsufflation) 
+        if(_msecTimerCnt > _timeoutEsp) 
         {
             if (!_stepper->motionComplete())
             {
