@@ -173,6 +173,8 @@ void MechVentilation::update(void)
 #endif
 
 
+  _msecTimerCnt=(unsigned long)(millis()-_msecTimerStartCycle);
+  
     SensorPressureValues_t pressures = _sensors->getRelativePressureInCmH20();
     _currentPressure = pressures.pressure1;
     // @dc unused
@@ -211,6 +213,8 @@ void MechVentilation::update(void)
 
         totalCyclesInThisState = (_timeoutIns) / TIME_BASE;
 
+        _msecTimerStartCycle=millis();  //Luciano
+
         /* Stepper control: set acceleration and end-position */
 
         #ifdef ACCEL_STEPPER
@@ -232,7 +236,7 @@ void MechVentilation::update(void)
         /* Status update, reset timer, for next time, and reset PID integrator to zero */
         _setState(State_Insufflation);
 
-        currentTime = 0;
+        currentTime = millis();
     }
     break;
     case State_Insufflation:
@@ -245,7 +249,8 @@ void MechVentilation::update(void)
 //#endif
 
         // time expired
-        if (currentTime > totalCyclesInThisState)
+        //if (currentTime > totalCyclesInThisState)
+        if(_msecTimerCnt > _msecTimeoutInsufflation)
         {
             if (!_stepper->motionComplete())
             {
@@ -256,7 +261,8 @@ void MechVentilation::update(void)
 
             }
             _setState(Init_Exsufflation);
-            currentTime = 0;
+            currentTime = millis();
+            float dt=(float)(_msecTimerCnt-_msecLastUpdate)*1000.;
 
             if (_recruitmentMode) {
                 deactivateRecruitment();
@@ -328,7 +334,7 @@ void MechVentilation::update(void)
 
         /* Status update and reset timer, for next time */
         _setState(State_Exsufflation);
-        currentTime = 0;
+        currentTime = millis();
     }
     break;
     case State_Exsufflation:
@@ -351,7 +357,8 @@ void MechVentilation::update(void)
 //        }
 //#endif
         // Time has expired
-        if (currentTime > totalCyclesInThisState)
+        //if (currentTime > totalCyclesInThisState)
+        if(_msecTimerCnt > _msecTimeoutExsufflation) 
         {
             if (!_stepper->motionComplete())
             {
@@ -363,7 +370,8 @@ void MechVentilation::update(void)
             /* Status update and reset timer, for next time */
             _setState(Init_Insufflation);
             _startWasTriggeredByPatient = false;
-
+            
+            _msecTimerStartCycle=millis();
             currentTime = 0;
         }
         else    //Time hasnot expired
@@ -386,7 +394,7 @@ void MechVentilation::update(void)
        _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
 
             //Serial.println("CUrrtime"+String(currentTime));
-            currentTime++;
+            //currentTime++;
         }
     }
     break;

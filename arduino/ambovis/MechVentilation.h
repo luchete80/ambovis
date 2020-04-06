@@ -158,6 +158,22 @@ private:
     State _currentState = State_Homing;
     Alarm _currentAlarm = No_Alarm;
 
+
+        /** Timer counter in seconds. */
+    //Este tambien es mio
+    unsigned long _msecTimerStartCycle; //CADA semiciclo
+    unsigned long _msecLastUpdate; //CADA semiciclo
+   
+    unsigned long _msecTimerCnt; //esteno necesita ser tan grande
+    /**  Insufflation timeout in seconds. */
+    // Cambiado por luciano
+    unsigned long _msecTimeoutInsufflation;
+    /** Exsufflation timeout in seconds. */
+    unsigned long _msecTimeoutExsufflation;
+
+
+    
+
     /** Stepper speed. Steps per seconds. */
     float _stepperSpeed;
     
