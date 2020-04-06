@@ -286,8 +286,8 @@ void MechVentilation::update(void)
             _stepper->setTargetPositionInSteps(-STEPPER_HIGHEST_POSITION);
             //_stepper->moveRelativeInSteps(200);
             #endif
-            Serial.println("CUrrtime"+String(_msecTimerCnt));
-            Serial.println("timeour"+_msecTimeoutInsufflation);
+            //Serial.println("CUrrtime");Serial.println(_msecTimerCnt);
+            //Serial.println("timeout");Serial.println(_msecTimeoutInsufflation);
             currentTime++;
         }
     }
@@ -339,7 +339,7 @@ void MechVentilation::update(void)
     break;
     case State_Exsufflation:
     {
-        Serial.println("exsuflacion"+String(currentTime));
+      
 //#if 0
 //        if (_stepper->motionComplete())
 //        {
