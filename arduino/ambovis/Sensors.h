@@ -5,7 +5,7 @@
 #include "src/Adafruit_BME280/Adafruit_BME280.h"
 #include "defaults.h"
 #ifdef ENABLED_SENSOR_VOLUME_SFM3300
-#include "src/SFM3200/sfm3000wedo.h"
+//#include "src/SFM3200/sfm3000wedo.h"
 #endif
 
 #define SENSORS_MAX_ERRORS 5
@@ -59,9 +59,7 @@ class Sensors
     void _init(void);
     Adafruit_BME280 _pres1Sensor;
     Adafruit_BME280 _pres2Sensor;
-#if ENABLED_SENSOR_VOLUME_SFM3300
-    SFM3000wedo* _sfm3000;
-#endif
+
     uint8_t _minPressure;
     uint8_t _maxPressure;
     float _pressure1;

@@ -14,7 +14,7 @@
 // Sensores
 #define ENABLED_SENSOR_VOLUME 1
 #if ENABLED_SENSOR_VOLUME
-#define ENABLED_SENSOR_VOLUME_SFM3300 1
+//#define ENABLED_SENSOR_VOLUME_SFM3300 1
 #endif
 
 // Valores motor

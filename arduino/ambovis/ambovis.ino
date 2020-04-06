@@ -28,7 +28,7 @@
 #include "src/FlexyStepper/FlexyStepper.h"
 #endif
 
-#include "src/TimerOne/TimerOne.h"
+//#include "src/TimerOne/TimerOne.h"
 //#include "src/TimerThree/TimerThree.h"  //PARA PLC?
 
 //LUCIANO -------
@@ -392,84 +392,53 @@ void loop() {
   ///////////--- LUCIANO
 }
 
-//
-//void loop ()
-//{
-//
-////  while (!encoder.readButton()) {
-////      unsigned char result = rotary.process();
-////  if (result == DIR_CW) {
-////    Compression_perc+=1;
-////    Serial.println(Compression_perc);
-////  } else if (result == DIR_CCW) {
-////    Compression_perc-=1;
-////    Serial.println(Compression_perc);
-////  }
-////  
-////    encoder.updateValue(&Compression_perc);
-////    writeLine(1, "Altura: " + String(Compression_perc) + " %");
-////  }
-////  writeLine(0, "Valor guardado");
-////  writeLine(1, "Altura: " + String(Compression_perc) + " cm");
-////  Serial.println("Altura (cm): " + String(Compression_perc));
-////  delay(1000);
-////  lcd.clear();
-//
-////  while (!encoder.readButton()) {
-////    encoder.updateValue(&options.respiratoryRate);
-////    writeLine(1, "Altura: " + String(options.respiratoryRate) + " rpm");
-////  }
-////  writeLine(0, "Valor guardado");
-////  writeLine(1, "Altura: " + String(options.respiratoryRate) + " rpm");
-////  Serial.println("Altura (cm): " + String(options.respiratoryRate));
-////  delay(1000);
-//  //check_encoder();
-//}
-//unsigned long lastButtonPress;
+unsigned long lastButtonPress;
+int curr_sel,old_curr_sel;
+
 ////LUCIANO
-//void check_encoder()
-//{
-//      //LUCIANO------------------------
-//byte btnState = digitalRead(9);
-//
-//if (btnState == LOW) {
-//    if (millis() - lastButtonPress > 50) {
-//        Serial.println(curr_sel);
-//        curr_sel++; //NOT +=1, is a byte
-//        if (curr_sel>2)
-//          curr_sel=0;
-//    }
-//    lastButtonPress = millis();
-//}
-//
-//
-//    if(oldEncPos != encoderPos) {
-//      Serial.println(encoderPos);
-//      oldEncPos = encoderPos;
-//      switch (curr_sel){
-//        case 0:
-//          A_comp=encoderPos;
-//          break;
-//        case 1:
-//          A_rate=encoderPos;
-//          break;
-//        case 2:
-//          A_pres=encoderPos;
-//          break;        
-//              }}
-//
-//if (curr_sel!=old_curr_sel){
-// switch (curr_sel){
-//  case 0:
+void check_encoder()
+{
+      //LUCIANO------------------------
+byte btnState = digitalRead(9);
+
+if (btnState == LOW) {
+    if (millis() - lastButtonPress > 50) {
+        Serial.println(curr_sel);
+        curr_sel++; //NOT +=1, is a byte
+        if (curr_sel>2)
+          curr_sel=0;
+    }
+    lastButtonPress = millis();
+}
+
+
+    if(oldEncPos != encoderPos) {
+      Serial.println(encoderPos);
+      oldEncPos = encoderPos;
+      switch (curr_sel){
+        case 0:
+          //A_comp=encoderPos;
+          break;
+        case 1:
+          options.respiratoryRate;
+          break;
+        case 2:
+          //A_pres=encoderPos;
+          break;        
+              }}
+
+if (curr_sel!=old_curr_sel){
+ switch (curr_sel){
+  case 0:
 //    encoderPos=oldEncPos=A_comp;
-//    break;
-//  case 1:
-//    encoderPos=oldEncPos=A_rate;
-//    break;
-//  case 2:
+    break;
+  case 1:
+    encoderPos=oldEncPos=options.respiratoryRate;
+    break;
+  case 2:
 //    encoderPos=oldEncPos=A_pres;
-//    break;
-//  }
-//  old_curr_sel=curr_sel;}
-// //----
-//}
+    break;
+  }
+  old_curr_sel=curr_sel;}
+ //----
+}

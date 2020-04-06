@@ -4,10 +4,9 @@
 #include "Sensors.h"
 #include "defaults.h"
 //#include "src/Adafruit_BME280/Adafruit_BME280.h"
-#include "src/Honeywell_ABP/Honeywell_ABP.h"
+//#include "src/Honeywell_ABP/Honeywell_ABP.h"
 #include "pinout.h"
 
-    static Honeywell_ABP* abp;
 
 unsigned int Sensors::begin(void) {
     // Arrancar sensores de presion 1 y 2
@@ -45,12 +44,7 @@ Sensors::Sensors(void) {
 
 
 void Sensors::_init () {
-    abp = new Honeywell_ABP(
-  0x28,   // I2C address
-  0,      // minimum pressure
-  70.307,      // maximum pressure
-  "mbar"   // pressure unit
-);
+
 #if 0
     Adafruit_BME280 bmp1(
     PIN_BME_CS1,
@@ -74,12 +68,7 @@ void Sensors::_init () {
     _errorCounter = 0;
     _state = SensorStateFailed;
 
-#if ENABLED_SENSOR_VOLUME_SFM3300
-    pinMode(20, INPUT_PULLUP);
-    pinMode(21, INPUT_PULLUP);
-    _sfm3000 = new SFM3000wedo(64);
-    _sfm3000->init();
-#endif
+
 #if ENABLED_SENSOR_VOLUME
     resetVolumeIntegrator();
 #endif
@@ -88,8 +77,8 @@ void Sensors::_init () {
 void Sensors::readPressure() {
     float pres1, pres2;
     // Acquire sensors data
-    abp->update();
-    pres1 = abp->pressure();
+//    abp->update();
+//    pres1 = abp->pressure();
     _pressure1 = pres1;
     if (_minPressure > _pressure1) {
         _minPressure = _pressure1;
@@ -213,24 +202,24 @@ void Sensors::saveVolume(void) {
 }
 
 void Sensors::readVolume(void) {
-    #if ENABLED_SENSOR_VOLUME_SFM3300
-        SFM3000_Value_t tmp = _sfm3000->getvalue(); //TODO crc
-        if (tmp.crcOK) {
-            _state = SensorStateOK;
-        } else {
-            _state = SensorStateFailed;
-        }
-        float flow = ((float)tmp.value - SFM3300_OFFSET) / SFM3300_SCALE; //lpm
-        _flow = flow;
-
-        unsigned short mseconds = (unsigned short)(millis() - _lastReadFlow);
-        float ml = flow * mseconds / 60; // l/min * ms * 1000 (ml) /60000 (ms)
-        _volume_ml += ml;
-        _lastReadFlow = millis();
-
-    #else
-    #error "not implemented"
-    #endif
+//    #if ENABLED_SENSOR_VOLUME_SFM3300
+//        SFM3000_Value_t tmp = _sfm3000->getvalue(); //TODO crc
+//        if (tmp.crcOK) {
+//            _state = SensorStateOK;
+//        } else {
+//            _state = SensorStateFailed;
+//        }
+//        float flow = ((float)tmp.value - SFM3300_OFFSET) / SFM3300_SCALE; //lpm
+//        _flow = flow;
+//
+//        unsigned short mseconds = (unsigned short)(millis() - _lastReadFlow);
+//        float ml = flow * mseconds / 60; // l/min * ms * 1000 (ml) /60000 (ms)
+//        _volume_ml += ml;
+//        _lastReadFlow = millis();
+//
+//    #else
+//    #error "not implemented"
+//    #endif
 }
 
 void Sensors::resetVolumeIntegrator(void) {
