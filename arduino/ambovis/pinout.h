@@ -37,10 +37,10 @@
 // #define PIN_BME_CS2  4  // sensor de presion 2
 
 // BME280 SPI for Arduino Mega 256
-#define PIN_BME_SCK  52
-#define PIN_BME_MISO 50
-#define PIN_BME_MOSI 51
-#define PIN_BME_CS1  53 // sensor de presion 1
+#define PIN_BME_SCK  13   //SCL
+#define PIN_BME_MISO 12   //SDO
+#define PIN_BME_MOSI 11   //SDA   
+#define PIN_BME_CS1  10   // sensor de presion 1
 #define PIN_BME_CS2  49 // sensor de presion 2
 
 #define CLKpin  5

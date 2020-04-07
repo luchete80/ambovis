@@ -9,8 +9,6 @@
 
 */
 
-
-
 //#define ACCEL_STEPPER 1
 
 #include "defaults.h"
@@ -184,7 +182,10 @@ unsigned long lastButtonPress;
 int curr_sel,old_curr_sel;
 
 unsigned long lastReadSensor = 0;
-  
+
+
+State static lastState;
+
 void setup() {
   // Puertos serie
   Serial.begin(9600);
@@ -213,16 +214,16 @@ void setup() {
   // Sensores de presión
   sensors = new Sensors();
   int check = sensors -> begin();
-#if 0
-  if (check) {
-    if (check == 1) {
-      Serial.println(F("Could not find sensor BME280 number 1, check wiring!"));
-    } else if (check == 2) {
-      Serial.println(F("Could not find sensor BME280 number 2, check wiring!"));
-    }
-    while (1);
-  }
-#endif
+//#if 0
+//  if (check) {
+//    if (check == 1) {
+//      Serial.println(F("Could not find sensor BME280 number 1, check wiring!"));
+//    } else if (check == 2) {
+//      Serial.println(F("Could not find sensor BME280 number 2, check wiring!"));
+//    }
+//    while (1);
+//  }
+//#endif
 
   // PID
   pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
@@ -304,13 +305,16 @@ void setup() {
 //  menu();
 
   lastReadSensor = millis();
-
+  lastState=ventilation->getState();
 }
 
 /**
    Loop
 */
 //
+byte last_cycle=0;
+bool update_display=false;
+
 void loop() {
   //
   //LUCIANO @TODO: remove
@@ -318,22 +322,22 @@ void loop() {
   //  if (!encoder.readButton())
   //    menu();
   //
-  dp = bmp1.get_dp();
+  //dp = bmp1.get_dp();
+  //writeLine(2, "fv: " + String(ventilation->getInsVol()) + " ml");
   //Serial.print("Sensor value: ");Serial.println(bmp1.get_dp());
   //lcd.setCursor(0,0);
   //lcd.print("test");
-  //writeLine(0, "BPM: " + String(options.respiratoryRate),1);
+  //writeLine(0, "Hola");
   //writeLine(0, "dV: " + String(analogRead(A0) * 5. / 1024.) + " V");
   //writeLine(1, "dp: " + String(bmp1.get_dp()) + " Pa");
 
-  calcularCaudalVenturi(dp, &flux);
-  writeLine(2, "fv: " + String(flux * 1000) + " ml/s");
+  
+  
   //-----------LUCIANO
 
   unsigned long time;
   time = millis();
   unsigned long static lastSendConfiguration = 0;
-  State static lastState;
 
   if (time > lastSendConfiguration + TIME_SEND_CONFIGURATION)
   {
@@ -355,8 +359,8 @@ void loop() {
     SensorVolumeValue_t volume = sensors -> getVolume();
     //writeLine(1, "p: " + String((int)pressure.pressure1) + " cmH20");
     char* string = (char*)malloc(100);
-    sprintf(string, "DT %05d %05d %05d %06d", ((int)pressure.pressure1), ((int)pressure.pressure2), volume.volume, ((int)(sensors->getFlow() * 1000)));
-    Serial.println("Insuflated: "+String(ventilation->getInsVol()));
+    //sprintf(string, "DT %05d %05d %05d %06d", ((int)pressure.pressure1), ((int)pressure.pressure2), volume.volume, ((int)(sensors->getFlow() * 1000)));
+    //Serial.println("Insuflated: "+String(ventilation->getInsVol()));
 
     //        Serial2.println(string);
     Serial.println(string);
@@ -372,17 +376,30 @@ void loop() {
     /*
        Notify insufflated volume
     */
-    if (ventilation->getState() != lastState)
+    if (ventilation->getCycleNum()!=last_cycle)
+      update_display=false;
+    State state=ventilation->getState();
+    if (!update_display)
+      if (ventilation->getCycleNum()!=last_cycle && state == State_Exsufflation){
+          Serial.print("Insuflated Vol: ");Serial.println(ventilation->getInsVol());
+          display_lcd();
+          update_display=true;
+          last_cycle=ventilation->getCycleNum();
+      }
+    
+//    Serial.print("last stte: ");Serial.println(lastState);
+//    Serial.print("stte: ");     Serial.println(state);
+    if (state != lastState)
     {
       SensorLastPressure_t lastPressure = sensors->getLastPressure();
-      if (ventilation->getState() == Init_Exsufflation)
+      if (state == Init_Exsufflation)
       {
         //                Serial2.println("EOC " + String(lastPressure.maxPressure) + " " +
         //                    String(lastPressure.minPressure) + " " + String(volume.volume));
-        Serial.print("Insuflated Vol: ");Serial.println(ventilation->getInsVol());
-        
+       // Serial.print("Insuflated Vol: ");Serial.println(ventilation->getInsVol());
+        //display_lcd();
       }
-      else if (ventilation->getState() == State_Exsufflation)
+      else if (state == State_Exsufflation) //CANNOT REPEAT getstate because init state are TOO SHORTs!
       {
         if (lastState != Init_Exsufflation)
         {
@@ -398,25 +415,26 @@ void loop() {
   //        readIncomingMsg();
   //    }
 
-#if DEBUG_STATE_MACHINE
-  if (debugMsgCounter) {
-    for (byte i = 0; i < debugMsgCounter; i++) {
-      Serial.println(debugMsg[i]);
-    }
-    debugMsgCounter = 0;
-  }
-#endif
+//#if DEBUG_STATE_MACHINE
+//  if (debugMsgCounter) {
+//    for (byte i = 0; i < debugMsgCounter; i++) {
+//      Serial.println(debugMsg[i]);
+//    }
+//    debugMsgCounter = 0;
+//  }
+//#endif
 
   //LUCIANO----------------------
   ventilation -> update();
   //stepper->setSpeedInStepsPerSecond(600);
   //stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
+
   
-      #ifdef ACCEL_STEPPER
-        stepper->run();
-      #else
-        stepper -> processMovement(); //LUCIANO
-      #endif
+  #ifdef ACCEL_STEPPER
+    stepper->run();
+  #else
+    stepper -> processMovement(); //LUCIANO
+  #endif
 
   ///////////--- LUCIANO
 }
@@ -467,4 +485,17 @@ if (curr_sel!=old_curr_sel){
   }
   old_curr_sel=curr_sel;}
  //----
+}
+char tempstr[5];
+void display_lcd()
+{
+  lcd.clear();
+  writeLine(0, "Mod: VCtrl",10);
+  writeLine(0, "BPM:" + String(options.respiratoryRate),1);
+  writeLine(1, "Vml:" + String(options.tidalVolume),1);
+  dtostrf(ventilation->getInsVol(), 4, 1, tempstr);
+  writeLine(1, String(tempstr),10);
+  //writeLine(2, "P[ml]: " + String(options.respiratoryRate),1);
+  //writeLine(2, "fv: " + String(ventilation->getInsVol()) + " ml");
+  
 }

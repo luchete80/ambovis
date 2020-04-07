@@ -107,6 +107,8 @@ public:
 
     float getInsVol(void);
 
+    byte getCycleNum(){return _cyclenum;};
+
 
 
     //LUCIANO 
@@ -179,9 +181,9 @@ private:
    
     unsigned long _msecTimerCnt; //esteno necesita ser tan grande
     /**  Insufflation timeout in seconds. */
-    float _mlInsVol;
+    float _mlInsVol,_mllastInsVol;
     float _flux;
-
+    byte _cyclenum;    //Not important value, only for printing control
     
 
     /** Stepper speed. Steps per seconds. */

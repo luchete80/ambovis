@@ -221,6 +221,7 @@ void MechVentilation::update(void)
         totalCyclesInThisState = (_timeoutIns) / TIME_BASE;
 
         _msecTimerStartCycle=millis();  //Luciano
+        _mlInsVol=0.;
 
         /* Stepper control: set acceleration and end-position */
 
@@ -268,6 +269,7 @@ void MechVentilation::update(void)
 
             }
             _setState(Init_Exsufflation);
+            _mllastInsVol=_mlInsVol;
 
             if (_recruitmentMode) {
                 deactivateRecruitment();
@@ -278,8 +280,9 @@ void MechVentilation::update(void)
             //_pid->run(_currentPressure, (float)_pip, &_stepperSpeed);
             
             //_sensors->
-            float dt=(float)(_msecTimerCnt-_msecLastUpdate)*1000.;
-            _mlInsVol+=_flux*dt;
+            float dt=(float)(_msecTimerCnt-_msecLastUpdate);
+            Serial.print("volue:");Serial.println(_mlInsVol);
+            _mlInsVol+=_flux*dt;//flux in l and time in msec, results in ml
 
               //flujo remanente                                   
              float rem_flux=(_tidalVol-_mlInsVol)/(float)(_timeoutIns-_msecTimerCnt);
@@ -394,6 +397,8 @@ void MechVentilation::update(void)
             
             _msecTimerStartCycle=millis();
             currentTime = 0;
+
+            _cyclenum++;
         }
         else    //Time hasnot expired
         {
@@ -507,7 +512,7 @@ void MechVentilation::_init(
     /* Initialize internal state */
     _currentState = State_Homing;
     _stepperSpeed = STEPPER_SPEED_DEFAULT;
-
+    _cyclenum=0;
     //
     // connect and configure the stepper motor to its IO pins
     //
@@ -533,5 +538,5 @@ void MechVentilation::_setAlarm(Alarm alarm)
 
 float MechVentilation::getInsVol()
 {
-    return _mlInsVol;
+    return _mllastInsVol;
 }
