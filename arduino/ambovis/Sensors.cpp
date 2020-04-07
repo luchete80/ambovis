@@ -72,6 +72,8 @@ void Sensors::_init () {
 #if ENABLED_SENSOR_VOLUME
     resetVolumeIntegrator();
 #endif
+
+    _dpsensor=Pressure_Sensor(A0);
 }
 
 void Sensors::readPressure() {
@@ -202,6 +204,9 @@ void Sensors::saveVolume(void) {
 }
 
 void Sensors::readVolume(void) {
+  
+    calcularCaudalVenturi(_dpsensor.get_dp(), &_flow);
+  
 //    #if ENABLED_SENSOR_VOLUME_SFM3300
 //        SFM3000_Value_t tmp = _sfm3000->getvalue(); //TODO crc
 //        if (tmp.crcOK) {

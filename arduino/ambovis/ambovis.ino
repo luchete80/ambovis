@@ -9,11 +9,9 @@
 
 */
 
-/**
-   Dependencies
-*/
 
-//#define ACCEL_STEPPER 0
+
+//#define ACCEL_STEPPER 1
 
 #include "defaults.h"
 #include "pinout.h"
@@ -169,6 +167,7 @@ void readIncomingMsg (void) {
 }
 
 LiquidCrystal_I2C lcd(0x3F, 20, 4);
+//LiquidCrystal_I2C lcd(0x27, 16, 2);
 void writeLine(int line, String message = "", int offsetLeft = 0)
 {
   lcd.setCursor(0, line);
@@ -181,7 +180,11 @@ void writeLine(int line, String message = "", int offsetLeft = 0)
 /**
    Setup
 */
+unsigned long lastButtonPress;
+int curr_sel,old_curr_sel;
 
+unsigned long lastReadSensor = 0;
+  
 void setup() {
   // Puertos serie
   Serial.begin(9600);
@@ -190,7 +193,7 @@ void setup() {
 
   //LUCIANO-------------
   lcd.begin();
-  lcd.backlight();
+  //lcd.backlight();
   lcd.clear();
   lcd.setCursor(0, 0);
   //---------------------
@@ -242,6 +245,7 @@ void setup() {
   options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
   options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
   options.hasTrigger = false;
+  options.tidalVolume = 400;
 
   ventilation = new MechVentilation(
     stepper,
@@ -285,7 +289,22 @@ void setup() {
   bmp1 = Pressure_Sensor(A0);
   //--
 
+//ENCODER
+    //LUCIANO
+  curr_sel=old_curr_sel=0; //COMPRESSION
+
+  pinMode(pinA, INPUT_PULLUP); // set pinA as an input, pulled HIGH to the logic voltage (5V or 3.3V for most cases)
+  pinMode(pinB, INPUT_PULLUP); // set pinB as an input, pulled HIGH to the logic voltage (5V or 3.3V for most cases)
+  attachInterrupt(0,PinA,RISING); // set an interrupt on PinA, looking for a rising edge signal and executing the "PinA" Interrupt Service Routine (below)
+  attachInterrupt(1,PinB,RISING); // set an interrupt on PinB, looking for a rising edge signal and executing the "PinB" Interrupt Service Routine (below)
+    pinMode(9, INPUT_PULLUP);
+//  btnState=digitalRead(9);
+//  lastButtonPress=millis();
+
 //  menu();
+
+  lastReadSensor = millis();
+
 }
 
 /**
@@ -295,22 +314,24 @@ void setup() {
 void loop() {
   //
   //LUCIANO @TODO: remove
-
+  //check_encoder();
   //  if (!encoder.readButton())
   //    menu();
   //
   dp = bmp1.get_dp();
   //Serial.print("Sensor value: ");Serial.println(bmp1.get_dp());
- //writeLine(0, "dV: " + String(analogRead(A0) * 5. / 1024.) + " V");
+  //lcd.setCursor(0,0);
+  //lcd.print("test");
+  //writeLine(0, "BPM: " + String(options.respiratoryRate),1);
+  //writeLine(0, "dV: " + String(analogRead(A0) * 5. / 1024.) + " V");
   //writeLine(1, "dp: " + String(bmp1.get_dp()) + " Pa");
 
   calcularCaudalVenturi(dp, &flux);
-  //writeLine(2, "fv: " + String(flux * 1000) + " ml/s");
+  writeLine(2, "fv: " + String(flux * 1000) + " ml/s");
   //-----------LUCIANO
 
   unsigned long time;
   time = millis();
-  unsigned long static lastReadSensor = 0;
   unsigned long static lastSendConfiguration = 0;
   State static lastState;
 
@@ -325,7 +346,7 @@ void loop() {
     lastSendConfiguration = time;
   }
 
-  if (time > lastReadSensor + TIME_SENSOR)
+  if (millis() > lastReadSensor + TIME_SENSOR)
   {
     sensors -> readPressure();
     SensorPressureValues_t pressure = sensors -> getRelativePressureInCmH20();
@@ -335,9 +356,10 @@ void loop() {
     //writeLine(1, "p: " + String((int)pressure.pressure1) + " cmH20");
     char* string = (char*)malloc(100);
     sprintf(string, "DT %05d %05d %05d %06d", ((int)pressure.pressure1), ((int)pressure.pressure2), volume.volume, ((int)(sensors->getFlow() * 1000)));
+    Serial.println("Insuflated: "+String(ventilation->getInsVol()));
 
     //        Serial2.println(string);
-    // Serial.println(string);
+    Serial.println(string);
     free(string);
 
     if (pressure.state == SensorStateFailed) {
@@ -345,7 +367,7 @@ void loop() {
       Serial.println(F("FALLO Sensor"));
       // TODO: BUZZ ALARMS LIKE HELL
     }
-    lastReadSensor = time;
+    lastReadSensor = millis();
 
     /*
        Notify insufflated volume
@@ -357,6 +379,8 @@ void loop() {
       {
         //                Serial2.println("EOC " + String(lastPressure.maxPressure) + " " +
         //                    String(lastPressure.minPressure) + " " + String(volume.volume));
+        Serial.print("Insuflated Vol: ");Serial.println(ventilation->getInsVol());
+        
       }
       else if (ventilation->getState() == State_Exsufflation)
       {
@@ -387,13 +411,15 @@ void loop() {
   ventilation -> update();
   //stepper->setSpeedInStepsPerSecond(600);
   //stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
-  stepper -> processMovement(); //LUCIANO
+  
+      #ifdef ACCEL_STEPPER
+        stepper->run();
+      #else
+        stepper -> processMovement(); //LUCIANO
+      #endif
 
   ///////////--- LUCIANO
 }
-
-unsigned long lastButtonPress;
-int curr_sel,old_curr_sel;
 
 ////LUCIANO
 void check_encoder()
@@ -420,7 +446,7 @@ if (btnState == LOW) {
           //A_comp=encoderPos;
           break;
         case 1:
-          options.respiratoryRate;
+          options.respiratoryRate=encoderPos;
           break;
         case 2:
           //A_pres=encoderPos;

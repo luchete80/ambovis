@@ -13,7 +13,12 @@ int currentStopInsufflationTime = 0;
 float currentFlow = 0;
 
 MechVentilation::MechVentilation(
-    FlexyStepper *stepper,
+        #ifdef ACCEL_STEPPER
+        AccelStepper *stepper,
+      #else
+        FlexyStepper *stepper,
+      #endif
+    
     Sensors *sensors,
     AutoPID *pid,
     VentilationOptions_t options)
@@ -180,6 +185,8 @@ void MechVentilation::update(void)
     // @dc unused
     // _currentVolume = _sensors->getVolume().volume;
     //_currentFlow = _sensors->getFlow();
+    _flux= _sensors->getFlow();
+
     if (pressures.state != SensorStateOK)
     {                                  // Sensor error detected: return to zero position and continue from there
         _sensor_error_detected = true; //An error was detected in sensors
@@ -252,7 +259,7 @@ void MechVentilation::update(void)
         //if (currentTime > totalCyclesInThisState)
         if(_msecTimerCnt > _timeoutIns)
         {
-            if (!_stepper->motionComplete())
+            if (!_stepper->motionComplete()) //LUCIANO: NEW
             {
                 // motor not finished, force motor to stop in current position
                 //_stepper->setTargetPositionInSteps(_stepper->getCurrentPositionInSteps());
@@ -261,8 +268,6 @@ void MechVentilation::update(void)
 
             }
             _setState(Init_Exsufflation);
-            //currentTime = millis();
-            float dt=(float)(_msecTimerCnt-_msecLastUpdate)*1000.;
 
             if (_recruitmentMode) {
                 deactivateRecruitment();
@@ -271,29 +276,46 @@ void MechVentilation::update(void)
         else //Time has not expired (State Insufflation)
         {
             //_pid->run(_currentPressure, (float)_pip, &_stepperSpeed);
+            
+            //_sensors->
+            float dt=(float)(_msecTimerCnt-_msecLastUpdate)*1000.;
+            _mlInsVol+=_flux*dt;
+
+              //flujo remanente                                   
+             float rem_flux=(_tidalVol-_mlInsVol)/(float)(_timeoutIns-_msecTimerCnt);
+//#ifdef DEBUG
+             //pid.calculate( double setpoint, double pv );                      
+             _pid->run(rem_flux, (double)_flux,&_stepperSpeed);
+
+             //Serial.print("Speed: "+String(_stepperSpeed));
 
             // TODO: if _currentPressure > _pip + 5, trigger alarm
             #ifdef ACCEL_STEPPER  //LUCIANO
             
             #else
-            _stepper->setSpeedInStepsPerSecond(800);
+            _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
 //            if (_stepperSpeed >= 0){
 //                _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
 //            }
 //            else{
 //                _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
 //            }
-            _stepper->setTargetPositionInSteps(-STEPPER_HIGHEST_POSITION);
+            //_stepper->setTargetPositionInSteps(-STEPPER_HIGHEST_POSITION);
             //_stepper->moveRelativeInSteps(200);
             #endif
             //Serial.println("CUrrtime");Serial.println(_msecTimerCnt);
             //Serial.println("timeout");Serial.println(_msecTimeoutInsufflation);
-            currentTime++;
+
+//            if (_stepper->getCurrentPositionInSteps()==STEPPER_HIGHEST_POSITION)
+//              _stepper->setTargetPositionToStop();
+
         }
     }
     break;
     case Init_Exsufflation:
     {
+      _msecTimerStartCycle=millis();
+      
 #if DEBUG_UPDATE
         Serial.println("Starting exsuflation");
 #endif
@@ -315,7 +337,7 @@ void MechVentilation::update(void)
         #ifdef ACCEL
 
         #else
-        _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
+        _stepper->setSpeedInStepsPerSecond(800);
         _stepper->setAccelerationInStepsPerSecondPerSecond(
             STEPPER_ACC_EXSUFFLATION);
         //LUCIANO
@@ -334,7 +356,6 @@ void MechVentilation::update(void)
 
         /* Status update and reset timer, for next time */
         _setState(State_Exsufflation);
-        currentTime = millis();
     }
     break;
     case State_Exsufflation:
@@ -391,7 +412,10 @@ void MechVentilation::update(void)
 //-----------------
        //_stepper-> moveRelativeInSteps(-200);
        _stepper->setSpeedInStepsPerSecond(800);
-       _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
+       //_stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
+//
+//       if (_stepper->getCurrentPositionInSteps()==STEPPER_LOWEST_POSITION)
+//        _stepper->setTargetPositionToStop();
 
             //Serial.println("CUrrtime"+String(currentTime));
             //currentTime++;
@@ -450,7 +474,10 @@ void MechVentilation::update(void)
         //TODO
         break;
     }
-}
+
+   _msecLastUpdate=_msecTimerCnt;
+      
+}//update
 
 void MechVentilation::_init(
     FlexyStepper *stepper,
@@ -465,6 +492,7 @@ void MechVentilation::_init(
     _rpm = options.respiratoryRate;
     _pip = options.peakInspiratoryPressure;
     _peep = options.peakEspiratoryPressure;
+    _tidalVol=options.tidalVolume;
     setRPM(_rpm);
     _hasTrigger = options.hasTrigger;
     if (_hasTrigger)
@@ -487,7 +515,7 @@ void MechVentilation::_init(
     #ifdef ACCEL_STEPPER
     #else
     _stepper->connectToPins(PIN_STEPPER_STEP, PIN_STEPPER_DIRECTION);
-    _stepper->setStepsPerRevolution(STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS);
+    _stepper->setStepsPerRevolution(1600);
     #endif
 
     _sensor_error_detected = false;
@@ -501,4 +529,9 @@ void MechVentilation::_setState(State state)
 void MechVentilation::_setAlarm(Alarm alarm)
 {
     _currentAlarm = alarm;
+}
+
+float MechVentilation::getInsVol()
+{
+    return _mlInsVol;
 }

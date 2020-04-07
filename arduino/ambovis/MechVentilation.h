@@ -16,6 +16,7 @@
 #include "Sensors.h"
 #include "src/AutoPID/AutoPID.h"
 #include "src/FlexyStepper/FlexyStepper.h"
+#include "src/AccelStepper/AccelStepper.h"
 
 /** States of the mechanical ventilation. */
 enum State
@@ -56,7 +57,11 @@ public:
 	 * @param options
 	 */
     MechVentilation(
-        FlexyStepper *stepper,
+      #ifdef ACCEL_STEPPER
+        AccelStepper *_stepper,
+      #else
+        FlexyStepper *_stepper,
+      #endif
         Sensors *sensors,
         AutoPID *pid,
         VentilationOptions_t options);
@@ -100,6 +105,9 @@ public:
     void setPeakInspiratoryPressure(float pip);
     void setPeakEspiratoryPressure(float peep);
 
+    float getInsVol(void);
+
+
 
     //LUCIANO 
     float getCurrentPressure(){
@@ -129,10 +137,13 @@ private:
     void _setInspiratoryCycle(void);
 
     /* Configuration parameters */
+    #ifdef ACCEL_STEPPER
+    AccelStepper *_stepper
+    #else
     FlexyStepper *_stepper;
+    #endif
     Sensors *_sensors;
     AutoPID *_pid;
-
     /** Flow trigger activation. */
     bool _hasTrigger;
     /** Flow trigger value in litres per minute. */
@@ -150,6 +161,8 @@ private:
     /** Recruitment */
     bool volatile _recruitmentMode = false;
 
+    uint8_t _tidalVol;
+
     /* Configuration */
     Configuration_t _nominalConfiguration;
 
@@ -166,11 +179,8 @@ private:
    
     unsigned long _msecTimerCnt; //esteno necesita ser tan grande
     /**  Insufflation timeout in seconds. */
-    // Cambiado por luciano
-    unsigned long _msecTimeoutInsufflation;
-    /** Exsufflation timeout in seconds. */
-    unsigned long _msecTimeoutExsufflation;
-
+    float _mlInsVol;
+    float _flux;
 
     
 

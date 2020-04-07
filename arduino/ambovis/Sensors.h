@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 #include "src/Adafruit_BME280/Adafruit_BME280.h"
+#include "src/Pressure_Sensor/Pressure_Sensor.h"  //LUCIANO: MPX5050DP
+#include "calc.h"
+
 #include "defaults.h"
 #ifdef ENABLED_SENSOR_VOLUME_SFM3300
 //#include "src/SFM3200/sfm3000wedo.h"
@@ -43,10 +46,12 @@ class Sensors
     unsigned int begin(void);
     void readPressure();
     SensorLastPressure_t getLastPressure(void);
+    
     SensorPressureValues_t getRelativePressureInPascals();
     SensorPressureValues_t getAbsolutePressureInPascals();
     SensorPressureValues_t getAbsolutePressureInCmH20();
     SensorPressureValues_t getRelativePressureInCmH20();
+    
     SensorVolumeValue_t getVolume();
     void saveVolume(void);
     void getOffsetBetweenPressureSensors(int samples = 100);
@@ -59,7 +64,8 @@ class Sensors
     void _init(void);
     Adafruit_BME280 _pres1Sensor;
     Adafruit_BME280 _pres2Sensor;
-
+    Pressure_Sensor _dpsensor;  //Used for venturi
+    
     uint8_t _minPressure;
     uint8_t _maxPressure;
     float _pressure1;
