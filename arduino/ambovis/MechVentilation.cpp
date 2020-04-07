@@ -255,6 +255,14 @@ void MechVentilation::update(void)
 //#if DEBUG_UPDATE
 //  Serial.println("Motor:speed=" + String(_stepperSpeed) + "steps/sec");
 //#endif
+        //IF _mllastInsVol
+        //VOLUME CONTROL
+
+        if (_mllastInsVol>_tidalVol){
+            _stepper->setTargetPositionToStop();
+            _setState(Init_Exsufflation);
+            _mllastInsVol=_mlInsVol;
+          }
 
         // time expired
         //if (currentTime > totalCyclesInThisState)
@@ -277,8 +285,9 @@ void MechVentilation::update(void)
         }
         else //Time has not expired (State Insufflation)
         {
+            //IF CONTROLED BY VOL
             //_pid->run(_currentPressure, (float)_pip, &_stepperSpeed);
-            
+
             //_sensors->
             float dt=(float)(_msecTimerCnt-_msecLastUpdate);
             //Serial.print("volue:");Serial.println(_mlInsVol);
@@ -319,6 +328,7 @@ void MechVentilation::update(void)
     case Init_Exsufflation:
     {
       _msecTimerStartCycle=millis();
+      Serial.print("Current pressure");Serial.println(_currentPressure);
       
 #if DEBUG_UPDATE
         Serial.println("Starting exsuflation");
@@ -467,7 +477,11 @@ void MechVentilation::update(void)
 #endif
             }
         }
-
+        else{
+#if DEBUG_UPDATE
+            Serial.println("No end stop detected.");
+#endif
+        }
         /* Status update and reset timer, for next time */
         currentTime = 0;
         _setState(Init_Exsufflation);

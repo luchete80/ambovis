@@ -185,7 +185,9 @@ unsigned long lastReadSensor = 0;
 
 
 State static lastState;
-
+bool changed_options=false;
+unsigned long time_update_display=250; //ms
+unsigned long last_update_display;
 void setup() {
   // Puertos serie
   Serial.begin(9600);
@@ -246,7 +248,7 @@ void setup() {
   options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
   options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
   options.hasTrigger = false;
-  options.tidalVolume = 400;
+  options.tidalVolume = 250;
 
   ventilation = new MechVentilation(
     stepper,
@@ -273,20 +275,7 @@ void setup() {
   sensors -> readPressure();
   // TODO: Make this period dependant of TIME_BASE
   // TIME_BASE * 1000 does not work!!
-  // Timer1.initialize(50000); // 50 ms
-  //Timer1.initialize(20000);
 
-  //Timer2.initialize(50000);
-
-  //Timer1.attachInterrupt(timer1Isr);
-  //TODO: Option: if (Sensores ok) { arranca timer3 }
-
-  //
-  //    Timer3.initialize(50); //50us
-  //    Timer3.attachInterrupt(timer3Isr);
-
-  //    //LUCIANO
-  //Timer2.attachInterrupt(timer3Isr);
   bmp1 = Pressure_Sensor(A0);
   //--
 
@@ -306,6 +295,9 @@ void setup() {
 
   lastReadSensor = millis();
   lastState=ventilation->getState();
+  last_update_display=millis();
+  writeLine(0,"Guachete apreta FC..");
+  
 }
 
 /**
@@ -318,7 +310,7 @@ bool update_display=false;
 void loop() {
   //
   //LUCIANO @TODO: remove
-  //check_encoder();
+  check_encoder();
   //  if (!encoder.readButton())
   //    menu();
   //
@@ -436,6 +428,12 @@ void loop() {
     stepper -> processMovement(); //LUCIANO
   #endif
 
+  if (changed_options && (millis()-last_update_display)>time_update_display){
+    display_lcd();
+    last_update_display=millis();
+    changed_options=false;
+    }
+
   ///////////--- LUCIANO
 }
 
@@ -461,7 +459,7 @@ if (btnState == LOW) {
       oldEncPos = encoderPos;
       switch (curr_sel){
         case 0:
-          //A_comp=encoderPos;
+          options.tidalVolume=encoderPos;
           break;
         case 1:
           options.respiratoryRate=encoderPos;
@@ -469,12 +467,14 @@ if (btnState == LOW) {
         case 2:
           //A_pres=encoderPos;
           break;        
-              }}
+              }
+        changed_options=true;              
+              }
 
 if (curr_sel!=old_curr_sel){
  switch (curr_sel){
   case 0:
-//    encoderPos=oldEncPos=A_comp;
+    encoderPos=oldEncPos=options.tidalVolume;
     break;
   case 1:
     encoderPos=oldEncPos=options.respiratoryRate;
@@ -483,7 +483,9 @@ if (curr_sel!=old_curr_sel){
 //    encoderPos=oldEncPos=A_pres;
     break;
   }
-  old_curr_sel=curr_sel;}
+  old_curr_sel=curr_sel;
+  Serial.println("Opciones cambiadas");
+  }
  //----
 }
 char tempstr[5];
@@ -495,7 +497,9 @@ void display_lcd()
   writeLine(1, "Vml:" + String(options.tidalVolume),1);
   dtostrf(ventilation->getInsVol(), 4, 1, tempstr);
   writeLine(1, String(tempstr),10);
+  writeLine(2, "PIP:"+String(options.peakInspiratoryPressure),1);
+  writeLine(3, "PEEP:"+String(options.peakEspiratoryPressure),1);
+  //writeLine(2, String(tempstr),10);
   //writeLine(2, "P[ml]: " + String(options.respiratoryRate),1);
-  //writeLine(2, "fv: " + String(ventilation->getInsVol()) + " ml");
-  
+  //writeLine(2, "fv: " + String(ventilation->getInsVol()) + " ml");  
 }
