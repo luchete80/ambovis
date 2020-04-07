@@ -281,7 +281,7 @@ void MechVentilation::update(void)
             
             //_sensors->
             float dt=(float)(_msecTimerCnt-_msecLastUpdate);
-            Serial.print("volue:");Serial.println(_mlInsVol);
+            //Serial.print("volue:");Serial.println(_mlInsVol);
             _mlInsVol+=_flux*dt;//flux in l and time in msec, results in ml
 
               //flujo remanente                                   
@@ -289,6 +289,7 @@ void MechVentilation::update(void)
 //#ifdef DEBUG
              //pid.calculate( double setpoint, double pv );                      
              _pid->run(rem_flux, (double)_flux,&_stepperSpeed);
+             //Serial.print("Speed");Serial.println(_stepperSpeed);
 
              //Serial.print("Speed: "+String(_stepperSpeed));
 
