@@ -32,7 +32,7 @@
 #define STEPPER_LOWEST_POSITION     (-10)   // Steps
 #define STEPPER_HIGHEST_POSITION    ( 700)   // Steps
 #define STEPPER_SPEED_DEFAULT       (STEPPER_MICROSTEPS *  100)   // Steps/s
-#define STEPPER_SPEED_MAX           (STEPPER_MICROSTEPS *  1600)   // Steps/s
+#define STEPPER_SPEED_MAX           (1000)   // Steps/s
 #define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  600)   // Steps/s2
 #define STEPPER_ACC_INSUFFLATION    (STEPPER_MICROSTEPS *  450)   // Steps/s2
 

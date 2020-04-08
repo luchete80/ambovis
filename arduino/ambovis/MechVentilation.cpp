@@ -300,6 +300,10 @@ void MechVentilation::update(void)
   //#ifdef DEBUG
                //pid.calculate( double setpoint, double pv );                      
                _pid->run(rem_flux, (double)_flux,&_stepperSpeed);
+
+               if (_stepperSpeed>MAX_SPEED)
+                _stepperSpeed=STEPPER_SPEED_MAX;
+                
                //Serial.print("Speed");Serial.println(_stepperSpeed);
   
                //Serial.print("Speed: "+String(_stepperSpeed));
