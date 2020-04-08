@@ -563,4 +563,6 @@ void MechVentilation::change_config(VentilationOptions_t options)
     _peep = options.peakEspiratoryPressure;
     _tidalVol=options.tidalVolume;
     setRPM(_rpm); //Include set inspiratory cycle
+
+    _mode = options.modeCtl;
 }

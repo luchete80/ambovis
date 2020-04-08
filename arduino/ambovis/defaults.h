@@ -2,6 +2,8 @@
 #ifndef _DEFAULTS_H
 #define _DEFAULTS_H
 
+#include "Arduino.h"
+
 #define DEBUG_UPDATE 1 //
 //#define DEBUG_STATE_MACHINE 1
 //#define PRUEBAS 1 // testing over arduino without sensors
@@ -88,6 +90,11 @@ typedef struct {
     float triggerThreshold;
     bool hasTrigger;
     short tidalVolume;  //in ml
+    byte modeCtl;
 } VentilationOptions_t;
+
+#define MODE_VOL_CTL 0
+#define MODE_VOL_CTL 1
+#define MODE_MANUAL  2
 
 #endif // DEFAULTS_H

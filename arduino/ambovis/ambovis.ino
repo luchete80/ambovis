@@ -416,7 +416,7 @@ void loop() {
   if (changed_options && (millis()-last_update_display)>time_update_display){
     display_lcd();
     last_update_display=millis();
-    ventilation->change_config();
+    ventilation->change_config(options);
     changed_options=false;
     }
 
@@ -478,14 +478,26 @@ char tempstr[5];
 void display_lcd()
 {
   lcd.clear();
-  writeLine(0, "Mod: VCtrl",10);
+//  writeLine(0, "Mod: VCtrl",10);
+//  writeLine(0, "BPM:" + String(options.respiratoryRate),1);
+//  writeLine(1, "Vml:" + String(options.tidalVolume),1);
+//  dtostrf(ventilation->getInsVol(), 4, 1, tempstr);
+//  writeLine(1, String(tempstr),10);
+//  writeLine(2, "PIP:"+String(options.peakInspiratoryPressure),1);
+//  writeLine(3, "PEEP:"+String(options.peakEspiratoryPressure),1);
+
   writeLine(0, "BPM:" + String(options.respiratoryRate),1);
-  writeLine(1, "Vml:" + String(options.tidalVolume),1);
-  dtostrf(ventilation->getInsVol(), 4, 1, tempstr);
-  writeLine(1, String(tempstr),10);
-  writeLine(2, "PIP:"+String(options.peakInspiratoryPressure),1);
-  writeLine(3, "PEEP:"+String(options.peakEspiratoryPressure),1);
-  //writeLine(2, String(tempstr),10);
-  //writeLine(2, "P[ml]: " + String(options.respiratoryRate),1);
-  //writeLine(2, "fv: " + String(ventilation->getInsVol()) + " ml");  
+  writeLine(1, "VCL",1);writeLine(0, "SET | ME",11);
+  writeLine(1, "V:" + String(options.tidalVolume),10);
+  //if (mode==){
+  //Remove decimal part
+    dtostrf(ventilation->getInsVol(), 4, 0, tempstr);
+    writeLine(1, String(tempstr),15);
+//}
+
+//  dtostrf(ventilation->getInsVol(), 4, 1, tempstr);
+//  writeLine(1, String(tempstr),10);
+  writeLine(2, "PIP :"+String(options.peakInspiratoryPressure),8);
+  writeLine(3, "PEEP:"+String(options.peakEspiratoryPressure),8);
+
 }

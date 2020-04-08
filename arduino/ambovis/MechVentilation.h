@@ -87,7 +87,7 @@ public:
     /** Recruitment */
     void activateRecruitment(void);
     void deactivateRecruitment(void);
-
+    byte _mode;
     /**
      * getters
      */
