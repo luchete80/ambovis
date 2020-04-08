@@ -13,7 +13,8 @@ unsigned int Sensors::begin(void) {
 //#if 0
 #if 1
 
-    if(!_pres1Sensor.begin())
+    //if(!_pres1Sensor.begin())
+    if(!_pres1Sensor.begin(0x76))
         return 1;
         
     if(!_pres1Sensor.begin()) {
@@ -52,12 +53,13 @@ void Sensors::_init () {
 // LUCIANO ORIGINALLY WAS if 0
 #if 1
 //#if 0
-    _pres1Sensor = Adafruit_BMP280(
-    PIN_BME_CS1,
-    PIN_BME_MOSI,
-    PIN_BME_MISO,
-    PIN_BME_SCK
-    );
+// IF SPI CONNECTION
+//    _pres1Sensor = Adafruit_BMP280(
+//    PIN_BME_CS1,
+//    PIN_BME_MOSI,
+//    PIN_BME_MISO,
+//    PIN_BME_SCK
+//    );
 
 //    _pres2Sensor = Adafruit_BMP280(
 //    PIN_BME_CS2,

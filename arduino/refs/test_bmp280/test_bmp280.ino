@@ -31,46 +31,53 @@
 //Connect the CS pin Digital #10 but any pin can be used later
 // https://learn.adafruit.com/adafruit-bmp280-barometric-pressure-plus-temperature-sensor-breakout/arduino-test
 
-#define PIN_BME_SCK  13  //ES IGUAL A SCL
-#define PIN_BME_MISO 12  //SDO pin to Digital #12
-#define PIN_BME_MOSI 11
-#define PIN_BME_CS1  10 // sensor de presion 1
+//#define PIN_BME_SCK  13  //ES IGUAL A SCL
+//#define PIN_BME_MISO 12  //SDO pin to Digital #12
+//#define PIN_BME_MOSI 11   //SDA
+//#define PIN_BME_CS1  10 // sensor de presion 1
 
 //D13 (SCLK). . . . . .SCL. . . . . . . . . . .SCL. . . . . . . . . .SCL
 //D12 (MISO). . . . . .SDO. . . . . . . . . .SDO. . . . . . . . . .SDO
 //D11 (MOSI). . . . . .SDA. . . . . . . . . . .SDA. . . . . . . . . .SDA
 //D10 (ss1). . . . . . . .CSB
+#define PIN_LCD_RS  2
+#define PIN_LCD_EN  3
+#define PIN_LCD_D4  4
+#define PIN_LCD_D5  5
+#define PIN_LCD_D6  6
+#define PIN_LCD_D7  7
 
 #include "src/Adafruit_BMP280/Adafruit_BMP280.h"
- #include "LiquidCrystal_I2C.h"
- 
+//#include "LiquidCrystal_I2C.h"
+#include <LiquidCrystal.h>
+LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
+
 Adafruit_BMP280 bmp; // I2C
 //     Adafruit_BMP280 bmp(
 //    PIN_BME_CS1,
 //    PIN_BME_MOSI,
 //    PIN_BME_MISO,
-//    PIN_BME_SCsensorsK
+//    PIN_BME_SCK
 //    );
- 
+// 
 float presion; // Almacena la presion atmosferica (Pa)
 float temperatura; // Almacena la temperatura (oC)
 int altitud; // Almacena la altitud (m) (se puede usar variable float)
  
- LiquidCrystal_I2C lcd(0x3F, 20, 4);
+//LiquidCrystal_I2C lcd(0x3F, 20, 4);
 void setup() {
-
+ Serial.begin(9600); // Inicia comunicacion serie
+ 
    //LUCIANO-------------
-  lcd.begin();
-  //lcd.backlight();
-  lcd.clear();
-  lcd.setCursor(0, 0);
+//  lcd.begin();
+//  //lcd.backlight();
+//  lcd.clear();
+//  lcd.setCursor(0, 0);
 
- //if (!bmp.begin(0x3F))//I2C
- // if (!bmp.begin()) //SP
+  if (!bmp.begin(0x76))//I2C
+  //if (!bmp.begin()) //SP
   Serial.println("Could not find a valid BMP280 sensor, check wiring!"); // Inicia el sensor
 
- Serial.begin(9600); // Inicia comunicacion serie
- Serial.println("BMP280 Sensor de Presion y Temperatura");
 }
  
  

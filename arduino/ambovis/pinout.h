@@ -28,11 +28,17 @@
 #define PIN_LCD_D6 A5
 #define PIN_LCD_D7 A6
 #endif*/
+#define PIN_LCD_RS  2
+#define PIN_LCD_EN  3
+#define PIN_LCD_D4  4
+#define PIN_LCD_D5  5
+#define PIN_LCD_D6  6
+#define PIN_LCD_D7  7
 
 // BME280 SPI for Arduino Nano or Mega 128
-#define PIN_BME_SCK  13
-#define PIN_BME_MISO 12
-#define PIN_BME_MOSI 11
+#define PIN_BME_SCK  13 //SCL
+#define PIN_BME_MISO 12 //SDO
+#define PIN_BME_MOSI 11 //SDA-SDI
 #define PIN_BME_CS1  10 // sensor de presion 1
 #define PIN_BME_CS2  99 // sensor de presion 1
 

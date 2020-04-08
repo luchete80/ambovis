@@ -164,6 +164,7 @@ private:
     bool volatile _recruitmentMode = false;
 
     uint8_t _tidalVol;
+    bool wait_NoMove;
 
     /* Configuration */
     Configuration_t _nominalConfiguration;

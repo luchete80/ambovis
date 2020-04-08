@@ -26,6 +26,7 @@
 
 
 #include "LiquidCrystal_I2C.h"
+//#include <LiquidCrystal.h>
 #include "src/Pressure_Sensor/Pressure_Sensor.h"  //LUCIANO: MPX5050DP
 
 int Compression_perc = 80; //Similar to israeli
@@ -146,14 +147,7 @@ void readIncomingMsg (void) {
 }
 
 LiquidCrystal_I2C lcd(0x3F, 20, 4);
-//LiquidCrystal_I2C lcd(0x27, 16, 2);
-void writeLine(int line, String message = "", int offsetLeft = 0)
-{
-  lcd.setCursor(0, line);
-  lcd.print("");
-  lcd.setCursor(offsetLeft, line);
-  lcd.print(message);
-}
+//LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
 
 
 /**
@@ -177,7 +171,9 @@ void setup() {
   Serial.println(F("Setup"));
 
   //LUCIANO-------------
-  lcd.begin();
+  lcd.begin();  //I2C
+  //lcd.begin(20, 4); //NO I2C
+  
   //lcd.backlight();
   lcd.clear();
   lcd.setCursor(0, 0);
@@ -250,8 +246,8 @@ void setup() {
   digitalWrite(PIN_EN, LOW);
 
   // configura la ventilación
-  //ventilation -> start();
-  //ventilation -> update();
+  ventilation -> start();
+  ventilation -> update();
 
   delay(1000);
 
@@ -374,7 +370,7 @@ void loop() {
         //                Serial2.println("EOC " + String(lastPressure.maxPressure) + " " +
         //                    String(lastPressure.minPressure) + " " + String(volume.volume));
        // Serial.print("Insuflated Vol: ");Serial.println(ventilation->getInsVol());
-        //display_lcd();
+        display_lcd();
       }
       else if (state == State_Exsufflation) //CANNOT REPEAT getstate because init state are TOO SHORTs!
       {
@@ -414,7 +410,7 @@ void loop() {
   #endif
 
   if (changed_options && (millis()-last_update_display)>time_update_display){
-    display_lcd();
+//    display_lcd();
     last_update_display=millis();
     ventilation->change_config(options);
     changed_options=false;
@@ -474,6 +470,15 @@ if (curr_sel!=old_curr_sel){
   }
  //----
 }
+
+void writeLine(int line, String message = "", int offsetLeft = 0)
+{
+  lcd.setCursor(0, line);
+  lcd.print("");
+  lcd.setCursor(offsetLeft, line);
+  lcd.print(message);
+}
+
 char tempstr[5];
 void display_lcd()
 {
@@ -485,9 +490,9 @@ void display_lcd()
 //  writeLine(1, String(tempstr),10);
 //  writeLine(2, "PIP:"+String(options.peakInspiratoryPressure),1);
 //  writeLine(3, "PEEP:"+String(options.peakEspiratoryPressure),1);
-
-  writeLine(0, "BPM:" + String(options.respiratoryRate),1);
-  writeLine(1, "VCL",1);writeLine(0, "SET | ME",11);
+  writeLine(0, "MOD:VCL",1);writeLine(0, "SET | ME",11);
+  writeLine(1, "BPM:" + String(options.respiratoryRate),1);
+  writeLine(2, "I:E:",1);
   writeLine(1, "V:" + String(options.tidalVolume),10);
   //if (mode==){
   //Remove decimal part

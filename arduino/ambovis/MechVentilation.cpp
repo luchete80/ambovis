@@ -222,7 +222,7 @@ void MechVentilation::update(void)
 
         _msecTimerStartCycle=millis();  //Luciano
         _mlInsVol=0.;
-
+        wait_NoMove=false;
         /* Stepper control: set acceleration and end-position */
 
         #ifdef ACCEL_STEPPER
@@ -260,10 +260,11 @@ void MechVentilation::update(void)
 
         if (_mllastInsVol>_tidalVol){
             _stepper->setTargetPositionToStop();
-            _setState(Init_Exsufflation);
+            //_setState(Init_Exsufflation); NOT BEGIN TO INSUFFLATE!
+            wait_NoMove=true;
             _mllastInsVol=_mlInsVol;
           }
-
+        
         // time expired
         //if (currentTime > totalCyclesInThisState)
         if(_msecTimerCnt > _timeoutIns)
@@ -285,42 +286,44 @@ void MechVentilation::update(void)
         }
         else //Time has not expired (State Insufflation)
         {
-            //IF CONTROLED BY VOL
-            //_pid->run(_currentPressure, (float)_pip, &_stepperSpeed);
-
-            //_sensors->
-            float dt=(float)(_msecTimerCnt-_msecLastUpdate);
-            //Serial.print("volue:");Serial.println(_mlInsVol);
-            _mlInsVol+=_flux*dt;//flux in l and time in msec, results in ml
-
-              //flujo remanente                                   
-             float rem_flux=(_tidalVol-_mlInsVol)/(float)(_timeoutIns-_msecTimerCnt);
-//#ifdef DEBUG
-             //pid.calculate( double setpoint, double pv );                      
-             _pid->run(rem_flux, (double)_flux,&_stepperSpeed);
-             //Serial.print("Speed");Serial.println(_stepperSpeed);
-
-             //Serial.print("Speed: "+String(_stepperSpeed));
-
-            // TODO: if _currentPressure > _pip + 5, trigger alarm
-            #ifdef ACCEL_STEPPER  //LUCIANO
-            
-            #else
-            _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
-//            if (_stepperSpeed >= 0){
-//                _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
-//            }
-//            else{
-//                _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
-//            }
-            //_stepper->setTargetPositionInSteps(-STEPPER_HIGHEST_POSITION);
-            //_stepper->moveRelativeInSteps(200);
-            #endif
-            //Serial.println("CUrrtime");Serial.println(_msecTimerCnt);
-            //Serial.println("timeout");Serial.println(_msecTimeoutInsufflation);
-
-//            if (_stepper->getCurrentPositionInSteps()==STEPPER_HIGHEST_POSITION)
-//              _stepper->setTargetPositionToStop();
+            if (!wait_NoMove){
+              //IF CONTROLED BY VOL
+              //_pid->run(_currentPressure, (float)_pip, &_stepperSpeed);
+  
+              //_sensors->
+              float dt=(float)(_msecTimerCnt-_msecLastUpdate);
+              //Serial.print("volue:");Serial.println(_mlInsVol);
+              _mlInsVol+=_flux*dt;//flux in l and time in msec, results in ml
+  
+                //flujo remanente                                   
+               float rem_flux=(_tidalVol-_mlInsVol)/(float)(_timeoutIns-_msecTimerCnt);
+  //#ifdef DEBUG
+               //pid.calculate( double setpoint, double pv );                      
+               _pid->run(rem_flux, (double)_flux,&_stepperSpeed);
+               //Serial.print("Speed");Serial.println(_stepperSpeed);
+  
+               //Serial.print("Speed: "+String(_stepperSpeed));
+  
+              // TODO: if _currentPressure > _pip + 5, trigger alarm
+              #ifdef ACCEL_STEPPER  //LUCIANO
+              
+              #else
+              _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
+  //            if (_stepperSpeed >= 0){
+  //                _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
+  //            }
+  //            else{
+  //                _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
+  //            }
+              //_stepper->setTargetPositionInSteps(-STEPPER_HIGHEST_POSITION);
+              //_stepper->moveRelativeInSteps(200);
+              #endif
+              //Serial.println("CUrrtime");Serial.println(_msecTimerCnt);
+              //Serial.println("timeout");Serial.println(_msecTimeoutInsufflation);
+  
+  //            if (_stepper->getCurrentPositionInSteps()==STEPPER_HIGHEST_POSITION)
+  //              _stepper->setTargetPositionToStop();
+            }//!Wait no move!
 
         }
     }
