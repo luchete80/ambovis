@@ -10,14 +10,15 @@
 
 unsigned int Sensors::begin(void) {
     // Arrancar sensores de presion 1 y 2
-#if 0
+//#if 0
+#if 1
 
     if(!_pres1Sensor.begin()) {
         return 1;
     }
-    if(!_pres2Sensor.begin()) {
-        return 2;
-    }
+//    if(!_pres2Sensor.begin()) {
+//        return 2;
+//    }
 
 
     /* Default settings from datasheet. */  //TODO: valorar SAMPLING_NONE, lecturas mas rapidas?
@@ -28,12 +29,12 @@ unsigned int Sensors::begin(void) {
                       Adafruit_BME280::SAMPLING_NONE,   /* humidity sampling */
                       Adafruit_BME280::FILTER_X4,      /* Filtering. */
                       Adafruit_BME280::STANDBY_MS_0_5); /* Standby time. */
-    _pres2Sensor.setSampling(Adafruit_BME280::MODE_NORMAL,     /* Operating Mode. */
-                      Adafruit_BME280::SAMPLING_X1,     /* Temp. oversampling */
-                      Adafruit_BME280::SAMPLING_X4,    /* Pressure oversampling */
-                      Adafruit_BME280::SAMPLING_NONE,   /* humidity sampling */
-                      Adafruit_BME280::FILTER_X4,      /* Filtering. */
-                      Adafruit_BME280::STANDBY_MS_0_5); /* Standby time. */
+//    _pres2Sensor.setSampling(Adafruit_BME280::MODE_NORMAL,     /* Operating Mode. */
+//                      Adafruit_BME280::SAMPLING_X1,     /* Temp. oversampling */
+//                      Adafruit_BME280::SAMPLING_X4,    /* Pressure oversampling */
+//                      Adafruit_BME280::SAMPLING_NONE,   /* humidity sampling */
+//                      Adafruit_BME280::FILTER_X4,      /* Filtering. */
+//                      Adafruit_BME280::STANDBY_MS_0_5); /* Standby time. */
 #endif
     return 0;
 }
@@ -44,25 +45,22 @@ Sensors::Sensors(void) {
 
 
 void Sensors::_init () {
-
-#if 0
-    Adafruit_BME280 bmp1(
+// LUCIANO ORIGINALLY WAS if 0
+#if 1
+//#if 0
+    _pres1Sensor = Adafruit_BME280(
     PIN_BME_CS1,
     PIN_BME_MOSI,
     PIN_BME_MISO,
     PIN_BME_SCK
     );
-
-    Adafruit_BME280 bmp2(
+    _pres2Sensor = Adafruit_BME280(
     PIN_BME_CS2,
     PIN_BME_MOSI,
     PIN_BME_MISO,
     PIN_BME_SCK
     );
-
-    _pres1Sensor = bmp1;
-    _pres2Sensor = bmp2;
-        #endif
+    #endif
         Wire.begin();
 
     _errorCounter = 0;
@@ -88,26 +86,26 @@ void Sensors::readPressure() {
     if (_maxPressure < _pressure1) {
         _maxPressure = _pressure1;
     }
-    #if 0
+//    #if 0
     pres1 = _pres1Sensor.readPressure(); // Pa
-    pres2 = _pres2Sensor.readPressure(); // Pa
-
-    if (pres1 == 0.0 || pres2 == 0.0) {
-
-        if (_errorCounter > SENSORS_MAX_ERRORS) {
-            _state = SensorStateFailed;
-            //TODO do something?
-        } else {
-            _errorCounter++;
-        }
-
-    } else {
-        _state = SensorStateOK;
-        _errorCounter = 0;
-        _pressure1 = pres1;
-        _pressure2 = pres2;
-    }
-    #endif
+//    pres2 = _pres2Sensor.readPressure(); // Pa
+//
+//    if (pres1 == 0.0 || pres2 == 0.0) {
+//
+//        if (_errorCounter > SENSORS_MAX_ERRORS) {
+//            _state = SensorStateFailed;
+//            //TODO do something?
+//        } else {
+//            _errorCounter++;
+//        }
+//
+//    } else {
+//        _state = SensorStateOK;
+//        _errorCounter = 0;
+//        _pressure1 = pres1;
+//        _pressure2 = pres2;
+//    }
+//    #endif
 }
 
 /**

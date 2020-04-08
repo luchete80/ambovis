@@ -34,6 +34,7 @@ void loop()
 
 //stepper1.distanceToGo() == 0){	
 if ( (millis ()-change_time) > cycle_time){
+  Serial.println("yendo...");
   change_time=millis();
 	stepper.setMaxSpeed(200);
 	pos=-pos;

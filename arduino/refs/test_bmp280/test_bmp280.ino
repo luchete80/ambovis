@@ -47,7 +47,7 @@
  
  
 //Adafruit_BMP280 bmp; // I2C
-     Adafruit_BMP280 bmp(
+     Adafruit_BMP280 bme(
     PIN_BME_CS1,
     PIN_BME_MOSI,
     PIN_BME_MISO,

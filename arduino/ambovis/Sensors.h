@@ -10,6 +10,7 @@
 #ifdef ENABLED_SENSOR_VOLUME_SFM3300
 //#include "src/SFM3200/sfm3000wedo.h"
 #endif
+#include "pinout.h"
 
 #define SENSORS_MAX_ERRORS 5
 
@@ -62,8 +63,11 @@ class Sensors
 #endif
     private:
     void _init(void);
-    Adafruit_BME280 _pres1Sensor;
+    //Adafruit_BME280 _pres1Sensor;
+    Adafruit_BME280 _pres1Sensor;    
     Adafruit_BME280 _pres2Sensor;
+    //Adafruit_BMP280 _pres1Sensor;   //LUCINO
+    //Adafruit_BMP280 _pres1Sensor;
     Pressure_Sensor _dpsensor;  //Used for venturi
     
     uint8_t _minPressure;
