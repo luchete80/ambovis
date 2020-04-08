@@ -41,32 +41,27 @@
 //D11 (MOSI). . . . . .SDA. . . . . . . . . . .SDA. . . . . . . . . .SDA
 //D10 (ss1). . . . . . . .CSB
 
+
+#include "src/Adafruit_Sensor/Adafruit_Sensor.h"
 #include "src/Adafruit_BMP280/Adafruit_BMP280.h"
- #include "LiquidCrystal_I2C.h"
+
  
-Adafruit_BMP280 bmp; // I2C
-//     Adafruit_BMP280 bmp(
-//    PIN_BME_CS1,
-//    PIN_BME_MOSI,
-//    PIN_BME_MISO,
-//    PIN_BME_SCsensorsK
-//    );
+//Adafruit_BMP280 bmp; // I2C
+     Adafruit_BMP280 bmp(
+    PIN_BME_CS1,
+    PIN_BME_MOSI,
+    PIN_BME_MISO,
+    PIN_BME_SCK
+    );
  
 float presion; // Almacena la presion atmosferica (Pa)
 float temperatura; // Almacena la temperatura (oC)
 int altitud; // Almacena la altitud (m) (se puede usar variable float)
  
- LiquidCrystal_I2C lcd(0x3F, 20, 4);
+ 
 void setup() {
-
-   //LUCIANO-------------
-  lcd.begin();
-  //lcd.backlight();
-  lcd.clear();
-  lcd.setCursor(0, 0);
-
- //if (!bmp.begin(0x3F))//I2C
- // if (!bmp.begin()) //SP
+ 
+ if (!bmp.begin())
   Serial.println("Could not find a valid BMP280 sensor, check wiring!"); // Inicia el sensor
 
  Serial.begin(9600); // Inicia comunicacion serie

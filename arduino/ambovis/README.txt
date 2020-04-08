@@ -59,6 +59,13 @@ https://goughlui.com/2018/08/05/note-bosch-sensortec-bmp280-vs-bme280-sensor-con
 
 http://www.buxtronix.net/2011/10/rotary-encoders-done-properly.html
 
+Resolution
+https://www.bosch-sensortec.com/products/environmental-sensors/pressure-sensors/pressure-sensors-bmp280-1.html
+LCD 2 con display
+http://www.zonnepanelen.wouterlood.com/logging-barometric-pressure-with-an-i2c-device-and-an-arduino-sd-shield/
+MUY BUENO DISPLAY
+https://diyi0t.com/lcd-display-tutorial-for-arduino-and-esp8266/
+
 --------------------------------
 Venturi
 http://laplace.us.es/wiki/index.php/Tubo_de_Venturi

@@ -7,7 +7,7 @@
 #define PIN_EN 8
 
 // Buzzer
-#define PIN_BUZZ 11
+#define PIN_BUZZ 100
 
 // Stepper homing
 #define PIN_ENDSTOP 4

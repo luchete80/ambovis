@@ -555,3 +555,12 @@ float MechVentilation::getInsVol()
 {
     return _mllastInsVol;
 }
+
+void MechVentilation::change_config(VentilationOptions_t options)
+{
+    _rpm = options.respiratoryRate;
+    _pip = options.peakInspiratoryPressure;
+    _peep = options.peakEspiratoryPressure;
+    _tidalVol=options.tidalVolume;
+    setRPM(_rpm); //Include set inspiratory cycle
+}

@@ -2,8 +2,9 @@
 #define _SENSORS_H_
 
 #include <stdint.h>
-#include "src/Adafruit_BME280/Adafruit_BME280.h"
-#include "src/Pressure_Sensor/Pressure_Sensor.h"  //LUCIANO: MPX5050DP
+#include "src/Adafruit_Sensor/Adafruit_Sensor.h"
+#include "src/Adafruit_BMP280/Adafruit_BMP280.h"
+#include "src/Pressure_Sensor/Pressure_Sensor.h"
 #include "calc.h"
 
 #include "defaults.h"
@@ -64,8 +65,8 @@ class Sensors
     private:
     void _init(void);
     //Adafruit_BME280 _pres1Sensor;
-    Adafruit_BME280 _pres1Sensor;    
-    Adafruit_BME280 _pres2Sensor;
+    Adafruit_BMP280 _pres1Sensor;    
+    Adafruit_BMP280 _pres2Sensor;
     //Adafruit_BMP280 _pres1Sensor;   //LUCINO
     //Adafruit_BMP280 _pres1Sensor;
     Pressure_Sensor _dpsensor;  //Used for venturi

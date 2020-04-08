@@ -13,6 +13,9 @@ unsigned int Sensors::begin(void) {
 //#if 0
 #if 1
 
+    if(!_pres1Sensor.begin())
+        return 1;
+        
     if(!_pres1Sensor.begin()) {
         return 1;
     }
@@ -21,14 +24,15 @@ unsigned int Sensors::begin(void) {
 //    }
 
 
+    //
     /* Default settings from datasheet. */  //TODO: valorar SAMPLING_NONE, lecturas mas rapidas?
     // Ver ejemplos: https://github.com/adafruit/Adafruit_BME280_Library/blob/master/examples/advancedsettings/advancedsettings.ino
-    _pres1Sensor.setSampling(Adafruit_BME280::MODE_NORMAL,     /* Operating Mode. */
-                      Adafruit_BME280::SAMPLING_X1,     /* Temp. oversampling */
-                      Adafruit_BME280::SAMPLING_X4,    /* Pressure oversampling */
-                      Adafruit_BME280::SAMPLING_NONE,   /* humidity sampling */
-                      Adafruit_BME280::FILTER_X4,      /* Filtering. */
-                      Adafruit_BME280::STANDBY_MS_0_5); /* Standby time. */
+//    _pres1Sensor.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
+//                      Adafruit_BMP280::SAMPLING_X1,     /* Temp. oversampling */
+//                      Adafruit_BMP280::SAMPLING_X4,    /* Pressure oversampling */
+//                      Adafruit_BMP280::SAMPLING_NONE,   /* humidity sampling */
+//                      Adafruit_BMP280::FILTER_X4,      /* Filtering. */
+//                      Adafruit_BMP280::STANDBY_MS_0_5); /* Standby time. */
 //    _pres2Sensor.setSampling(Adafruit_BME280::MODE_NORMAL,     /* Operating Mode. */
 //                      Adafruit_BME280::SAMPLING_X1,     /* Temp. oversampling */
 //                      Adafruit_BME280::SAMPLING_X4,    /* Pressure oversampling */
@@ -48,20 +52,21 @@ void Sensors::_init () {
 // LUCIANO ORIGINALLY WAS if 0
 #if 1
 //#if 0
-    _pres1Sensor = Adafruit_BME280(
+    _pres1Sensor = Adafruit_BMP280(
     PIN_BME_CS1,
     PIN_BME_MOSI,
     PIN_BME_MISO,
     PIN_BME_SCK
     );
-    _pres2Sensor = Adafruit_BME280(
-    PIN_BME_CS2,
-    PIN_BME_MOSI,
-    PIN_BME_MISO,
-    PIN_BME_SCK
-    );
+
+//    _pres2Sensor = Adafruit_BMP280(
+//    PIN_BME_CS2,
+//    PIN_BME_MOSI,
+//    PIN_BME_MISO,
+//    PIN_BME_SCK
+//    );
     #endif
-        Wire.begin();
+//        Wire.begin();
 
     _errorCounter = 0;
     _state = SensorStateFailed;
@@ -88,6 +93,7 @@ void Sensors::readPressure() {
     }
 //    #if 0
     pres1 = _pres1Sensor.readPressure(); // Pa
+    Serial.println("Pressure: ");Serial.println(_pres1Sensor.readPressure());
 //    pres2 = _pres2Sensor.readPressure(); // Pa
 //
 //    if (pres1 == 0.0 || pres2 == 0.0) {

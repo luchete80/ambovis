@@ -24,16 +24,10 @@
 #include "src/FlexyStepper/FlexyStepper.h"
 #endif
 
-//#include "src/TimerOne/TimerOne.h"
-//#include "src/TimerThree/TimerThree.h"  //PARA PLC?
 
-//LUCIANO -------
 #include "LiquidCrystal_I2C.h"
 #include "src/Pressure_Sensor/Pressure_Sensor.h"  //LUCIANO: MPX5050DP
-//LUCIANO -------
 
-//LUCIANO
-Pressure_Sensor bmp1;
 int Compression_perc = 80; //Similar to israeli
 
 float flux, dp;
@@ -61,33 +55,20 @@ AccelStepper *stepper = new AccelStepper(
 FlexyStepper * stepper = new FlexyStepper();
 #endif
 
-//Encoder encoder(
-//  DTpin,
-//  CLKpin,
-//  SWpin
-//);
-
-//Encoder encoder(
-//  2,
-//  3,
-//  7
-//);
-//
-//
 #define PIN_ENC_SW  9
 #define PIN_ENC_CL  2
 #define PIN_ENC_DIR 3
 
+
+int pinA = PIN_ENC_CL; // Our first hardware interrupt pin is digital pin 2
+int pinB = PIN_ENC_DIR; // Our second hardware interrupt pin is digital pin 3
+byte aFlag = 0; // let's us know when we're expecting a rising edge on pinA to signal that the encoder has arrived at a detent
+byte bFlag = 0; // let's us know when we're expecting a rising edge on pinB to signal that the encoder has arrived at a detent (opposite direction to when aFlag is set)
+byte encoderPos = 0; //this variable stores our current value of encoder position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
+byte oldEncPos = 0; //stores the last encoder position value so we can compare to the current reading and see if it has changed (so we know when to print to the serial monitor)
+byte reading = 0; //somewhere to store the direct values we read from our interrupt pins before checking to see if we have moved a whole detent
+
 //
-static int pinA = PIN_ENC_CL; // Our first hardware interrupt pin is digital pin 2
-static int pinB = PIN_ENC_DIR; // Our second hardware interrupt pin is digital pin 3
-volatile byte aFlag = 0; // let's us know when we're expecting a rising edge on pinA to signal that the encoder has arrived at a detent
-volatile byte bFlag = 0; // let's us know when we're expecting a rising edge on pinB to signal that the encoder has arrived at a detent (opposite direction to when aFlag is set)
-volatile byte encoderPos = 0; //this variable stores our current value of encoder position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
-volatile byte oldEncPos = 0; //stores the last encoder position value so we can compare to the current reading and see if it has changed (so we know when to print to the serial monitor)
-volatile byte reading = 0; //somewhere to store the direct values we read from our interrupt pins before checking to see if we have moved a whole detent
-
-
 void PinA(){
   cli(); //stop interrupts happening before we read pin values
   reading = PIND & 0xC; // read all eight pin values then strip away all but pinA and pinB's values
@@ -188,6 +169,7 @@ State static lastState;
 bool changed_options=false;
 unsigned long time_update_display=250; //ms
 unsigned long last_update_display;
+
 void setup() {
   // Puertos serie
   Serial.begin(9600);
@@ -200,32 +182,33 @@ void setup() {
   lcd.clear();
   lcd.setCursor(0, 0);
   //---------------------
-
-  // Zumbador
-  pinMode(PIN_BUZZ, OUTPUT);
-  digitalWrite(PIN_BUZZ, HIGH); // test zumbador
-  delay(100);
-  digitalWrite(PIN_BUZZ, LOW);
-
-  // FC efecto hall
-  pinMode(PIN_ENDSTOP, INPUT_PULLUP); // el sensor de efecto hall da un 1 cuando detecta
-
-  // Solenoid
-  pinMode(PIN_SOLENOID, OUTPUT);
+//
+//  // Zumbador
+//  pinMode(PIN_BUZZ, OUTPUT);
+//  digitalWrite(PIN_BUZZ, HIGH); // test zumbador
+//  delay(100);
+//  digitalWrite(PIN_BUZZ, LOW);
+//
+//  // FC efecto hall
+//  pinMode(PIN_ENDSTOP, INPUT_PULLUP); // el sensor de efecto hall da un 1 cuando detecta
+//
+//  // Solenoid
+//  pinMode(PIN_SOLENOID, OUTPUT);
 
   // Sensores de presión
   sensors = new Sensors();
+
   int check = sensors -> begin();
-#if 1
+//#if 1
   if (check) {
     if (check == 1) {
       Serial.println(F("Could not find sensor BME280 number 1, check wiring!"));
     } else if (check == 2) {
       Serial.println(F("Could not find sensor BME280 number 2, check wiring!"));
     }
-    while (1);
+    //while (1);
   }
-#endif
+//#endif
 
   // PID
   pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
@@ -267,21 +250,22 @@ void setup() {
   digitalWrite(PIN_EN, LOW);
 
   // configura la ventilación
-  ventilation -> start();
-  ventilation -> update();
+  //ventilation -> start();
+  //ventilation -> update();
 
   delay(1000);
 
   sensors -> readPressure();
   // TODO: Make this period dependant of TIME_BASE
   // TIME_BASE * 1000 does not work!!
-
-  bmp1 = Pressure_Sensor(A0);
   //--
 
 //ENCODER
     //LUCIANO
+  //LA SELECCION EMPIEZA POR EL MODO
+  //SEL: Modo/BPM/V/PIP/PEP /V & PIP SON LOS QUE CONTROLAN
   curr_sel=old_curr_sel=0; //COMPRESSION
+  encoderPos=oldEncPos=options.tidalVolume;
 
   pinMode(pinA, INPUT_PULLUP); // set pinA as an input, pulled HIGH to the logic voltage (5V or 3.3V for most cases)
   pinMode(pinB, INPUT_PULLUP); // set pinB as an input, pulled HIGH to the logic voltage (5V or 3.3V for most cases)
@@ -296,7 +280,6 @@ void setup() {
   lastReadSensor = millis();
   lastState=ventilation->getState();
   last_update_display=millis();
-  writeLine(0,"Guachete apreta FC..");
   
 }
 
@@ -308,6 +291,7 @@ byte last_cycle=0;
 bool update_display=false;
 
 void loop() {
+
   //
   //LUCIANO @TODO: remove
   check_encoder();
@@ -346,6 +330,7 @@ void loop() {
   {
     sensors -> readPressure();
     SensorPressureValues_t pressure = sensors -> getRelativePressureInCmH20();
+    Serial.print("Pressure: ");Serial.println(pressure.pressure1);
 
     sensors -> readVolume();
     SensorVolumeValue_t volume = sensors -> getVolume();
@@ -431,12 +416,13 @@ void loop() {
   if (changed_options && (millis()-last_update_display)>time_update_display){
     display_lcd();
     last_update_display=millis();
+    ventilation->change_config();
     changed_options=false;
     }
 
   ///////////--- LUCIANO
 }
-
+//
 ////LUCIANO
 void check_encoder()
 {

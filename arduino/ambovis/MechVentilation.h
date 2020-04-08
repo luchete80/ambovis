@@ -108,7 +108,7 @@ public:
     float getInsVol(void);
 
     byte getCycleNum(){return _cyclenum;};
-
+    void change_config(VentilationOptions_t);
 
 
     //LUCIANO 
