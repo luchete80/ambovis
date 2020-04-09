@@ -90,4 +90,6 @@ class Sensors
 
 };
 
+extern float pressure_p;
+
 #endif

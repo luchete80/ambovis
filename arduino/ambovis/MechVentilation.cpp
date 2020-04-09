@@ -230,7 +230,7 @@ void MechVentilation::update(void)
         #else
         // Note: this can only be called when the motor is stopped
         //IMPORTANT FROM https://github.com/Stan-Reifel/FlexyStepper/blob/master/Documentation.md
-        _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
+        _stepper->setSpeedInStepsPerSecond(STEPPER_SPEED_DEFAULT);
         _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_INSUFFLATION);
         _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
         #endif
@@ -301,7 +301,7 @@ void MechVentilation::update(void)
                //pid.calculate( double setpoint, double pv );                      
                _pid->run(rem_flux, (double)_flux,&_stepperSpeed);
 
-               if (_stepperSpeed>MAX_SPEED)
+               if (_stepperSpeed>STEPPER_SPEED_MAX)
                 _stepperSpeed=STEPPER_SPEED_MAX;
                 
                //Serial.print("Speed");Serial.println(_stepperSpeed);
@@ -358,7 +358,7 @@ void MechVentilation::update(void)
         #ifdef ACCEL
 
         #else
-        _stepper->setSpeedInStepsPerSecond(800);
+        _stepper->setSpeedInStepsPerSecond(400);
         _stepper->setAccelerationInStepsPerSecondPerSecond(
             STEPPER_ACC_EXSUFFLATION);
         //LUCIANO
@@ -476,7 +476,7 @@ void MechVentilation::update(void)
             if (_stepper->moveToHomeInSteps(
                     STEPPER_HOMING_DIRECTION,
                     STEPPER_HOMING_SPEED,
-                    STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS,
+                    2000, //ATTENTION
                     PIN_ENDSTOP) != true)
             {
 #if DEBUG_UPDATE

@@ -13,13 +13,13 @@ unsigned int Sensors::begin(void) {
 //#if 0
 #if 1
 
-    //if(!_pres1Sensor.begin())
+//    //if(!_pres1Sensor.begin())
     if(!_pres1Sensor.begin(0x76))
         return 1;
-        
-    if(!_pres1Sensor.begin()) {
-        return 1;
-    }
+//        
+//    if(!_pres1Sensor.begin()) {
+//        return 1;
+//    }
 //    if(!_pres2Sensor.begin()) {
 //        return 2;
 //    }

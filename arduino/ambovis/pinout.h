@@ -16,37 +16,30 @@
 #define PIN_SOLENOID 39
 
 // Display
-/*
-#ifdef I2C
+
+#ifdef LCD_I2C
 #define I2C_DIR 0x3F
 #else
-#define PIN_LCD_RS A0
-#define PIN_LCD_RW A1
-#define PIN_LCD_E  A2
-#define PIN_LCD_D4 A3
-#define PIN_LCD_D5 A4
-#define PIN_LCD_D6 A5
-#define PIN_LCD_D7 A6
-#endif*/
-#define PIN_LCD_RS  2
-#define PIN_LCD_EN  3
-#define PIN_LCD_D4  4
-#define PIN_LCD_D5  5
-#define PIN_LCD_D6  6
-#define PIN_LCD_D7  7
+#define PIN_LCD_RS A8
+#define PIN_LCD_EN A9
+#define PIN_LCD_D4 A10
+#define PIN_LCD_D5 A11
+#define PIN_LCD_D6 A12
+#define PIN_LCD_D7 A13
+#endif
 
 // BME280 SPI for Arduino Nano or Mega 128
-#define PIN_BME_SCK  13 //SCL
-#define PIN_BME_MISO 12 //SDO
-#define PIN_BME_MOSI 11 //SDA-SDI
-#define PIN_BME_CS1  10 // sensor de presion 1
+#define PIN_BME_SCK  99 //SCL
+#define PIN_BME_MISO 99 //SDO
+#define PIN_BME_MOSI 99 //SDA-SDI
+#define PIN_BME_CS1  99 // sensor de presion 1
 #define PIN_BME_CS2  99 // sensor de presion 1
 
 
 // #define PIN_BME_CS2  4  // sensor de presion 2
+#define PIN_ENC_SW  99
+#define PIN_ENC_CL  2
+#define PIN_ENC_DIR 3
 
-#define CLKpin  5
-#define DTpin   6
-#define SWpin   7
 
 #endif // ENCODER_H

@@ -163,7 +163,7 @@ private:
     /** Recruitment */
     bool volatile _recruitmentMode = false;
 
-    uint8_t _tidalVol;
+    unsigned short _tidalVol;
     bool wait_NoMove;
 
     /* Configuration */

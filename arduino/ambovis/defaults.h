@@ -30,8 +30,8 @@
 //#define STEPPER_LOWEST_POSITION     (STEPPER_MICROSTEPS *  -100)   // Steps
 //#define STEPPER_HIGHEST_POSITION    (STEPPER_MICROSTEPS *   100)   // Steps
 #define STEPPER_LOWEST_POSITION     (-10)   // Steps
-#define STEPPER_HIGHEST_POSITION    ( 700)   // Steps
-#define STEPPER_SPEED_DEFAULT       (STEPPER_MICROSTEPS *  100)   // Steps/s
+#define STEPPER_HIGHEST_POSITION    ( 1000)   // Steps
+#define STEPPER_SPEED_DEFAULT       (200)   // Steps/s
 #define STEPPER_SPEED_MAX           (1000)   // Steps/s
 #define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  600)   // Steps/s2
 #define STEPPER_ACC_INSUFFLATION    (STEPPER_MICROSTEPS *  450)   // Steps/s2
@@ -89,7 +89,7 @@ typedef struct {
     short peakEspiratoryPressure;
     float triggerThreshold;
     bool hasTrigger;
-    short tidalVolume;  //in ml
+    unsigned short tidalVolume;  //in ml
     byte modeCtl;
 } VentilationOptions_t;
 

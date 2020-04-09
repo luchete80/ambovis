@@ -1,15 +1,5 @@
-/**
-   @file rees_firmware.ino
-   @author Reesistencia Team
-   @brief
-   @version 0.1
-   @date 2020-03-29
-
-   @copyright GPLv3
-
-*/
-
 //#define ACCEL_STEPPER 1
+//#ifdef LCD_I2C
 
 #include "defaults.h"
 #include "pinout.h"
@@ -25,20 +15,17 @@
 #endif
 
 
-#include "LiquidCrystal_I2C.h"
-//#include <LiquidCrystal.h>
+#ifdef LCD_I2C
+ #include "LiquidCrystal_I2C.h"
+#else
+ #include <LiquidCrystal.h>
+#endif
 #include "src/Pressure_Sensor/Pressure_Sensor.h"  //LUCIANO: MPX5050DP
 
+int pressure_flux;  //For calculating flux
+
+
 int Compression_perc = 80; //Similar to israeli
-
-float flux, dp;
-//LUCIANO --------
-
-/**
-   Variables
-*/
-
-//Rotary rotary(3,2);
 
 #if DEBUG_STATE_MACHINE
 volatile String debugMsg[15];
@@ -56,10 +43,7 @@ AccelStepper *stepper = new AccelStepper(
 FlexyStepper * stepper = new FlexyStepper();
 #endif
 
-#define PIN_ENC_SW  9
-#define PIN_ENC_CL  2
-#define PIN_ENC_DIR 3
-
+float pressure_p;   //EXTERN!!
 
 int pinA = PIN_ENC_CL; // Our first hardware interrupt pin is digital pin 2
 int pinB = PIN_ENC_DIR; // Our second hardware interrupt pin is digital pin 3
@@ -146,9 +130,11 @@ void readIncomingMsg (void) {
   free(msg);
 }
 
-LiquidCrystal_I2C lcd(0x3F, 20, 4);
-//LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
-
+#ifdef LCD_I2C
+  LiquidCrystal_I2C lcd(0x3F, 20, 4);
+#else
+  LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
+#endif
 
 /**
    Setup
@@ -161,7 +147,7 @@ unsigned long lastReadSensor = 0;
 
 State static lastState;
 bool changed_options=false;
-unsigned long time_update_display=250; //ms
+unsigned long time_update_display=100; //ms
 unsigned long last_update_display;
 
 void setup() {
@@ -170,10 +156,12 @@ void setup() {
   //Serial2.begin(115200);
   Serial.println(F("Setup"));
 
-  //LUCIANO-------------
-  lcd.begin();  //I2C
-  //lcd.begin(20, 4); //NO I2C
-  
+
+  #ifdef LCD_I2C
+    lcd.begin();  //I2C
+  #else
+  lcd.begin(20, 4); //NO I2C
+  #endif
   //lcd.backlight();
   lcd.clear();
   lcd.setCursor(0, 0);
@@ -227,7 +215,7 @@ void setup() {
   options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
   options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
   options.hasTrigger = false;
-  options.tidalVolume = 250;
+  options.tidalVolume = 150;
 
   ventilation = new MechVentilation(
     stepper,
@@ -252,6 +240,15 @@ void setup() {
   delay(1000);
 
   sensors -> readPressure();
+
+  // map the Raw data to kPa  
+  //diffPressure = map(sensorValue, 0, 1023, -2000, 2000); 
+  //Vout = VS*(0.018*P+0.04) ± ERROR
+  //VS = 5.0 Vdc
+  //EL 0.04 es el 48que aparece en 0
+  //Por eso como yaesta restado no se tiene en cuenta 
+  //0.04=48*/1024
+  pressure_p=(analogRead(A1)/1024.-0.04)/0.18*1000*DEFAULT_PA_TO_CM_H20;  
   // TODO: Make this period dependant of TIME_BASE
   // TIME_BASE * 1000 does not work!!
   //--
@@ -267,7 +264,7 @@ void setup() {
   pinMode(pinB, INPUT_PULLUP); // set pinB as an input, pulled HIGH to the logic voltage (5V or 3.3V for most cases)
   attachInterrupt(0,PinA,RISING); // set an interrupt on PinA, looking for a rising edge signal and executing the "PinA" Interrupt Service Routine (below)
   attachInterrupt(1,PinB,RISING); // set an interrupt on PinB, looking for a rising edge signal and executing the "PinB" Interrupt Service Routine (below)
-    pinMode(9, INPUT_PULLUP);
+    pinMode(PIN_ENC_SW, INPUT_PULLUP);
 //  btnState=digitalRead(9);
 //  lastButtonPress=millis();
 
@@ -410,7 +407,7 @@ void loop() {
   #endif
 
   if (changed_options && (millis()-last_update_display)>time_update_display){
-//    display_lcd();
+    display_lcd();
     last_update_display=millis();
     ventilation->change_config(options);
     changed_options=false;
@@ -423,7 +420,7 @@ void loop() {
 void check_encoder()
 {
       //LUCIANO------------------------
-byte btnState = digitalRead(9);
+byte btnState = digitalRead(PIN_ENC_SW);
 
 if (btnState == LOW) {
     if (millis() - lastButtonPress > 50) {
@@ -436,22 +433,22 @@ if (btnState == LOW) {
 }
 
 
-    if(oldEncPos != encoderPos) {
-      Serial.println(encoderPos);
-      oldEncPos = encoderPos;
-      switch (curr_sel){
-        case 0:
-          options.tidalVolume=encoderPos;
-          break;
-        case 1:
-          options.respiratoryRate=encoderPos;
-          break;
-        case 2:
-          //A_pres=encoderPos;
-          break;        
-              }
-        changed_options=true;              
-              }
+  if(oldEncPos != encoderPos) {
+    Serial.println(encoderPos);
+    oldEncPos = encoderPos;
+    switch (curr_sel){
+      case 0:
+        options.tidalVolume=encoderPos;
+        break;
+      case 1:
+        options.respiratoryRate=encoderPos;
+        break;
+      case 2:
+        //A_pres=encoderPos;
+        break;        
+            }
+      changed_options=true;          
+            }
 
 if (curr_sel!=old_curr_sel){
  switch (curr_sel){
@@ -503,6 +500,8 @@ void display_lcd()
 //  dtostrf(ventilation->getInsVol(), 4, 1, tempstr);
 //  writeLine(1, String(tempstr),10);
   writeLine(2, "PIP :"+String(options.peakInspiratoryPressure),8);
+  dtostrf(pressure_p, 4, 0, tempstr);
+  writeLine(2, String(tempstr),15);
   writeLine(3, "PEEP:"+String(options.peakEspiratoryPressure),8);
 
 }
