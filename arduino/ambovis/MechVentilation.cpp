@@ -209,6 +209,7 @@ void MechVentilation::update(void)
     {
     case Init_Insufflation:
     {
+        pressure_max=0;
 #if DEBUG_UPDATE
         Serial.println("Starting insuflation");
 #endif
@@ -257,6 +258,8 @@ void MechVentilation::update(void)
 //#endif
         //IF _mllastInsVol
         //VOLUME CONTROL
+        if (pressure_p>pressure_max)
+          pressure_max=pressure_p;
 
         if (_mllastInsVol>_tidalVol){
             _stepper->setTargetPositionToStop();

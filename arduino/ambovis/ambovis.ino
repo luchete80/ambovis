@@ -47,8 +47,10 @@ FlexyStepper * stepper = new FlexyStepper();
 // - EXTERNAL VARIABLES //
 //////////////////////////
 float pressure_p;   //EXTERN!!
-byte vent_mode=0;
-
+byte vent_mode=VENTMODE_VCL;  //0
+Adafruit_BMP280 _pres1Sensor;
+float pressure_p0;
+float pressure_max;
 
 int pinA = PIN_ENC_CL; // Our first hardware interrupt pin is digital pin 2
 int pinB = PIN_ENC_DIR; // Our second hardware interrupt pin is digital pin 3
@@ -278,6 +280,9 @@ void setup() {
   lastReadSensor = millis();
   lastState=ventilation->getState();
   last_update_display=millis();
+
+  //MAKE AN IF IF_2_PRESS_SENSORS
+  pressure_p0=_pres1Sensor.readPressure()*DEFAULT_PA_TO_CM_H20;
   
 }
 
@@ -326,9 +331,12 @@ void loop() {
 
   if (millis() > lastReadSensor + TIME_SENSOR)
   {
+    //Is not anymore in classes
+    pressure_p=_pres1Sensor.readPressure()*DEFAULT_PA_TO_CM_H20;
+    Serial.print("PRessure");Serial.println(pressure_p);
+    
     sensors -> readPressure();
     SensorPressureValues_t pressure = sensors -> getRelativePressureInCmH20();
-    Serial.print("Pressure: ");Serial.println(pressure.pressure1);
 
     sensors -> readVolume();
     SensorVolumeValue_t volume = sensors -> getVolume();
@@ -338,8 +346,8 @@ void loop() {
     //Serial.println("Insuflated: "+String(ventilation->getInsVol()));
 
     //        Serial2.println(string);
-    Serial.println(string);
-    free(string);
+    //Serial.println(string);
+    //free(string);
 
     if (pressure.state == SensorStateFailed) {
       //TODO sensor fail. do something
@@ -505,8 +513,9 @@ void display_lcd()
 //  dtostrf(ventilation->getInsVol(), 4, 1, tempstr);
 //  writeLine(1, String(tempstr),10);
   writeLine(2, "PIP :"+String(options.peakInspiratoryPressure),8);
-  dtostrf(pressure_p, 4, 0, tempstr);
-  writeLine(2, String(tempstr),15);
+  dtostrf(pressure_max-pressure_p0, 2, 0, tempstr);
+  Serial.println(pressure_max);
+  writeLine(2, String(tempstr),16);
   writeLine(3, "PEEP:"+String(options.peakEspiratoryPressure),8);
 
 }

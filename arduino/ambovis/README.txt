@@ -70,6 +70,11 @@ https://diyi0t.com/lcd-display-tutorial-for-arduino-and-esp8266/
 Venturi
 http://laplace.us.es/wiki/index.php/Tubo_de_Venturi
 
+--------------------------------
+ANDROID OREO EMULATOR
+https://liliputing.com/2019/01/android-x86-8-1-released-lets-you-run-oreo-on-desktop-pcs.html
+
+
 ---------------------------------
 Encoder
 https://www.electronics-lab.com/project/rotary-encoder-arduino-mega-nokia-5110-display-tutorial/

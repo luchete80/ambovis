@@ -65,7 +65,7 @@ class Sensors
     private:
     void _init(void);
     //Adafruit_BME280 _pres1Sensor;
-    Adafruit_BMP280 _pres1Sensor;    
+    //Adafruit_BMP280 _pres1Sensor;    
     Adafruit_BMP280 _pres2Sensor;
     //Adafruit_BMP280 _pres1Sensor;   //LUCINO
     //Adafruit_BMP280 _pres1Sensor;
@@ -90,8 +90,10 @@ class Sensors
 
 };
 
+extern float pressure_max;
 extern float pressure_p;
+extern float pressure_p0;
 
-
+extern Adafruit_BMP280 _pres1Sensor;
 
 #endif
