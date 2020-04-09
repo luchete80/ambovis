@@ -43,7 +43,12 @@ AccelStepper *stepper = new AccelStepper(
 FlexyStepper * stepper = new FlexyStepper();
 #endif
 
+//////////////////////////
+// - EXTERNAL VARIABLES //
+//////////////////////////
 float pressure_p;   //EXTERN!!
+byte vent_mode=0;
+
 
 int pinA = PIN_ENC_CL; // Our first hardware interrupt pin is digital pin 2
 int pinB = PIN_ENC_DIR; // Our second hardware interrupt pin is digital pin 3

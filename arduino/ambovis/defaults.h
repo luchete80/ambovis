@@ -97,4 +97,7 @@ typedef struct {
 #define MODE_VOL_CTL 1
 #define MODE_MANUAL  2
 
+//general variables
+extern byte vent_mode;
+
 #endif // DEFAULTS_H
