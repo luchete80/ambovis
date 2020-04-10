@@ -301,7 +301,7 @@ void MechVentilation::update(void)
                 //flujo remanente                                   
                float rem_flux=(_tidalVol-_mlInsVol)/(float)(_timeoutIns-_msecTimerCnt);
                    
-               _pid->run(rem_flux, (double)_flux,&_stepperSpeed);
+               //_pid->run(rem_flux, (double)_flux,&_stepperSpeed);
 
                if (_stepperSpeed>STEPPER_SPEED_MAX)
                 _stepperSpeed=STEPPER_SPEED_MAX;
@@ -316,7 +316,6 @@ void MechVentilation::update(void)
 
               #else
               //_stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
-              _stepper->setSpeedInStepsPerSecond(600);
   //            if (_stepperSpeed >= 0){
   //                _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
   //            }
@@ -406,47 +405,43 @@ void MechVentilation::update(void)
         //if (currentTime > totalCyclesInThisState)
         if(_msecTimerCnt > _timeoutEsp) 
         {
-            if (!_stepper->motionComplete())
-            {
-                // motor not finished, force motor to stop in current position
-                //BUG
-                //_stepper->setTargetPositionInSteps(_stepper->getCurrentPositionInSteps());
-                _stepper->setTargetPositionToStop();
-            }
+//            if (!_stepper->motionComplete())
+//            {
+//                // motor not finished, force motor to stop in current position
+//                //BUG
+//                //_stepper->setTargetPositionInSteps(_stepper->getCurrentPositionInSteps());
+//                _stepper->setTargetPositionToStop();
+//            }
             /* Status update and reset timer, for next time */
             _setState(Init_Insufflation);
             _startWasTriggeredByPatient = false;
             
-            _msecTimerStartCycle=millis();
-            currentTime = 0;
-
-            _cyclenum++;
-        }
-        else    //Time hasnot expired
-        {
-            //_pid->run(_currentPressure, (float)_peep, &_stepperSpeed);
-
-//LUCIANO
-//              _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
-//            if (_stepperSpeed >= 0)
-//            {
-//                _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
-//            }
-//            else
-//            {
-//                _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
-//            }
-//-----------------
-       //_stepper-> moveRelativeInSteps(-200);
-       _stepper->setSpeedInStepsPerSecond(800);
-       //_stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
+          }
+//        else    //Time hasnot expired
+//        {
+//            //_pid->run(_currentPressure, (float)_peep, &_stepperSpeed);
 //
-//       if (_stepper->getCurrentPositionInSteps()==STEPPER_LOWEST_POSITION)
-//        _stepper->setTargetPositionToStop();
-
-            //Serial.println("CUrrtime"+String(currentTime));
-            //currentTime++;
-        }
+////LUCIANO
+////              _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
+////            if (_stepperSpeed >= 0)
+////            {
+////                _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
+////            }
+////            else
+////            {
+////                _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
+////            }
+////-----------------
+//       //_stepper-> moveRelativeInSteps(-200);
+//       _stepper->setSpeedInStepsPerSecond(800);
+//       //_stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
+////
+////       if (_stepper->getCurrentPositionInSteps()==STEPPER_LOWEST_POSITION)
+////        _stepper->setTargetPositionToStop();
+//
+//            //Serial.println("CUrrtime"+String(currentTime));
+//            //currentTime++;
+//        }
     }
     break;
 

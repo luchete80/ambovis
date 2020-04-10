@@ -199,6 +199,7 @@ private:
 };
 
 extern byte stepper_time;
+extern unsigned long last_vent_time;
 //extern float _stepperSpeed;
 
 #endif /* INC_MECHANICAL_VENTILATION_H */
