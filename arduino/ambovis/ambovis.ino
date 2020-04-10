@@ -36,7 +36,8 @@ volatile byte debugMsgCounter = 0;
 
 #ifdef ACCEL_STEPPER
 AccelStepper *stepper = new AccelStepper(
-  AccelStepper::DRIVER,
+  //AccelStepper::DRIVER,
+  1,
   PIN_STEPPER_DIRECTION,
   PIN_STEPPER_STEP);
 #else
@@ -334,11 +335,13 @@ void loop() {
 //    //Is not anymore in classes
     pressure_p=_pres1Sensor.readPressure()*DEFAULT_PA_TO_CM_H20;
     //Serial.print("PRessure");Serial.println(pressure_p);
-    
+
+    ////////////////////////////// MOTOR RUNNING MAKING NOISE //////////////////////////////
 //    sensors -> readPressure();
 //    SensorPressureValues_t pressure = sensors -> getRelativePressureInCmH20();
 //
-//    sensors -> readVolume();
+    sensors -> readVolume();
+//    Serial.print("Flow: ");Serial.println(sensors->getFlow());
 //    SensorVolumeValue_t volume = sensors -> getVolume();
     //writeLine(1, "p: " + String((int)pressure.pressure1) + " cmH20");
 //    char* string = (char*)malloc(100);
@@ -348,7 +351,10 @@ void loop() {
 //    //        Serial2.println(string);
 //    //Serial.println(string);
 //    //free(string);
-//
+
+////////////////////////////// MOTOR RUNNING MAKING NOISE //////////////////////////////
+
+
 //    if (pressure.state == SensorStateFailed) {
 //      //TODO sensor fail. do something
 //      //Serial.println(F("FALLO Sensor"));
@@ -364,7 +370,7 @@ void loop() {
     State state=ventilation->getState();
     if (!update_display)
       if (ventilation->getCycleNum()!=last_cycle && state == State_Exsufflation){
-         // Serial.print("Insuflated Vol: ");Serial.println(ventilation->getInsVol());
+          Serial.print("Insuflated Vol: ");Serial.println(ventilation->getInsVol());
           display_lcd();
           update_display=true;
           last_cycle=ventilation->getCycleNum();

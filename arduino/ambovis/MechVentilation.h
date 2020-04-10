@@ -15,9 +15,12 @@
 #include "calc.h"
 #include "Sensors.h"
 #include "src/AutoPID/AutoPID.h"
-#include "src/FlexyStepper/FlexyStepper.h"
-#include "src/AccelStepper/AccelStepper.h"
 
+#ifdef ACCEL_STEPPER
+#include "src/AccelStepper/AccelStepper.h"
+#else
+#include "src/FlexyStepper/FlexyStepper.h"
+#endif
 /** States of the mechanical ventilation. */
 enum State
 {
@@ -119,7 +122,11 @@ public:
 private:
     /** Initialization. */
     void _init(
-        FlexyStepper *stepper,
+        #ifdef ACCEL_STEPPER
+        AccelStepper *_stepper,
+        #else
+        FlexyStepper *_stepper,
+        #endif
         Sensors *sensors,
         AutoPID *pid,
         VentilationOptions_t options);
@@ -140,7 +147,7 @@ private:
 
     /* Configuration parameters */
     #ifdef ACCEL_STEPPER
-    AccelStepper *_stepper
+    AccelStepper *_stepper;
     #else
     FlexyStepper *_stepper;
     #endif
