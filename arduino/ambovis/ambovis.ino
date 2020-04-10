@@ -51,6 +51,10 @@ byte vent_mode=VENTMODE_VCL;  //0
 Adafruit_BMP280 _pres1Sensor;
 float pressure_p0;
 float pressure_max;
+//float _stepperSpeed;
+
+extern byte stepper_time=50;
+unsigned long last_stepper_time;
 
 int pinA = PIN_ENC_CL; // Our first hardware interrupt pin is digital pin 2
 int pinB = PIN_ENC_DIR; // Our second hardware interrupt pin is digital pin 3
@@ -283,7 +287,9 @@ void setup() {
 
   //MAKE AN IF IF_2_PRESS_SENSORS
   pressure_p0=_pres1Sensor.readPressure()*DEFAULT_PA_TO_CM_H20;
-  
+
+  //STEPPER
+  last_stepper_time=millis();
 }
 
 /**
@@ -318,22 +324,22 @@ void loop() {
   time = millis();
   unsigned long static lastSendConfiguration = 0;
 
-  if (time > lastSendConfiguration + TIME_SEND_CONFIGURATION)
-  {
-    Serial.print(F("CONFIG "));
-    Serial.print(ventilation -> getPeakInspiratoryPressure());
-    Serial.print(F(" "));
-    Serial.print(ventilation -> getPeakEspiratoryPressure());
-    Serial.print(F(" "));
-    Serial.println(ventilation -> getRPM());
-    lastSendConfiguration = time;
-  }
+//  if (time > lastSendConfiguration + TIME_SEND_CONFIGURATION)
+//  {
+//    Serial.print(F("CONFIG "));
+//    Serial.print(ventilation -> getPeakInspiratoryPressure());
+//    Serial.print(F(" "));
+//    Serial.print(ventilation -> getPeakEspiratoryPressure());
+//    Serial.print(F(" "));
+//    Serial.println(ventilation -> getRPM());
+//    lastSendConfiguration = time;
+//  }
 
   if (millis() > lastReadSensor + TIME_SENSOR)
   {
     //Is not anymore in classes
     pressure_p=_pres1Sensor.readPressure()*DEFAULT_PA_TO_CM_H20;
-    Serial.print("PRessure");Serial.println(pressure_p);
+    //Serial.print("PRessure");Serial.println(pressure_p);
     
     sensors -> readPressure();
     SensorPressureValues_t pressure = sensors -> getRelativePressureInCmH20();
@@ -351,7 +357,7 @@ void loop() {
 
     if (pressure.state == SensorStateFailed) {
       //TODO sensor fail. do something
-      Serial.println(F("FALLO Sensor"));
+      //Serial.println(F("FALLO Sensor"));
       // TODO: BUZZ ALARMS LIKE HELL
     }
     lastReadSensor = millis();
@@ -412,11 +418,12 @@ void loop() {
   //stepper->setSpeedInStepsPerSecond(600);
   //stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
 
-  
+  if (millis()-last_stepper_time>stepper_time){
   #ifdef ACCEL_STEPPER
     stepper->run();
   #else
     stepper -> processMovement(); //LUCIANO
+    //Serial.print("Speed");Serial.println(_stepperSpeed);
   #endif
 
   if (changed_options && (millis()-last_update_display)>time_update_display){
@@ -425,6 +432,7 @@ void loop() {
     ventilation->change_config(options);
     changed_options=false;
     }
+  }
 
   ///////////--- LUCIANO
 }

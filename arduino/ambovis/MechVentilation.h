@@ -198,4 +198,7 @@ private:
     //float _currentVolume = 0.0;
 };
 
+extern byte stepper_time;
+//extern float _stepperSpeed;
+
 #endif /* INC_MECHANICAL_VENTILATION_H */

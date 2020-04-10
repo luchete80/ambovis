@@ -65,6 +65,11 @@ LCD 2 con display
 http://www.zonnepanelen.wouterlood.com/logging-barometric-pressure-with-an-i2c-device-and-an-arduino-sd-shield/
 MUY BUENO DISPLAY
 https://diyi0t.com/lcd-display-tutorial-for-arduino-and-esp8266/
+--------------------------------
+Visualizacion
+Con matplotlib
+http://arduino-er.blogspot.com/2017/06/python-run-on-raspberry-pi-to-plot.html
+http://arduino-er.blogspot.com/2015/04/python-to-plot-graph-of-serial-data.html
 
 --------------------------------
 Venturi

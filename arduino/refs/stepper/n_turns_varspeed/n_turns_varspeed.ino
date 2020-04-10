@@ -55,8 +55,8 @@ void setup()
 	stepper.connectToPins(PIN_STEPPER_STEP, PIN_STEPPER_DIRECTION);
   stepper.setStepsPerRevolution(1600);
   stepper.setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_EXSUFFLATION);
-
-	stepper.setSpeedInStepsPerSecond(200);
+  stepper.setTargetPositionInSteps(4800);
+	stepper.setSpeedInStepsPerSecond(50);
 	change_time=millis();
 	
 }
@@ -69,7 +69,7 @@ void loop()
 	if ( (millis ()-change_time) > cycle_time){
 			
   //stepper.moveRelativeInSteps(10*1600);
-  stepper.setTargetPositionInSteps(1600);
+  //stepper.setTargetPositionInSteps(4800);
 	stepper.setSpeedInStepsPerSecond(n*200);
 	change_time=millis();
 	n++;

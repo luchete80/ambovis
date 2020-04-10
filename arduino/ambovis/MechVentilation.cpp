@@ -300,8 +300,7 @@ void MechVentilation::update(void)
   
                 //flujo remanente                                   
                float rem_flux=(_tidalVol-_mlInsVol)/(float)(_timeoutIns-_msecTimerCnt);
-  //#ifdef DEBUG
-               //pid.calculate( double setpoint, double pv );                      
+                   
                _pid->run(rem_flux, (double)_flux,&_stepperSpeed);
 
                if (_stepperSpeed>STEPPER_SPEED_MAX)
@@ -310,12 +309,14 @@ void MechVentilation::update(void)
                //Serial.print("Speed");Serial.println(_stepperSpeed);
   
                //Serial.print("Speed: "+String(_stepperSpeed));
-  
+              //Serial.print("Speed");Serial.println(abs(_stepperSpeed));
+                
               // TODO: if _currentPressure > _pip + 5, trigger alarm
               #ifdef ACCEL_STEPPER  //LUCIANO
-              
+
               #else
-              _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
+              //_stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
+              _stepper->setSpeedInStepsPerSecond(600);
   //            if (_stepperSpeed >= 0){
   //                _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
   //            }
@@ -338,16 +339,16 @@ void MechVentilation::update(void)
     case Init_Exsufflation:
     {
       _msecTimerStartCycle=millis();
-      Serial.print("Current pressure");Serial.println(_currentPressure);
+      //Serial.print("Current pressure");Serial.println(_currentPressure);
       
 #if DEBUG_UPDATE
-        Serial.println("Starting exsuflation");
+        //Serial.println("Starting exsuflation");
 #endif
         // Open Solenoid Valve
         digitalWrite(PIN_SOLENOID, SOLENOID_OPEN);
 
         totalCyclesInThisState = _timeoutEsp / TIME_BASE;
-        Serial.println("Ciclos exsuff"+String(totalCyclesInThisState));
+        //Serial.println("Ciclos exsuff"+String(totalCyclesInThisState));
         _sensors->saveVolume();
         _sensors->resetVolumeIntegrator();
 
