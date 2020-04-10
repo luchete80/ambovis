@@ -177,7 +177,7 @@ void setup() {
   // Puertos serie
   Serial.begin(9600);
   //Serial2.begin(115200);
-  Serial.println(F("Setup"));
+  //Serial.println(F("Setup"));
 
 
   #ifdef LCD_I2C
@@ -206,15 +206,15 @@ void setup() {
   sensors = new Sensors();
 
   int check = sensors -> begin();
-//#if 1
-  if (check) {
-    if (check == 1) {
-      Serial.println(F("Could not find sensor BME280 number 1, check wiring!"));
-    } else if (check == 2) {
-      Serial.println(F("Could not find sensor BME280 number 2, check wiring!"));
-    }
-    //while (1);
-  }
+////#if 1
+//  if (check) {
+//    if (check == 1) {
+//      Serial.println(F("Could not find sensor BME280 number 1, check wiring!"));
+//    } else if (check == 2) {
+//      Serial.println(F("Could not find sensor BME280 number 2, check wiring!"));
+//    }
+//    //while (1);
+//  }
 //#endif
 
   // PID
@@ -247,9 +247,9 @@ void setup() {
     options
   );
 
-  Serial.println("Tiempo del ciclo (seg):" + String(ventilation -> getExsuflationTime() + ventilation -> getInsuflationTime()));
-  Serial.println("Tiempo inspiratorio (mseg):" + String(ventilation -> getInsuflationTime()));
-  Serial.println("Tiempo espiratorio (mseg):" + String(ventilation -> getExsuflationTime()));
+//  Serial.println("Tiempo del ciclo (seg):" + String(ventilation -> getExsuflationTime() + ventilation -> getInsuflationTime()));
+//  Serial.println("Tiempo inspiratorio (mseg):" + String(ventilation -> getInsuflationTime()));
+//  Serial.println("Tiempo espiratorio (mseg):" + String(ventilation -> getExsuflationTime()));
 
   // TODO: Esperar aqui a iniciar el arranque desde el serial
 
@@ -341,6 +341,8 @@ void loop() {
 //    SensorPressureValues_t pressure = sensors -> getRelativePressureInCmH20();
 //
     sensors -> readVolume();
+    Serial.print(pressure_p);
+    //Serial.print(",");Serial.println(sensors->getFlow());
 //    Serial.print("Flow: ");Serial.println(sensors->getFlow());
 //    SensorVolumeValue_t volume = sensors -> getVolume();
     //writeLine(1, "p: " + String((int)pressure.pressure1) + " cmH20");
