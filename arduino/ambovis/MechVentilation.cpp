@@ -405,17 +405,18 @@ void MechVentilation::update(void)
         //if (currentTime > totalCyclesInThisState)
         if(_msecTimerCnt > _timeoutEsp) 
         {
-//            if (!_stepper->motionComplete())
-//            {
-//                // motor not finished, force motor to stop in current position
-//                //BUG
-//                //_stepper->setTargetPositionInSteps(_stepper->getCurrentPositionInSteps());
-//                _stepper->setTargetPositionToStop();
-//            }
+            if (!_stepper->motionComplete())
+            {
+                // motor not finished, force motor to stop in current position
+                //BUG
+                //_stepper->setTargetPositionInSteps(_stepper->getCurrentPositionInSteps());
+                _stepper->setTargetPositionToStop();
+            }
             /* Status update and reset timer, for next time */
             _setState(Init_Insufflation);
             _startWasTriggeredByPatient = false;
-            
+
+            _cyclenum++;
           }
 //        else    //Time hasnot expired
 //        {

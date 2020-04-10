@@ -163,6 +163,15 @@ bool changed_options=false;
 unsigned long time_update_display=100; //ms
 unsigned long last_update_display;
 
+void writeLine(int line, String message = "", int offsetLeft = 0)
+{
+  lcd.setCursor(0, line);
+  lcd.print("");
+  lcd.setCursor(offsetLeft, line);
+  lcd.print(message);
+}
+
+
 void setup() {
   // Puertos serie
   Serial.begin(9600);
@@ -173,7 +182,7 @@ void setup() {
   #ifdef LCD_I2C
     lcd.begin();  //I2C
   #else
-  lcd.begin(20, 4); //NO I2C
+    lcd.begin(20, 4); //NO I2C
   #endif
   //lcd.backlight();
   lcd.clear();
@@ -246,11 +255,11 @@ void setup() {
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
+  writeLine(0,"Ambovis");
+  
   // configura la ventilación
   ventilation -> start();
   ventilation -> update();
-
-  delay(1000);
 
   sensors -> readPressure();
 
@@ -306,7 +315,7 @@ void loop() {
 
 //  check_encoder();
 
-//  time = millis();
+  time = millis();
 //  unsigned long static lastSendConfiguration = 0;
 //
 //  if (time > lastSendConfiguration + TIME_SEND_CONFIGURATION)
@@ -324,14 +333,14 @@ void loop() {
   {
 //    //Is not anymore in classes
     pressure_p=_pres1Sensor.readPressure()*DEFAULT_PA_TO_CM_H20;
-//    //Serial.print("PRessure");Serial.println(pressure_p);
-//    
+    //Serial.print("PRessure");Serial.println(pressure_p);
+    
 //    sensors -> readPressure();
 //    SensorPressureValues_t pressure = sensors -> getRelativePressureInCmH20();
 //
 //    sensors -> readVolume();
 //    SensorVolumeValue_t volume = sensors -> getVolume();
-//    //writeLine(1, "p: " + String((int)pressure.pressure1) + " cmH20");
+    //writeLine(1, "p: " + String((int)pressure.pressure1) + " cmH20");
 //    char* string = (char*)malloc(100);
 //    //sprintf(string, "DT %05d %05d %05d %06d", ((int)pressure.pressure1), ((int)pressure.pressure2), volume.volume, ((int)(sensors->getFlow() * 1000)));
 //    //Serial.println("Insuflated: "+String(ventilation->getInsVol()));
@@ -345,11 +354,11 @@ void loop() {
 //      //Serial.println(F("FALLO Sensor"));
 //      // TODO: BUZZ ALARMS LIKE HELL
 //    }
-//    lastReadSensor = millis();
-//
-//    /*
-//       Notify insufflated volume
-//    */
+    lastReadSensor = millis();
+
+    /*
+       Notify insufflated volume
+    */
     if (ventilation->getCycleNum()!=last_cycle)
       update_display=false;
     State state=ventilation->getState();
@@ -405,8 +414,6 @@ void loop() {
     ventilation -> update();
     last_vent_time=millis();
     //}
-  //stepper->setSpeedInStepsPerSecond(600);
-  //stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
 
   if (millis()-last_stepper_time>stepper_time){
   #ifdef ACCEL_STEPPER
@@ -479,13 +486,7 @@ if (curr_sel!=old_curr_sel){
  //----
 }
 
-void writeLine(int line, String message = "", int offsetLeft = 0)
-{
-  lcd.setCursor(0, line);
-  lcd.print("");
-  lcd.setCursor(offsetLeft, line);
-  lcd.print(message);
-}
+
 
 char tempstr[5];
 void display_lcd()
