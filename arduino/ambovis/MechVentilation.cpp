@@ -296,7 +296,7 @@ void MechVentilation::update(void)
               float dt=(float)(_msecTimerCnt-_msecLastUpdate);
               //Serial.print("volue:");Serial.println(_mlInsVol);
               _mlInsVol+=_flux*dt;//flux in l and time in msec, results in ml
-              Serial.print(_flux);Serial.println(dt);Serial.println(_mlInsVol);
+              //Serial.print(_flux);Serial.println(dt);Serial.println(_mlInsVol);
                 //flujo remanente                                   
                float rem_flux=(_tidalVol-_mlInsVol)/(float)(_timeoutIns-_msecTimerCnt);
                    
