@@ -40,16 +40,17 @@ while True:
 
     #check if valid value can be casted
     try:
-        valueInInt = int(valueRead)
-        print(valueInInt)
-        if valueInInt <= 1024:
-            if valueInInt >= 0:
-                values.append(valueInInt)
-                values.pop(0)
-                drawnow(plotValues)
-            else:
-                print("Invalid! negative number")
-        else:
-            print("Invalid! too large")
+        valueInInt = valueRead
+	# valueInInt = int(valueRead)
+        # print(valueInInt)
+        # if valueInInt <= 1024:
+            # if valueInInt >= 0:
+        values.append(valueInInt)
+        values.pop(0)
+        drawnow(plotValues)
+            # else:
+                # print("Invalid! negative number")
+        # else:
+            # print("Invalid! too large")
     except ValueError:
         print("Invalid! cannot cast")
