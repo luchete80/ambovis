@@ -211,7 +211,7 @@ void MechVentilation::update(void)
     {
         pressure_max=0;
 #if DEBUG_UPDATE
-        //Serial.println("Starting insuflation");
+        Serial.println("Starting insuflation");
 #endif
         // Close Solenoid Valve
         digitalWrite(PIN_SOLENOID, SOLENOID_CLOSED);
@@ -296,7 +296,6 @@ void MechVentilation::update(void)
               float dt=(float)(_msecTimerCnt-_msecLastUpdate);
               //Serial.print("volue:");Serial.println(_mlInsVol);
               _mlInsVol+=_flux*dt;//flux in l and time in msec, results in ml
-              //THIS INTERRUPT MOTOR 
               //Serial.print(_flux);Serial.println(dt);Serial.println(_mlInsVol);
                 //flujo remanente                                   
                float rem_flux=(_tidalVol-_mlInsVol)/(float)(_timeoutIns-_msecTimerCnt);
@@ -317,8 +316,7 @@ void MechVentilation::update(void)
                 stepper->setSpeed(_stepperSpeed);
                 stepper->moveTo(STEPPER_HIGHEST_POSITION);
               #else
-              //_stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
-			        _stepper->setSpeedInStepsPerSecond(600);
+              _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
   //            if (_stepperSpeed >= 0){
   //                _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
   //            }
@@ -422,13 +420,12 @@ void MechVentilation::update(void)
 
             _cyclenum++;
           }
-        else    //Time hasnot expired
-        {
-            //_pid->run(_currentPressure, (float)_peep, &_stepperSpeed);
-            _pid->run(float(pressure_p-pressure_p0), (float)_peep, &_stepperSpeed);
-
-//LUCIANO
-              _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
+//        else    //Time hasnot expired
+//        {
+//            //_pid->run(_currentPressure, (float)_peep, &_stepperSpeed);
+//
+////LUCIANO
+////              _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
 ////            if (_stepperSpeed >= 0)
 ////            {
 ////                _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
@@ -446,8 +443,8 @@ void MechVentilation::update(void)
 ////        _stepper->setTargetPositionToStop();
 //
 //            //Serial.println("CUrrtime"+String(currentTime));
-
-        }
+//            //currentTime++;
+//        }
     }
     break;
 
@@ -476,7 +473,7 @@ void MechVentilation::update(void)
 
             /* Stepper control: homming */
 #if DEBUG_UPDATE
-            //Serial.println("Attempting homing...");
+            Serial.println("Attempting homing...");
 #endif
             if (_stepper->moveToHomeInSteps(
                     STEPPER_HOMING_DIRECTION,
@@ -491,7 +488,7 @@ void MechVentilation::update(void)
         }
         else{
 #if DEBUG_UPDATE
-           // Serial.println("No end stop detected.");
+            Serial.println("No end stop detected.");
 #endif
         }
         /* Status update and reset timer, for next time */
