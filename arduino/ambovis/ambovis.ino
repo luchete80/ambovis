@@ -343,11 +343,7 @@ void loop() {
     //    SensorPressureValues_t pressure = sensors -> getRelativePressureInCmH20();
     //
     sensors -> readVolume();
-<<<<<<< HEAD
-    //Serial.print(pressure_p-pressure_p0);
-=======
     Serial.println(pressure_p - pressure_p0);
->>>>>>> master
     //Serial.print(",");Serial.println(sensors->getFlow());
     //    Serial.print("Flow: ");Serial.println(sensors->getFlow());
     //    SensorVolumeValue_t volume = sensors -> getVolume();
@@ -377,19 +373,11 @@ void loop() {
       update_display = false;
     State state = ventilation->getState();
     if (!update_display)
-<<<<<<< HEAD
-      if (ventilation->getCycleNum()!=last_cycle && state == State_Exsufflation){
-          //Serial.print("Insuflated Vol: ");Serial.println(ventilation->getInsVol());
-          display_lcd();
-          update_display=true;
-          last_cycle=ventilation->getCycleNum();
-=======
       if (ventilation->getCycleNum() != last_cycle && state == State_Exsufflation) {
         //Serial.print("Insuflated Vol: "); Serial.println(ventilation->getInsVol());
         display_lcd();
         update_display = true;
         last_cycle = ventilation->getCycleNum();
->>>>>>> master
       }
     //
     ////    Serial.print("last stte: ");Serial.println(lastState);
