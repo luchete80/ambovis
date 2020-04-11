@@ -70,6 +70,7 @@ Visualizacion
 Con matplotlib
 http://arduino-er.blogspot.com/2017/06/python-run-on-raspberry-pi-to-plot.html
 http://arduino-er.blogspot.com/2015/04/python-to-plot-graph-of-serial-data.html
+http://www.toptechboy.com/tutorial/python-with-arduino-lesson-11-plotting-and-graphing-live-data-from-arduino-with-matplotlib/
 
 Separated with commas
 https://www.instructables.com/id/Plotting-and-Graphing-Live-Data-from-Arduino-using/

@@ -95,7 +95,7 @@ void Sensors::readPressure() {
     }
 //    #if 0
     pres1 = _pres1Sensor.readPressure(); // Pa
-    Serial.println("Pressure: ");Serial.println(_pres1Sensor.readPressure());
+    //Serial.println("Pressure: ");Serial.println(_pres1Sensor.readPressure());
 //    pres2 = _pres2Sensor.readPressure(); // Pa
 //
 //    if (pres1 == 0.0 || pres2 == 0.0) {

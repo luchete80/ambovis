@@ -34,7 +34,7 @@
 #define STEPPER_SPEED_DEFAULT       (400)   // Steps/s
 #define STEPPER_SPEED_MAX           (800)   // Steps/s
 #define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  400)   // Steps/s2
-#define STEPPER_ACC_INSUFFLATION    (STEPPER_MICROSTEPS *  450)   // Steps/s2
+#define STEPPER_ACC_INSUFFLATION    (STEPPER_MICROSTEPS *  300)   // Steps/s2
 
 // Valores por defecto
 #define DEFAULT_HEIGHT 170 // cm

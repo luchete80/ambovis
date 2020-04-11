@@ -70,9 +70,9 @@ class serialPlot:
  
  
 def main():
-    # portName = 'COM5'     # for windows users
-    portName = '/dev/ttyUSB0'
-    baudRate = 38400
+    portName = 'COM8'     # for windows users
+    # portName = '/dev/ttyUSB0'
+    baudRate = 9600
     maxPlotLength = 100
     dataNumBytes = 4        # number of bytes of 1 data point
     s = serialPlot(portName, baudRate, maxPlotLength, dataNumBytes)   # initializes all required variables
@@ -82,10 +82,11 @@ def main():
     pltInterval = 50    # Period at which the plot animation updates [ms]
     xmin = 0
     xmax = maxPlotLength
-    ymin = -(1)
-    ymax = 1
+    ymin = -(0)
+    ymax = 50
     fig = plt.figure()
-    ax = plt.axes(xlim=(xmin, xmax), ylim=(float(ymin - (ymax - ymin) / 10), float(ymax + (ymax - ymin) / 10)))
+    #ax = plt.axes(xlim=(xmin, xmax), ylim=(float(ymin - (ymax - ymin) / 10), float(ymax + (ymax - ymin) / 10)))
+    ax = plt.axes(xlim=(xmin, xmax), ylim=(0,50))
     ax.set_title('Arduino Analog Read')
     ax.set_xlabel("time")
     ax.set_ylabel("AnalogRead Value")
