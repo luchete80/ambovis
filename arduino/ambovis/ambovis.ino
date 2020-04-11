@@ -59,6 +59,7 @@ unsigned long last_stepper_time;
 unsigned long last_vent_time;
 unsigned long time;
 
+//Encoder from https://www.instructables.com/id/Improved-Arduino-Rotary-Encoder-Reading/
 int pinA = PIN_ENC_CL; // Our first hardware interrupt pin is digital pin 2
 int pinB = PIN_ENC_DIR; // Our second hardware interrupt pin is digital pin 3
 byte aFlag = 0; // let's us know when we're expecting a rising edge on pinA to signal that the encoder has arrived at a detent
