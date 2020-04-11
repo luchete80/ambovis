@@ -37,7 +37,7 @@
 
 
 // #define PIN_BME_CS2  4  // sensor de presion 2
-#define PIN_ENC_SW  99
+#define PIN_ENC_SW  9
 #define PIN_ENC_CL  2
 #define PIN_ENC_DIR 3
 

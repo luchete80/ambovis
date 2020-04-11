@@ -298,19 +298,27 @@ void MechVentilation::update(void)
               _mlInsVol+=_flux*dt;//flux in l and time in msec, results in ml
               //THIS INTERRUPT MOTOR 
               //Serial.print(_flux);Serial.println(dt);Serial.println(_mlInsVol);
-                //flujo remanente                                   
-               float rem_flux=(_tidalVol-_mlInsVol)/(float)(_timeoutIns-_msecTimerCnt);
-                   
-               _pid->run(rem_flux, (double)_flux,&_stepperSpeed);
-              //IF CONTROLED BY VOL
-              //_pid->run(_currentPressure, (float)_pip, &_stepperSpeed);
+                //flujo remanente   
+//                float rem_flux;
+//               if(_mlInsVol<0);//avoid first instance errors
+//               float rem_flux=(_tidalVol-_mlInsVol)/(float)(_timeoutIns-_msecTimerCnt);
+//               else
+//               float rem_flux=(_tidalVol-_mlInsVol)/(float)(_timeoutIns-_msecTimerCnt);
+//               Serial.print("rem flow");Serial.println(rem_flux);
+
+               if (vent_mode==VENTMODE_VCL)
+                //_pid->run(rem_flux, (double)_flux,&_stepperSpeed);
+                _stepperSpeed=STEPPER_SPEED_DEFAULT;
+               else if (vent_mode==VENTMODE_PCL)
+                  if ( (pressure_p-pressure_p0)<0)
+                    _stepperSpeed=STEPPER_SPEED_DEFAULT;
+                  else
+                    _pid->run(float(pressure_p-pressure_p0), (float)_pip, &_stepperSpeed);
+               
                if (_stepperSpeed>STEPPER_SPEED_MAX)
                 _stepperSpeed=STEPPER_SPEED_MAX;
                 
-               //Serial.print("Speed");Serial.println(_stepperSpeed);
-  
-               //Serial.print("Speed: "+String(_stepperSpeed));
-              //Serial.print("Speed");Serial.println(abs(_stepperSpeed));
+//               Serial.print("Speed");Serial.println(_stepperSpeed);
                 
               // TODO: if _currentPressure > _pip + 5, trigger alarm
               #ifdef ACCEL_STEPPER  //LUCIANO
@@ -318,15 +326,15 @@ void MechVentilation::update(void)
                 stepper->moveTo(STEPPER_HIGHEST_POSITION);
               #else
               //_stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
-			        _stepper->setSpeedInStepsPerSecond(600);
-  //            if (_stepperSpeed >= 0){
-  //                _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
-  //            }
-  //            else{
-  //                _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
-  //            }
-              //_stepper->setTargetPositionInSteps(-STEPPER_HIGHEST_POSITION);
-              //_stepper->moveRelativeInSteps(200);
+			        _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed)); //WHAT iF SPEED<0???
+//             
+//              if (_stepperSpeed >= 0){
+//                  _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
+//              }
+//              else{
+//                  _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
+//              }
+              
               #endif
               //Serial.println("CUrrtime");Serial.println(_msecTimerCnt);
               //Serial.println("timeout");Serial.println(_msecTimeoutInsufflation);
@@ -425,27 +433,16 @@ void MechVentilation::update(void)
         else    //Time hasnot expired
         {
             //_pid->run(_currentPressure, (float)_peep, &_stepperSpeed);
-            _pid->run(float(pressure_p-pressure_p0), (float)_peep, &_stepperSpeed);
-
+//            _pid->run(float(pressure_p-pressure_p0), (float)_peep, &_stepperSpeed);
+              _stepper->setSpeedInStepsPerSecond(600);
 //LUCIANO
               _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
-////            if (_stepperSpeed >= 0)
-////            {
-////                _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
-////            }
-////            else
-////            {
-////                _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
-////            }
-////-----------------
-//       //_stepper-> moveRelativeInSteps(-200);
-//       _stepper->setSpeedInStepsPerSecond(800);
-//       //_stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
-////
-////       if (_stepper->getCurrentPositionInSteps()==STEPPER_LOWEST_POSITION)
-////        _stepper->setTargetPositionToStop();
-//
-//            //Serial.println("CUrrtime"+String(currentTime));
+             // Serial.println(_stepperSpeed);
+//            if (_stepperSpeed >= 0)
+//                _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
+//            else
+//                _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
+
 
         }
     }

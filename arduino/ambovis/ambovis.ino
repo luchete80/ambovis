@@ -48,7 +48,7 @@ FlexyStepper * stepper = new FlexyStepper();
 // - EXTERNAL VARIABLES //
 //////////////////////////
 float pressure_p;   //EXTERN!!
-byte vent_mode = VENTMODE_VCL; //0
+byte vent_mode = VENTMODE_PCL; //0
 Adafruit_BMP280 _pres1Sensor;
 float pressure_p0;
 float pressure_max;
@@ -288,10 +288,8 @@ void setup() {
   attachInterrupt(0, PinA, RISING); // set an interrupt on PinA, looking for a rising edge signal and executing the "PinA" Interrupt Service Routine (below)
   attachInterrupt(1, PinB, RISING); // set an interrupt on PinB, looking for a rising edge signal and executing the "PinB" Interrupt Service Routine (below)
   pinMode(PIN_ENC_SW, INPUT_PULLUP);
-  //  btnState=digitalRead(9);
-  //  lastButtonPress=millis();
-
-  //  menu();
+  //btnState=digitalRead(9);
+  lastButtonPress=millis();
 
   lastReadSensor = millis();
   lastState = ventilation->getState();
@@ -316,7 +314,7 @@ bool update_display = false;
 
 void loop() {
 
-  //  check_encoder();
+  check_encoder();
 
   time = millis();
   //  unsigned long static lastSendConfiguration = 0;
@@ -344,6 +342,7 @@ void loop() {
     //
     sensors -> readVolume();
     Serial.println(pressure_p - pressure_p0);
+    
     //Serial.print(",");Serial.println(sensors->getFlow());
     //    Serial.print("Flow: ");Serial.println(sensors->getFlow());
     //    SensorVolumeValue_t volume = sensors -> getVolume();
@@ -420,10 +419,10 @@ void loop() {
 #endif
 
   //LUCIANO----------------------
-  //if (millis()-last_vent_time>20){
+  if (millis()-last_vent_time>20){
   ventilation -> update();
   last_vent_time = millis();
-  //}
+  }
 
   if (millis() - last_stepper_time > stepper_time) {
 #ifdef ACCEL_STEPPER
@@ -441,10 +440,9 @@ void loop() {
     }
   }
 
-  ///////////--- LUCIANO
 }
 //
-////LUCIANO
+
 void check_encoder()
 {
   //LUCIANO------------------------
@@ -491,6 +489,7 @@ void check_encoder()
         break;
     }
     old_curr_sel = curr_sel;
+    changed_options = true;
     Serial.println("Opciones cambiadas");
   }
   //----
@@ -523,7 +522,7 @@ void display_lcd()
   //  writeLine(1, String(tempstr),10);
   writeLine(2, "PIP :" + String(options.peakInspiratoryPressure), 8);
   dtostrf(pressure_max - pressure_p0, 2, 0, tempstr);
-  Serial.println(pressure_max);
+  //Serial.println(pressure_max);
   writeLine(2, String(tempstr), 16);
   writeLine(3, "PEEP:" + String(options.peakEspiratoryPressure), 8);
 
