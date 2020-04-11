@@ -71,6 +71,11 @@ Con matplotlib
 http://arduino-er.blogspot.com/2017/06/python-run-on-raspberry-pi-to-plot.html
 http://arduino-er.blogspot.com/2015/04/python-to-plot-graph-of-serial-data.html
 
+Separated with commas
+https://www.instructables.com/id/Plotting-and-Graphing-Live-Data-from-Arduino-using/
+Serial plotter
+https://problemsolvingwithpython.com/11-Python-and-External-Hardware/11.04-Reading-a-Sensor-with-Python/
+
 --------------------------------
 Venturi
 http://laplace.us.es/wiki/index.php/Tubo_de_Venturi

@@ -38,11 +38,23 @@ int pos = 1;
  FlexyStepper stepper;
 #endif
 
+#include <LiquidCrystal.h>
+
+#define PIN_LCD_RS A8
+#define PIN_LCD_EN A9
+#define PIN_LCD_D4 A10
+#define PIN_LCD_D5 A11
+#define PIN_LCD_D6 A12
+#define PIN_LCD_D7 A13
+
+LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
 
 unsigned long cycle_time;
 unsigned long change_time;
 float _stepperSpeed;
 int n=1;
+
+unsigned long time_last_display;
 
 void setup()
 {
@@ -50,7 +62,9 @@ void setup()
   cycle_time=1000;
   
   _stepperSpeed = STEPPER_SPEED_DEFAULT;
- 
+  lcd.begin(20, 4); //NO I2C
+  lcd.clear();
+  //lcd.backlight();
  
 	stepper.connectToPins(PIN_STEPPER_STEP, PIN_STEPPER_DIRECTION);
   stepper.setStepsPerRevolution(1600);
@@ -58,6 +72,7 @@ void setup()
   stepper.setTargetPositionInSteps(4800);
 	stepper.setSpeedInStepsPerSecond(50);
 	change_time=millis();
+ time_last_display=millis();
 	
 }
 
@@ -66,6 +81,10 @@ void setup()
   
 void loop()
 {
+  if (millis()-time_last_display>500){
+  lcd.setCursor(0,0);
+  lcd.print("Hola");
+  time_last_display=millis();}
 	if ( (millis ()-change_time) > cycle_time){
 			
   //stepper.moveRelativeInSteps(10*1600);

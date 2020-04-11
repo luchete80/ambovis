@@ -227,7 +227,8 @@ void MechVentilation::update(void)
         /* Stepper control: set acceleration and end-position */
 
         #ifdef ACCEL_STEPPER
-
+        stepper->setSpeed(STEPPER_SPEED_DEFAULT);
+        stepper->moveTo(STEPPER_HIGHEST_POSITION);
         #else
         // Note: this can only be called when the motor is stopped
         //IMPORTANT FROM https://github.com/Stan-Reifel/FlexyStepper/blob/master/Documentation.md
@@ -261,7 +262,7 @@ void MechVentilation::update(void)
         if (pressure_p>pressure_max)
           pressure_max=pressure_p;
 
-        if (_mllastInsVol>_tidalVol){
+        if (_mlInsVol>_tidalVol){
             _stepper->setTargetPositionToStop();
             //_setState(Init_Exsufflation); NOT BEGIN TO INSUFFLATE!
             wait_NoMove=true;
@@ -290,19 +291,18 @@ void MechVentilation::update(void)
         else //Time has not expired (State Insufflation)
         {
             if (!wait_NoMove){
-              //IF CONTROLED BY VOL
-              //_pid->run(_currentPressure, (float)_pip, &_stepperSpeed);
   
               //_sensors->
               float dt=(float)(_msecTimerCnt-_msecLastUpdate);
               //Serial.print("volue:");Serial.println(_mlInsVol);
               _mlInsVol+=_flux*dt;//flux in l and time in msec, results in ml
-  
+              //Serial.print(_flux);Serial.println(dt);Serial.println(_mlInsVol);
                 //flujo remanente                                   
                float rem_flux=(_tidalVol-_mlInsVol)/(float)(_timeoutIns-_msecTimerCnt);
                    
                _pid->run(rem_flux, (double)_flux,&_stepperSpeed);
-
+              //IF CONTROLED BY VOL
+              //_pid->run(_currentPressure, (float)_pip, &_stepperSpeed);
                if (_stepperSpeed>STEPPER_SPEED_MAX)
                 _stepperSpeed=STEPPER_SPEED_MAX;
                 
@@ -313,10 +313,10 @@ void MechVentilation::update(void)
                 
               // TODO: if _currentPressure > _pip + 5, trigger alarm
               #ifdef ACCEL_STEPPER  //LUCIANO
-
+                stepper->setSpeed(_stepperSpeed);
+                stepper->moveTo(STEPPER_HIGHEST_POSITION);
               #else
-              //_stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
-              _stepper->setSpeedInStepsPerSecond(600);
+              _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
   //            if (_stepperSpeed >= 0){
   //                _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
   //            }
@@ -362,7 +362,7 @@ void MechVentilation::update(void)
         #ifdef ACCEL
 
         #else
-        _stepper->setSpeedInStepsPerSecond(400);
+        _stepper->setSpeedInStepsPerSecond(STEPPER_ACC_EXSUFFLATION);
         _stepper->setAccelerationInStepsPerSecondPerSecond(
             STEPPER_ACC_EXSUFFLATION);
         //LUCIANO
@@ -416,37 +416,34 @@ void MechVentilation::update(void)
             /* Status update and reset timer, for next time */
             _setState(Init_Insufflation);
             _startWasTriggeredByPatient = false;
-            
-            _msecTimerStartCycle=millis();
-            currentTime = 0;
 
             _cyclenum++;
-        }
-        else    //Time hasnot expired
-        {
-            //_pid->run(_currentPressure, (float)_peep, &_stepperSpeed);
-
-//LUCIANO
-//              _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
-//            if (_stepperSpeed >= 0)
-//            {
-//                _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
-//            }
-//            else
-//            {
-//                _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
-//            }
-//-----------------
-       //_stepper-> moveRelativeInSteps(-200);
-       _stepper->setSpeedInStepsPerSecond(800);
-       //_stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
+          }
+//        else    //Time hasnot expired
+//        {
+//            //_pid->run(_currentPressure, (float)_peep, &_stepperSpeed);
 //
-//       if (_stepper->getCurrentPositionInSteps()==STEPPER_LOWEST_POSITION)
-//        _stepper->setTargetPositionToStop();
-
-            //Serial.println("CUrrtime"+String(currentTime));
-            //currentTime++;
-        }
+////LUCIANO
+////              _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
+////            if (_stepperSpeed >= 0)
+////            {
+////                _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
+////            }
+////            else
+////            {
+////                _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
+////            }
+////-----------------
+//       //_stepper-> moveRelativeInSteps(-200);
+//       _stepper->setSpeedInStepsPerSecond(800);
+//       //_stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
+////
+////       if (_stepper->getCurrentPositionInSteps()==STEPPER_LOWEST_POSITION)
+////        _stepper->setTargetPositionToStop();
+//
+//            //Serial.println("CUrrtime"+String(currentTime));
+//            //currentTime++;
+//        }
     }
     break;
 

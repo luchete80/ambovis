@@ -36,7 +36,8 @@ volatile byte debugMsgCounter = 0;
 
 #ifdef ACCEL_STEPPER
 AccelStepper *stepper = new AccelStepper(
-  AccelStepper::DRIVER,
+  //AccelStepper::DRIVER,
+  1,
   PIN_STEPPER_DIRECTION,
   PIN_STEPPER_STEP);
 #else
@@ -55,6 +56,8 @@ float pressure_max;
 
 extern byte stepper_time=50;
 unsigned long last_stepper_time;
+unsigned long last_vent_time;
+unsigned long time;
 
 int pinA = PIN_ENC_CL; // Our first hardware interrupt pin is digital pin 2
 int pinB = PIN_ENC_DIR; // Our second hardware interrupt pin is digital pin 3
@@ -161,17 +164,26 @@ bool changed_options=false;
 unsigned long time_update_display=100; //ms
 unsigned long last_update_display;
 
+void writeLine(int line, String message = "", int offsetLeft = 0)
+{
+  lcd.setCursor(0, line);
+  lcd.print("");
+  lcd.setCursor(offsetLeft, line);
+  lcd.print(message);
+}
+
+
 void setup() {
   // Puertos serie
   Serial.begin(9600);
   //Serial2.begin(115200);
-  Serial.println(F("Setup"));
+  //Serial.println(F("Setup"));
 
 
   #ifdef LCD_I2C
     lcd.begin();  //I2C
   #else
-  lcd.begin(20, 4); //NO I2C
+    lcd.begin(20, 4); //NO I2C
   #endif
   //lcd.backlight();
   lcd.clear();
@@ -194,15 +206,15 @@ void setup() {
   sensors = new Sensors();
 
   int check = sensors -> begin();
-//#if 1
-  if (check) {
-    if (check == 1) {
-      Serial.println(F("Could not find sensor BME280 number 1, check wiring!"));
-    } else if (check == 2) {
-      Serial.println(F("Could not find sensor BME280 number 2, check wiring!"));
-    }
-    //while (1);
-  }
+////#if 1
+//  if (check) {
+//    if (check == 1) {
+//      Serial.println(F("Could not find sensor BME280 number 1, check wiring!"));
+//    } else if (check == 2) {
+//      Serial.println(F("Could not find sensor BME280 number 2, check wiring!"));
+//    }
+//    //while (1);
+//  }
 //#endif
 
   // PID
@@ -235,20 +247,20 @@ void setup() {
     options
   );
 
-  Serial.println("Tiempo del ciclo (seg):" + String(ventilation -> getExsuflationTime() + ventilation -> getInsuflationTime()));
-  Serial.println("Tiempo inspiratorio (mseg):" + String(ventilation -> getInsuflationTime()));
-  Serial.println("Tiempo espiratorio (mseg):" + String(ventilation -> getExsuflationTime()));
+//  Serial.println("Tiempo del ciclo (seg):" + String(ventilation -> getExsuflationTime() + ventilation -> getInsuflationTime()));
+//  Serial.println("Tiempo inspiratorio (mseg):" + String(ventilation -> getInsuflationTime()));
+//  Serial.println("Tiempo espiratorio (mseg):" + String(ventilation -> getExsuflationTime()));
 
   // TODO: Esperar aqui a iniciar el arranque desde el serial
 
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
+  writeLine(0,"Ambovis");
+  
   // configura la ventilación
   ventilation -> start();
   ventilation -> update();
-
-  delay(1000);
 
   sensors -> readPressure();
 
@@ -290,6 +302,7 @@ void setup() {
 
   //STEPPER
   last_stepper_time=millis();
+  last_vent_time=millis();
 }
 
 /**
@@ -301,29 +314,11 @@ bool update_display=false;
 
 void loop() {
 
-  //
-  //LUCIANO @TODO: remove
-  check_encoder();
-  //  if (!encoder.readButton())
-  //    menu();
-  //
-  //dp = bmp1.get_dp();
-  //writeLine(2, "fv: " + String(ventilation->getInsVol()) + " ml");
-  //Serial.print("Sensor value: ");Serial.println(bmp1.get_dp());
-  //lcd.setCursor(0,0);
-  //lcd.print("test");
-  //writeLine(0, "Hola");
-  //writeLine(0, "dV: " + String(analogRead(A0) * 5. / 1024.) + " V");
-  //writeLine(1, "dp: " + String(bmp1.get_dp()) + " Pa");
+//  check_encoder();
 
-  
-  
-  //-----------LUCIANO
-
-  unsigned long time;
   time = millis();
-  unsigned long static lastSendConfiguration = 0;
-
+//  unsigned long static lastSendConfiguration = 0;
+//
 //  if (time > lastSendConfiguration + TIME_SEND_CONFIGURATION)
 //  {
 //    Serial.print(F("CONFIG "));
@@ -334,32 +329,39 @@ void loop() {
 //    Serial.println(ventilation -> getRPM());
 //    lastSendConfiguration = time;
 //  }
-
-  if (millis() > lastReadSensor + TIME_SENSOR)
+//
+  if (time > lastReadSensor + TIME_SENSOR)
   {
-    //Is not anymore in classes
+//    //Is not anymore in classes
     pressure_p=_pres1Sensor.readPressure()*DEFAULT_PA_TO_CM_H20;
     //Serial.print("PRessure");Serial.println(pressure_p);
-    
-    sensors -> readPressure();
-    SensorPressureValues_t pressure = sensors -> getRelativePressureInCmH20();
 
+    ////////////////////////////// MOTOR RUNNING MAKING NOISE //////////////////////////////
+//    sensors -> readPressure();
+//    SensorPressureValues_t pressure = sensors -> getRelativePressureInCmH20();
+//
     sensors -> readVolume();
-    SensorVolumeValue_t volume = sensors -> getVolume();
+    Serial.print(pressure_p);
+    //Serial.print(",");Serial.println(sensors->getFlow());
+//    Serial.print("Flow: ");Serial.println(sensors->getFlow());
+//    SensorVolumeValue_t volume = sensors -> getVolume();
     //writeLine(1, "p: " + String((int)pressure.pressure1) + " cmH20");
-    char* string = (char*)malloc(100);
-    //sprintf(string, "DT %05d %05d %05d %06d", ((int)pressure.pressure1), ((int)pressure.pressure2), volume.volume, ((int)(sensors->getFlow() * 1000)));
-    //Serial.println("Insuflated: "+String(ventilation->getInsVol()));
+//    char* string = (char*)malloc(100);
+//    //sprintf(string, "DT %05d %05d %05d %06d", ((int)pressure.pressure1), ((int)pressure.pressure2), volume.volume, ((int)(sensors->getFlow() * 1000)));
+//    //Serial.println("Insuflated: "+String(ventilation->getInsVol()));
+//
+//    //        Serial2.println(string);
+//    //Serial.println(string);
+//    //free(string);
 
-    //        Serial2.println(string);
-    //Serial.println(string);
-    //free(string);
+////////////////////////////// MOTOR RUNNING MAKING NOISE //////////////////////////////
 
-    if (pressure.state == SensorStateFailed) {
-      //TODO sensor fail. do something
-      //Serial.println(F("FALLO Sensor"));
-      // TODO: BUZZ ALARMS LIKE HELL
-    }
+
+//    if (pressure.state == SensorStateFailed) {
+//      //TODO sensor fail. do something
+//      //Serial.println(F("FALLO Sensor"));
+//      // TODO: BUZZ ALARMS LIKE HELL
+//    }
     lastReadSensor = millis();
 
     /*
@@ -375,9 +377,9 @@ void loop() {
           update_display=true;
           last_cycle=ventilation->getCycleNum();
       }
-    
-//    Serial.print("last stte: ");Serial.println(lastState);
-//    Serial.print("stte: ");     Serial.println(state);
+//    
+////    Serial.print("last stte: ");Serial.println(lastState);
+////    Serial.print("stte: ");     Serial.println(state);
     if (state != lastState)
     {
       SensorLastPressure_t lastPressure = sensors->getLastPressure();
@@ -398,25 +400,28 @@ void loop() {
       }
     }
     lastState = ventilation->getState();
-  }
-  //
-  //    if (Serial2.available()) {
-  //        readIncomingMsg();
-  //    }
+  }//Read Sensor
 
-//#if DEBUG_STATE_MACHINE
-//  if (debugMsgCounter) {
-//    for (byte i = 0; i < debugMsgCounter; i++) {
-//      Serial.println(debugMsg[i]);
-//    }
-//    debugMsgCounter = 0;
-//  }
-//#endif
+//  //
+//  //    if (Serial2.available()) {
+//  //        readIncomingMsg();
+//  //    }
+//
+
+#if DEBUG_STATE_MACHINE
+  if (debugMsgCounter) {
+    for (byte i = 0; i < debugMsgCounter; i++) {
+      Serial.println(debugMsg[i]);
+    }
+    debugMsgCounter = 0;
+  }
+#endif
 
   //LUCIANO----------------------
-  ventilation -> update();
-  //stepper->setSpeedInStepsPerSecond(600);
-  //stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
+  //if (millis()-last_vent_time>20){
+    ventilation -> update();
+    last_vent_time=millis();
+    //}
 
   if (millis()-last_stepper_time>stepper_time){
   #ifdef ACCEL_STEPPER
@@ -445,7 +450,7 @@ byte btnState = digitalRead(PIN_ENC_SW);
 
 if (btnState == LOW) {
     if (millis() - lastButtonPress > 50) {
-        Serial.println(curr_sel);
+        //Serial.println(curr_sel);
         curr_sel++; //NOT +=1, is a byte
         if (curr_sel>2)
           curr_sel=0;
@@ -489,13 +494,7 @@ if (curr_sel!=old_curr_sel){
  //----
 }
 
-void writeLine(int line, String message = "", int offsetLeft = 0)
-{
-  lcd.setCursor(0, line);
-  lcd.print("");
-  lcd.setCursor(offsetLeft, line);
-  lcd.print(message);
-}
+
 
 char tempstr[5];
 void display_lcd()
