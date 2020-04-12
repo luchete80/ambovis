@@ -68,6 +68,8 @@ byte encoderPos = 0; //this variable stores our current value of encoder positio
 byte oldEncPos = 0; //stores the last encoder position value so we can compare to the current reading and see if it has changed (so we know when to print to the serial monitor)
 byte reading = 0; //somewhere to store the direct values we read from our interrupt pins before checking to see if we have moved a whole detent
 
+byte max_sel,min_sel; //According to current selection
+
 //
 void PinA() {
   cli(); //stop interrupts happening before we read pin values
@@ -448,13 +450,30 @@ void check_encoder()
 {
   //LUCIANO------------------------
   byte btnState = digitalRead(PIN_ENC_SW);
-
+  //SELECTION: VENT_MODE/BMP/VOL/PIP/PEEP 
   if (btnState == LOW) {
     if (millis() - lastButtonPress > 50) {
       //Serial.println(curr_sel);
       curr_sel++; //NOT +=1, is a byte
-      if (curr_sel > 2)
+      if (curr_sel > 4)
         curr_sel = 0;
+      switch (curr_sel){
+        case 0: 
+          max_sel=1;
+        break;
+        case 1: 
+          min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
+        break;
+        case 2: 
+          min_sel=DEFAULT_MIN_VOLUMEN_TIDAL;max_sel=DEFAULT_MAX_VOLUMEN_TIDAL;
+        break;
+        case 3: 
+          min_sel=20;max_sel=40;
+        break;
+        case 4: 
+          min_sel=5;max_sel=20;
+        break;
+      }
     }
     lastButtonPress = millis();
   }
@@ -465,13 +484,13 @@ void check_encoder()
     oldEncPos = encoderPos;
     switch (curr_sel) {
       case 0:
-        options.tidalVolume = encoderPos;
+        vent_mode = encoderPos;
         break;
       case 1:
         options.respiratoryRate = encoderPos;
         break;
       case 2:
-        //A_pres=encoderPos;
+        options.tidalVolume = encoderPos;
         break;
     }
     changed_options = true;
@@ -480,13 +499,19 @@ void check_encoder()
   if (curr_sel != old_curr_sel) {
     switch (curr_sel) {
       case 0:
-        encoderPos = oldEncPos = options.tidalVolume;
+        encoderPos = oldEncPos = vent_mode;
         break;
       case 1:
         encoderPos = oldEncPos = options.respiratoryRate;
         break;
       case 2:
-        //    encoderPos=oldEncPos=A_pres;
+        encoderPos = oldEncPos = options.tidalVolume;
+        break;
+      case 3:
+        encoderPos = oldEncPos = options.peakInspiratoryPressure;
+        break;
+      case 4:
+        encoderPos = oldEncPos = options.peakEspiratoryPressure;
         break;
     }
     old_curr_sel = curr_sel;
@@ -499,17 +524,19 @@ void check_encoder()
 
 
 char tempstr[5];
-void display_lcd()
-{
+void display_lcd ( ) {
   lcd.clear();
-  //  writeLine(0, "Mod: VCtrl",10);
-  //  writeLine(0, "BPM:" + String(options.respiratoryRate),1);
-  //  writeLine(1, "Vml:" + String(options.tidalVolume),1);
-  //  dtostrf(ventilation->getInsVol(), 4, 1, tempstr);
-  //  writeLine(1, String(tempstr),10);
-  //  writeLine(2, "PIP:"+String(options.peakInspiratoryPressure),1);
-  //  writeLine(3, "PEEP:"+String(options.peakEspiratoryPressure),1);
-  writeLine(0, "MOD:VCL", 1); writeLine(0, "SET | ME", 11);
+  if ( vent_mode == ENTMODE_VCL ) {
+    writeLine(0, "MOD:VCL", 1); 
+    writeLine(2, "PIP : -", 8);
+  } else {
+    if ( vent_mode == ENTMODE_PCL ) {
+      writeLine(0, "MOD:PCL", 1); 
+      writeLine(2, "PIP :" + String(options.peakInspiratoryPressure), 8);
+    }
+  }
+  
+  writeLine(0, "SET | ME", 11);
   writeLine(1, "BPM:" + String(options.respiratoryRate), 1);
   writeLine(2, "I:E:", 1);
   writeLine(1, "V:" + String(options.tidalVolume), 10);
@@ -517,14 +544,10 @@ void display_lcd()
   //Remove decimal part
   dtostrf(ventilation->getInsVol(), 4, 0, tempstr);
   writeLine(1, String(tempstr), 15);
-  //}
-
-  //  dtostrf(ventilation->getInsVol(), 4, 1, tempstr);
-  //  writeLine(1, String(tempstr),10);
-  writeLine(2, "PIP :" + String(options.peakInspiratoryPressure), 8);
+  
   dtostrf(pressure_max - pressure_p0, 2, 0, tempstr);
-  //Serial.println(pressure_max);
   writeLine(2, String(tempstr), 16);
+  
   writeLine(3, "PEEP:" + String(options.peakEspiratoryPressure), 8);
 
 }
