@@ -450,7 +450,7 @@ void check_encoder()
 {
   //LUCIANO------------------------
   byte btnState = digitalRead(PIN_ENC_SW);
-  //SELECTION: VENT_MODE/BMP/VOL/PIP/PEEP 
+  //SELECTION: VENT_MODE/BMP/I:E/VOL/PIP/PEEP 
   if (btnState == LOW) {
     if (millis() - lastButtonPress > 50) {
       //Serial.println(curr_sel);
@@ -459,18 +459,21 @@ void check_encoder()
         curr_sel = 0;
       switch (curr_sel){
         case 0: 
-          max_sel=1;
+          min_sel=0;max_sel=1;
         break;
         case 1: 
           min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
         break;
-        case 2: 
-          min_sel=DEFAULT_MIN_VOLUMEN_TIDAL;max_sel=DEFAULT_MAX_VOLUMEN_TIDAL;
+        case 2:
+
         break;
         case 3: 
-          min_sel=20;max_sel=40;
+          min_sel=DEFAULT_MIN_VOLUMEN_TIDAL;max_sel=DEFAULT_MAX_VOLUMEN_TIDAL;
         break;
         case 4: 
+          min_sel=20;max_sel=40;
+        break;
+        case 5: 
           min_sel=5;max_sel=20;
         break;
       }
@@ -480,21 +483,37 @@ void check_encoder()
 
 
   if (oldEncPos != encoderPos) {
-    Serial.println(encoderPos);
-    oldEncPos = encoderPos;
-    switch (curr_sel) {
-      case 0:
-        vent_mode = encoderPos;
-        break;
-      case 1:
-        options.respiratoryRate = encoderPos;
-        break;
-      case 2:
-        options.tidalVolume = encoderPos;
-        break;
-    }
-    changed_options = true;
-  }
+    if ( encoderPos > max_sel ) {
+       encoderPos=max_sel; 
+    } else if ( encoderPos < min_sel ) {
+            encoderPos=min_sel;
+      } else {
+      
+      Serial.println(encoderPos);
+      oldEncPos = encoderPos;
+      switch (curr_sel) {
+        case 0:
+          vent_mode = encoderPos;
+          break;
+        case 1:
+          options.respiratoryRate = encoderPos;
+          break;
+        case 2:
+
+          break;
+        case 3:
+          options.tidalVolume = encoderPos;
+          break;
+        case 4:
+          options.peakInspiratoryPressure = encoderPos;
+          break;
+        case 5:
+          options.peakEspiratoryPressure = encoderPos;
+          break;
+      }
+      changed_options = true;
+    }//Valid range
+  }//oldEncPos != encoderPos and valid between range
 
   if (curr_sel != old_curr_sel) {
     switch (curr_sel) {
@@ -526,13 +545,16 @@ void check_encoder()
 char tempstr[5];
 void display_lcd ( ) {
   lcd.clear();
-  if ( vent_mode == ENTMODE_VCL ) {
+  if ( vent_mode == VENTMODE_VCL ) {
     writeLine(0, "MOD:VCL", 1); 
-    writeLine(2, "PIP : -", 8);
+    writeLine(2, "PIP : - ", 8);
+    dtostrf(ventilation->getInsVol(), 4, 0, tempstr);
+    writeLine(1, String(tempstr), 15);
   } else {
-    if ( vent_mode == ENTMODE_PCL ) {
+    if ( vent_mode == VENTMODE_PCL ) {
       writeLine(0, "MOD:PCL", 1); 
       writeLine(2, "PIP :" + String(options.peakInspiratoryPressure), 8);
+      writeLine(1, " - ", 10);
     }
   }
   
@@ -540,10 +562,6 @@ void display_lcd ( ) {
   writeLine(1, "BPM:" + String(options.respiratoryRate), 1);
   writeLine(2, "I:E:", 1);
   writeLine(1, "V:" + String(options.tidalVolume), 10);
-  //if (mode==){
-  //Remove decimal part
-  dtostrf(ventilation->getInsVol(), 4, 0, tempstr);
-  writeLine(1, String(tempstr), 15);
   
   dtostrf(pressure_max - pressure_p0, 2, 0, tempstr);
   writeLine(2, String(tempstr), 16);
