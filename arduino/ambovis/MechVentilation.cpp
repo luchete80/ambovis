@@ -262,7 +262,7 @@ void MechVentilation::update(void)
         if (pressure_p>pressure_max)
           pressure_max=pressure_p;
 
-        if (_mlInsVol>_tidalVol){
+        if (vent_mode==VENTMODE_VCL && _mlInsVol>_tidalVol){
             _stepper->setTargetPositionToStop();
             //_setState(Init_Exsufflation); NOT BEGIN TO INSUFFLATE!
             wait_NoMove=true;
@@ -299,12 +299,12 @@ void MechVentilation::update(void)
               //THIS INTERRUPT MOTOR 
               //Serial.print(_flux);Serial.println(dt);Serial.println(_mlInsVol);
                 //flujo remanente   
-//                float rem_flux;
-//               if(_mlInsVol<0);//avoid first instance errors
-//               float rem_flux=(_tidalVol-_mlInsVol)/(float)(_timeoutIns-_msecTimerCnt);
-//               else
-//               float rem_flux=(_tidalVol-_mlInsVol)/(float)(_timeoutIns-_msecTimerCnt);
-//               Serial.print("rem flow");Serial.println(rem_flux);
+                float rem_flux;
+               if(_mlInsVol<0) //avoid first instance errors
+                rem_flux=_tidalVol/((float)(_timeoutIns-_msecTimerCnt) * DEFAULT_FRAC_CYCLE_VCL_INSUFF );
+               else
+                rem_flux=(_tidalVol-_mlInsVol)/((float)(_timeoutIns-_msecTimerCnt) * DEFAULT_FRAC_CYCLE_VCL_INSUFF );
+               Serial.print("rem flow");Serial.println(rem_flux);
 
                if (vent_mode==VENTMODE_VCL)
                 //_pid->run(rem_flux, (double)_flux,&_stepperSpeed);

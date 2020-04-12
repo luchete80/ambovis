@@ -380,6 +380,7 @@ void loop() {
         display_lcd();
         update_display = true;
         last_cycle = ventilation->getCycleNum();
+        Serial.print("Insufflated vol: ");Serial.println(ventilation->getInsVol());
       }
     //
     ////    Serial.print("last stte: ");Serial.println(lastState);
@@ -392,6 +393,8 @@ void loop() {
         //                Serial2.println("EOC " + String(lastPressure.maxPressure) + " " +
         //                    String(lastPressure.minPressure) + " " + String(volume.volume));
         // Serial.print("Insuflated Vol: ");Serial.println(ventilation->getInsVol());
+        
+        Serial.print("Insufflated vol: ");Serial.println(ventilation->getInsVol());
         display_lcd();
       }
       else if (state == State_Exsufflation) //CANNOT REPEAT getstate because init state are TOO SHORTs!
@@ -460,6 +463,7 @@ void check_encoder()
       switch (curr_sel){
         case 0: 
           min_sel=0;max_sel=1;
+          encoderPos=oldEncPos=vent_mode;
         break;
         case 1: 
           min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
@@ -547,22 +551,23 @@ void display_lcd ( ) {
   lcd.clear();
   if ( vent_mode == VENTMODE_VCL ) {
     writeLine(0, "MOD:VCL", 1); 
+    writeLine(1, "V:" + String(options.tidalVolume), 10);    
     writeLine(2, "PIP : - ", 8);
-    dtostrf(ventilation->getInsVol(), 4, 0, tempstr);
-    writeLine(1, String(tempstr), 15);
   } else {
     if ( vent_mode == VENTMODE_PCL ) {
       writeLine(0, "MOD:PCL", 1); 
       writeLine(2, "PIP :" + String(options.peakInspiratoryPressure), 8);
-      writeLine(1, " - ", 10);
+      writeLine(1, "V: - ", 10);
     }
   }
   
   writeLine(0, "SET | ME", 11);
   writeLine(1, "BPM:" + String(options.respiratoryRate), 1);
   writeLine(2, "I:E:", 1);
-  writeLine(1, "V:" + String(options.tidalVolume), 10);
-  
+
+  dtostrf(ventilation->getInsVol(), 4, 0, tempstr);
+  writeLine(1, String(tempstr), 15);
+      
   dtostrf(pressure_max - pressure_p0, 2, 0, tempstr);
   writeLine(2, String(tempstr), 16);
   
