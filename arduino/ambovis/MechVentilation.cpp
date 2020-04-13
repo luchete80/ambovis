@@ -180,10 +180,6 @@ void MechVentilation::update(void)
   _msecTimerCnt=(unsigned long)(millis()-_msecTimerStartCycle);
     SensorPressureValues_t pressures = _sensors->getRelativePressureInCmH20();
     _currentPressure = pressures.pressure1;
-    // @dc unused
-    // _currentVolume = _sensors->getVolume().volume;
-    //_currentFlow = _sensors->getFlow();
-    _flux= _sensors->getFlow();
 
     if (pressures.state != SensorStateOK)
     {                                  // Sensor error detected: return to zero position and continue from there
@@ -292,7 +288,8 @@ void MechVentilation::update(void)
   
               //Serial.print("volue:");Serial.println(_mlInsVol);
               //_mlInsVol+=float(_flux*(TIME_BASE));//flux in l and time in msec, results in ml
-              _mlInsVol+=float(_flux*(millis()-last_vent_time));//flux in l and time in msec, results in ml              
+              //_mlInsVol+=float((_flux-_flux_0)*(millis()-last_vent_time));//flux in l and time in msec, results in ml 
+              _mlInsVol+=float(_flux*(millis()-last_vent_time));//flux in l and time in msec, results in ml                  
               //#endif
                 //flujo remanente   
                 float rem_flux;
@@ -300,22 +297,22 @@ void MechVentilation::update(void)
                 rem_flux=_tidalVol/((float)(_timeoutIns-_msecTimerCnt) * DEFAULT_FRAC_CYCLE_VCL_INSUFF );
                else
                 rem_flux=(_tidalVol-_mlInsVol)/((float)(_timeoutIns-_msecTimerCnt) * DEFAULT_FRAC_CYCLE_VCL_INSUFF );
-               #ifdef DEBUG_UPDATE
-               Serial.print("rem flow");Serial.println(rem_flux);
-               #endif
+               //#ifdef DEBUG_UPDATE
+               // Serial.print("flux");Serial.println(_flux);Serial.print("rem flux");Serial.println(rem_flux);
+               //#endif
                
                if (vent_mode==VENTMODE_VCL)
-                //_pid->run(rem_flux, (double)_flux,&_stepperSpeed);
-                _stepperSpeed=STEPPER_SPEED_DEFAULT;
-               else if (vent_mode==VENTMODE_PCL)
+                _pid->run(_flux,rem_flux,&_stepperSpeed);
+                //_stepperSpeed=STEPPER_SPEED_DEFAULT;
+               else if (vent_mode==VENTMODE_PCL) {
                   if ( (pressure_p-pressure_p0)<0)
                     _stepperSpeed=STEPPER_SPEED_DEFAULT;
                   else
                     _pid->run(float(pressure_p-pressure_p0), (float)_pip, &_stepperSpeed);
-               
+               } 
                #ifdef DEBUG_UPDATE
-               Serial.print("Speed: "); Serial.println(_stepperSpeed);       
-               Serial.print("pip 30, dp");Serial.println(pressure_p - pressure_p0);                
+                Serial.print("Speed: "); Serial.println(_stepperSpeed);       
+                Serial.print("pip 30, dp");Serial.println(pressure_p - pressure_p0);                
                #endif
                
                if (_stepperSpeed>STEPPER_SPEED_MAX)
@@ -328,8 +325,7 @@ void MechVentilation::update(void)
                 stepper->setSpeed(_stepperSpeed);
                 stepper->moveTo(STEPPER_HIGHEST_POSITION);
               #else
-              //_stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
-			        _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed)); //WHAT iF SPEED<0???
+              _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
               _stepper->setAccelerationInStepsPerSecondPerSecond(
                       STEPPER_ACC_EXSUFFLATION);
 //             
@@ -355,7 +351,7 @@ void MechVentilation::update(void)
     break;
     case Init_Exsufflation:
     {
-      pressure_min=1000000.;
+      pressure_min=103000.*DEFAULT_PA_TO_CM_H20;
       _msecTimerStartCycle=millis();
       //Serial.print("Current pressure");Serial.println(_currentPressure);
       

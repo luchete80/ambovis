@@ -188,8 +188,6 @@ private:
    
     unsigned long _msecTimerCnt; //esteno necesita ser tan grande
     /**  Insufflation timeout in seconds. */
-    float _mlInsVol,_mllastInsVol;
-    float _flux;
     byte _cyclenum;    //Not important value, only for printing control
     
 
@@ -206,6 +204,7 @@ private:
 
 extern byte stepper_time;
 extern unsigned long last_vent_time;
+extern float _mlInsVol,_mllastInsVol;
 //extern float _stepperSpeed;
 
 #endif /* INC_MECHANICAL_VENTILATION_H */

@@ -1,7 +1,7 @@
 //#define ACCEL_STEPPER 1
 //#ifdef LCD_I2C
-//#define DEBUG_UPDATE 1 //
-//#define DEBUG_OFF 1 //Release version
+#define DEBUG_UPDATE 1 //
+#define DEBUG_OFF 1 //Release version
 
 #include "defaults.h"
 #include "pinout.h"
@@ -52,9 +52,12 @@ FlexyStepper * stepper = new FlexyStepper();
 float pressure_p;   //EXTERN!!
 byte vent_mode = VENTMODE_PCL; //0
 Adafruit_BMP280 _pres1Sensor;
+Pressure_Sensor _dpsensor;
 float pressure_p0;
 float pressure_max;
 float pressure_min;
+float _mlInsVol,_mllastInsVol;
+float _flux,_flux_0;
 //float _stepperSpeed;
 
 extern byte stepper_time = 50;
@@ -221,16 +224,17 @@ void setup() {
   sensors = new Sensors();
 
   int check = sensors -> begin();
-  ////#if 1
-  //  if (check) {
-  //    if (check == 1) {
-  //      Serial.println(F("Could not find sensor BME280 number 1, check wiring!"));
-  //    } else if (check == 2) {
-  //      Serial.println(F("Could not find sensor BME280 number 2, check wiring!"));
-  //    }
-  //    //while (1);
-  //  }
-  //#endif
+  #ifdef DEBUG_UPDATE
+    if (check) {
+      if (check == 1) {
+        Serial.println(F("Could not find sensor BME280 number 1, check wiring!"));
+        writeLine("Sensor BMP ERROR");
+      } else if (check == 2) {
+        Serial.println(F("Could not find sensor BME280 number 2, check wiring!"));
+      }
+      while (1);
+    }
+  #endif
 
   // PID
   pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
@@ -253,7 +257,7 @@ void setup() {
   options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
   options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
   options.hasTrigger = false;
-  options.tidalVolume = 150;
+  options.tidalVolume = 300;
 
   ventilation = new MechVentilation(
     stepper,
@@ -290,7 +294,7 @@ void setup() {
   // TODO: Make this period dependant of TIME_BASE
   // TIME_BASE * 1000 does not work!!
   //--
-
+  
   //ENCODER
   //LUCIANO
   //LA SELECCION EMPIEZA POR EL MODO
@@ -312,6 +316,8 @@ void setup() {
 
   //MAKE AN IF IF_2_PRESS_SENSORS
   pressure_p0 = _pres1Sensor.readPressure() * DEFAULT_PA_TO_CM_H20;
+
+  calcularCaudalVenturi(_dpsensor.get_dp(), &_flux_0);
 
   //STEPPER
   last_stepper_time = millis();
@@ -357,7 +363,8 @@ void loop() {
     //
     sensors -> readVolume();
     #ifdef DEBUG_OFF
-      Serial.println(pressure_p - pressure_p0);
+      //Serial.println(pressure_p - pressure_p0);
+      Serial.print(_flux);Serial.println(_mlInsVol);
     #endif
         
     //Serial.print(",");Serial.println(sensors->getFlow());
@@ -415,14 +422,14 @@ void loop() {
   last_vent_time = millis();
   }
 //
-//  if (millis() - last_stepper_time > stepper_time) {
-//#ifdef ACCEL_STEPPER
-//    stepper->run();
-//#else
+  if (millis() - last_stepper_time > stepper_time) {
+#ifdef ACCEL_STEPPER
+    stepper->run();
+#else
     stepper -> processMovement(); //LUCIANO
-//    //Serial.print("Speed");Serial.println(_stepperSpeed);
-//#endif
-//  }
+    //Serial.print("Speed");Serial.println(_stepperSpeed);
+#endif
+  }
 //  
   if (changed_options && (millis() - last_update_display) > time_update_display) {
       display_lcd();

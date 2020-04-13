@@ -19,7 +19,7 @@
 #define SFM3300_OFFSET 32768
 #define SFM3300_SCALE   120
 #endif
-
+    
 enum SensorState {
     SensorStateOK = 0,
     SensorStateFailed = 1
@@ -69,7 +69,6 @@ class Sensors
     Adafruit_BMP280 _pres2Sensor;
     //Adafruit_BMP280 _pres1Sensor;   //LUCINO
     //Adafruit_BMP280 _pres1Sensor;
-    Pressure_Sensor _dpsensor;  //Used for venturi
     
     uint8_t _minPressure;
     uint8_t _maxPressure;
@@ -82,7 +81,7 @@ class Sensors
     volatile uint8_t _lastMaxPressure;
 #if ENABLED_SENSOR_VOLUME
     float _volume_ml;
-    float _flow;
+
     volatile float _lastVolume;
     unsigned long _lastReadFlow;
 #endif
@@ -94,7 +93,8 @@ extern float pressure_max;
 extern float pressure_min;
 extern float pressure_p;
 extern float pressure_p0;
-
+extern float _flux,_flux_0;
+extern Pressure_Sensor _dpsensor;  //Used for venturi
 extern Adafruit_BMP280 _pres1Sensor;
 
 #endif
