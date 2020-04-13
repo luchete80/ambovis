@@ -199,9 +199,6 @@ void Sensors::getOffsetBetweenPressureSensors(int samples)
 }
 
 #if ENABLED_SENSOR_VOLUME
-float Sensors::getFlow(void) {
-    return _flow;
-}
 
 void Sensors::saveVolume(void) {
     _lastVolume = _volume_ml;
@@ -211,7 +208,7 @@ void Sensors::saveVolume(void) {
 
 void Sensors::readVolume(void) {
   
-    calcularCaudalVenturi(_dpsensor.get_dp(), &_flow);
+    calcularCaudalVenturi(_dpsensor.get_dp(), &_flux);
   
 //    #if ENABLED_SENSOR_VOLUME_SFM3300
 //        SFM3000_Value_t tmp = _sfm3000->getvalue(); //TODO crc

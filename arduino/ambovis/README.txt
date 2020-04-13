@@ -89,6 +89,8 @@ http://laplace.us.es/wiki/index.php/Tubo_de_Venturi
 ANDROID OREO EMULATOR
 https://liliputing.com/2019/01/android-x86-8-1-released-lets-you-run-oreo-on-desktop-pcs.html
 
+---------------------------------
+git config --global credential.helper 'cache --timeout 7200'
 
 ---------------------------------
 ONLINE SIMULATORS

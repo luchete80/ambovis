@@ -9,7 +9,7 @@ from time import time
 # If you're not using Linux, you'll need to change this
 # check the Arduino IDE to see what serial port it's attached to
 #ser = serial.Serial('/dev/ttyACM0', 115200)
-ser = serial.Serial('com8', 115200)
+ser = serial.Serial('com4', 115200)
 
 # set plot to animated
 plt.ion() 

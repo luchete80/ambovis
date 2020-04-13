@@ -31,7 +31,7 @@ void writeLine(int line, String message = "", int offsetLeft = 0)
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
 	  lcd.begin();
   //lcd.backlight();
   lcd.clear();
