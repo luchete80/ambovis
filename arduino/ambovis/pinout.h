@@ -4,7 +4,7 @@
 // Stepper driver (FlexyStepper)
 #define PIN_STEPPER_STEP 6
 #define PIN_STEPPER_DIRECTION 7
-#define PIN_EN 8
+#define PIN_EN 99
 
 // Buzzer
 #define PIN_BUZZ 100
@@ -20,12 +20,12 @@
 #ifdef LCD_I2C
 #define I2C_DIR 0x3F
 #else
-#define PIN_LCD_RS A8
-#define PIN_LCD_EN A9
-#define PIN_LCD_D4 A10
-#define PIN_LCD_D5 A11
-#define PIN_LCD_D6 A12
-#define PIN_LCD_D7 A13
+#define PIN_LCD_RS 8
+#define PIN_LCD_EN 9
+#define PIN_LCD_D4 10
+#define PIN_LCD_D5 11
+#define PIN_LCD_D6 12
+#define PIN_LCD_D7 13
 #endif
 
 // BME280 SPI for Arduino Nano or Mega 128
