@@ -42,7 +42,7 @@ float Pressure_Sensor::get_dp()
   //EL 0.04 es el 48que aparece en 0
   //Por eso como yaesta restado no se tiene en cuenta 
   //0.04=48*/1024
-  diffPressure=(sensorValue/1024.-0.035)/0.18*1000;
+  diffPressure=(sensorValue/1024.-0.045)/0.18*1000;
   //Acc to datasheet
   //diffPressure=(sensorValue/1024.-0.04)/0.18*1000;
 	//return sensorValue;

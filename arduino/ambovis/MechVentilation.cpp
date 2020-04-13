@@ -286,7 +286,7 @@ void MechVentilation::update(void)
         {
             if (!wait_NoMove){
   
-              //Serial.print("volue:");Serial.println(_mlInsVol);
+              //Serial.print("volume:");Serial.println(_mlInsVol);
               //_mlInsVol+=float(_flux*(TIME_BASE));//flux in l and time in msec, results in ml
               //_mlInsVol+=float((_flux-_flux_0)*(millis()-last_vent_time));//flux in l and time in msec, results in ml 
               _mlInsVol+=_flux*float((millis()-last_vent_time));//flux in l and time in msec, results in ml                  
@@ -294,7 +294,7 @@ void MechVentilation::update(void)
                 //flujo remanente   
                 float rem_flux;
                if(_mlInsVol<0) //avoid first instance errors
-                rem_flux=_tidalVol/((float)(_timeoutIns-_msecTimerCnt) * DEFAULT_FRAC_CYCLE_VCL_INSUFF *1000);//En [ml/s]
+                rem_flux=_tidalVol/((float)(_timeoutIns-_msecTimerCnt) * DEFAULT_FRAC_CYCLE_VCL_INSUFF)*1000;//En [ml/s]
                else
                 rem_flux=(_tidalVol-_mlInsVol)/((float)(_timeoutIns-_msecTimerCnt) * DEFAULT_FRAC_CYCLE_VCL_INSUFF )*1000.;
                //#ifdef DEBUG_UPDATE
@@ -314,10 +314,10 @@ void MechVentilation::update(void)
                     if (_stepperSpeed > STEPPER_SPEED_MAX)
                       _stepperSpeed=STEPPER_SPEED_MAX;
                } 
-               #ifdef DEBUG_UPDATE
+               //#ifdef DEBUG_UPDATE
                 Serial.print("Speed: "); Serial.println(_stepperSpeed);       
-                Serial.print("pip 30, dp");Serial.println(pressure_p - pressure_p0);                
-               #endif
+               // Serial.print("pip 30, dp");Serial.println(pressure_p - pressure_p0);                
+               //#endif
                
                 
 //               Serial.print("Speed");Serial.println(_stepperSpeed);

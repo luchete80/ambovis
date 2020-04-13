@@ -50,7 +50,7 @@ FlexyStepper * stepper = new FlexyStepper();
 // - EXTERNAL VARIABLES //
 //////////////////////////
 float pressure_p;   //EXTERN!!
-byte vent_mode = VENTMODE_PCL; //0
+byte vent_mode = VENTMODE_VCL; //0
 Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
 float pressure_p0;
@@ -451,10 +451,6 @@ void check_encoder()
     if (millis() - lastButtonPress > 50) {
       //Serial.println(curr_sel);
       //Clean all marks
-      lcd_clearxy(0,0);
-      lcd_clearxy(0,1); lcd_clearxy(9,1);
-      lcd_clearxy(0,2); lcd_clearxy(7,2);
-      lcd_clearxy(7,3);
       
       curr_sel++; //NOT +=1, is a byte
       if (curr_sel > 5)
@@ -463,30 +459,24 @@ void check_encoder()
         case 0: 
           min_sel=0;max_sel=1;
           encoderPos=oldEncPos=vent_mode;
-          lcd_selxy(0,0);
         break;
         case 1: 
           encoderPos=oldEncPos=options.respiratoryRate;
           min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
-          lcd_selxy(0,1);
         break;
         case 2:
-          lcd_selxy(0,2);
         break;
         case 3: 
           encoderPos=oldEncPos=options.tidalVolume;
           min_sel=DEFAULT_MIN_VOLUMEN_TIDAL;max_sel=DEFAULT_MAX_VOLUMEN_TIDAL;
-          lcd_selxy(9,1);
         break;
         case 4: 
           encoderPos=oldEncPos=options.peakInspiratoryPressure;
           min_sel=20;max_sel=40;
-          lcd_selxy(7,2);
         break;
         case 5: 
           encoderPos=oldEncPos=options.peakEspiratoryPressure;
           min_sel=5;max_sel=20;
-          lcd_selxy(7,3);
         break;
       }
 
@@ -527,6 +517,7 @@ void check_encoder()
           break;
       }
       changed_options = true;
+      Serial.print("Volume: ");Serial.println(options.tidalVolume);
     }//Valid range
 
   }//oldEncPos != encoderPos and valid between range
@@ -537,7 +528,7 @@ void check_encoder()
 
 char tempstr[5];
 void display_lcd ( ) {
-  //lcd.clear();
+  lcd.clear();
   if ( vent_mode == VENTMODE_VCL ) {
     writeLine(0, "MOD:VCL", 1); 
     writeLine(1, "V:" + String(options.tidalVolume), 10);    
@@ -563,5 +554,20 @@ void display_lcd ( ) {
   writeLine(3, "PEEP:" + String(options.peakEspiratoryPressure), 8);
   dtostrf(pressure_min - pressure_p0, 2, 0, tempstr);
   writeLine(3, String(tempstr), 16);
+
+  switch(curr_sel){
+        case 0: 
+          lcd_selxy(0,0);break;
+        case 1: 
+          lcd_selxy(0,1);break;
+        case 2:
+          lcd_selxy(0,2);break;
+        case 3: 
+          lcd_selxy(9,1);break;
+        case 4: 
+          lcd_selxy(7,2);break;
+        case 5: 
+          lcd_selxy(7,3);break;
+    }
 
 }
