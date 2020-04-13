@@ -72,6 +72,8 @@ byte reading = 0; //somewhere to store the direct values we read from our interr
 
 byte max_sel,min_sel; //According to current selection
 
+void display_lcd ( );
+
 //
 void PinA() {
   cli(); //stop interrupts happening before we read pin values
@@ -432,22 +434,23 @@ void loop() {
   ventilation -> update();
   last_vent_time = millis();
   }
-
-  if (millis() - last_stepper_time > stepper_time) {
-#ifdef ACCEL_STEPPER
-    stepper->run();
-#else
+//
+//  if (millis() - last_stepper_time > stepper_time) {
+//#ifdef ACCEL_STEPPER
+//    stepper->run();
+//#else
     stepper -> processMovement(); //LUCIANO
-    //Serial.print("Speed");Serial.println(_stepperSpeed);
-#endif
-
-    if (changed_options && (millis() - last_update_display) > time_update_display) {
+//    //Serial.print("Speed");Serial.println(_stepperSpeed);
+//#endif
+//  }
+//  
+  if (changed_options && (millis() - last_update_display) > time_update_display) {
       display_lcd();
       last_update_display = millis();
       ventilation->change_config(options);
       changed_options = false;
     }
-  }
+  
 
 }
 //

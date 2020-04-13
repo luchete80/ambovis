@@ -316,7 +316,7 @@ void MechVentilation::update(void)
                     _pid->run(float(pressure_p-pressure_p0), (float)_pip, &_stepperSpeed);
 
                Serial.print("Speed: "); Serial.println(_stepperSpeed);       
-                
+               Serial.print("pip 30, dp");Serial.println(pressure_p - pressure_p0);                
                if (_stepperSpeed>STEPPER_SPEED_MAX)
                 _stepperSpeed=STEPPER_SPEED_MAX;
                 
@@ -329,6 +329,8 @@ void MechVentilation::update(void)
               #else
               //_stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
 			        _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed)); //WHAT iF SPEED<0???
+              _stepper->setAccelerationInStepsPerSecondPerSecond(
+                      STEPPER_ACC_EXSUFFLATION);
 //             
               if (_stepperSpeed >= 0){
                   _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
@@ -438,9 +440,8 @@ void MechVentilation::update(void)
         {
             //_pid->run(_currentPressure, (float)_peep, &_stepperSpeed);
 //            _pid->run(float(pressure_p-pressure_p0), (float)_peep, &_stepperSpeed);
-              _stepper->setSpeedInStepsPerSecond(600);
 //LUCIANO
-              _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
+              _stepper->setSpeedInStepsPerSecond(1200);
              // Serial.println(_stepperSpeed);
 //            if (_stepperSpeed >= 0)
 //                _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
