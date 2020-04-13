@@ -362,10 +362,10 @@ void loop() {
     //    SensorPressureValues_t pressure = sensors -> getRelativePressureInCmH20();
     //
     sensors -> readVolume();
-    #ifdef DEBUG_OFF
+    //#ifdef DEBUG_OFF
       //Serial.println(pressure_p - pressure_p0);
       Serial.print(_flux);Serial.println(_mlInsVol);
-    #endif
+    //#endif
         
     //Serial.print(",");Serial.println(sensors->getFlow());
     //    Serial.print("Flow: ");Serial.println(sensors->getFlow());
