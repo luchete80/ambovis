@@ -91,6 +91,7 @@ class Sensors
 };
 
 extern float pressure_max;
+extern float pressure_min;
 extern float pressure_p;
 extern float pressure_p0;
 

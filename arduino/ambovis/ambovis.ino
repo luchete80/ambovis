@@ -54,6 +54,7 @@ byte vent_mode = VENTMODE_PCL; //0
 Adafruit_BMP280 _pres1Sensor;
 float pressure_p0;
 float pressure_max;
+float pressure_min;
 //float _stepperSpeed;
 
 extern byte stepper_time = 50;
@@ -321,7 +322,7 @@ bool update_display = false;
 
 void loop() {
 
-  //check_encoder();
+  check_encoder();
 
   time = millis();
   //  unsigned long static lastSendConfiguration = 0;
@@ -491,62 +492,62 @@ void check_encoder()
     lastButtonPress = millis();
   }
 
-
-  if (oldEncPos != encoderPos) {
-    if ( encoderPos > max_sel ) {
-       encoderPos=max_sel; 
-    } else if ( encoderPos < min_sel ) {
-            encoderPos=min_sel;
-      } else {
-      
-      Serial.println(encoderPos);
-      oldEncPos = encoderPos;
-      switch (curr_sel) {
-        case 0:
-          vent_mode = encoderPos;
-          break;
-        case 1:
-          options.respiratoryRate = encoderPos;
-          break;
-        case 2:
-
-          break;
-        case 3:
-          options.tidalVolume = encoderPos;
-          break;
-        case 4:
-          options.peakInspiratoryPressure = encoderPos;
-          break;
-        case 5:
-          options.peakEspiratoryPressure = encoderPos;
-          break;
-      }
-      changed_options = true;
-    }//Valid range
-  }//oldEncPos != encoderPos and valid between range
-
-  if (curr_sel != old_curr_sel) {
-    switch (curr_sel) {
-      case 0:
-        encoderPos = oldEncPos = vent_mode;
-        break;
-      case 1:
-        encoderPos = oldEncPos = options.respiratoryRate;
-        break;
-      case 2:
-        encoderPos = oldEncPos = options.tidalVolume;
-        break;
-      case 3:
-        encoderPos = oldEncPos = options.peakInspiratoryPressure;
-        break;
-      case 4:
-        encoderPos = oldEncPos = options.peakEspiratoryPressure;
-        break;
-    }
-    old_curr_sel = curr_sel;
-    changed_options = true;
-    Serial.println("Opciones cambiadas");
-  }
+//
+//  if (oldEncPos != encoderPos) {
+//    if ( encoderPos > max_sel ) {
+//       encoderPos=max_sel; 
+//    } else if ( encoderPos < min_sel ) {
+//            encoderPos=min_sel;
+//      } else {
+//      
+//      Serial.println(encoderPos);
+//      oldEncPos = encoderPos;
+//      switch (curr_sel) {
+//        case 0:
+//          vent_mode = encoderPos;
+//          break;
+//        case 1:
+//          options.respiratoryRate = encoderPos;
+//          break;
+//        case 2:
+//
+//          break;
+//        case 3:
+//          options.tidalVolume = encoderPos;
+//          break;
+//        case 4:
+//          options.peakInspiratoryPressure = encoderPos;
+//          break;
+//        case 5:
+//          options.peakEspiratoryPressure = encoderPos;
+//          break;
+//      }
+//      changed_options = true;
+//    }//Valid range
+//  }//oldEncPos != encoderPos and valid between range
+//
+//  if (curr_sel != old_curr_sel) {
+//    switch (curr_sel) {
+//      case 0:
+//        encoderPos = oldEncPos = vent_mode;
+//        break;
+//      case 1:
+//        encoderPos = oldEncPos = options.respiratoryRate;
+//        break;
+//      case 2:
+//        encoderPos = oldEncPos = options.tidalVolume;
+//        break;
+//      case 3:
+//        encoderPos = oldEncPos = options.peakInspiratoryPressure;
+//        break;
+//      case 4:
+//        encoderPos = oldEncPos = options.peakEspiratoryPressure;
+//        break;
+//    }
+//    old_curr_sel = curr_sel;
+//    changed_options = true;
+//    Serial.println("Opciones cambiadas");
+//  }
   //----
 }
 
@@ -577,6 +578,9 @@ void display_lcd ( ) {
   dtostrf(pressure_max - pressure_p0, 2, 0, tempstr);
   writeLine(2, String(tempstr), 16);
   
+   
   writeLine(3, "PEEP:" + String(options.peakEspiratoryPressure), 8);
+  dtostrf(pressure_min - pressure_p0, 3, 0, tempstr);
+  writeLine(3, String(tempstr), 16);
 
 }
