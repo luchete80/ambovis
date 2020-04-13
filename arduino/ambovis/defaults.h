@@ -4,7 +4,6 @@
 
 #include "Arduino.h"
 
-#define DEBUG_UPDATE 1 //
 //#define DEBUG_STATE_MACHINE 1
 //#define PRUEBAS 1 // testing over arduino without sensors
 

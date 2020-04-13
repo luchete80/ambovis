@@ -1,5 +1,6 @@
 //#define ACCEL_STEPPER 1
 //#ifdef LCD_I2C
+#define DEBUG_UPDATE 1 //
 
 #include "defaults.h"
 #include "pinout.h"
@@ -380,7 +381,6 @@ void loop() {
         display_lcd();
         update_display = true;
         last_cycle = ventilation->getCycleNum();
-        Serial.print("Insufflated vol: ");Serial.println(ventilation->getInsVol());
       }
     //
     ////    Serial.print("last stte: ");Serial.println(lastState);

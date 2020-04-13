@@ -293,11 +293,13 @@ void MechVentilation::update(void)
             if (!wait_NoMove){
   
               //_sensors->
-              float dt=(float)(_msecTimerCnt-_msecLastUpdate);
+              //dt=_msecTimerCnt-_msecLastUpdate);
               //Serial.print("volue:");Serial.println(_mlInsVol);
-              _mlInsVol+=_flux*dt;//flux in l and time in msec, results in ml
+              _mlInsVol+=float(_flux*(_msecTimerCnt-_msecLastUpdate));//flux in l and time in msec, results in ml
               //THIS INTERRUPT MOTOR 
-              //Serial.print(_flux);Serial.println(dt);Serial.println(_mlInsVol);
+              //#if DEBUG_UPDATE
+              Serial.print(_flux);Serial.print(",");Serial.print(_msecTimerCnt-_msecLastUpdate);Serial.print(",");Serial.println(_mlInsVol);
+              //#endif
                 //flujo remanente   
                 float rem_flux;
                if(_mlInsVol<0) //avoid first instance errors
@@ -488,7 +490,7 @@ void MechVentilation::update(void)
         }
         else{
 #if DEBUG_UPDATE
-           // Serial.println("No end stop detected.");
+           Serial.println("No end stop detected.");
 #endif
         }
         /* Status update and reset timer, for next time */

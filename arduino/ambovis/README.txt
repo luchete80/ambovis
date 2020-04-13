@@ -98,8 +98,11 @@ Encoder
 https://www.electronics-lab.com/project/rotary-encoder-arduino-mega-nokia-5110-display-tutorial/
 https://www.reddit.com/r/arduino/comments/5eox8g/best_rotary_encoder_library_on_any_pin/
 
-
 https://arduino.stackexchange.com/questions/43774/arduino-mega-2560-interrupt-pins-and-port-mapping-with-rotary-encoder
+
+//INSTALL APP
+https://stackoverflow.com/questions/7076240/install-an-apk-file-from-command-prompt
+
 
 mpx5050
 
