@@ -1,7 +1,7 @@
 //#define ACCEL_STEPPER 1
 //#ifdef LCD_I2C
-#define DEBUG_UPDATE 1 //
-#define DEBUG_OFF 1 //Release version
+//#define DEBUG_UPDATE 1 //
+//#define DEBUG_OFF 1 //Release version
 
 #include "defaults.h"
 #include "pinout.h"
@@ -364,7 +364,7 @@ void loop() {
     sensors -> readVolume();
     //#ifdef DEBUG_OFF
       //Serial.println(pressure_p - pressure_p0);
-      Serial.print(_flux);Serial.println(_mlInsVol);
+     // Serial.print(_flux);Serial.println(_mlInsVol);
     //#endif
         
     //Serial.print(",");Serial.println(sensors->getFlow());
@@ -466,6 +466,7 @@ void check_encoder()
           lcd_selxy(0,0);
         break;
         case 1: 
+          encoderPos=oldEncPos=options.respiratoryRate;
           min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
           lcd_selxy(0,1);
         break;
@@ -473,18 +474,24 @@ void check_encoder()
           lcd_selxy(0,2);
         break;
         case 3: 
+          encoderPos=oldEncPos=options.tidalVolume;
           min_sel=DEFAULT_MIN_VOLUMEN_TIDAL;max_sel=DEFAULT_MAX_VOLUMEN_TIDAL;
           lcd_selxy(9,1);
         break;
         case 4: 
+          encoderPos=oldEncPos=options.peakInspiratoryPressure;
           min_sel=20;max_sel=40;
           lcd_selxy(7,2);
         break;
         case 5: 
+          encoderPos=oldEncPos=options.peakEspiratoryPressure;
           min_sel=5;max_sel=20;
           lcd_selxy(7,3);
         break;
       }
+
+      old_curr_sel = curr_sel;
+      changed_options = true;
     }
     lastButtonPress = millis();
   }
@@ -495,11 +502,10 @@ void check_encoder()
        encoderPos=oldEncPos=max_sel; 
     } else if ( encoderPos < min_sel ) {
         encoderPos=oldEncPos=min_sel;
-      } 
-// else {
+      } else {
 //      
       Serial.println(encoderPos);
-//      oldEncPos = encoderPos;
+      oldEncPos = encoderPos;
       switch (curr_sel) {
         case 0:
           vent_mode = encoderPos;
@@ -520,33 +526,11 @@ void check_encoder()
           options.peakEspiratoryPressure = encoderPos;
           break;
       }
-//    }//Valid range
-    changed_options = true;
+      changed_options = true;
+    }//Valid range
+
   }//oldEncPos != encoderPos and valid between range
-//
-  if (curr_sel != old_curr_sel) {
-    switch (curr_sel) {
-      case 0:
-        encoderPos = oldEncPos = vent_mode;
-        break;
-      case 1:
-        encoderPos = oldEncPos = options.respiratoryRate;
-        break;
-      case 2:
-        encoderPos = oldEncPos = options.tidalVolume;
-        break;
-      case 3:
-        encoderPos = oldEncPos = options.peakInspiratoryPressure;
-        break;
-      case 4:
-        encoderPos = oldEncPos = options.peakEspiratoryPressure;
-        break;
-    }
-    old_curr_sel = curr_sel;
-    changed_options = true;
-    Serial.println("Opciones cambiadas");
-  }
-  //----
+
 }
 
 
