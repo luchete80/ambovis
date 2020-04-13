@@ -1,6 +1,6 @@
 //#define ACCEL_STEPPER 1
 //#ifdef LCD_I2C
-#define DEBUG_UPDATE 1 //
+//#define DEBUG_UPDATE 1 //
 //#define DEBUG_OFF 1 //Release version
 
 #include "defaults.h"
@@ -172,14 +172,21 @@ bool changed_options = false;
 unsigned long time_update_display = 100; //ms
 unsigned long last_update_display;
 
-void writeLine(int line, String message = "", int offsetLeft = 0)
-{
+void writeLine(int line, String message = "", int offsetLeft = 0) {
   lcd.setCursor(0, line);
   lcd.print("");
   lcd.setCursor(offsetLeft, line);
   lcd.print(message);
 }
 
+void lcd_clearxy(int x, int y) {
+  lcd.setCursor(x, y);
+  lcd.print(" ");
+}
+void lcd_selxy(int x, int y) {
+  lcd.setCursor(x, y);
+  lcd.print(">");
+}
 
 void setup() {
   // Puertos serie
@@ -388,39 +395,11 @@ void loop() {
         update_display = true;
         last_cycle = ventilation->getCycleNum();
       }
-    //
-    ////    Serial.print("last stte: ");Serial.println(lastState);
-    ////    Serial.print("stte: ");     Serial.println(state);
-    if (state != lastState)
-    {
-      SensorLastPressure_t lastPressure = sensors->getLastPressure();
-      if (state == Init_Exsufflation)
-      {
-        //                Serial2.println("EOC " + String(lastPressure.maxPressure) + " " +
-        //                    String(lastPressure.minPressure) + " " + String(volume.volume));
-        // Serial.print("Insuflated Vol: ");Serial.println(ventilation->getInsVol());
-        
-        Serial.print("Insufflated vol: ");Serial.println(ventilation->getInsVol());
-        display_lcd();
-      }
-      else if (state == State_Exsufflation) //CANNOT REPEAT getstate because init state are TOO SHORTs!
-      {
-        if (lastState != Init_Exsufflation)
-        {
-          //                    Serial2.println("EOC " + String(lastPressure.maxPressure) + " " +
-          //                    String(lastPressure.minPressure) + " " + String(volume.volume));
-        }
-      }
-    }
-    lastState = ventilation->getState();
   }//Read Sensor
 
-  //  //
   //  //    if (Serial2.available()) {
   //  //        readIncomingMsg();
   //  //    }
-  //
-
 #if DEBUG_STATE_MACHINE
   if (debugMsgCounter) {
     for (byte i = 0; i < debugMsgCounter; i++) {
@@ -464,6 +443,12 @@ void check_encoder()
   if (btnState == LOW) {
     if (millis() - lastButtonPress > 50) {
       //Serial.println(curr_sel);
+      //Clean all marks
+      lcd_clearxy(0,0);
+      lcd_clearxy(0,1); lcd_clearxy(9,1);
+      lcd_clearxy(0,2); lcd_clearxy(7,2);
+      lcd_clearxy(7,3);
+      
       curr_sel++; //NOT +=1, is a byte
       if (curr_sel > 5)
         curr_sel = 0;
@@ -471,83 +456,89 @@ void check_encoder()
         case 0: 
           min_sel=0;max_sel=1;
           encoderPos=oldEncPos=vent_mode;
+          lcd_selxy(0,0);
         break;
         case 1: 
           min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
+          lcd_selxy(0,1);
         break;
         case 2:
-
+          lcd_selxy(0,2);
         break;
         case 3: 
           min_sel=DEFAULT_MIN_VOLUMEN_TIDAL;max_sel=DEFAULT_MAX_VOLUMEN_TIDAL;
+          lcd_selxy(9,1);
         break;
         case 4: 
           min_sel=20;max_sel=40;
+          lcd_selxy(7,2);
         break;
         case 5: 
           min_sel=5;max_sel=20;
+          lcd_selxy(7,3);
         break;
       }
     }
     lastButtonPress = millis();
   }
 
-//
-//  if (oldEncPos != encoderPos) {
-//    if ( encoderPos > max_sel ) {
-//       encoderPos=max_sel; 
-//    } else if ( encoderPos < min_sel ) {
-//            encoderPos=min_sel;
-//      } else {
+
+  if (oldEncPos != encoderPos) {
+    if ( encoderPos > max_sel ) {
+       encoderPos=oldEncPos=max_sel; 
+    } else if ( encoderPos < min_sel ) {
+        encoderPos=oldEncPos=min_sel;
+      } 
+// else {
 //      
-//      Serial.println(encoderPos);
+      Serial.println(encoderPos);
 //      oldEncPos = encoderPos;
-//      switch (curr_sel) {
-//        case 0:
-//          vent_mode = encoderPos;
-//          break;
-//        case 1:
-//          options.respiratoryRate = encoderPos;
-//          break;
-//        case 2:
-//
-//          break;
-//        case 3:
-//          options.tidalVolume = encoderPos;
-//          break;
-//        case 4:
-//          options.peakInspiratoryPressure = encoderPos;
-//          break;
-//        case 5:
-//          options.peakEspiratoryPressure = encoderPos;
-//          break;
-//      }
-//      changed_options = true;
+      switch (curr_sel) {
+        case 0:
+          vent_mode = encoderPos;
+          break;
+        case 1:
+          options.respiratoryRate = encoderPos;
+          break;
+        case 2:
+
+          break;
+        case 3:
+          options.tidalVolume = encoderPos;
+          break;
+        case 4:
+          options.peakInspiratoryPressure = encoderPos;
+          break;
+        case 5:
+          options.peakEspiratoryPressure = encoderPos;
+          break;
+      }
 //    }//Valid range
-//  }//oldEncPos != encoderPos and valid between range
+    changed_options = true;
+  }//oldEncPos != encoderPos and valid between range
 //
-//  if (curr_sel != old_curr_sel) {
-//    switch (curr_sel) {
-//      case 0:
-//        encoderPos = oldEncPos = vent_mode;
-//        break;
-//      case 1:
-//        encoderPos = oldEncPos = options.respiratoryRate;
-//        break;
-//      case 2:
-//        encoderPos = oldEncPos = options.tidalVolume;
-//        break;
-//      case 3:
-//        encoderPos = oldEncPos = options.peakInspiratoryPressure;
-//        break;
-//      case 4:
-//        encoderPos = oldEncPos = options.peakEspiratoryPressure;
-//        break;
-//    }
-//    old_curr_sel = curr_sel;
-//    changed_options = true;
-//    Serial.println("Opciones cambiadas");
-//  }
+  if (curr_sel != old_curr_sel) {
+    switch (curr_sel) {
+      case 0:
+        encoderPos = oldEncPos = vent_mode;
+        break;
+      case 1:
+        encoderPos = oldEncPos = options.respiratoryRate;
+        break;
+      case 2:
+        encoderPos = oldEncPos = options.tidalVolume;
+        break;
+      case 3:
+        encoderPos = oldEncPos = options.peakInspiratoryPressure;
+        break;
+      case 4:
+        encoderPos = oldEncPos = options.peakEspiratoryPressure;
+        break;
+    }
+    old_curr_sel = curr_sel;
+    changed_options = true;
+    Serial.println("Opciones cambiadas");
+  }
   //----
 }
 
@@ -555,7 +546,7 @@ void check_encoder()
 
 char tempstr[5];
 void display_lcd ( ) {
-  lcd.clear();
+  //lcd.clear();
   if ( vent_mode == VENTMODE_VCL ) {
     writeLine(0, "MOD:VCL", 1); 
     writeLine(1, "V:" + String(options.tidalVolume), 10);    
@@ -576,11 +567,10 @@ void display_lcd ( ) {
   writeLine(1, String(tempstr), 15);
       
   dtostrf(pressure_max - pressure_p0, 2, 0, tempstr);
-  writeLine(2, String(tempstr), 16);
-  
+  writeLine(2, String(tempstr), 16);  
    
   writeLine(3, "PEEP:" + String(options.peakEspiratoryPressure), 8);
-  dtostrf(pressure_min - pressure_p0, 3, 0, tempstr);
+  dtostrf(pressure_min - pressure_p0, 2, 0, tempstr);
   writeLine(3, String(tempstr), 16);
 
 }

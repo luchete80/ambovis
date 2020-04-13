@@ -312,9 +312,12 @@ void MechVentilation::update(void)
                     _stepperSpeed=STEPPER_SPEED_DEFAULT;
                   else
                     _pid->run(float(pressure_p-pressure_p0), (float)_pip, &_stepperSpeed);
-
+               
+               #ifdef DEBUG_UPDATE
                Serial.print("Speed: "); Serial.println(_stepperSpeed);       
                Serial.print("pip 30, dp");Serial.println(pressure_p - pressure_p0);                
+               #endif
+               
                if (_stepperSpeed>STEPPER_SPEED_MAX)
                 _stepperSpeed=STEPPER_SPEED_MAX;
                 
@@ -352,7 +355,7 @@ void MechVentilation::update(void)
     break;
     case Init_Exsufflation:
     {
-      pressure_min=100000.;
+      pressure_min=1000000.;
       _msecTimerStartCycle=millis();
       //Serial.print("Current pressure");Serial.println(_currentPressure);
       
@@ -402,10 +405,7 @@ void MechVentilation::update(void)
     {
       if (pressure_p<pressure_min)
         pressure_min=pressure_p;
-
-        Serial.print(pressure_p);Serial.println(pressure_min);
-
-      
+    
 //#if 0
 //        if (_stepper->motionComplete())
 //        {
