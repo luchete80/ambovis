@@ -179,7 +179,9 @@ void MechVentilation::update(void)
 
 
   _msecTimerCnt=(unsigned long)(millis()-_msecTimerStartCycle);
-  
+//#if DEBUG_UPDATE
+  //Serial.print("_msecTimerCnt:");Serial.print(_msecTimerCnt);Serial.print("Last Update:");Serial.println(_msecLastUpdate);
+//#endif
     SensorPressureValues_t pressures = _sensors->getRelativePressureInCmH20();
     _currentPressure = pressures.pressure1;
     // @dc unused
@@ -292,13 +294,9 @@ void MechVentilation::update(void)
         {
             if (!wait_NoMove){
   
-              //_sensors->
-              //dt=_msecTimerCnt-_msecLastUpdate);
               //Serial.print("volue:");Serial.println(_mlInsVol);
-              _mlInsVol+=float(_flux*(_msecTimerCnt-_msecLastUpdate));//flux in l and time in msec, results in ml
-              //THIS INTERRUPT MOTOR 
-              //#if DEBUG_UPDATE
-              Serial.print(_flux);Serial.print(",");Serial.print(_msecTimerCnt-_msecLastUpdate);Serial.print(",");Serial.println(_mlInsVol);
+              //_mlInsVol+=float(_flux*(TIME_BASE));//flux in l and time in msec, results in ml
+              _mlInsVol+=float(_flux*(millis()-last_vent_time));//flux in l and time in msec, results in ml              
               //#endif
                 //flujo remanente   
                 float rem_flux;
@@ -316,7 +314,9 @@ void MechVentilation::update(void)
                     _stepperSpeed=STEPPER_SPEED_DEFAULT;
                   else
                     _pid->run(float(pressure_p-pressure_p0), (float)_pip, &_stepperSpeed);
-               
+
+               Serial.print("Speed: "); Serial.println(_stepperSpeed);       
+                
                if (_stepperSpeed>STEPPER_SPEED_MAX)
                 _stepperSpeed=STEPPER_SPEED_MAX;
                 
@@ -330,12 +330,14 @@ void MechVentilation::update(void)
               //_stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
 			        _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed)); //WHAT iF SPEED<0???
 //             
-//              if (_stepperSpeed >= 0){
-//                  _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
-//              }
-//              else{
-//                  _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
-//              }
+              if (_stepperSpeed >= 0){
+                  _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
+              }
+              else{
+                  _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
+//                  if (!_stepper->motionComplete())
+//                    _stepper->setTargetPositionToStop();
+              }
               
               #endif
               //Serial.println("CUrrtime");Serial.println(_msecTimerCnt);
@@ -505,8 +507,6 @@ void MechVentilation::update(void)
         //TODO
         break;
     }
-
-   _msecLastUpdate=_msecTimerCnt;
       
 }//update
 

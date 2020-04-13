@@ -185,7 +185,6 @@ private:
         /** Timer counter in seconds. */
     //Este tambien es mio
     unsigned long _msecTimerStartCycle; //CADA semiciclo
-    unsigned long _msecLastUpdate; //CADA semiciclo
    
     unsigned long _msecTimerCnt; //esteno necesita ser tan grande
     /**  Insufflation timeout in seconds. */

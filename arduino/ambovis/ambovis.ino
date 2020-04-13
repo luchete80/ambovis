@@ -1,6 +1,7 @@
 //#define ACCEL_STEPPER 1
 //#ifdef LCD_I2C
 #define DEBUG_UPDATE 1 //
+//#define DEBUG_OFF 1 //Release version
 
 #include "defaults.h"
 #include "pinout.h"
@@ -318,7 +319,7 @@ bool update_display = false;
 
 void loop() {
 
-  check_encoder();
+  //check_encoder();
 
   time = millis();
   //  unsigned long static lastSendConfiguration = 0;
@@ -345,8 +346,10 @@ void loop() {
     //    SensorPressureValues_t pressure = sensors -> getRelativePressureInCmH20();
     //
     sensors -> readVolume();
-    Serial.println(pressure_p - pressure_p0);
-    
+    #ifdef DEBUG_OFF
+      Serial.println(pressure_p - pressure_p0);
+    #endif
+        
     //Serial.print(",");Serial.println(sensors->getFlow());
     //    Serial.print("Flow: ");Serial.println(sensors->getFlow());
     //    SensorVolumeValue_t volume = sensors -> getVolume();
@@ -425,7 +428,7 @@ void loop() {
 #endif
 
   //LUCIANO----------------------
-  if (millis()-last_vent_time>20){
+  if (millis()-last_vent_time>TIME_BASE){
   ventilation -> update();
   last_vent_time = millis();
   }
@@ -458,7 +461,7 @@ void check_encoder()
     if (millis() - lastButtonPress > 50) {
       //Serial.println(curr_sel);
       curr_sel++; //NOT +=1, is a byte
-      if (curr_sel > 4)
+      if (curr_sel > 5)
         curr_sel = 0;
       switch (curr_sel){
         case 0: 
