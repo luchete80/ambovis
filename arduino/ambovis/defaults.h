@@ -84,8 +84,6 @@
 #define SOLENOID_OPEN 1
 
 typedef struct {
-    short height;
-    bool sex;
     short respiratoryRate;
     short peakInspiratoryPressure;
     short peakEspiratoryPressure;
