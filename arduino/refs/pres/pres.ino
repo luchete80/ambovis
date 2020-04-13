@@ -31,6 +31,7 @@ void writeLine(int line, String message = "", int offsetLeft = 0)
 
 void setup()
 {
+  Serial.begin(9600);
 	  lcd.begin();
   //lcd.backlight();
   lcd.clear();
@@ -39,9 +40,13 @@ void setup()
 	psen=Pressure_Sensor(A0);
 }
 
+float dv;
+
 void loop()
 {
+  dv=analogRead(A0) * 5. / 1024.;
 	calcularCaudalVenturi(psen.get_dp(), &flux);
-	writeLine(0, "dV: " + String(analogRead(A0) * 5. / 1024.) + " V");
+	writeLine(0, "dV: " + String(dv) + " V");
 	writeLine(1, "flow: "+String(flux*1000));
+ Serial.print(dv);Serial.print(" ");Serial.println(flux);
 }

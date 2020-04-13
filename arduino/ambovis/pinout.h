@@ -5,12 +5,15 @@
 #define PIN_STEPPER_STEP 6
 #define PIN_STEPPER_DIRECTION 7
 #define PIN_EN 99
+<<<<<<< HEAD
 
+=======
+>>>>>>> features
 // Buzzer
 #define PIN_BUZZ 100
 
 // Stepper homing
-#define PIN_ENDSTOP 4
+#define PIN_ENDSTOP 5
 
 // Solenoid pine
 #define PIN_SOLENOID 39
@@ -37,9 +40,14 @@
 
 
 // #define PIN_BME_CS2  4  // sensor de presion 2
-#define PIN_ENC_SW  99
+#define PIN_ENC_SW  4
 #define PIN_ENC_CL  2
 #define PIN_ENC_DIR 3
+
+// IF ARDUINO UNO
+//#define PIN_ENC_CL  2
+//#define PIN_ENC_DIR 3
+
 
 
 #endif // ENCODER_H

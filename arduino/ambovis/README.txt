@@ -65,6 +65,10 @@ LCD 2 con display
 http://www.zonnepanelen.wouterlood.com/logging-barometric-pressure-with-an-i2c-device-and-an-arduino-sd-shield/
 MUY BUENO DISPLAY
 https://diyi0t.com/lcd-display-tutorial-for-arduino-and-esp8266/
+
+//INTERRUPTIONS IN ARDUINO MEGA
+https://forum.arduino.cc/index.php?topic=418776.0
+
 --------------------------------
 Visualizacion
 Con matplotlib
@@ -87,10 +91,17 @@ https://liliputing.com/2019/01/android-x86-8-1-released-lets-you-run-oreo-on-des
 
 
 ---------------------------------
+ONLINE SIMULATORS
+
+
 Encoder
 https://www.electronics-lab.com/project/rotary-encoder-arduino-mega-nokia-5110-display-tutorial/
-
 https://www.reddit.com/r/arduino/comments/5eox8g/best_rotary_encoder_library_on_any_pin/
+
+https://arduino.stackexchange.com/questions/43774/arduino-mega-2560-interrupt-pins-and-port-mapping-with-rotary-encoder
+
+//INSTALL APP
+https://stackoverflow.com/questions/7076240/install-an-apk-file-from-command-prompt
 
 
 mpx5050

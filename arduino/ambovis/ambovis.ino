@@ -1,5 +1,7 @@
 //#define ACCEL_STEPPER 1
 //#ifdef LCD_I2C
+#define DEBUG_UPDATE 1 //
+//#define DEBUG_OFF 1 //Release version
 
 #include "defaults.h"
 #include "pinout.h"
@@ -48,7 +50,7 @@ FlexyStepper * stepper = new FlexyStepper();
 // - EXTERNAL VARIABLES //
 //////////////////////////
 float pressure_p;   //EXTERN!!
-byte vent_mode = VENTMODE_VCL; //0
+byte vent_mode = VENTMODE_PCL; //0
 Adafruit_BMP280 _pres1Sensor;
 float pressure_p0;
 float pressure_max;
@@ -59,6 +61,7 @@ unsigned long last_stepper_time;
 unsigned long last_vent_time;
 unsigned long time;
 
+//Encoder from https://www.instructables.com/id/Improved-Arduino-Rotary-Encoder-Reading/
 int pinA = PIN_ENC_CL; // Our first hardware interrupt pin is digital pin 2
 int pinB = PIN_ENC_DIR; // Our second hardware interrupt pin is digital pin 3
 byte aFlag = 0; // let's us know when we're expecting a rising edge on pinA to signal that the encoder has arrived at a detent
@@ -66,6 +69,10 @@ byte bFlag = 0; // let's us know when we're expecting a rising edge on pinB to s
 byte encoderPos = 0; //this variable stores our current value of encoder position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
 byte oldEncPos = 0; //stores the last encoder position value so we can compare to the current reading and see if it has changed (so we know when to print to the serial monitor)
 byte reading = 0; //somewhere to store the direct values we read from our interrupt pins before checking to see if we have moved a whole detent
+
+byte max_sel,min_sel; //According to current selection
+
+void display_lcd ( );
 
 //
 void PinA() {
@@ -288,10 +295,8 @@ void setup() {
   attachInterrupt(0, PinA, RISING); // set an interrupt on PinA, looking for a rising edge signal and executing the "PinA" Interrupt Service Routine (below)
   attachInterrupt(1, PinB, RISING); // set an interrupt on PinB, looking for a rising edge signal and executing the "PinB" Interrupt Service Routine (below)
   pinMode(PIN_ENC_SW, INPUT_PULLUP);
-  //  btnState=digitalRead(9);
-  //  lastButtonPress=millis();
-
-  //  menu();
+  //btnState=digitalRead(9);
+  lastButtonPress=millis();
 
   lastReadSensor = millis();
   lastState = ventilation->getState();
@@ -316,7 +321,7 @@ bool update_display = false;
 
 void loop() {
 
-  //  check_encoder();
+  //check_encoder();
 
   time = millis();
   //  unsigned long static lastSendConfiguration = 0;
@@ -343,7 +348,10 @@ void loop() {
     //    SensorPressureValues_t pressure = sensors -> getRelativePressureInCmH20();
     //
     sensors -> readVolume();
-    Serial.println(pressure_p - pressure_p0);
+    #ifdef DEBUG_OFF
+      Serial.println(pressure_p - pressure_p0);
+    #endif
+        
     //Serial.print(",");Serial.println(sensors->getFlow());
     //    Serial.print("Flow: ");Serial.println(sensors->getFlow());
     //    SensorVolumeValue_t volume = sensors -> getVolume();
@@ -390,6 +398,8 @@ void loop() {
         //                Serial2.println("EOC " + String(lastPressure.maxPressure) + " " +
         //                    String(lastPressure.minPressure) + " " + String(volume.volume));
         // Serial.print("Insuflated Vol: ");Serial.println(ventilation->getInsVol());
+        
+        Serial.print("Insufflated vol: ");Serial.println(ventilation->getInsVol());
         display_lcd();
       }
       else if (state == State_Exsufflation) //CANNOT REPEAT getstate because init state are TOO SHORTs!
@@ -420,77 +430,121 @@ void loop() {
 #endif
 
   //LUCIANO----------------------
-  //if (millis()-last_vent_time>20){
+  if (millis()-last_vent_time>TIME_BASE){
   ventilation -> update();
   last_vent_time = millis();
-  //}
-
-  if (millis() - last_stepper_time > stepper_time) {
-#ifdef ACCEL_STEPPER
-    stepper->run();
-#else
+  }
+//
+//  if (millis() - last_stepper_time > stepper_time) {
+//#ifdef ACCEL_STEPPER
+//    stepper->run();
+//#else
     stepper -> processMovement(); //LUCIANO
-    //Serial.print("Speed");Serial.println(_stepperSpeed);
-#endif
-
-    if (changed_options && (millis() - last_update_display) > time_update_display) {
+//    //Serial.print("Speed");Serial.println(_stepperSpeed);
+//#endif
+//  }
+//  
+  if (changed_options && (millis() - last_update_display) > time_update_display) {
       display_lcd();
       last_update_display = millis();
       ventilation->change_config(options);
       changed_options = false;
     }
-  }
+  
 
-  ///////////--- LUCIANO
 }
 //
-////LUCIANO
+
 void check_encoder()
 {
   //LUCIANO------------------------
   byte btnState = digitalRead(PIN_ENC_SW);
-
+  //SELECTION: VENT_MODE/BMP/I:E/VOL/PIP/PEEP 
   if (btnState == LOW) {
     if (millis() - lastButtonPress > 50) {
       //Serial.println(curr_sel);
       curr_sel++; //NOT +=1, is a byte
-      if (curr_sel > 2)
+      if (curr_sel > 5)
         curr_sel = 0;
+      switch (curr_sel){
+        case 0: 
+          min_sel=0;max_sel=1;
+          encoderPos=oldEncPos=vent_mode;
+        break;
+        case 1: 
+          min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
+        break;
+        case 2:
+
+        break;
+        case 3: 
+          min_sel=DEFAULT_MIN_VOLUMEN_TIDAL;max_sel=DEFAULT_MAX_VOLUMEN_TIDAL;
+        break;
+        case 4: 
+          min_sel=20;max_sel=40;
+        break;
+        case 5: 
+          min_sel=5;max_sel=20;
+        break;
+      }
     }
     lastButtonPress = millis();
   }
 
 
   if (oldEncPos != encoderPos) {
-    Serial.println(encoderPos);
-    oldEncPos = encoderPos;
-    switch (curr_sel) {
-      case 0:
-        options.tidalVolume = encoderPos;
-        break;
-      case 1:
-        options.respiratoryRate = encoderPos;
-        break;
-      case 2:
-        //A_pres=encoderPos;
-        break;
-    }
-    changed_options = true;
-  }
+    if ( encoderPos > max_sel ) {
+       encoderPos=max_sel; 
+    } else if ( encoderPos < min_sel ) {
+            encoderPos=min_sel;
+      } else {
+      
+      Serial.println(encoderPos);
+      oldEncPos = encoderPos;
+      switch (curr_sel) {
+        case 0:
+          vent_mode = encoderPos;
+          break;
+        case 1:
+          options.respiratoryRate = encoderPos;
+          break;
+        case 2:
+
+          break;
+        case 3:
+          options.tidalVolume = encoderPos;
+          break;
+        case 4:
+          options.peakInspiratoryPressure = encoderPos;
+          break;
+        case 5:
+          options.peakEspiratoryPressure = encoderPos;
+          break;
+      }
+      changed_options = true;
+    }//Valid range
+  }//oldEncPos != encoderPos and valid between range
 
   if (curr_sel != old_curr_sel) {
     switch (curr_sel) {
       case 0:
-        encoderPos = oldEncPos = options.tidalVolume;
+        encoderPos = oldEncPos = vent_mode;
         break;
       case 1:
         encoderPos = oldEncPos = options.respiratoryRate;
         break;
       case 2:
-        //    encoderPos=oldEncPos=A_pres;
+        encoderPos = oldEncPos = options.tidalVolume;
+        break;
+      case 3:
+        encoderPos = oldEncPos = options.peakInspiratoryPressure;
+        break;
+      case 4:
+        encoderPos = oldEncPos = options.peakEspiratoryPressure;
         break;
     }
     old_curr_sel = curr_sel;
+    changed_options = true;
     Serial.println("Opciones cambiadas");
   }
   //----
@@ -499,32 +553,30 @@ void check_encoder()
 
 
 char tempstr[5];
-void display_lcd()
-{
+void display_lcd ( ) {
   lcd.clear();
-  //  writeLine(0, "Mod: VCtrl",10);
-  //  writeLine(0, "BPM:" + String(options.respiratoryRate),1);
-  //  writeLine(1, "Vml:" + String(options.tidalVolume),1);
-  //  dtostrf(ventilation->getInsVol(), 4, 1, tempstr);
-  //  writeLine(1, String(tempstr),10);
-  //  writeLine(2, "PIP:"+String(options.peakInspiratoryPressure),1);
-  //  writeLine(3, "PEEP:"+String(options.peakEspiratoryPressure),1);
-  writeLine(0, "MOD:VCL", 1); writeLine(0, "SET | ME", 11);
+  if ( vent_mode == VENTMODE_VCL ) {
+    writeLine(0, "MOD:VCL", 1); 
+    writeLine(1, "V:" + String(options.tidalVolume), 10);    
+    writeLine(2, "PIP : - ", 8);
+  } else {
+    if ( vent_mode == VENTMODE_PCL ) {
+      writeLine(0, "MOD:PCL", 1); 
+      writeLine(2, "PIP :" + String(options.peakInspiratoryPressure), 8);
+      writeLine(1, "V: - ", 10);
+    }
+  }
+  
+  writeLine(0, "SET | ME", 11);
   writeLine(1, "BPM:" + String(options.respiratoryRate), 1);
   writeLine(2, "I:E:", 1);
-  writeLine(1, "V:" + String(options.tidalVolume), 10);
-  //if (mode==){
-  //Remove decimal part
+
   dtostrf(ventilation->getInsVol(), 4, 0, tempstr);
   writeLine(1, String(tempstr), 15);
-  //}
-
-  //  dtostrf(ventilation->getInsVol(), 4, 1, tempstr);
-  //  writeLine(1, String(tempstr),10);
-  writeLine(2, "PIP :" + String(options.peakInspiratoryPressure), 8);
+      
   dtostrf(pressure_max - pressure_p0, 2, 0, tempstr);
-  Serial.println(pressure_max);
   writeLine(2, String(tempstr), 16);
+  
   writeLine(3, "PEEP:" + String(options.peakEspiratoryPressure), 8);
 
 }
