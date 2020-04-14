@@ -528,6 +528,11 @@ void check_encoder()
 
 char tempstr[5];
 void display_lcd ( ) {
+  
+  lcd_clearxy(5,1,3); lcd_clearxy(12,0,3);
+  lcd_clearxy(5,2,2); lcd_clearxy(13,2,2);
+  lcd_clearxy(13,3,2);
+  
   if ( vent_mode == VENTMODE_VCL ) {
     writeLine(0, "MOD:VCL", 1); 
     writeLine(1, "V:" + String(options.tidalVolume), 10);    
@@ -540,9 +545,6 @@ void display_lcd ( ) {
     }
   }
   
-  lcd_clearxy(5,1,3); lcd_clearxy(12,0,3);
-  lcd_clearxy(5,2,2); lcd_clearxy(13,2,2);
-  lcd_clearxy(13,3,2);
     
   writeLine(0, "SET | ME", 11);
   writeLine(1, "BPM:" + String(options.respiratoryRate), 1);
