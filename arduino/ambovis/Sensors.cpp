@@ -10,12 +10,14 @@
 
 unsigned int Sensors::begin(void) {
     // Arrancar sensores de presion 1 y 2
-//#if 0
-#if 1
 
-//    //if(!_pres1Sensor.begin())
+  #ifdef BMP_I2C
     if(!_pres1Sensor.begin(0x76))
         return 1;
+  #else
+    if(!_pres1Sensor.begin())
+      return 1;
+  #endif
 //        
 //    if(!_pres1Sensor.begin()) {
 //        return 1;
@@ -40,7 +42,7 @@ unsigned int Sensors::begin(void) {
 //                      Adafruit_BME280::SAMPLING_NONE,   /* humidity sampling */
 //                      Adafruit_BME280::FILTER_X4,      /* Filtering. */
 //                      Adafruit_BME280::STANDBY_MS_0_5); /* Standby time. */
-#endif
+
     return 0;
 }
 
@@ -51,15 +53,17 @@ Sensors::Sensors(void) {
 
 void Sensors::_init () {
 // LUCIANO ORIGINALLY WAS if 0
-#if 1
-//#if 0
-// IF SPI CONNECTION
-//    _pres1Sensor = Adafruit_BMP280(
-//    PIN_BME_CS1,
-//    PIN_BME_MOSI,
-//    PIN_BME_MISO,
-//    PIN_BME_SCK
-//    );
+
+  #ifdef BMP_I2C
+  #else
+      _pres1Sensor = Adafruit_BMP280(
+      PIN_BME_CS1,
+      PIN_BME_MOSI,
+      PIN_BME_MISO,
+      PIN_BME_SCK
+      );
+        Wire.begin();
+  #endif
 
 //    _pres2Sensor = Adafruit_BMP280(
 //    PIN_BME_CS2,
@@ -67,8 +71,6 @@ void Sensors::_init () {
 //    PIN_BME_MISO,
 //    PIN_BME_SCK
 //    );
-    #endif
-//        Wire.begin();
 
     _errorCounter = 0;
     _state = SensorStateFailed;

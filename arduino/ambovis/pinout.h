@@ -28,12 +28,15 @@
 #endif
 
 // BME280 SPI for Arduino Nano or Mega 128
-#define PIN_BME_SCK  99 //SCL
-#define PIN_BME_MISO 99 //SDO
-#define PIN_BME_MOSI 99 //SDA-SDI
-#define PIN_BME_CS1  99 // sensor de presion 1
-#define PIN_BME_CS2  99 // sensor de presion 1
+#ifdef BMP_I2C
 
+#else //SPI
+//#define PIN_BME_SCK  13 //SCL
+//#define PIN_BME_MISO 12 //SDO
+//#define PIN_BME_MOSI 11 //SDA-SDI
+//#define PIN_BME_CS1  10 // sensor de presion 1
+//#define PIN_BME_CS2  99 // sensor de presion 1
+#endif
 
 // #define PIN_BME_CS2  4  // sensor de presion 2
 #define PIN_ENC_SW  4

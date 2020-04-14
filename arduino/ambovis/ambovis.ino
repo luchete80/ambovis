@@ -1,8 +1,3 @@
-//#define ACCEL_STEPPER 1
-//#ifdef LCD_I2C
-//#define DEBUG_UPDATE 1 //
-//#define DEBUG_OFF 1 //Release version
-
 #include "defaults.h"
 #include "pinout.h"
 #include "calc.h"
@@ -361,7 +356,7 @@ void loop() {
     //
     sensors -> readVolume();
     //#ifdef DEBUG_OFF
-      //Serial.println(pressure_p - pressure_p0);
+     //Serial.println(pressure_p - pressure_p0);
      // Serial.print(_flux);Serial.println(_mlInsVol);
     //#endif
         
