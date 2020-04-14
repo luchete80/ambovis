@@ -9,7 +9,7 @@
 //#define DEBUG_UPDATE 1 //
 #define DEBUG_OFF 1 //Release version
 
-#define BMP_I2C 1  //Pressure Sensor
+//#define BMP_I2C 1  //Pressure Sensor
 //#define LCD_I2C 1 //IT DOES NOT WORK WITH ENCODER
 
 
@@ -18,7 +18,7 @@
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE 20                 // msec
-#define TIME_SENSOR 50               // msec
+#define TIME_SENSOR 71               // msec
 #define TIME_SEND_CONFIGURATION 2000 // msec
 
 // Sensores
@@ -38,9 +38,9 @@
 //#define STEPPER_LOWEST_POSITION     (STEPPER_MICROSTEPS *  -100)   // Steps
 //#define STEPPER_HIGHEST_POSITION    (STEPPER_MICROSTEPS *   100)   // Steps
 #define STEPPER_LOWEST_POSITION     (-10)   // Steps
-#define STEPPER_HIGHEST_POSITION    ( 1000)   // Steps
+#define STEPPER_HIGHEST_POSITION    ( 1200)   // Steps
 #define STEPPER_SPEED_DEFAULT       (200)   // Steps/s
-#define STEPPER_SPEED_MAX           (600)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
+#define STEPPER_SPEED_MAX           (1200)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_SPEED_MAX_VCL       (1200)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_SPEED_MAX_EXSUFF    (1600)
 #define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  400)   // Steps/s2
@@ -97,6 +97,7 @@ typedef struct {
     short peakInspiratoryPressure;
     short peakEspiratoryPressure;
     float triggerThreshold;
+    byte percInspEsp;
     bool hasTrigger;
     unsigned short tidalVolume;  //in ml
     byte modeCtl;
@@ -112,5 +113,6 @@ typedef struct {
 
 //general variables
 extern byte vent_mode;
+extern bool send_data;
 
 #endif // DEFAULTS_H

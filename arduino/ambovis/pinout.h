@@ -31,17 +31,17 @@
 #ifdef BMP_I2C
 
 #else //SPI
-//#define PIN_BME_SCK  13 //SCL
-//#define PIN_BME_MISO 12 //SDO
-//#define PIN_BME_MOSI 11 //SDA-SDI
-//#define PIN_BME_CS1  10 // sensor de presion 1
-//#define PIN_BME_CS2  99 // sensor de presion 1
+#define PIN_BME_SCK  3 //SCL
+#define PIN_BME_MISO 2 //SDO
+#define PIN_BME_MOSI 1 //SDA-SDI
+#define PIN_BME_CS1  0 // sensor de presion 1
+#define PIN_BME_CS2  99 // sensor de presion 1
 #endif
 
 // #define PIN_BME_CS2  4  // sensor de presion 2
-#define PIN_ENC_SW  4
-#define PIN_ENC_CL  2
-#define PIN_ENC_DIR 3
+#define PIN_ENC_SW  99
+#define PIN_ENC_CL  99
+#define PIN_ENC_DIR 99
 
 // IF ARDUINO UNO
 //#define PIN_ENC_CL  2

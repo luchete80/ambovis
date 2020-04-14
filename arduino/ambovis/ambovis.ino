@@ -45,7 +45,7 @@ FlexyStepper * stepper = new FlexyStepper();
 // - EXTERNAL VARIABLES //
 //////////////////////////
 float pressure_p;   //EXTERN!!
-byte vent_mode = VENTMODE_VCL; //0
+byte vent_mode = VENTMODE_PCL; //0
 Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
 float pressure_p0;
@@ -54,6 +54,7 @@ float pressure_min;
 float _mlInsVol,_mllastInsVol;
 float _flux,_flux_0;
 //float _stepperSpeed;
+bool send_data=false;
 
 extern byte stepper_time = 50;
 unsigned long last_stepper_time;
@@ -221,17 +222,17 @@ void setup() {
   sensors = new Sensors();
 
   int check = sensors -> begin();
-  #ifdef DEBUG_UPDATE
-    if (check) {
-      if (check == 1) {
-        Serial.println(F("Could not find sensor BME280 number 1, check wiring!"));
-        writeLine("Sensor BMP ERROR");
-      } else if (check == 2) {
-        Serial.println(F("Could not find sensor BME280 number 2, check wiring!"));
-      }
-      while (1);
-    }
-  #endif
+//  #ifdef DEBUG_UPDATE
+//    if (check) {
+//      if (check == 1) {
+//        Serial.println(F("Could not find sensor BME280 number 1, check wiring!"));
+//        writeLine("Sensor BMP ERROR");
+//      } else if (check == 2) {
+//        Serial.println(F("Could not find sensor BME280 number 2, check wiring!"));
+//      }
+//      while (1);
+//    }
+//  #endif
 
   // PID
   pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
@@ -247,6 +248,7 @@ void setup() {
 
   // TODO: Añadir aquí la configuarcion inicial desde puerto serie
   options.respiratoryRate = DEFAULT_RPM;
+  options.percInspEsp=3;//1:1 to 1:4, is denom
   options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
   options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
   options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
@@ -355,10 +357,10 @@ void loop() {
     //    SensorPressureValues_t pressure = sensors -> getRelativePressureInCmH20();
     //
     sensors -> readVolume();
-    //#ifdef DEBUG_OFF
-     //Serial.println(pressure_p - pressure_p0);
-     // Serial.print(_flux);Serial.println(_mlInsVol);
-    //#endif
+//    #ifdef DEBUG_OFF
+      Serial.println(byte(pressure_p));// - pressure_p0));Serial.print(" ");
+//     Serial.println(byte(_mlInsVol));
+//    #endif
         
     //Serial.print(",");Serial.println(sensors->getFlow());
     //    Serial.print("Flow: ");Serial.println(sensors->getFlow());
@@ -463,6 +465,8 @@ void check_encoder()
           min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
         break;
         case 3:
+          encoderPos=oldEncPos=options.percInspEsp;
+          min_sel=1;max_sel=4;        
         break;
         case 4: 
           encoderPos=oldEncPos=options.tidalVolume;
@@ -504,7 +508,7 @@ void check_encoder()
             options.respiratoryRate = encoderPos;
             break;
           case 3:
-  
+            options.percInspEsp=encoderPos;
             break;
           case 4:
             options.tidalVolume = encoderPos;
@@ -517,7 +521,6 @@ void check_encoder()
             break;
         }
         changed_options = true;
-        Serial.print("Volume: ");Serial.println(options.tidalVolume);
       }//Valid range
   
     }//oldEncPos != encoderPos and valid between range
@@ -548,11 +551,13 @@ void display_lcd ( ) {
     
   writeLine(0, "SET | ME", 11);
   writeLine(1, "BPM:" + String(options.respiratoryRate), 1);
-  writeLine(2, "I:E:", 1);
+  writeLine(2, "IE:1:", 1);
 
   dtostrf(ventilation->getInsVol(), 4, 0, tempstr);
   writeLine(1, String(tempstr), 15);
-      
+
+  writeLine(2, String(options.percInspEsp), 6);
+  
   dtostrf(pressure_max - pressure_p0, 2, 0, tempstr);
   writeLine(2, String(tempstr), 16);  
    

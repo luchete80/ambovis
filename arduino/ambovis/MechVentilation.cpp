@@ -114,7 +114,8 @@ void MechVentilation::setPeakEspiratoryPressure(float peep)
 void MechVentilation::_setInspiratoryCycle(void)
 {
     float timeoutCycle = ((float)60) * 1000 / ((float)_rpm); // Tiempo de ciclo en msegundos
-    _timeoutIns = timeoutCycle * DEFAULT_POR_INSPIRATORIO / 100;
+    //_timeoutIns = timeoutCycle * DEFAULT_POR_INSPIRATORIO / 100;
+    _timeoutIns = timeoutCycle / (float(_percIE));
     _timeoutEsp = (timeoutCycle) - _timeoutIns;
 }
 
@@ -314,10 +315,10 @@ void MechVentilation::update(void)
                     if (_stepperSpeed > STEPPER_SPEED_MAX)
                       _stepperSpeed=STEPPER_SPEED_MAX;
                } 
-               //#ifdef DEBUG_UPDATE
+               #ifdef DEBUG_UPDATE
                 Serial.print("Speed: "); Serial.println(_stepperSpeed);       
                // Serial.print("pip 30, dp");Serial.println(pressure_p - pressure_p0);                
-               //#endif
+               #endif
                
                 
 //               Serial.print("Speed");Serial.println(_stepperSpeed);
@@ -329,7 +330,7 @@ void MechVentilation::update(void)
               #else
               _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
               _stepper->setAccelerationInStepsPerSecondPerSecond(
-                      STEPPER_ACC_EXSUFFLATION);
+                      STEPPER_ACC_INSUFFLATION);
 //             
               if (_stepperSpeed >= 0){
                   _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
@@ -527,6 +528,8 @@ void MechVentilation::_init(
     _pip = options.peakInspiratoryPressure;
     _peep = options.peakEspiratoryPressure;
     _tidalVol=options.tidalVolume;
+    _percIE= options.percInspEsp;
+    
     setRPM(_rpm);
     _hasTrigger = options.hasTrigger;
     if (_hasTrigger)
@@ -576,6 +579,7 @@ void MechVentilation::change_config(VentilationOptions_t options)
     _pip = options.peakInspiratoryPressure;
     _peep = options.peakEspiratoryPressure;
     _tidalVol=options.tidalVolume;
+    _percIE= options.percInspEsp;
     setRPM(_rpm); //Include set inspiratory cycle
 
     _mode = options.modeCtl;
