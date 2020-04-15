@@ -5,10 +5,7 @@
 #define PIN_STEPPER_STEP 6
 #define PIN_STEPPER_DIRECTION 7
 #define PIN_EN 99
-<<<<<<< HEAD
 
-=======
->>>>>>> features
 // Buzzer
 #define PIN_BUZZ 100
 
