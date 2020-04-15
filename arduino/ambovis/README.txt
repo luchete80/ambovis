@@ -84,6 +84,7 @@ https://problemsolvingwithpython.com/11-Python-and-External-Hardware/11.04-Readi
 --------------------------------
 Venturi
 http://laplace.us.es/wiki/index.php/Tubo_de_Venturi
+https://fisica.laguia2000.com/dinamica-clasica/efecto-venturi
 
 --------------------------------
 ANDROID OREO EMULATOR

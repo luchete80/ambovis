@@ -114,7 +114,8 @@ void MechVentilation::setPeakEspiratoryPressure(float peep)
 void MechVentilation::_setInspiratoryCycle(void)
 {
     float timeoutCycle = ((float)60) * 1000 / ((float)_rpm); // Tiempo de ciclo en msegundos
-    _timeoutIns = timeoutCycle * DEFAULT_POR_INSPIRATORIO / 100;
+    //_timeoutIns = timeoutCycle * DEFAULT_POR_INSPIRATORIO / 100;
+    _timeoutIns = timeoutCycle / (float(_percIE));
     _timeoutEsp = (timeoutCycle) - _timeoutIns;
 }
 
@@ -286,7 +287,7 @@ void MechVentilation::update(void)
         {
             if (!wait_NoMove){
   
-              //Serial.print("volue:");Serial.println(_mlInsVol);
+              //Serial.print("volume:");Serial.println(_mlInsVol);
               //_mlInsVol+=float(_flux*(TIME_BASE));//flux in l and time in msec, results in ml
               //_mlInsVol+=float((_flux-_flux_0)*(millis()-last_vent_time));//flux in l and time in msec, results in ml 
               _mlInsVol+=_flux*float((millis()-last_vent_time));//flux in l and time in msec, results in ml                  
@@ -294,7 +295,7 @@ void MechVentilation::update(void)
                 //flujo remanente   
                 float rem_flux;
                if(_mlInsVol<0) //avoid first instance errors
-                rem_flux=_tidalVol/((float)(_timeoutIns-_msecTimerCnt) * DEFAULT_FRAC_CYCLE_VCL_INSUFF *1000);//En [ml/s]
+                rem_flux=_tidalVol/((float)(_timeoutIns-_msecTimerCnt) * DEFAULT_FRAC_CYCLE_VCL_INSUFF)*1000;//En [ml/s]
                else
                 rem_flux=(_tidalVol-_mlInsVol)/((float)(_timeoutIns-_msecTimerCnt) * DEFAULT_FRAC_CYCLE_VCL_INSUFF )*1000.;
                //#ifdef DEBUG_UPDATE
@@ -316,7 +317,7 @@ void MechVentilation::update(void)
                } 
                #ifdef DEBUG_UPDATE
                 Serial.print("Speed: "); Serial.println(_stepperSpeed);       
-                Serial.print("pip 30, dp");Serial.println(pressure_p - pressure_p0);                
+               // Serial.print("pip 30, dp");Serial.println(pressure_p - pressure_p0);                
                #endif
                
                 
@@ -329,16 +330,16 @@ void MechVentilation::update(void)
               #else
               _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
               _stepper->setAccelerationInStepsPerSecondPerSecond(
-                      STEPPER_ACC_EXSUFFLATION);
+                      STEPPER_ACC_INSUFFLATION);
 //             
-              if (_stepperSpeed >= 0){
-                  _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
-              }
-              else{
-                  _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
-//                  if (!_stepper->motionComplete())
-//                    _stepper->setTargetPositionToStop();
-              }
+//              if (_stepperSpeed >= 0){
+//                  _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
+//              }
+//              else{
+//                  _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
+////                  if (!_stepper->motionComplete())
+////                    _stepper->setTargetPositionToStop();
+//              }
               
               #endif
               //Serial.println("CUrrtime");Serial.println(_msecTimerCnt);
@@ -527,6 +528,8 @@ void MechVentilation::_init(
     _pip = options.peakInspiratoryPressure;
     _peep = options.peakEspiratoryPressure;
     _tidalVol=options.tidalVolume;
+    _percIE= options.percInspEsp;
+    
     setRPM(_rpm);
     _hasTrigger = options.hasTrigger;
     if (_hasTrigger)
@@ -576,6 +579,7 @@ void MechVentilation::change_config(VentilationOptions_t options)
     _pip = options.peakInspiratoryPressure;
     _peep = options.peakEspiratoryPressure;
     _tidalVol=options.tidalVolume;
+    _percIE= options.percInspEsp;
     setRPM(_rpm); //Include set inspiratory cycle
 
     _mode = options.modeCtl;

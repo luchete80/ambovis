@@ -20,10 +20,10 @@
 // En la librería desarrollada por Adafruit, el bus I2C utiliza por defecto la dirección (0x77), para modificarlo hay que editar el fichero “Adafruit_BMP280.h”
 //y en la linea 37  #define BMP280_ADDRESS  (0x77) cambiamos la dirección (0x
 // BME280 SPI for Arduino Mega 256
-//#define PIN_BME_SCK  52
-//#define PIN_BME_MISO 50
-//#define PIN_BME_MOSI 51
-//#define PIN_BME_CS1  53 // sensor de presion 1
+#define PIN_BME_SCK  3
+#define PIN_BME_MISO 2
+#define PIN_BME_MOSI 1
+#define PIN_BME_CS1  0 // sensor de presion 1
 
 //Connect the SCK pin to Digital #13 but any pin can be used later
 //Connect the SDO MISO pin to Digital #12 but any pin can be used later
@@ -54,15 +54,15 @@
 #include "src/Adafruit_BMP280/Adafruit_BMP280.h"
 //#include "LiquidCrystal_I2C.h"
 #include <LiquidCrystal.h>
-LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
+//LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
 
-Adafruit_BMP280 bmp; // I2C
-//     Adafruit_BMP280 bmp(
-//    PIN_BME_CS1,
-//    PIN_BME_MOSI,
-//    PIN_BME_MISO,
-//    PIN_BME_SCK
-//    );
+//Adafruit_BMP280 bmp; // I2C
+     Adafruit_BMP280 bmp(
+    PIN_BME_CS1,
+    PIN_BME_MOSI,
+    PIN_BME_MISO,
+    PIN_BME_SCK
+    );
 //
 float presion,presion_0; // Almacena la presion atmosferica (Pa)
 float temperatura; // Almacena la temperatura (oC)
@@ -76,13 +76,13 @@ void setup() {
   Serial.begin(9600); // Inicia comunicacion serie
 
   //LUCIANO-------------
-  lcd.begin(20, 4);
-  //  //lcd.backlight();
-  lcd.clear();
+//  lcd.begin(20, 4);
+//  //  //lcd.backlight();
+//  lcd.clear();
 
 
-  if (!bmp.begin(0x76))//I2C
-    //if (!bmp.begin()) //SP
+//  if (!bmp.begin(0x76))//I2C
+    if (!bmp.begin()) //SP
     Serial.println("Could not find a valid BMP280 sensor, check wiring!"); // Inicia el sensor
   presion_0 = bmp.readPressure();
 }
@@ -112,13 +112,13 @@ void loop() {
   
   
   
-  lcd.setCursor(0, 0);
-  lcd.print("dp [cmH20]");
+//  lcd.setCursor(0, 0);
+//  lcd.print("dp [cmH20]");
   Serial.print("Analogico");Serial.println(analogRead(A1));
-  lcd.setCursor(0, 1);
-  lcd.print("BMP280 : "); lcd.print(presion);
-  lcd.setCursor(0, 2);
-  lcd.print("MPX5050: "); lcd.print(presion_mpx);
+//  lcd.setCursor(0, 1);
+//  lcd.print("BMP280 : "); lcd.print(presion);
+//  lcd.setCursor(0, 2);
+//  lcd.print("MPX5050: "); lcd.print(presion_mpx);
 
   delay(50);
 }

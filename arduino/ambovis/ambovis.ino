@@ -1,13 +1,10 @@
-//#define ACCEL_STEPPER 1
-//#ifdef LCD_I2C
-#define DEBUG_UPDATE 1 //
-#define DEBUG_OFF 1 //Release version
-
 #include "defaults.h"
 #include "pinout.h"
 #include "calc.h"
 #include "Sensors.h"
 #include "MechVentilation.h"
+#include "src/TimerOne/TimerOne.h"
+#include "src/TimerTwo/TimerTwo.h"
 
 #include "src/AutoPID/AutoPID.h"
 #ifdef ACCEL_STEPPER
@@ -59,6 +56,9 @@ float pressure_min;
 float _mlInsVol,_mllastInsVol;
 float _flux,_flux_0;
 //float _stepperSpeed;
+bool send_data=false;
+byte time_encoder=50;
+
 
 extern byte stepper_time = 50;
 unsigned long last_stepper_time;
@@ -182,9 +182,11 @@ void writeLine(int line, String message = "", int offsetLeft = 0) {
   lcd.print(message);
 }
 
-void lcd_clearxy(int x, int y) {
-  lcd.setCursor(x, y);
-  lcd.print(" ");
+void lcd_clearxy(int x, int y,int pos=1) {
+  for (int i=0;i<pos;i++) {
+      lcd.setCursor(x+i, y);
+      lcd.print(" ");
+  }
 }
 void lcd_selxy(int x, int y) {
   lcd.setCursor(x, y);
@@ -249,10 +251,8 @@ void setup() {
   digitalWrite(PIN_EN, HIGH);
 
   // TODO: Añadir aquí la configuarcion inicial desde puerto serie
-
-  options.height = DEFAULT_HEIGHT;
-  options.sex = DEFAULT_SEX;
   options.respiratoryRate = DEFAULT_RPM;
+  options.percInspEsp=3;//1:1 to 1:4, is denom
   options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
   options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
   options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
@@ -308,7 +308,6 @@ void setup() {
   attachInterrupt(1, PinB, RISING); // set an interrupt on PinB, looking for a rising edge signal and executing the "PinB" Interrupt Service Routine (below)
   pinMode(PIN_ENC_SW, INPUT_PULLUP);
   //btnState=digitalRead(9);
-  lastButtonPress=millis();
 
   lastReadSensor = millis();
   lastState = ventilation->getState();
@@ -324,6 +323,9 @@ void setup() {
   last_vent_time = millis();
 
   //Serial.print(",0,50");
+
+  Timer1.initialize(50);
+  Timer1.attachInterrupt(timer1Isr);
 }
 
 /**
@@ -362,10 +364,10 @@ void loop() {
     //    SensorPressureValues_t pressure = sensors -> getRelativePressureInCmH20();
     //
     sensors -> readVolume();
-    //#ifdef DEBUG_OFF
-      //Serial.println(pressure_p - pressure_p0);
-      Serial.print(_flux);Serial.println(_mlInsVol);
-    //#endif
+//    #ifdef DEBUG_OFF
+      Serial.println(pressure_p - pressure_p0);Serial.print(" ");
+//     Serial.println(byte(_mlInsVol));
+//    #endif
         
     //Serial.print(",");Serial.println(sensors->getFlow());
     //    Serial.print("Flow: ");Serial.println(sensors->getFlow());
@@ -398,6 +400,7 @@ void loop() {
     if (!update_display)
       if (ventilation->getCycleNum() != last_cycle && state == State_Exsufflation) {
         //Serial.print("Insuflated Vol: "); Serial.println(ventilation->getInsVol());
+        lcd.clear();  //display_lcd do not clear screnn in order to not blink
         display_lcd();
         update_display = true;
         last_cycle = ventilation->getCycleNum();
@@ -421,18 +424,18 @@ void loop() {
   ventilation -> update();
   last_vent_time = millis();
   }
-//
-  if (millis() - last_stepper_time > stepper_time) {
-#ifdef ACCEL_STEPPER
-    stepper->run();
-#else
-    stepper -> processMovement(); //LUCIANO
-    //Serial.print("Speed");Serial.println(_stepperSpeed);
-#endif
-  }
-//  
-  if (changed_options && (millis() - last_update_display) > time_update_display) {
-      display_lcd();
+
+//  if (millis() - last_stepper_time > stepper_time) {
+//#ifdef ACCEL_STEPPER
+//    stepper->run();
+//#else
+//    stepper -> processMovement(); //LUCIANO
+//    //Serial.print("Speed");Serial.println(_stepperSpeed);
+//#endif
+//  }
+  
+  if (changed_options && ( (millis() - last_update_display) > time_update_display) ) {
+      display_lcd();  //WITHOUT CLEAR!
       last_update_display = millis();
       ventilation->change_config(options);
       changed_options = false;
@@ -440,6 +443,17 @@ void loop() {
   
 
 }
+
+void timer1Isr(void)
+{
+    #ifdef ACCEL_STEPPER
+    stepper->run();
+    #else
+    stepper -> processMovement(); //LUCIANO
+    //Serial.print("Speed");Serial.println(_stepperSpeed);
+    #endif
+}
+
 //
 
 void check_encoder()
@@ -448,112 +462,98 @@ void check_encoder()
   byte btnState = digitalRead(PIN_ENC_SW);
   //SELECTION: VENT_MODE/BMP/I:E/VOL/PIP/PEEP 
   if (btnState == LOW) {
-    if (millis() - lastButtonPress > 50) {
+    if (millis() - lastButtonPress > 200) {
       //Serial.println(curr_sel);
       //Clean all marks
-      lcd_clearxy(0,0);
-      lcd_clearxy(0,1); lcd_clearxy(9,1);
-      lcd_clearxy(0,2); lcd_clearxy(7,2);
-      lcd_clearxy(7,3);
       
       curr_sel++; //NOT +=1, is a byte
-      if (curr_sel > 5)
+
+      if (vent_mode==VENTMODE_VCL && curr_sel==5) curr_sel++; //Not selecting pip in VCL
+      if (vent_mode==VENTMODE_PCL && curr_sel==4) curr_sel++; //Not selecting pip in VCL 
+      
+      if (curr_sel > 6)
         curr_sel = 0;
       switch (curr_sel){
-        case 0: 
+        case 1: 
           min_sel=0;max_sel=1;
           encoderPos=oldEncPos=vent_mode;
-          lcd_selxy(0,0);
         break;
-        case 1: 
+        case 2: 
+          encoderPos=oldEncPos=options.respiratoryRate;
           min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
-          lcd_selxy(0,1);
         break;
-        case 2:
-          lcd_selxy(0,2);
-        break;
-        case 3: 
-          min_sel=DEFAULT_MIN_VOLUMEN_TIDAL;max_sel=DEFAULT_MAX_VOLUMEN_TIDAL;
-          lcd_selxy(9,1);
+        case 3:
+          encoderPos=oldEncPos=options.percInspEsp;
+          min_sel=1;max_sel=4;        
         break;
         case 4: 
-          min_sel=20;max_sel=40;
-          lcd_selxy(7,2);
+          encoderPos=oldEncPos=options.tidalVolume;
+          min_sel=DEFAULT_MIN_VOLUMEN_TIDAL;max_sel=DEFAULT_MAX_VOLUMEN_TIDAL;
         break;
         case 5: 
+          encoderPos=oldEncPos=options.peakInspiratoryPressure;
+          min_sel=20;max_sel=40;
+        break;
+        case 6: 
+          encoderPos=oldEncPos=options.peakEspiratoryPressure;
           min_sel=5;max_sel=20;
-          lcd_selxy(7,3);
         break;
       }
+
+      old_curr_sel = curr_sel;
+      changed_options = true;
     }
     lastButtonPress = millis();
   }
 
 
   if (oldEncPos != encoderPos) {
-    if ( encoderPos > max_sel ) {
-       encoderPos=oldEncPos=max_sel; 
-    } else if ( encoderPos < min_sel ) {
-        encoderPos=oldEncPos=min_sel;
-      } 
-// else {
-//      
-      Serial.println(encoderPos);
-//      oldEncPos = encoderPos;
-      switch (curr_sel) {
-        case 0:
-          vent_mode = encoderPos;
-          break;
-        case 1:
-          options.respiratoryRate = encoderPos;
-          break;
-        case 2:
 
-          break;
-        case 3:
-          options.tidalVolume = encoderPos;
-          break;
-        case 4:
-          options.peakInspiratoryPressure = encoderPos;
-          break;
-        case 5:
-          options.peakEspiratoryPressure = encoderPos;
-          break;
-      }
-//    }//Valid range
-    changed_options = true;
-  }//oldEncPos != encoderPos and valid between range
-//
-  if (curr_sel != old_curr_sel) {
-    switch (curr_sel) {
-      case 0:
-        encoderPos = oldEncPos = vent_mode;
-        break;
-      case 1:
-        encoderPos = oldEncPos = options.respiratoryRate;
-        break;
-      case 2:
-        encoderPos = oldEncPos = options.tidalVolume;
-        break;
-      case 3:
-        encoderPos = oldEncPos = options.peakInspiratoryPressure;
-        break;
-      case 4:
-        encoderPos = oldEncPos = options.peakEspiratoryPressure;
-        break;
-    }
-    old_curr_sel = curr_sel;
-    changed_options = true;
-    Serial.println("Opciones cambiadas");
+    if (curr_sel != 0) {
+      if ( encoderPos > max_sel ) {
+         encoderPos=oldEncPos=max_sel; 
+      } else if ( encoderPos < min_sel ) {
+          encoderPos=oldEncPos=min_sel;
+        } else {
+       
+        Serial.println(encoderPos);
+        oldEncPos = encoderPos;
+        switch (curr_sel) {
+          case 1:
+            vent_mode = encoderPos;
+            break;
+          case 2:
+            options.respiratoryRate = encoderPos;
+            break;
+          case 3:
+            options.percInspEsp=encoderPos;
+            break;
+          case 4:
+            options.tidalVolume = encoderPos;
+            break;
+          case 5:
+            options.peakInspiratoryPressure = encoderPos;
+            break;
+          case 6:
+            options.peakEspiratoryPressure = encoderPos;
+            break;
+        }
+        changed_options = true;
+      }//Valid range
+  
+    }//oldEncPos != encoderPos and valid between range
   }
-  //----
 }
 
 
 
 char tempstr[5];
 void display_lcd ( ) {
-  //lcd.clear();
+  
+  lcd_clearxy(5,1,3); lcd_clearxy(12,0,3);
+  lcd_clearxy(5,2,2); lcd_clearxy(13,2,2);
+  lcd_clearxy(13,3,2);
+  
   if ( vent_mode == VENTMODE_VCL ) {
     writeLine(0, "MOD:VCL", 1); 
     writeLine(1, "V:" + String(options.tidalVolume), 10);    
@@ -566,18 +566,41 @@ void display_lcd ( ) {
     }
   }
   
+    
   writeLine(0, "SET | ME", 11);
   writeLine(1, "BPM:" + String(options.respiratoryRate), 1);
-  writeLine(2, "I:E:", 1);
+  writeLine(2, "IE:1:", 1);
 
   dtostrf(ventilation->getInsVol(), 4, 0, tempstr);
   writeLine(1, String(tempstr), 15);
-      
+
+  writeLine(2, String(options.percInspEsp), 6);
+  
   dtostrf(pressure_max - pressure_p0, 2, 0, tempstr);
   writeLine(2, String(tempstr), 16);  
    
   writeLine(3, "PEEP:" + String(options.peakEspiratoryPressure), 8);
   dtostrf(pressure_min - pressure_p0, 2, 0, tempstr);
   writeLine(3, String(tempstr), 16);
+
+  lcd_clearxy(0,0);
+  lcd_clearxy(0,1);lcd_clearxy(9,1);
+  lcd_clearxy(0,2);lcd_clearxy(7,2);
+  lcd_clearxy(7,3);
+  
+  switch(curr_sel){
+        case 1: 
+          lcd_selxy(0,0);break;
+        case 2: 
+          lcd_selxy(0,1);break;
+        case 3:
+          lcd_selxy(0,2);break;
+        case 4: 
+          lcd_selxy(9,1);break;
+        case 5: 
+          lcd_selxy(7,2);break;
+        case 6: 
+          lcd_selxy(7,3);break;
+    }
 
 }
