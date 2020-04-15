@@ -3,6 +3,8 @@
 #include "calc.h"
 #include "Sensors.h"
 #include "MechVentilation.h"
+#include "src/TimerOne/TimerOne.h"
+#include "src/TimerTwo/TimerTwo.h"
 
 #include "src/AutoPID/AutoPID.h"
 #ifdef ACCEL_STEPPER
@@ -55,6 +57,8 @@ float _mlInsVol,_mllastInsVol;
 float _flux,_flux_0;
 //float _stepperSpeed;
 bool send_data=false;
+byte time_encoder=50;
+
 
 extern byte stepper_time = 50;
 unsigned long last_stepper_time;
@@ -222,17 +226,17 @@ void setup() {
   sensors = new Sensors();
 
   int check = sensors -> begin();
-//  #ifdef DEBUG_UPDATE
-//    if (check) {
-//      if (check == 1) {
-//        Serial.println(F("Could not find sensor BME280 number 1, check wiring!"));
-//        writeLine("Sensor BMP ERROR");
-//      } else if (check == 2) {
-//        Serial.println(F("Could not find sensor BME280 number 2, check wiring!"));
-//      }
-//      while (1);
-//    }
-//  #endif
+  #ifdef DEBUG_UPDATE
+    if (check) {
+      if (check == 1) {
+        Serial.println(F("Could not find sensor BME280 number 1, check wiring!"));
+        writeLine("Sensor BMP ERROR");
+      } else if (check == 2) {
+        Serial.println(F("Could not find sensor BME280 number 2, check wiring!"));
+      }
+      while (1);
+    }
+  #endif
 
   // PID
   pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
@@ -319,6 +323,9 @@ void setup() {
   last_vent_time = millis();
 
   //Serial.print(",0,50");
+
+  Timer1.initialize(50);
+  Timer1.attachInterrupt(timer1Isr);
 }
 
 /**
@@ -358,7 +365,7 @@ void loop() {
     //
     sensors -> readVolume();
 //    #ifdef DEBUG_OFF
-      Serial.println(byte(pressure_p));// - pressure_p0));Serial.print(" ");
+      Serial.println(pressure_p - pressure_p0);Serial.print(" ");
 //     Serial.println(byte(_mlInsVol));
 //    #endif
         
@@ -417,16 +424,16 @@ void loop() {
   ventilation -> update();
   last_vent_time = millis();
   }
-//
-  if (millis() - last_stepper_time > stepper_time) {
-#ifdef ACCEL_STEPPER
-    stepper->run();
-#else
-    stepper -> processMovement(); //LUCIANO
-    //Serial.print("Speed");Serial.println(_stepperSpeed);
-#endif
-  }
-//  
+
+//  if (millis() - last_stepper_time > stepper_time) {
+//#ifdef ACCEL_STEPPER
+//    stepper->run();
+//#else
+//    stepper -> processMovement(); //LUCIANO
+//    //Serial.print("Speed");Serial.println(_stepperSpeed);
+//#endif
+//  }
+  
   if (changed_options && ( (millis() - last_update_display) > time_update_display) ) {
       display_lcd();  //WITHOUT CLEAR!
       last_update_display = millis();
@@ -436,6 +443,17 @@ void loop() {
   
 
 }
+
+void timer1Isr(void)
+{
+    #ifdef ACCEL_STEPPER
+    stepper->run();
+    #else
+    stepper -> processMovement(); //LUCIANO
+    //Serial.print("Speed");Serial.println(_stepperSpeed);
+    #endif
+}
+
 //
 
 void check_encoder()
@@ -444,7 +462,7 @@ void check_encoder()
   byte btnState = digitalRead(PIN_ENC_SW);
   //SELECTION: VENT_MODE/BMP/I:E/VOL/PIP/PEEP 
   if (btnState == LOW) {
-    if (millis() - lastButtonPress > 50) {
+    if (millis() - lastButtonPress > 200) {
       //Serial.println(curr_sel);
       //Clean all marks
       

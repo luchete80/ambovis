@@ -332,14 +332,14 @@ void MechVentilation::update(void)
               _stepper->setAccelerationInStepsPerSecondPerSecond(
                       STEPPER_ACC_INSUFFLATION);
 //             
-              if (_stepperSpeed >= 0){
-                  _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
-              }
-              else{
-                  _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
-//                  if (!_stepper->motionComplete())
-//                    _stepper->setTargetPositionToStop();
-              }
+//              if (_stepperSpeed >= 0){
+//                  _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
+//              }
+//              else{
+//                  _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
+////                  if (!_stepper->motionComplete())
+////                    _stepper->setTargetPositionToStop();
+//              }
               
               #endif
               //Serial.println("CUrrtime");Serial.println(_msecTimerCnt);

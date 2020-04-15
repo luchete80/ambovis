@@ -39,9 +39,9 @@
 #endif
 
 // #define PIN_BME_CS2  4  // sensor de presion 2
-#define PIN_ENC_SW  99
-#define PIN_ENC_CL  99
-#define PIN_ENC_DIR 99
+#define PIN_ENC_SW  4
+#define PIN_ENC_CL  2
+#define PIN_ENC_DIR 3
 
 // IF ARDUINO UNO
 //#define PIN_ENC_CL  2
