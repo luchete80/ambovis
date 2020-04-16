@@ -6,7 +6,7 @@
 
 //Connections and Debug Defs
 //#define ACCEL_STEPPER 1
-#define DEBUG_UPDATE 1 //
+//#define DEBUG_UPDATE 1 //
 #define DEBUG_OFF 1 //Release version
 
 #define BMP_I2C 1  //Pressure Sensor
@@ -33,7 +33,7 @@
 
 #define STEPPER_MICROSTEPS_PER_REVOLUTION (STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS)
 //#define STEPPER_DIR 1
-#define STEPPER_HOMING_DIRECTION    (-1)
+#define STEPPER_HOMING_DIRECTION    (1)
 #define STEPPER_HOMING_SPEED        (STEPPER_MICROSTEPS * 1000)   // Steps/s
 //#define STEPPER_LOWEST_POSITION     (STEPPER_MICROSTEPS *  -100)   // Steps
 //#define STEPPER_HIGHEST_POSITION    (STEPPER_MICROSTEPS *   100)   // Steps
