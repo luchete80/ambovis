@@ -266,6 +266,8 @@ void setup() {
     options
   );
 
+  delay(100);
+
   //  Serial.println("Tiempo del ciclo (seg):" + String(ventilation -> getExsuflationTime() + ventilation -> getInsuflationTime()));
   //  Serial.println("Tiempo inspiratorio (mseg):" + String(ventilation -> getInsuflationTime()));
   //  Serial.println("Tiempo espiratorio (mseg):" + String(ventilation -> getExsuflationTime()));
@@ -275,7 +277,7 @@ void setup() {
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
-  writeLine(0, "Ambovis");
+  writeLine(1, "AMBOVIS",6);
 
   // configura la ventilación
   ventilation -> start();
@@ -283,22 +285,9 @@ void setup() {
 
   sensors -> readPressure();
 
-  // map the Raw data to kPa
-  //diffPressure = map(sensorValue, 0, 1023, -2000, 2000);
-  //Vout = VS*(0.018*P+0.04) ± ERROR
-  //VS = 5.0 Vdc
-  //EL 0.04 es el 48que aparece en 0
-  //Por eso como yaesta restado no se tiene en cuenta
-  //0.04=48*/1024
-  pressure_p = (analogRead(A1) / 1024. - 0.04) / 0.18 * 1000 * DEFAULT_PA_TO_CM_H20;
-  // TODO: Make this period dependant of TIME_BASE
-  // TIME_BASE * 1000 does not work!!
-  //--
-  
+  display_lcd();
+
   //ENCODER
-  //LUCIANO
-  //LA SELECCION EMPIEZA POR EL MODO
-  //SEL: Modo/BPM/V/PIP/PEP /V & PIP SON LOS QUE CONTROLAN
   curr_sel = old_curr_sel = 0; //COMPRESSION
   encoderPos = oldEncPos = options.tidalVolume;
 
@@ -355,6 +344,7 @@ void loop() {
   //
   if (time > lastReadSensor + TIME_SENSOR)
   {
+    //Serial.println(analogRead(A1));
     //    //Is not anymore in classes
     pressure_p = _pres1Sensor.readPressure() * DEFAULT_PA_TO_CM_H20;
     //Serial.print("PRessure");Serial.println(pressure_p);

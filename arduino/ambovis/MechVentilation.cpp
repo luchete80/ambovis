@@ -459,7 +459,7 @@ void MechVentilation::update(void)
     case State_Homing:
     {
         // Open Solenoid Valve
-        digitalWrite(PIN_SOLENOID, SOLENOID_OPEN);
+        //digitalWrite(PIN_SOLENOID, SOLENOID_OPEN);
 
         if (_sensor_error_detected)
         {
@@ -475,7 +475,7 @@ void MechVentilation::update(void)
                  * 0: stepper is in home
                  * 1: stepper is not in home
                  */
-
+//        Now is homing without setting
         if (digitalRead(PIN_ENDSTOP))
         {
 
@@ -501,7 +501,7 @@ void MechVentilation::update(void)
         }
         /* Status update and reset timer, for next time */
         currentTime = 0;
-        _setState(Init_Exsufflation);
+        _setState(Init_Insufflation);
     }
     break;
 
