@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">VentVis</string>
+
+    <string name="pressure_title">Pressure</string>
+    <string name="flow_title">Flow</string>
+
+    <string name="viewGithub">View on GitHub</string>
+    <string name="reportProblem">Problem Report</string>
+    <string name="viewWebsite">Developer Website</string>
+    <string name="actionSave">Save to Gallery</string>
+
+    <string name="actionAddEntry">Add Entry</string>
+    <string name="actionFeedMultiple">Add Multiple</string>
+    <string name="actionRemoveEntry">Remove Entry</string>
+    <string name="actionAddDataSet">Add Data Set</string>
+    <string name="actionRemoveDataSet">Remove Data Set</string>
+    <string name="actionClearChart">Clear chart</string>
+
+    <string name="dash">-</string>
+
+    <string name="pip_text">PIP</string>
+    <string name="peep_text">PEEP</string>
+    <string name="fr_text">FR</string>
+    <string name="vol_text">VOL</string>
+    <string name="serial_port">Serial Port</string>
+    <string name="actionLicenses">Show third party licenses</string>
+</resources>
