@@ -3,8 +3,8 @@
 #include "calc.h"
 #include "Sensors.h"
 #include "MechVentilation.h"
-#include "src/TimerOne/TimerOne.h"
-#include "src/TimerTwo/TimerTwo.h"
+//#include "src/TimerOne/TimerOne.h"
+//#include "src/TimerTwo/TimerTwo.h"
 
 #include "src/AutoPID/AutoPID.h"
 #ifdef ACCEL_STEPPER
@@ -59,6 +59,16 @@ float _flux,_flux_0;
 bool send_data=false;
 byte time_encoder=50;
 char tempstr[5],tempstr2[5];
+unsigned long lastButtonPress;
+int curr_sel, old_curr_sel;
+
+unsigned long lastReadSensor = 0;
+
+
+State static lastState;
+bool changed_options = false;
+unsigned long time_update_display = 100; //ms
+unsigned long last_update_display;
 
 
 extern byte stepper_time = 50;
@@ -88,7 +98,6 @@ void PinA() {
     bFlag = 0; //reset flags for the next turn
     aFlag = 0; //reset flags for the next turn
   }
-  else if (reading == B00000100) bFlag = 1; //signal that we're expecting pinB to signal the transition to detent from free rotation
   sei(); //restart interrupts
 }
 
@@ -165,16 +174,6 @@ LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PI
 /**
    Setup
 */
-unsigned long lastButtonPress;
-int curr_sel, old_curr_sel;
-
-unsigned long lastReadSensor = 0;
-
-
-State static lastState;
-bool changed_options = false;
-unsigned long time_update_display = 100; //ms
-unsigned long last_update_display;
 
 void writeLine(int line, String message = "", int offsetLeft = 0) {
   lcd.setCursor(0, line);
@@ -227,18 +226,18 @@ void setup() {
   sensors = new Sensors();
 
   int check = sensors -> begin();
-  #ifdef DEBUG_UPDATE
-    if (check) {
-      if (check == 1) {
-        writeLine("Error BMP280");
-        Serial.println(F("Could not find sensor BME280 number 1, check wiring!"));
-        writeLine("Sensor BMP ERROR");
-      } else if (check == 2) {
-        Serial.println(F("Could not find sensor BME280 number 2, check wiring!"));
-      }
-      while (1);
-    }
-  #endif
+//  if (check) {
+//    if (check == 1) {
+//      writeLine("Sensor BMP ERROR");
+//      writeLine("Error BMP280");
+//      Serial.println(F("Could not find sensor BME280 number 1, check wiring!"));
+//    } else if (check == 2) {
+//      Serial.println(F("Could not find sensor BME280 number 2, check wiring!"));
+//    }
+//    delay(500);
+//    sensors -> begin();
+//    while (1);
+//  }
 
   // PID
   pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
@@ -316,8 +315,8 @@ void setup() {
 
   //Serial.print(",0,50");
 
-  Timer1.initialize(50);
-  Timer1.attachInterrupt(timer1Isr);
+  //Timer1.initialize(50);
+  //Timer1.attachInterrupt(timer1Isr);
 }
 
 /**
@@ -361,7 +360,7 @@ void loop() {
 //    #ifdef DEBUG_OFF
       //Serial.print(pressure_p - pressure_p0);Serial.print(" ");Serial.println(int(temp));
       //sprintf(string, "%f %f",(float)( pressure_p - pressure_p0), temp);
-      Serial.print(pressure_p - pressure_p0);Serial.print(" ");Serial.println(temp);
+//      Serial.print(pressure_p - pressure_p0);Serial.print(" ");Serial.println(temp);
 //     Serial.println(byte(_mlInsVol));
 //    #endif
         
@@ -483,13 +482,14 @@ void check_encoder()
           min_sel=1;max_sel=4;        
         break;
         case 4: 
-          if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
+//          if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
             encoderPos=oldEncPos=options.tidalVolume;
             min_sel=DEFAULT_MIN_VOLUMEN_TIDAL;max_sel=DEFAULT_MAX_VOLUMEN_TIDAL;
-          } else {//Manual
-            encoderPos=oldEncPos=options.percVolume/10;
-            min_sel=1;max_sel=10;            
-          }
+//          } else {//Manual
+//            encoderPos=oldEncPos=options.percVolume/10;
+//            Serial.print("Encoder pos: ");Serial.println(encoderPos);
+//            min_sel=1;max_sel=10;            
+//          }
         break;
         case 5: 
           encoderPos=oldEncPos=options.peakInspiratoryPressure;
@@ -530,10 +530,12 @@ void check_encoder()
             options.percInspEsp=encoderPos;
             break;
           case 4:
-            if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL)
+//            if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL)
               options.tidalVolume = encoderPos;
-            else //manual
-              options.percVolume = encoderPos*100;
+//            else //manual
+//              options.percVolume = encoderPos*100;
+//              Serial.print("Encoder pos: ");Serial.println(encoderPos);
+//              Serial.print("Perc vol: ");Serial.println(options.percVolume);
             break;
           case 5:
             options.peakInspiratoryPressure = encoderPos;
