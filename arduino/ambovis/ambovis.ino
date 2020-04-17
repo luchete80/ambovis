@@ -3,7 +3,7 @@
 #include "calc.h"
 #include "Sensors.h"
 #include "MechVentilation.h"
-//#include "src/TimerOne/TimerOne.h"
+#include "src/TimerOne/TimerOne.h"
 //#include "src/TimerTwo/TimerTwo.h"
 
 #include "src/AutoPID/AutoPID.h"
@@ -316,8 +316,8 @@ void setup() {
 
   //Serial.print(",0,50");
 
-  //Timer1.initialize(50);
-  //Timer1.attachInterrupt(timer1Isr);
+  Timer1.initialize(50);
+  Timer1.attachInterrupt(timer1Isr);
 }
 
 /**
