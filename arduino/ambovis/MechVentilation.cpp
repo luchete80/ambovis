@@ -314,7 +314,11 @@ void MechVentilation::update(void)
                     _pid->run(float(pressure_p-pressure_p0), (float)_pip, &_stepperSpeed);
                     if (_stepperSpeed > STEPPER_SPEED_MAX)
                       _stepperSpeed=STEPPER_SPEED_MAX;
-               } 
+               }
+                else if (vent_mode==VENTMODE_MAN) {
+                     
+                }
+                
                #ifdef DEBUG_UPDATE
                 Serial.print("Speed: "); Serial.println(_stepperSpeed);       
                // Serial.print("pip 30, dp");Serial.println(pressure_p - pressure_p0);                
@@ -331,15 +335,15 @@ void MechVentilation::update(void)
               _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
               _stepper->setAccelerationInStepsPerSecondPerSecond(
                       STEPPER_ACC_INSUFFLATION);
-//             
-//              if (_stepperSpeed >= 0){
-//                  _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
-//              }
-//              else{
-//                  _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
-////                  if (!_stepper->motionComplete())
-////                    _stepper->setTargetPositionToStop();
-//              }
+             
+              if (_stepperSpeed >= 0){
+                  _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
+              }
+              else{
+                  _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
+//                  if (!_stepper->motionComplete())
+//                    _stepper->setTargetPositionToStop();
+              }
               
               #endif
               //Serial.println("CUrrtime");Serial.println(_msecTimerCnt);

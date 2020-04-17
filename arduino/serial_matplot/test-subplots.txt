@@ -1,0 +1,4 @@
+fig, (ax1, ax2) = plt.subplots(2)
+fig.suptitle('Vertically stacked subplots')
+ax1.plot(x, y)
+ax2.plot(x, -y)

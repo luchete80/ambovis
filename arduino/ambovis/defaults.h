@@ -6,7 +6,7 @@
 
 //Connections and Debug Defs
 //#define ACCEL_STEPPER 1
-//#define DEBUG_UPDATE 1 //
+#define DEBUG_UPDATE 1 //
 #define DEBUG_OFF 1 //Release version
 
 #define BMP_I2C 1  //Pressure Sensor
@@ -40,7 +40,7 @@
 #define STEPPER_LOWEST_POSITION     (-10)   // Steps
 #define STEPPER_HIGHEST_POSITION    ( 1200)   // Steps
 #define STEPPER_SPEED_DEFAULT       (400)   // Steps/s
-#define STEPPER_SPEED_MAX           (800)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
+#define STEPPER_SPEED_MAX           (1000)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_SPEED_MAX_VCL       (1200)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_SPEED_MAX_EXSUFF    (1600)
 #define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  400)   // Steps/s2
@@ -101,6 +101,7 @@ typedef struct {
     bool hasTrigger;
     unsigned short tidalVolume;  //in ml
     byte modeCtl;
+    byte percVolume;   //For manual mode
 } VentilationOptions_t;
 
 #define MODE_VOL_CTL 0

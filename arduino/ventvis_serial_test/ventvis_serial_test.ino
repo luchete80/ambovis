@@ -15,34 +15,35 @@ void setup() {
 
   // Serial.detectBaudrate() may also be called before Serial.begin()
   // There must be activity on the serial port for the baudrate to be detected
-  unsigned long detectedBaudrate = Serial.detectBaudrate(TIMEOUT);
 
-  if (detectedBaudrate) {
-    Serial.printf("\nDetected baudrate is %lu, switching to that baudrate now...\n", detectedBaudrate);
+//  unsigned long detectedBaudrate = Serial.detectBaudrate(TIMEOUT);
 
-    // Wait for printf to finish
-    while (Serial.availableForWrite() != UART_TX_FIFO_SIZE) {
-      yield();
-    }
-
-    // Clear Tx buffer to avoid extra characters being printed
-    Serial.flush();
-
-    // After this, any writing to Serial will print gibberish on the serial monitor if the baudrate doesn't match
-    Serial.begin(detectedBaudrate);
-  } else {
-    Serial.println("\nNothing detected");
-  }
-
-  led_on = false;
-  count = 0;
-  digitalWrite(LED_BUILTIN, HIGH); // Active is low in the ESP
+//  if (detectedBaudrate) {
+//    Serial.printf("\nDetected baudrate is %lu, switching to that baudrate now...\n", detectedBaudrate);
+//
+//    // Wait for printf to finish
+//    while (Serial.availableForWrite() != UART_TX_FIFO_SIZE) {
+//      yield();
+//    }
+//
+//    // Clear Tx buffer to avoid extra characters being printed
+//    Serial.flush();
+//
+//    // After this, any writing to Serial will print gibberish on the serial monitor if the baudrate doesn't match
+//    Serial.begin(detectedBaudrate);
+//  } else {
+//    Serial.println("\nNothing detected");
+//  }
+//
+//  led_on = false;
+//  count = 0;
+//  digitalWrite(LED_BUILTIN, HIGH); // Active is low in the ESP
 }
 
 void loop() {
 
   count++;
-  int pressure1 = (int)(sin(2.0 * 3.1416 * ((float)(count) / ((float) CYCLE) )) * 20000 + 50000);
+  int pressure1 = (int)(sin(2.0 * 3.1416 * ((float)(count) / ((float) CYCLE) )) * 30+2);
   int pressure2 = 0;
   int volume = 0;
   int flow = (int)(cos(2.0 * 3.1416 * ((float)(count) / ((float) CYCLE) )) * 20000 + 50000);
@@ -61,7 +62,8 @@ void loop() {
   }
   
   char string[100];
-  sprintf(string, "DT %05d %05d %05d %06d", pressure1, pressure2, volume, flow);
+  //sprintf(string, "DT %05d %05d %05d %06d", pressure1, pressure2, volume, flow);
+  sprintf(string, "%05d %05d", pressure1, pressure2);
   Serial.println(string);
   
   delay(DT);                      // Wait for two seconds (to demonstrate the active low LED)

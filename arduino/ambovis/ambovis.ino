@@ -58,6 +58,7 @@ float _flux,_flux_0;
 //float _stepperSpeed;
 bool send_data=false;
 byte time_encoder=50;
+char tempstr[5],tempstr2[5];
 
 
 extern byte stepper_time = 50;
@@ -258,6 +259,7 @@ void setup() {
   options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
   options.hasTrigger = false;
   options.tidalVolume = 300;
+  options.percVolume= 80;
 
   ventilation = new MechVentilation(
     stepper,
@@ -323,7 +325,8 @@ void setup() {
 //
 byte last_cycle = 0;
 bool update_display = false;
-
+float temp;
+char string[100];
 void loop() {
 
   check_encoder();
@@ -344,7 +347,6 @@ void loop() {
   //
   if (time > lastReadSensor + TIME_SENSOR)
   {
-    //Serial.println(analogRead(A1));
     //    //Is not anymore in classes
     pressure_p = _pres1Sensor.readPressure() * DEFAULT_PA_TO_CM_H20;
     //Serial.print("PRessure");Serial.println(pressure_p);
@@ -353,9 +355,12 @@ void loop() {
     //    sensors -> readPressure();
     //    SensorPressureValues_t pressure = sensors -> getRelativePressureInCmH20();
     //
+    temp=float(analogRead(A1))*25.49/1024.;
     sensors -> readVolume();
 //    #ifdef DEBUG_OFF
-      Serial.println(pressure_p - pressure_p0);Serial.print(" ");
+      //Serial.print(pressure_p - pressure_p0);Serial.print(" ");Serial.println(int(temp));
+      //sprintf(string, "%f %f",(float)( pressure_p - pressure_p0), temp);
+      Serial.print(pressure_p - pressure_p0);Serial.print(" ");Serial.println(temp);
 //     Serial.println(byte(_mlInsVol));
 //    #endif
         
@@ -450,7 +455,7 @@ void check_encoder()
 {
   //LUCIANO------------------------
   byte btnState = digitalRead(PIN_ENC_SW);
-  //SELECTION: VENT_MODE/BMP/I:E/VOL/PIP/PEEP 
+  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
   if (btnState == LOW) {
     if (millis() - lastButtonPress > 200) {
       //Serial.println(curr_sel);
@@ -460,7 +465,8 @@ void check_encoder()
 
       if (vent_mode==VENTMODE_VCL && curr_sel==5) curr_sel++; //Not selecting pip in VCL
       if (vent_mode==VENTMODE_PCL && curr_sel==4) curr_sel++; //Not selecting pip in VCL 
-      
+      if (vent_mode==VENTMODE_MAN && curr_sel==4) curr_sel+=2; //Not selecting pip nor Vol in Manual mode
+            
       if (curr_sel > 6)
         curr_sel = 0;
       switch (curr_sel){
@@ -477,8 +483,13 @@ void check_encoder()
           min_sel=1;max_sel=4;        
         break;
         case 4: 
-          encoderPos=oldEncPos=options.tidalVolume;
-          min_sel=DEFAULT_MIN_VOLUMEN_TIDAL;max_sel=DEFAULT_MAX_VOLUMEN_TIDAL;
+          if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
+            encoderPos=oldEncPos=options.tidalVolume;
+            min_sel=DEFAULT_MIN_VOLUMEN_TIDAL;max_sel=DEFAULT_MAX_VOLUMEN_TIDAL;
+          } else {//Manual
+            encoderPos=oldEncPos=options.percVolume/10;
+            min_sel=1;max_sel=10;            
+          }
         break;
         case 5: 
           encoderPos=oldEncPos=options.peakInspiratoryPressure;
@@ -519,7 +530,10 @@ void check_encoder()
             options.percInspEsp=encoderPos;
             break;
           case 4:
-            options.tidalVolume = encoderPos;
+            if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL)
+              options.tidalVolume = encoderPos;
+            else //manual
+              options.percVolume = encoderPos*100;
             break;
           case 5:
             options.peakInspiratoryPressure = encoderPos;
@@ -537,25 +551,31 @@ void check_encoder()
 
 
 
-char tempstr[5];
+
 void display_lcd ( ) {
   
   lcd_clearxy(5,1,3); lcd_clearxy(12,0,3);
   lcd_clearxy(5,2,2); lcd_clearxy(13,2,2);
   lcd_clearxy(13,3,2);
-  
-  if ( vent_mode == VENTMODE_VCL ) {
-    writeLine(0, "MOD:VCL", 1); 
-    writeLine(1, "V:" + String(options.tidalVolume), 10);    
-    writeLine(2, "PIP : - ", 8);
-  } else {
-    if ( vent_mode == VENTMODE_PCL ) {
+
+  switch (vent_mode){
+    case VENTMODE_VCL:
+      writeLine(0, "MOD:VCL", 1); 
+      writeLine(1, "V:" + String(options.tidalVolume), 10);    
+      writeLine(2, "PIP : - ", 8);
+    break;
+    case VENTMODE_PCL:
       writeLine(0, "MOD:PCL", 1); 
       writeLine(2, "PIP :" + String(options.peakInspiratoryPressure), 8);
       writeLine(1, "V: - ", 10);
-    }
+    break;    
+    case VENTMODE_MAN:
+      writeLine(0, "MOD:MAN", 1); 
+      writeLine(2, "PIP : -", 8);
+      writeLine(1, "V:" + String(options.percVolume)+"%", 10);    
+    break;
   }
-  
+   
     
   writeLine(0, "SET | ME", 11);
   writeLine(1, "BPM:" + String(options.respiratoryRate), 1);
