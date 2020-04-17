@@ -98,6 +98,7 @@ void PinA() {
     bFlag = 0; //reset flags for the next turn
     aFlag = 0; //reset flags for the next turn
   }
+  else if (reading == B00000100) bFlag = 1; //signal that we're expecting pinB to signal the transition to detent from free rotation
   sei(); //restart interrupts
 }
 
