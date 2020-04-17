@@ -6,7 +6,7 @@
 #define PIN_STEPPER_DIRECTION 7
 #define PIN_EN 99
 // Buzzer
-#define PIN_BUZZ 100
+#define PIN_BUZZ 1
 
 // Stepper homing
 #define PIN_ENDSTOP 5

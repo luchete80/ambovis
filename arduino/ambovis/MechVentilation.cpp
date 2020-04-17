@@ -119,12 +119,17 @@ void MechVentilation::_setInspiratoryCycle(void)
     _timeoutEsp = (timeoutCycle) - _timeoutIns;
 }
 
+//LUCIANO 
+float MechVentilation::getCurrentPressure(){
+  return _currentPressure;}
+      
 void MechVentilation::evaluatePressure(void)
 {
     if (_currentPressure > ALARM_MAX_PRESSURE)
     {
         digitalWrite(PIN_BUZZ, HIGH);
         _currentAlarm = Alarm_Overpressure;
+        Serial.println("Overpressure");
     }
     // else if (_currentPressure < ALARM_MIN_PRESSURE)
     // {
@@ -180,7 +185,7 @@ void MechVentilation::update(void)
 
   _msecTimerCnt=(unsigned long)(millis()-_msecTimerStartCycle);
     SensorPressureValues_t pressures = _sensors->getRelativePressureInCmH20();
-    _currentPressure = pressures.pressure1;
+    _currentPressure = pressure_p - pressure_p0;
 
     if (pressures.state != SensorStateOK)
     {                                  // Sensor error detected: return to zero position and continue from there

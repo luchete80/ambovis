@@ -115,8 +115,7 @@ public:
 
 
     //LUCIANO 
-    float getCurrentPressure(){
-      return _currentPressure;}
+    float getCurrentPressure();
     //
     
 private:
@@ -199,7 +198,6 @@ private:
     bool _running = false;
     bool _sensor_error_detected;
     bool _startWasTriggeredByPatient = false;
-    float _currentPressure = 0.0;
     //float _currentFlow = 0.0;
     //float _currentVolume = 0.0;
 };
@@ -208,5 +206,7 @@ extern byte stepper_time;
 extern unsigned long last_vent_time;
 extern float _mlInsVol,_mllastInsVol;
 //extern float _stepperSpeed;
+
+extern float _currentPressure;
 
 #endif /* INC_MECHANICAL_VENTILATION_H */

@@ -7,7 +7,7 @@
 //Connections and Debug Defs
 //#define ACCEL_STEPPER 1
 //#define DEBUG_UPDATE 1 //
-//#define DEBUG_OFF 1 //Release version
+#define DEBUG_OFF 1 //Release version
 
 #define BMP_I2C 1  //Pressure Sensor
 //#define LCD_I2C 1 //IT DOES NOT WORK WITH ENCODER

@@ -61,6 +61,7 @@ byte time_encoder=50;
 char tempstr[5],tempstr2[5];
 unsigned long lastButtonPress;
 int curr_sel, old_curr_sel;
+float _currentPressure = 0.0;
 
 unsigned long lastReadSensor = 0;
 
@@ -212,10 +213,10 @@ void setup() {
   //---------------------
   //
   //  // Zumbador
-  //  pinMode(PIN_BUZZ, OUTPUT);
-  //  digitalWrite(PIN_BUZZ, HIGH); // test zumbador
-  //  delay(100);
-  //  digitalWrite(PIN_BUZZ, LOW);
+  pinMode(PIN_BUZZ, OUTPUT);
+  digitalWrite(PIN_BUZZ, HIGH); // test zumbador
+  delay(100);
+  digitalWrite(PIN_BUZZ, LOW);
   //
   //  // FC efecto hall
   //  pinMode(PIN_ENDSTOP, INPUT_PULLUP); // el sensor de efecto hall da un 1 cuando detecta
@@ -358,12 +359,12 @@ void loop() {
     //
     temp=float(analogRead(A1))*25.49/1024.;
     sensors -> readVolume();
-//    #ifdef DEBUG_OFF
-      //Serial.print(pressure_p - pressure_p0);Serial.print(" ");Serial.println(int(temp));
+    #ifdef DEBUG_OFF
+      Serial.print(pressure_p - pressure_p0);Serial.print(" ");Serial.println(int(temp));
       //sprintf(string, "%f %f",(float)( pressure_p - pressure_p0), temp);
 //      Serial.print(pressure_p - pressure_p0);Serial.print(" ");Serial.println(temp);
 //     Serial.println(byte(_mlInsVol));
-//    #endif
+    #endif
         
     //Serial.print(",");Serial.println(sensors->getFlow());
     //    Serial.print("Flow: ");Serial.println(sensors->getFlow());
@@ -471,7 +472,7 @@ void check_encoder()
         curr_sel = 0;
       switch (curr_sel){
         case 1: 
-          min_sel=0;max_sel=1;
+          min_sel=0;max_sel=2;
           encoderPos=oldEncPos=vent_mode;
         break;
         case 2: 
@@ -518,7 +519,6 @@ void check_encoder()
           encoderPos=oldEncPos=min_sel;
         } else {
        
-        Serial.println(encoderPos);
         oldEncPos = encoderPos;
         switch (curr_sel) {
           case 1:
@@ -531,12 +531,13 @@ void check_encoder()
             options.percInspEsp=encoderPos;
             break;
           case 4:
-//            if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL)
+            if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL)
               options.tidalVolume = encoderPos;
-//            else //manual
-//              options.percVolume = encoderPos*100;
-//              Serial.print("Encoder pos: ");Serial.println(encoderPos);
-//              Serial.print("Perc vol: ");Serial.println(options.percVolume);
+            else{ //manual
+              options.percVolume = 100*encoderPos;
+             // Serial.print("Encoder pos: ");Serial.println(encoderPos);
+             // Serial.print("Perc vol: ");Serial.println(options.percVolume);
+            }
             break;
           case 5:
             options.peakInspiratoryPressure = encoderPos;
