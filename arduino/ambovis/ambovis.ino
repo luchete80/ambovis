@@ -471,7 +471,7 @@ void check_encoder()
         curr_sel = 0;
       switch (curr_sel){
         case 1: 
-          min_sel=0;max_sel=2;
+          min_sel=0;max_sel=1;
           encoderPos=oldEncPos=vent_mode;
         break;
         case 2: 
@@ -483,14 +483,14 @@ void check_encoder()
           min_sel=1;max_sel=4;        
         break;
         case 4: 
-          if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
+//          if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
             encoderPos=oldEncPos=options.tidalVolume;
             min_sel=DEFAULT_MIN_VOLUMEN_TIDAL;max_sel=DEFAULT_MAX_VOLUMEN_TIDAL;
-          } else {//Manual
-            encoderPos=oldEncPos=options.percVolume/10;
-            Serial.print("Encoder pos: ");Serial.println(encoderPos);
-            min_sel=1;max_sel=10;            
-          }
+//          } else {//Manual
+//            encoderPos=oldEncPos=options.percVolume/10;
+//            Serial.print("Encoder pos: ");Serial.println(encoderPos);
+//            min_sel=1;max_sel=10;            
+//          }
         break;
         case 5: 
           encoderPos=oldEncPos=options.peakInspiratoryPressure;
@@ -531,12 +531,12 @@ void check_encoder()
             options.percInspEsp=encoderPos;
             break;
           case 4:
-            if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL)
+//            if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL)
               options.tidalVolume = encoderPos;
-            else //manual
-              options.percVolume = encoderPos*100;
-              Serial.print("Encoder pos: ");Serial.println(encoderPos);
-              Serial.print("Perc vol: ");Serial.println(options.percVolume);
+//            else //manual
+//              options.percVolume = encoderPos*100;
+//              Serial.print("Encoder pos: ");Serial.println(encoderPos);
+//              Serial.print("Perc vol: ");Serial.println(options.percVolume);
             break;
           case 5:
             options.peakInspiratoryPressure = encoderPos;
