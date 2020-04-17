@@ -24,7 +24,7 @@
 int pressure_flux;  //For calculating flux
 
 
-int Compression_perc = 80; //Similar to israeli
+int Compression_perc = 8; //80%
 
 #if DEBUG_STATE_MACHINE
 volatile String debugMsg[15];
@@ -484,14 +484,14 @@ void check_encoder()
           min_sel=1;max_sel=4;        
         break;
         case 4: 
-//          if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
+          if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
             encoderPos=oldEncPos=options.tidalVolume;
             min_sel=DEFAULT_MIN_VOLUMEN_TIDAL;max_sel=DEFAULT_MAX_VOLUMEN_TIDAL;
-//          } else {//Manual
-//            encoderPos=oldEncPos=options.percVolume/10;
+          } else {//Manual
+            encoderPos=oldEncPos=options.percVolume;
 //            Serial.print("Encoder pos: ");Serial.println(encoderPos);
-//            min_sel=1;max_sel=10;            
-//          }
+            min_sel=1;max_sel=10;            
+          }
         break;
         case 5: 
           encoderPos=oldEncPos=options.peakInspiratoryPressure;
@@ -534,7 +534,7 @@ void check_encoder()
             if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL)
               options.tidalVolume = encoderPos;
             else{ //manual
-              options.percVolume = 100*encoderPos;
+              options.percVolume =encoderPos;
              // Serial.print("Encoder pos: ");Serial.println(encoderPos);
              // Serial.print("Perc vol: ");Serial.println(options.percVolume);
             }
@@ -558,7 +558,7 @@ void check_encoder()
 
 void display_lcd ( ) {
   
-  lcd_clearxy(5,1,3); lcd_clearxy(12,0,3);
+  lcd_clearxy(5,1,3); lcd_clearxy(12,1,4);
   lcd_clearxy(5,2,2); lcd_clearxy(13,2,2);
   lcd_clearxy(13,3,2);
 
@@ -576,7 +576,7 @@ void display_lcd ( ) {
     case VENTMODE_MAN:
       writeLine(0, "MOD:MAN", 1); 
       writeLine(2, "PIP : -", 8);
-      writeLine(1, "V:" + String(options.percVolume)+"%", 10);    
+      writeLine(1, "V:" + String(options.percVolume*10)+"%", 10);    
     break;
   }
    

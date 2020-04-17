@@ -234,7 +234,10 @@ void MechVentilation::update(void)
         //IMPORTANT FROM https://github.com/Stan-Reifel/FlexyStepper/blob/master/Documentation.md
         _stepper->setSpeedInStepsPerSecond(STEPPER_SPEED_DEFAULT);
         _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_INSUFFLATION);
-        _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
+        if (vent_mode<2)  //VCL && PCL
+          _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
+        else 
+          _stepper->setTargetPositionInSteps(int (STEPPER_HIGHEST_POSITION*_percVol/10.));
         #endif
         
         _pid->reset();
@@ -321,7 +324,7 @@ void MechVentilation::update(void)
                       _stepperSpeed=STEPPER_SPEED_MAX;
                }
                 else if (vent_mode==VENTMODE_MAN) {
-                     
+                     _stepperSpeed=STEPPER_SPEED_MAX*0.75;
                 }
                 
                #ifdef DEBUG_UPDATE
@@ -340,16 +343,16 @@ void MechVentilation::update(void)
               _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
               _stepper->setAccelerationInStepsPerSecondPerSecond(
                       STEPPER_ACC_INSUFFLATION);
-             
-              if (_stepperSpeed >= 0){
-                  _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
-              }
-              else{
-                  _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
-//                  if (!_stepper->motionComplete())
-//                    _stepper->setTargetPositionToStop();
-              }
-              
+              if (vent_mode < 2 ){  //only if auto
+                if (_stepperSpeed >= 0){
+                    _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
+                }
+                else{
+                    _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
+                    if (!_stepper->motionComplete())
+                      _stepper->setTargetPositionToStop();
+                }
+              }//vent mode
               #endif
               //Serial.println("CUrrtime");Serial.println(_msecTimerCnt);
               //Serial.println("timeout");Serial.println(_msecTimeoutInsufflation);
@@ -538,6 +541,7 @@ void MechVentilation::_init(
     _peep = options.peakEspiratoryPressure;
     _tidalVol=options.tidalVolume;
     _percIE= options.percInspEsp;
+    _percVol=options.percVolume;
     
     setRPM(_rpm);
     _hasTrigger = options.hasTrigger;
@@ -590,6 +594,7 @@ void MechVentilation::change_config(VentilationOptions_t options)
     _tidalVol=options.tidalVolume;
     _percIE= options.percInspEsp;
     setRPM(_rpm); //Include set inspiratory cycle
+    _percVol=options.percVolume;
 
     _mode = options.modeCtl;
 }

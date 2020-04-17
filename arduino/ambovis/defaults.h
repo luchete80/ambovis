@@ -101,7 +101,7 @@ typedef struct {
     bool hasTrigger;
     unsigned short tidalVolume;  //in ml
     byte modeCtl;
-    byte percVolume;   //For manual mode
+    byte percVolume;   //For manual mode: 1 to 10
 } VentilationOptions_t;
 
 #define MODE_VOL_CTL 0
