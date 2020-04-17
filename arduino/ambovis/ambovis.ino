@@ -230,6 +230,7 @@ void setup() {
   #ifdef DEBUG_UPDATE
     if (check) {
       if (check == 1) {
+        writeLine("Error BMP280");
         Serial.println(F("Could not find sensor BME280 number 1, check wiring!"));
         writeLine("Sensor BMP ERROR");
       } else if (check == 2) {
@@ -463,9 +464,8 @@ void check_encoder()
       
       curr_sel++; //NOT +=1, is a byte
 
-      if (vent_mode==VENTMODE_VCL && curr_sel==5) curr_sel++; //Not selecting pip in VCL
+      if ((vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_MAN) && curr_sel==5) curr_sel++; //Not selecting pip in VCL
       if (vent_mode==VENTMODE_PCL && curr_sel==4) curr_sel++; //Not selecting pip in VCL 
-      if (vent_mode==VENTMODE_MAN && curr_sel==4) curr_sel+=2; //Not selecting pip nor Vol in Manual mode
             
       if (curr_sel > 6)
         curr_sel = 0;
