@@ -29,7 +29,7 @@ fig1,axs = plt.subplots(2)
 # http://matplotlib.org/users/text_props.html
 fig1.suptitle('live updated data', fontsize='18', fontweight='bold')
 plt.xlabel('time, seconds', fontsize='14', fontstyle='italic')
-plt.ylabel('potential, volts', fontsize='14', fontstyle='italic')
+plt.ylabel('Presion, CMH2O', fontsize='14', fontstyle='italic')
 plt.axes().grid(True)
 line1, = plt.plot(ydata,marker='o',markersize=4,linestyle='dotted',markerfacecolor='green') #ORIGINAL
 line2, = plt.plot(y2data,marker='o',markersize=4,linestyle='dotted',markerfacecolor='blue') #ORIGINAL
