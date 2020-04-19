@@ -324,11 +324,14 @@ void MechVentilation::update(void)
                       _stepperSpeed=STEPPER_SPEED_MAX;
                }
                 else if (vent_mode==VENTMODE_MAN) {
-                     _stepperSpeed=STEPPER_SPEED_MAX*0.75;
+                    //This updates everytime in case of change
+                     _stepperSpeed=STEPPER_HIGHEST_POSITION/((float)(_timeoutIns) * DEFAULT_FRAC_CYCLE_VCL_INSUFF)*1000;//En [ml/s]
+                    if (_stepperSpeed > STEPPER_SPEED_MAX)
+                      _stepperSpeed=STEPPER_SPEED_MAX;
                 }
                 
                #ifdef DEBUG_UPDATE
-                Serial.print("Speed: "); Serial.println(_stepperSpeed);       
+                Serial.print("Speed: "); Serial.println(int(_stepperSpeed));       
                // Serial.print("pip 30, dp");Serial.println(pressure_p - pressure_p0);                
                #endif
                
