@@ -115,7 +115,11 @@ void MechVentilation::_setInspiratoryCycle(void)
 {
     float timeoutCycle = ((float)60) * 1000 / ((float)_rpm); // Tiempo de ciclo en msegundos
     //_timeoutIns = timeoutCycle * DEFAULT_POR_INSPIRATORIO / 100;
-    _timeoutIns = timeoutCycle / (float(_percIE));
+    _timeoutIns = timeoutCycle / (float(_percIE+1));
+    #ifdef DEBUG_UPDATE
+      Serial.print("Timeout Cycle");Serial.println(timeoutCycle);
+      Serial.print("_timeoutIns");Serial.println(_timeoutIns);
+    #endif
     _timeoutEsp = (timeoutCycle) - _timeoutIns;
 }
 
