@@ -264,7 +264,7 @@ void setup() {
   options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
   options.hasTrigger = false;
   options.tidalVolume = 300;
-  options.percVolume= 80;
+  options.percVolume= 8;  //1 to 10
 
   ventilation = new MechVentilation(
     stepper,

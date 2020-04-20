@@ -40,11 +40,11 @@
 #define STEPPER_LOWEST_POSITION     (-10)   // Steps
 #define STEPPER_HIGHEST_POSITION    ( 1200)   // Steps
 #define STEPPER_SPEED_DEFAULT       (400)   // Steps/s
-#define STEPPER_SPEED_MAX           (2000)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
+#define STEPPER_SPEED_MAX           (STEPPER_MICROSTEPS * 1600)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_SPEED_MAX_VCL       (1200)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_SPEED_MAX_EXSUFF    (1600)
 #define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  400)   // Steps/s2
-#define STEPPER_ACC_INSUFFLATION    (STEPPER_MICROSTEPS *  400)   // Steps/s2
+#define STEPPER_ACC_INSUFFLATION    (STEPPER_MICROSTEPS *  800)   // Steps/s2
 
 // Valores por defecto
 #define DEFAULT_HEIGHT 170 // cm
@@ -82,9 +82,9 @@
 // PID settings and gains
 #define PID_MIN -20000 // TODO: check direction implementation
 #define PID_MAX 20000
-#define PID_KP 80
-#define PID_KI 2
-#define PID_KD 0.1
+#define PID_KP 0.01
+#define PID_KI 0.01
+#define PID_KD 0.01
 #define PID_TS TIME_BASE
 #define PID_BANGBANG 8
 
