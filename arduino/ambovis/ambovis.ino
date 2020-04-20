@@ -77,6 +77,9 @@ unsigned long last_stepper_time;
 unsigned long last_vent_time;
 unsigned long time;
 
+int max_speed=2000;
+int max_accel=2000;
+
 //Encoder from https://www.instructables.com/id/Improved-Arduino-Rotary-Encoder-Reading/
 int pinA = PIN_ENC_CL; // Our first hardware interrupt pin is digital pin 2
 int pinB = PIN_ENC_DIR; // Our second hardware interrupt pin is digital pin 3
@@ -228,18 +231,18 @@ void setup() {
   sensors = new Sensors();
 
   int check = sensors -> begin();
-//  if (check) {
-//    if (check == 1) {
-//      writeLine("Sensor BMP ERROR");
-//      writeLine("Error BMP280");
-//      Serial.println(F("Could not find sensor BME280 number 1, check wiring!"));
-//    } else if (check == 2) {
-//      Serial.println(F("Could not find sensor BME280 number 2, check wiring!"));
-//    }
-//    delay(500);
-//    sensors -> begin();
-//    while (1);
-//  }
+  if (check) {
+    if (check == 1) {
+      writeLine("Sensor BMP ERROR");
+      writeLine("Error BMP280");
+      Serial.println(F("Could not find sensor BME280 number 1, check wiring!"));
+    } else if (check == 2) {
+      Serial.println(F("Could not find sensor BME280 number 2, check wiring!"));
+    }
+    delay(500);
+    sensors -> begin();
+    while (1);
+  }
 
   // PID
   pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);

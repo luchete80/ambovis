@@ -6,7 +6,7 @@
 
 //Connections and Debug Defs
 //#define ACCEL_STEPPER 1
-#define DEBUG_UPDATE 1 //
+#define DEBUG_UPDATE 1 // 
 #define DEBUG_OFF 1 //Release version
 
 #define BMP_I2C 1  //Pressure Sensor
@@ -115,5 +115,7 @@ typedef struct {
 //general variables
 extern byte vent_mode;
 extern bool send_data;
+
+extern int max_speed,max_accel;
 
 #endif // DEFAULTS_H

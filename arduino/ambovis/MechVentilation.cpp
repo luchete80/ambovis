@@ -243,6 +243,12 @@ void MechVentilation::update(void)
         else 
           _stepper->setTargetPositionInSteps(int (STEPPER_HIGHEST_POSITION*_percVol/10.));
         #endif
+
+        if (vent_mode==VENTMODE_PCL){
+            max_accel=(_pip-20)/20.*(5000-500)+2000;
+            max_speed=(_pip-20)/20.*(3000-500)+2000;
+            _stepper->setAccelerationInStepsPerSecondPerSecond(max_accel);          
+          }
         
         _pid->reset();
 
@@ -324,8 +330,8 @@ void MechVentilation::update(void)
                     _stepperSpeed=STEPPER_SPEED_DEFAULT;
                   else
                     _pid->run(float(pressure_p-pressure_p0), (float)_pip, &_stepperSpeed);
-                    if (_stepperSpeed > STEPPER_SPEED_MAX)
-                      _stepperSpeed=STEPPER_SPEED_MAX;
+                    if (_stepperSpeed > max_speed)
+                      _stepperSpeed=max_speed;
                }
                 else if (vent_mode==VENTMODE_MAN) {
                     //This updates everytime in case of change
@@ -334,10 +340,10 @@ void MechVentilation::update(void)
                       _stepperSpeed=STEPPER_SPEED_MAX;
                 }
                 
-               #ifdef DEBUG_UPDATE
-                Serial.print("Speed: "); Serial.println(int(_stepperSpeed));       
-               // Serial.print("pip 30, dp");Serial.println(pressure_p - pressure_p0);                
-               #endif
+//               #ifdef DEBUG_UPDATE
+//                Serial.print("Speed: "); Serial.println(int(_stepperSpeed));       
+//               // Serial.print("pip 30, dp");Serial.println(pressure_p - pressure_p0);                
+//               #endif
                
                 
 //               Serial.print("Speed");Serial.println(_stepperSpeed);
@@ -348,14 +354,13 @@ void MechVentilation::update(void)
                 stepper->moveTo(STEPPER_HIGHEST_POSITION);
               #else
               _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
-              _stepper->setAccelerationInStepsPerSecondPerSecond(
-                      STEPPER_ACC_INSUFFLATION);
+
               if (vent_mode < 2 ){  //only if auto
                 if (_stepperSpeed >= 0){
                     _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
                 }
                 else{
-                    _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
+                    //_stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
                     if (!_stepper->motionComplete())
                       _stepper->setTargetPositionToStop();
                 }
