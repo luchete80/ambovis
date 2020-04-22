@@ -13,7 +13,6 @@
 #include "src/FlexyStepper/FlexyStepper.h"
 #endif
 
-
 #ifdef LCD_I2C
 #include "LiquidCrystal_I2C.h"
 #else
@@ -62,6 +61,7 @@ char tempstr[5],tempstr2[5];
 unsigned long lastButtonPress;
 int curr_sel, old_curr_sel;
 float _currentPressure = 0.0;
+float p_honey;
 
 unsigned long lastReadSensor = 0;
 
@@ -360,10 +360,16 @@ void loop() {
     //    sensors -> readPressure();
     //    SensorPressureValues_t pressure = sensors -> getRelativePressureInCmH20();
     //
-    temp=float(analogRead(A1))*25.49/1024.;
+    temp    =float(analogRead(A1))*25.49/1024.; //From DPT 
+    //Serial.print("Honey read: ");Serial.println(analogRead(A0)/1023.);
+    //0.42 is level (0 to 1) of zero dp
+    //0.1 is a correction
+    //p_honey = (( float ( analogRead(A0) )/1023.- 0.51) * 5.0/V_SUPPLY_HONEY  - 0.1)/0.8*DEFAULT_PSI_TO_CM_H20*2.; //Data sheet figure 2 analog pressure, calibration from 10% to 90%
+    p_honey = (( float ( analogRead(A0) )/1023.) * 5.0/V_SUPPLY_HONEY  - 0.1 + (V_HONEY_P0-0.5))/0.8*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20; //Data sheet figure 2 analog pressure, calibration from 10% to 90%
+    sensors -> readVolume();
     sensors -> readVolume();
     #ifdef DEBUG_OFF
-      Serial.print(pressure_p - pressure_p0);Serial.print(" ");Serial.println(int(temp));
+      Serial.print(pressure_p - pressure_p0);Serial.print(" ");Serial.print(temp);Serial.print(" ");Serial.println(int(p_honey));
       //sprintf(string, "%f %f",(float)( pressure_p - pressure_p0), temp);
 //      Serial.print(pressure_p - pressure_p0);Serial.print(" ");Serial.println(temp);
 //     Serial.println(byte(_mlInsVol));

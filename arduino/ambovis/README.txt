@@ -54,6 +54,14 @@ https://sites.google.com/site/angmuz/home/proyecto-10-arduino-basics-steppers-mo
 SENSORES-----------------------
 Con honeywell ASDXRRX010ND7A5
 https://www.instructables.com/id/Make-Your-Own-Spirometer/
+https://trybotics.com/project/Make-Your-Own-Spirometer-80064
+https://electronics.stackexchange.com/questions/181181/arduino-interface-with-i2c-pressure-sensor
+
+//CONECTADO EN FORMA ANALOGICA
+https://forum.arduino.cc/index.php?topic=614995.0
+https://www.instructables.com/id/Low-Cost-Spirometer/
+
+
 Sensores de presion
 https://goughlui.com/2018/08/05/note-bosch-sensortec-bmp280-vs-bme280-sensor-confusion/
 

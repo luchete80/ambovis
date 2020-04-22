@@ -18,6 +18,7 @@ start_time = time()
 timepoints = []
 ydata = []
 y2data = []
+y3data = []
 #yrange = [-0.1,5.1]
 yrange = [0.,50.]
 view_time = 4 # seconds of data to view at once
@@ -33,6 +34,7 @@ plt.ylabel('Presion, CMH2O', fontsize='14', fontstyle='italic')
 plt.axes().grid(True)
 line1, = plt.plot(ydata,marker='o',markersize=4,linestyle='dotted',markerfacecolor='green') #ORIGINAL
 line2, = plt.plot(y2data,marker='o',markersize=4,linestyle='dotted',markerfacecolor='blue') #ORIGINAL
+line3, = plt.plot(y3data,marker='o',markersize=4,linestyle='dotted',markerfacecolor='red') #ORIGINAL
 #line1, = axs[0].plot(ydata,marker='o',markersize=4,linestyle='none',markerfacecolor='red')
 #axs[0].plot(timepoints, ydata,marker='o',markersize=4,linestyle='none',markerfacecolor='red')
 #axs[1].plot(timepoints, -ydata)
@@ -58,6 +60,7 @@ while run:
         #ydata.append(float(data[0])*5.0/1024
         ydata.append(float(data[0]))
         y2data.append(float(data[1]))
+        y3data.append(float(data[2]))
         timepoints.append(time()-start_time)
         current_time = timepoints[-1]
         
@@ -67,6 +70,9 @@ while run:
 
         line2.set_xdata(timepoints)
         line2.set_ydata(y2data)
+
+        line3.set_xdata(timepoints)
+        line3.set_ydata(y3data)
         
         # slide the viewing frame along
         if current_time > view_time:

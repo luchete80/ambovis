@@ -1,0 +1,37 @@
+//https://electronics.stackexchange.com/questions/181181/arduino-interface-with-i2c-pressure-sensor
+
+#include<Wire.h>
+#define sensor 0x28 //Unique bus address 
+
+void setup()
+{ 
+  Wire.begin();//Wakes up I2C bus 
+  Serial.begin(9600);
+}
+
+void getdata(byte *a, byte *b)
+{
+  //Move register pointer back to first register
+  //Wire.beginTransmission(sensor);
+  //Wire.write(1);
+  //Wire.endTransmission();
+  Wire.requestFrom(sensor,2);//Sends content of first two registers
+  *a = Wire.read(); //first byte recieved stored here
+  *b = Wire.read(); //second byte recieved stored here
+}
+
+void showdata()
+{
+  byte aa,bb;
+  float pressure =0;
+  getdata(&aa,&bb);
+  Serial.print("byte 1: ");Serial.println(aa,DEC);
+  Serial.print("byte 2 ");Serial.println(bb,DEC);
+ delay(1000);
+
+}
+
+void loop()
+{
+  showdata();
+}

@@ -20,6 +20,7 @@
 #define TIME_BASE 50                 // msec
 #define TIME_SENSOR 100               // msec
 #define TIME_SEND_CONFIGURATION 2000 // msec
+#define V_HONEY_P0 0.51
 
 // Sensores
 #define ENABLED_SENSOR_VOLUME 1
@@ -60,12 +61,15 @@
 #define DEFAULT_POR_INSPIRATORIO 33.3333F // %
 #define DEFAULT_PEAK_INSPIRATORY_PRESSURE 30
 #define DEFAULT_PEAK_ESPIRATORY_PRESSURE 10
+
+#define V_SUPPLY_HONEY 5.23F
 // #define DEFAULT_PEAK_ESPIRATORY_PRESSURE 6
 
 #define DEFAULT_PRESSURE_V_FLUX_K1 1.
 
 // Presión
 #define DEFAULT_PA_TO_CM_H20 0.0102F
+#define DEFAULT_PSI_TO_CM_H20 70.306957F
 
 // Recruitment
 #define DEFAULT_RECRUITMENT_TIMEOUT 40000 // msec
