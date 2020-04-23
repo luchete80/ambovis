@@ -65,7 +65,9 @@ unsigned long lastReadSensor = 0;
 
 
 State static lastState;
-bool changed_options = false;
+bool show_changed_options = false; //Only for display
+bool update_options = false;
+
 unsigned long time_update_display = 100; //ms
 unsigned long last_update_display;
 
@@ -400,8 +402,8 @@ void loop() {
     //Serial.print("Flujo: "); Serial.print(_flux);Serial.println(" ");
     
     #ifdef DEBUG_OFF
-      //Serial.print(p_bmp);Serial.print(" ");Serial.print(p_honey);Serial.print(" ");/*Serial.print(ptest);Serial.print(" ");*/Serial.println(_flux);
-      Serial.print(int(p_bmp));Serial.print(" ");Serial.print(int(p_honey));Serial.print(" ");Serial.print(int(ptest));Serial.print(" ");Serial.println(int(_flux));
+      Serial.print(p_bmp);Serial.print(" ");Serial.print(p_honey);Serial.print(" ");/*Serial.print(ptest);Serial.print(" ");*/Serial.println(_flux);
+      //Serial.print(int(p_bmp));Serial.print(" ");Serial.print(int(p_honey));Serial.print(" ");Serial.print(int(ptest));Serial.print(" ");Serial.println(int(_flux);
       //sprintf(string, "%f %f",(float)( pressure_p - pressure_p0), temp);
 //      Serial.print(pressure_p - pressure_p0);Serial.print(" ");Serial.println(temp);
 //     Serial.println(byte(_mlInsVol));
@@ -440,13 +442,14 @@ void loop() {
         //Serial.print("Insuflated Vol: "); Serial.println(ventilation->getInsVol());
         lcd.clear();  //display_lcd do not clear screnn in order to not blink
         display_lcd();
-        last_update_display = millis();
         update_display = true;
         last_cycle = ventilation->getCycleNum();
+        last_update_display = millis();
 
-        if (changed_options) { //Changed options applies when cycle changed
+        if (update_options) { //Changed options applies when cycle changed
           ventilation->change_config(options);
-          changed_options = false;}
+          update_options = false;
+        }
       }
   }//Read Sensor
 
@@ -469,9 +472,10 @@ void loop() {
   }
 
   //HERE changed_options flag is not updating until cycle hcanges
-  if ( changed_options && ((millis() - last_update_display) > time_update_display) ) {
+  if ( show_changed_options && ((millis() - last_update_display) > time_update_display) ) {
       display_lcd();  //WITHOUT CLEAR!
       last_update_display = millis();
+      show_changed_options=false;
     }
   
 
@@ -540,7 +544,8 @@ void check_encoder()
       }
 
       old_curr_sel = curr_sel;
-      changed_options = true;
+      show_changed_options = true;
+      update_options = true;
     }
     lastButtonPress = millis();
   }
@@ -582,7 +587,8 @@ void check_encoder()
             options.peakEspiratoryPressure = encoderPos;
             break;
         }
-        changed_options = true;
+        show_changed_options = true;
+        update_options=true;
       }//Valid range
   
     }//oldEncPos != encoderPos and valid between range
