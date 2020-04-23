@@ -12,6 +12,9 @@ int currentWaitTriggerTime = 0;
 int currentStopInsufflationTime = 0;
 float currentFlow = 0;
 
+float pressure_max;
+float pressure_min;
+
 MechVentilation::MechVentilation(
         #ifdef ACCEL_STEPPER
         AccelStepper *stepper,
@@ -207,13 +210,13 @@ void MechVentilation::update(void)
     if (pressure_p>pressure_max) {
           pressure_max=pressure_p;
           #ifdef DEBUG_UPDATE
-            Serial.print("max pressure: ");Serial.println(pressure_p);
+            Serial.print("max pressure: ");Serial.println(pressure_max);
           #endif
     }
-    else if (pressure_p<pressure_min){
+    else if (pressure_p < pressure_min){
         pressure_min=pressure_p;
           #ifdef DEBUG_UPDATE
-            Serial.print("Min pressure: ");Serial.println(pressure_p);
+            Serial.print("Min pressure: ");Serial.println(pressure_min);
           #endif
     }
 
@@ -226,9 +229,12 @@ void MechVentilation::update(void)
     {
     case Init_Insufflation:
     {
-        pressure_max=0;
+      pressure_max=0;
+      pressure_min=105000.*DEFAULT_PA_TO_CM_H20;
+
 #if DEBUG_UPDATE
         //Serial.println("Starting insuflation");
+        Serial.print("pressure_max");
 #endif
         // Close Solenoid Valve
         digitalWrite(PIN_SOLENOID, SOLENOID_CLOSED);
@@ -383,7 +389,6 @@ void MechVentilation::update(void)
     break;
     case Init_Exsufflation:
     {
-      pressure_min=103000.*DEFAULT_PA_TO_CM_H20;
       if (pressure_p<pressure_min) {
           pressure_min=pressure_p;
           #ifdef DEBUG_UPDATE

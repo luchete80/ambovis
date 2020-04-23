@@ -50,8 +50,6 @@ byte vent_mode = VENTMODE_PCL; //0
 Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
 float pressure_p0;
-float pressure_max;
-float pressure_min;
 float _mlInsVol,_mllastInsVol;
 float _flux,_flux_0;
 //float _stepperSpeed;
@@ -320,6 +318,9 @@ void setup() {
 
   //MAKE AN IF IF_2_PRESS_SENSORS
   pressure_p0 = _pres1Sensor.readPressure() * DEFAULT_PA_TO_CM_H20;
+  #ifdef DEBUG_UPDATE
+    Serial.print("Pressure_p0");Serial.print(pressure_p0);
+  #endif
 
   //calcularCaudalVenturi(_dpsensor.get_dp(), &_flux_0);
 
@@ -622,7 +623,10 @@ void display_lcd ( ) {
   writeLine(3, "PEEP:" + String(options.peakEspiratoryPressure), 8);
   dtostrf(pressure_min - pressure_p0, 2, 0, tempstr);
   writeLine(3, String(tempstr), 16);
-
+  #ifdef DEBUG_UPDATE
+    Serial.print("Max and Min pressures: ");Serial.print(pressure_max);Serial.print(",");Serial.println(pressure_min);
+  #endif
+  
   lcd_clearxy(0,0);
   lcd_clearxy(0,1);lcd_clearxy(9,1);
   lcd_clearxy(0,2);lcd_clearxy(7,2);
