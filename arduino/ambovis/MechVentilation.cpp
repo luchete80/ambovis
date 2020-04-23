@@ -243,7 +243,9 @@ void MechVentilation::update(void)
         else if (vent_mode==VENTMODE_MAN){
           _stepper->setTargetPositionInSteps(int (STEPPER_HIGHEST_POSITION*(float)_percVol/10.));
           _stepperSpeed=STEPPER_HIGHEST_POSITION*(float(_percVol)/10.)/( (float)(_timeoutIns/1000) * DEFAULT_FRAC_CYCLE_VCL_INSUFF);//En [ml/s]
-          Serial.print("Speed Man:");Serial.print(_stepperSpeed);
+          #ifdef DEBUG_UPDATE
+            Serial.print("Speed Man:");Serial.print(_stepperSpeed);
+          #endif
           _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
           _stepper->setAccelerationInStepsPerSecondPerSecond(3000);
         #endif

@@ -428,6 +428,14 @@ void loop() {
         display_lcd();
         update_display = true;
         last_cycle = ventilation->getCycleNum();
+
+        if (changed_options) { //Changed options applies when cycle changed
+          ventilation->change_config(options);
+          changed_options = false;
+          Serial.println("Changing opts");
+          display_lcd();  //WITHOUT CLEAR!
+          last_update_display = millis();
+        }
       }
   }//Read Sensor
 
@@ -444,25 +452,15 @@ void loop() {
 #endif
 
   //LUCIANO----------------------
-  if (millis()-last_vent_time>TIME_BASE){
-  ventilation -> update();
-  last_vent_time = millis();
+  if ( millis () - last_vent_time > TIME_BASE ) {
+    ventilation -> update();
+    last_vent_time = millis();
   }
 
-//  if (millis() - last_stepper_time > stepper_time) {
-//#ifdef ACCEL_STEPPER
-//    stepper->run();
-//#else
-//    stepper -> processMovement(); //LUCIANO
-//    //Serial.print("Speed");Serial.println(_stepperSpeed);
-//#endif
-//  }
-  
-  if (changed_options && ( (millis() - last_update_display) > time_update_display) ) {
+  //HERE changed_options flag is not updating until cycle hcanges
+  if ( changed_options && ((millis() - last_update_display) > time_update_display) ) {
       display_lcd();  //WITHOUT CLEAR!
       last_update_display = millis();
-      ventilation->change_config(options);
-      changed_options = false;
     }
   
 
@@ -613,7 +611,8 @@ void display_lcd ( ) {
   writeLine(2, "IE:1:", 1);
 
   dtostrf(ventilation->getInsVol(), 4, 0, tempstr);
-  writeLine(1, String(tempstr), 15);
+  //writeLine(1, String(tempstr), 15);
+  writeLine(1, "---", 16);
 
   writeLine(2, String(options.percInspEsp), 6);
   
