@@ -199,9 +199,22 @@ void MechVentilation::update(void)
         Serial.println("fail sensor");
         _setState(State_Exsufflation);
     }
-    else
-    {
+    else {
         _sensor_error_detected = false; //clear flag
+    }
+
+    //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
+    if (pressure_p>pressure_max) {
+          pressure_max=pressure_p;
+          #ifdef DEBUG_UPDATE
+            Serial.print("max pressure: ");Serial.println(pressure_p);
+          #endif
+    }
+    else if (pressure_p<pressure_min){
+        pressure_min=pressure_p;
+          #ifdef DEBUG_UPDATE
+            Serial.print("Min pressure: ");Serial.println(pressure_p);
+          #endif
     }
 
     // Check pressures
@@ -252,8 +265,8 @@ void MechVentilation::update(void)
         }
 
         if (vent_mode==VENTMODE_PCL){
-            max_accel=(_pip-20)/20.*(5000-500)+2000;
-            max_speed=(_pip-20)/20.*(3000-500)+2000;
+            max_accel=(_pip-20)/20.*(3000-500)+500;
+            max_speed=(_pip-20)/20.*(3000-500)+500;
             _stepper->setAccelerationInStepsPerSecondPerSecond(max_accel);          
         }
         
@@ -273,15 +286,7 @@ void MechVentilation::update(void)
     {
 
         /* Stepper control: set end position */
-////LUCIANO
-//#if DEBUG_UPDATE
-//  Serial.println("Motor:speed=" + String(_stepperSpeed) + "steps/sec");
-//#endif
-        //IF _mllastInsVol
-        //VOLUME CONTROL
-        if (pressure_p>pressure_max)
-          pressure_max=pressure_p;
-          
+            
         if (vent_mode==VENTMODE_VCL && _mlInsVol>_tidalVol){
             _stepper->setTargetPositionToStop();
             //_setState(Init_Exsufflation); NOT BEGIN TO INSUFFLATE!
@@ -379,6 +384,13 @@ void MechVentilation::update(void)
     case Init_Exsufflation:
     {
       pressure_min=103000.*DEFAULT_PA_TO_CM_H20;
+      if (pressure_p<pressure_min) {
+          pressure_min=pressure_p;
+          #ifdef DEBUG_UPDATE
+            Serial.print("min pressure: ");Serial.println(pressure_p);
+          #endif
+        }
+        
       _msecTimerStartCycle=millis();
       //Serial.print("Current pressure");Serial.println(_currentPressure);
       
@@ -426,8 +438,6 @@ void MechVentilation::update(void)
     break;
     case State_Exsufflation:
     {
-      if (pressure_p<pressure_min)
-        pressure_min=pressure_p;
     
 //#if 0
 //        if (_stepper->motionComplete())
