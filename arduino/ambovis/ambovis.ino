@@ -46,7 +46,7 @@ FlexyStepper * stepper = new FlexyStepper();
 // - EXTERNAL VARIABLES //
 //////////////////////////
 float pressure_p;   //EXTERN!!
-byte vent_mode = VENTMODE_PCL; //0
+byte vent_mode = VENTMODE_MAN; //0
 Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
 float pressure_p0;
@@ -59,7 +59,7 @@ char tempstr[5],tempstr2[5];
 unsigned long lastButtonPress;
 int curr_sel, old_curr_sel;
 float _currentPressure = 0.0;
-float p_honey;
+float p_honey,p_bmp;
 
 unsigned long lastReadSensor = 0;
 
@@ -318,6 +318,7 @@ void setup() {
 
   //MAKE AN IF IF_2_PRESS_SENSORS
   pressure_p0 = _pres1Sensor.readPressure() * DEFAULT_PA_TO_CM_H20;
+  //pressure_p0 = 103100.0* DEFAULT_PA_TO_CM_H20;
   #ifdef DEBUG_UPDATE
     Serial.print("Pressure_p0");Serial.print(pressure_p0);
   #endif
@@ -340,7 +341,7 @@ void setup() {
 //
 byte last_cycle = 0;
 bool update_display = false;
-float temp;
+float ptest;
 char string[100];
 void loop() {
 
@@ -363,32 +364,44 @@ void loop() {
   if (time > lastReadSensor + TIME_SENSOR)
   {
     //    //Is not anymore in classes
-    pressure_p = _pres1Sensor.readPressure() * DEFAULT_PA_TO_CM_H20;
     //Serial.print("PRessure");Serial.println(pressure_p);
 
     ////////////////////////////// MOTOR RUNNING MAKING NOISE //////////////////////////////
     //    sensors -> readPressure();
     //    SensorPressureValues_t pressure = sensors -> getRelativePressureInCmH20();
     //
-    //temp   =float(analogRead(A0))*25.49/1024.; //From DPT, AS MAX RANGE
-    p_honey    =float(analogRead(A1))*1.01972/1024.; //From DPT, AS MAX RANGE
+    // A0: PRESSURE (HOEYWELL)
+    //A1: Volume (DPT)
+    //A2: Test Mode pressure (DPT)
+    //ptest   =float(analogRead(A2))*25.49/1024.; //From DPT, AS MAX RANGE, for testing
+    //p_honey    =float(analogRead(A1))*1.01972/1024.; //From DPT, AS MAX RANGE
     
-    //Serial.print("Honey Volt at p0: ");Serial.println(analogRead(A0)/1023.);
+    #ifdef DEBUG_UPDATE
+      Serial.print("Honey Volt at p0: ");Serial.println(analogRead(A0)/1023.);
+    #endif
     //0.42 is level (0 to 1) of zero dp
     //0.1 is a correction
     //p_honey = (( float ( analogRead(A0) )/1023.- 0.51) * 5.0/V_SUPPLY_HONEY  - 0.1)/0.8*DEFAULT_PSI_TO_CM_H20*2.; //Data sheet figure 2 analog pressure, calibration from 10% to 90%
-    //p_honey = (( float ( analogRead(A0) )/1023.) * 5.0/V_SUPPLY_HONEY  - 0.1 + (V_HONEY_P0-0.5))/0.8*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20; //Data sheet figure 2 analog pressure, calibration from 10% to 90%
+    p_honey = (( float ( analogRead(A0) )/1023.) * 5.0/V_SUPPLY_HONEY  - 0.1 + (V_HONEY_P0-0.5))/0.8*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20; //Data sheet figure 2 analog pressure, calibration from 10% to 90%
+    p_bmp = _pres1Sensor.readPressure() * DEFAULT_PA_TO_CM_H20 - pressure_p0;
     
-    if (p_honey<0)
-      _flux=1000./60.*(1.005747e-1*pow(p_honey,4) + 2.247666*pow(p_honey,3) + 1.760981e+1*(p_honey,2) + 7.057159E+1*p_honey - 8.168219E+00);
-    else
-      _flux=1000./60.*(-3.779710E-02*pow(p_honey,4) + 1.046894E+00*pow(p_honey,3) - 1.029272E+01*pow(p_honey,2) + 5.379200E+01*p_honey + 8.455071E+00);
+    #ifdef P_HONEYWELL
+      pressure_p = p_honey;
+    #else
+      pressure_p = p_bmp;
+    #endif
     
-    _flux-=150.;
+//    if (p_honey<0)
+//      _flux=1000./60.*(1.005747e-1*pow(p_honey,4) + 2.247666*pow(p_honey,3) + 1.760981e+1*(p_honey,2) + 7.057159E+1*p_honey - 8.168219E+00);
+//    else
+//      _flux=1000./60.*(-3.779710E-02*pow(p_honey,4) + 1.046894E+00*pow(p_honey,3) - 1.029272E+01*pow(p_honey,2) + 5.379200E+01*p_honey + 8.455071E+00);
+//    
+//    _flux-=150.;
     //Serial.print("Flujo: "); Serial.print(_flux);Serial.println(" ");
     
     #ifdef DEBUG_OFF
-      Serial.print(pressure_p - pressure_p0);Serial.print(" ");Serial.print(temp);Serial.print(" ");Serial.print(p_honey);Serial.print(" ");Serial.println(_flux);
+      //Serial.print(p_bmp);Serial.print(" ");Serial.print(p_honey);Serial.print(" ");/*Serial.print(ptest);Serial.print(" ");*/Serial.println(_flux);
+      Serial.print(int(p_bmp));Serial.print(" ");Serial.print(int(p_honey));Serial.print(" ");Serial.print(int(ptest));Serial.print(" ");Serial.println(int(_flux));
       //sprintf(string, "%f %f",(float)( pressure_p - pressure_p0), temp);
 //      Serial.print(pressure_p - pressure_p0);Serial.print(" ");Serial.println(temp);
 //     Serial.println(byte(_mlInsVol));
@@ -427,16 +440,13 @@ void loop() {
         //Serial.print("Insuflated Vol: "); Serial.println(ventilation->getInsVol());
         lcd.clear();  //display_lcd do not clear screnn in order to not blink
         display_lcd();
+        last_update_display = millis();
         update_display = true;
         last_cycle = ventilation->getCycleNum();
 
         if (changed_options) { //Changed options applies when cycle changed
           ventilation->change_config(options);
-          changed_options = false;
-          Serial.println("Changing opts");
-          display_lcd();  //WITHOUT CLEAR!
-          last_update_display = millis();
-        }
+          changed_options = false;}
       }
   }//Read Sensor
 
@@ -617,16 +627,19 @@ void display_lcd ( ) {
 
   writeLine(2, String(options.percInspEsp), 6);
   
-  dtostrf(pressure_max - pressure_p0, 2, 0, tempstr);
+  dtostrf(pressure_max, 2, 0, tempstr);
   writeLine(2, String(tempstr), 16);  
-   
-  writeLine(3, "PEEP:" + String(options.peakEspiratoryPressure), 8);
-  dtostrf(pressure_min - pressure_p0, 2, 0, tempstr);
-  writeLine(3, String(tempstr), 16);
-  #ifdef DEBUG_UPDATE
-    Serial.print("Max and Min pressures: ");Serial.print(pressure_max);Serial.print(",");Serial.println(pressure_min);
-  #endif
   
+  #ifdef DEBUG_UPDATE
+  Serial.print("Max press conv: ");Serial.println(tempstr);
+    Serial.print("Min Max press");  Serial.print(pressure_min);Serial.print(" ");Serial.println(pressure_max);
+  #endif
+    
+  writeLine(3, "PEEP:" + String(options.peakEspiratoryPressure), 8);
+  dtostrf(pressure_min, 2, 0, tempstr);
+  writeLine(3, String(tempstr), 16);  
+  
+
   lcd_clearxy(0,0);
   lcd_clearxy(0,1);lcd_clearxy(9,1);
   lcd_clearxy(0,2);lcd_clearxy(7,2);

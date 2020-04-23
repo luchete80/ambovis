@@ -192,7 +192,6 @@ void MechVentilation::update(void)
 
   _msecTimerCnt=(unsigned long)(millis()-_msecTimerStartCycle);
     SensorPressureValues_t pressures = _sensors->getRelativePressureInCmH20();
-    _currentPressure = pressure_p - pressure_p0;
 
     if (pressures.state != SensorStateOK)
     {                                  // Sensor error detected: return to zero position and continue from there
@@ -209,15 +208,9 @@ void MechVentilation::update(void)
     //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
     if (pressure_p>pressure_max) {
           pressure_max=pressure_p;
-          #ifdef DEBUG_UPDATE
-            Serial.print("max pressure: ");Serial.println(pressure_max);
-          #endif
     }
-    else if (pressure_p < pressure_min){
+    if (pressure_p < pressure_min){
         pressure_min=pressure_p;
-          #ifdef DEBUG_UPDATE
-            Serial.print("Min pressure: ");Serial.println(pressure_min);
-          #endif
     }
 
     // Check pressures
@@ -229,11 +222,16 @@ void MechVentilation::update(void)
     {
     case Init_Insufflation:
     {
+      #ifdef DEBUG_UPDATE
+        Serial.print("max pressure: ");Serial.println(pressure_max);
+        Serial.print("min pressure: ");Serial.println(pressure_min);        
+      #endif
+          
       pressure_max=0;
-      pressure_min=105000.*DEFAULT_PA_TO_CM_H20;
+      pressure_min=60;
 
 #if DEBUG_UPDATE
-        //Serial.println("Starting insuflation");
+        Serial.println("Starting insuflation");
         Serial.print("pressure_max");
 #endif
         // Close Solenoid Valve
@@ -271,8 +269,8 @@ void MechVentilation::update(void)
         }
 
         if (vent_mode==VENTMODE_PCL){
-            max_accel=(_pip-20)/20.*(3000-500)+500;
-            max_speed=(_pip-20)/20.*(3000-500)+500;
+            max_accel=(_pip-20)/20.*(5000-500)+500;
+            max_speed=(_pip-20)/20.*(5000-500)+500;
             _stepper->setAccelerationInStepsPerSecondPerSecond(max_accel);          
         }
         
@@ -344,10 +342,10 @@ void MechVentilation::update(void)
                 if (_stepperSpeed>STEPPER_SPEED_MAX_VCL)
                   _stepperSpeed=STEPPER_SPEED_MAX_VCL;
                } else if (vent_mode==VENTMODE_PCL) {
-                  if ( (pressure_p-pressure_p0)<0)
+                  if ( (pressure_p)<0)
                     _stepperSpeed=STEPPER_SPEED_DEFAULT;
                   else
-                    _pid->run(float(pressure_p-pressure_p0), (float)_pip, &_stepperSpeed);
+                    _pid->run(pressure_p, (float)_pip, &_stepperSpeed);
                     if (_stepperSpeed > max_speed)
                       _stepperSpeed=max_speed;
                }                
@@ -389,13 +387,7 @@ void MechVentilation::update(void)
     break;
     case Init_Exsufflation:
     {
-      if (pressure_p<pressure_min) {
-          pressure_min=pressure_p;
-          #ifdef DEBUG_UPDATE
-            Serial.print("min pressure: ");Serial.println(pressure_p);
-          #endif
-        }
-        
+      
       _msecTimerStartCycle=millis();
       //Serial.print("Current pressure");Serial.println(_currentPressure);
       
@@ -480,7 +472,7 @@ void MechVentilation::update(void)
           }
         else    //Time hasnot expired
         {
-            //_pid->run(_currentPressure, (float)_peep, &_stepperSpeed);
+//            _pid->run(pressure_p, (float)_peep, &_stepperSpeed);
 //            _pid->run(float(pressure_p-pressure_p0), (float)_peep, &_stepperSpeed);
 //LUCIANO
               _stepper->setSpeedInStepsPerSecond(1200);

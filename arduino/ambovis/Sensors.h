@@ -91,7 +91,7 @@ class Sensors
 
 extern float pressure_max;
 extern float pressure_min;
-extern float pressure_p;
+extern float pressure_p;  //DIFFERENTIALS!
 extern float pressure_p0;
 extern float _flux,_flux_0;
 extern Pressure_Sensor _dpsensor;  //Used for venturi
