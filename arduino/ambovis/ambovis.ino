@@ -497,7 +497,7 @@ void timer1Isr(void)
 
 void check_encoder()
 {
-  encpos_bck=oldEncPos;
+  //encpos_bck=oldEncPos;
   //LUCIANO------------------------
   byte btnState = digitalRead(PIN_ENC_SW);
   //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
@@ -506,11 +506,11 @@ void check_encoder()
       //Serial.println(curr_sel);
       //Clean all marks
 
-      //vent_mode=VENTMODE_MAN;
+      vent_mode=VENTMODE_MAN;
       curr_sel++; //NOT +=1, is a byte
 
-//      if (curr_sel==1)
-//        curr_sel++;
+      if (curr_sel==1)
+        curr_sel++;
       
       if ((vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_MAN) && curr_sel==5) curr_sel++; //Not selecting pip in VCL
       if (vent_mode==VENTMODE_PCL && curr_sel==4) curr_sel++; //Not selecting pip in VCL 
@@ -560,8 +560,8 @@ void check_encoder()
 
 
   if (oldEncPos != encoderPos) {
-  if (millis()-lastButtonPress>50)
-  {
+//  if (millis()-lastButtonPress>50)
+//  {
       if (curr_sel != 0) {
         if ( encoderPos > max_sel ) {
            encoderPos=oldEncPos=max_sel; 
@@ -602,10 +602,10 @@ void check_encoder()
     
       }//oldEncPos != encoderPos and valid between range
   } 
-  }else{
-    encoderPos = oldEncPos = encpos_bck;
-    
-    }
+//  }else{
+//    encoderPos = oldEncPos = encpos_bck;
+//    
+//    }
 }
 
 
