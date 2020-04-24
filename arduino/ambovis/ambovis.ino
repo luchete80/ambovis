@@ -295,7 +295,7 @@ void setup() {
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
-  writeLine(1, "AMBOVIS 0423_v1",1);
+  writeLine(1, "AMBOVIS 0424_v3",1);
 
   // configura la ventilación
   ventilation -> start();
@@ -509,8 +509,8 @@ void check_encoder()
       vent_mode=VENTMODE_MAN;
       curr_sel++; //NOT +=1, is a byte
 
-      if (curr_sel==1)
-        curr_sel++;
+//      if (curr_sel==1)
+//        curr_sel++;
       
       if ((vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_MAN) && curr_sel==5) curr_sel++; //Not selecting pip in VCL
       if (vent_mode==VENTMODE_PCL && curr_sel==4) curr_sel++; //Not selecting pip in VCL 
@@ -519,7 +519,7 @@ void check_encoder()
         curr_sel = 0;
       switch (curr_sel){
         case 1: 
-          min_sel=0;max_sel=0;
+          min_sel=2;max_sel=2;
           encoderPos=oldEncPos=vent_mode;
         break;
         case 2: 
