@@ -11,9 +11,10 @@ void setup() {
 
   pinMode(LED_BUILTIN, OUTPUT);     // Initialize the LED_BUILTIN pin as an output
 
-  Serial.begin(115200);
+Serial.detectBaudrate();
+  Serial.begin(9600);
 
-  // Serial.detectBaudrate() may also be called before Serial.begin()
+   Serial.detectBaudrate();// may also be called before Serial.begin()
   // There must be activity on the serial port for the baudrate to be detected
 
 //  unsigned long detectedBaudrate = Serial.detectBaudrate(TIMEOUT);
@@ -62,8 +63,8 @@ void loop() {
   }
   
   char string[100];
-  //sprintf(string, "DT %05d %05d %05d %06d", pressure1, pressure2, volume, flow);
-  sprintf(string, "%05d %05d", pressure1, pressure2);
+  sprintf(string, "DT %05d %05d %05d %06d", pressure1, pressure2, volume, flow);
+  //sprintf(string, "%05d %05d", pressure1, pressure2);
   Serial.println(string);
   
   delay(DT);                      // Wait for two seconds (to demonstrate the active low LED)
