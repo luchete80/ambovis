@@ -499,7 +499,7 @@ void check_encoder()
   byte btnState = digitalRead(PIN_ENC_SW);
   //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
   if (btnState == LOW) {
-    if (millis() - lastButtonPress > 200) {
+    if (millis() - lastButtonPress > 400) {
       //Serial.println(curr_sel);
       //Clean all marks
       
