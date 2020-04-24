@@ -524,7 +524,7 @@ void MechVentilation::update(void)
                     Serial.println("Homing failed");
 #endif
             } else{
-              _stepper->setCurrentPositionInSteps(int(STEPPER_HIGHEST_POSITION*0.7));
+              _stepper->setCurrentPositionInSteps(int(STEPPER_HIGHEST_POSITION*0.12));
               
               }
             
