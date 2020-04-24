@@ -13,8 +13,6 @@
 #include "src/FlexyStepper/FlexyStepper.h"
 #endif
 
-byte encpos_bck;
-
 #ifdef LCD_I2C
 #include "LiquidCrystal_I2C.h"
 #else
@@ -48,7 +46,7 @@ FlexyStepper * stepper = new FlexyStepper();
 // - EXTERNAL VARIABLES //
 //////////////////////////
 float pressure_p;   //EXTERN!!
-byte vent_mode = VENTMODE_PCL; //0
+byte vent_mode = VENTMODE_MAN; //0
 Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
 float pressure_p0;
@@ -61,7 +59,7 @@ char tempstr[5],tempstr2[5];
 unsigned long lastButtonPress;
 int curr_sel, old_curr_sel;
 float _currentPressure = 0.0;
-float p_honey,p_bmp;
+float p_honey,p_bmp,p_dpt;
 
 unsigned long lastReadSensor = 0;
 
@@ -252,7 +250,7 @@ void setup() {
     }
     delay(500);
     sensors -> begin();
-    while (1);
+//    while (1);
   }
 
   // PID
@@ -295,7 +293,7 @@ void setup() {
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
-  writeLine(1, "AMBOVIS 0424_v3",1);
+  writeLine(1, "AMBOVIS 0423_v1",1);
 
   // configura la ventilación
   ventilation -> start();
@@ -378,7 +376,7 @@ void loop() {
     //A1: Volume (DPT)
     //A2: Test Mode pressure (DPT)
     //ptest   =float(analogRead(A2))*25.49/1024.; //From DPT, AS MAX RANGE, for testing
-    //p_honey    =float(analogRead(A1))*1.01972/1024.; //From DPT, AS MAX RANGE
+    p_dpt    =float(analogRead(A1))*DEFAULT_PA_TO_CM_H20*100./1024.; //From DPT, AS MAX RANGE (100 Pa or more) //PA TO CMH2O
     
     #ifdef DEBUG_UPDATE
       Serial.print("Honey Volt at p0: ");Serial.println(analogRead(A0)/1023.);
@@ -395,16 +393,16 @@ void loop() {
       pressure_p = p_bmp;
     #endif
     
-//    if (p_honey<0)
-//      _flux=1000./60.*(1.005747e-1*pow(p_honey,4) + 2.247666*pow(p_honey,3) + 1.760981e+1*(p_honey,2) + 7.057159E+1*p_honey - 8.168219E+00);
-//    else
-//      _flux=1000./60.*(-3.779710E-02*pow(p_honey,4) + 1.046894E+00*pow(p_honey,3) - 1.029272E+01*pow(p_honey,2) + 5.379200E+01*p_honey + 8.455071E+00);
-//    
-//    _flux-=150.;
+    if (p_honey<0)
+      _flux=1000./60.*(1.005747e-1*pow(p_dpt,4) + 2.247666*pow(p_dpt,3) + 1.760981e+1*(p_dpt,2) + 7.057159E+1*p_dpt - 8.168219E+00);
+    else
+      _flux=1000./60.*(-3.779710E-02*pow(p_dpt,4) + 1.046894E+00*pow(p_dpt,3) - 1.029272E+01*pow(p_dpt,2) + 5.379200E+01*p_dpt + 8.455071E+00);
+    
+    _flux-=150.;
     //Serial.print("Flujo: "); Serial.print(_flux);Serial.println(" ");
     
     #ifdef DEBUG_OFF
-      Serial.print(p_bmp);Serial.print(" ");Serial.print(p_honey);Serial.print(" ");/*Serial.print(ptest);Serial.print(" ");*/Serial.println(_flux);
+      Serial.print(p_bmp);Serial.print(" ");Serial.print(p_honey);Serial.print(" ");Serial.print(p_dpt);Serial.print(" ");-Serial.println(_flux);
       //Serial.print(int(p_bmp));Serial.print(" ");Serial.print(int(p_honey));Serial.print(" ");Serial.print(int(ptest));Serial.print(" ");Serial.println(int(_flux);
       //sprintf(string, "%f %f",(float)( pressure_p - pressure_p0), temp);
 //      Serial.print(pressure_p - pressure_p0);Serial.print(" ");Serial.println(temp);
@@ -497,7 +495,6 @@ void timer1Isr(void)
 
 void check_encoder()
 {
-  //encpos_bck=oldEncPos;
   //LUCIANO------------------------
   byte btnState = digitalRead(PIN_ENC_SW);
   //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
@@ -505,8 +502,7 @@ void check_encoder()
     if (millis() - lastButtonPress > 200) {
       //Serial.println(curr_sel);
       //Clean all marks
-
-      vent_mode=VENTMODE_PCL;
+      
       curr_sel++; //NOT +=1, is a byte
 
       if ((vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_MAN) && curr_sel==5) curr_sel++; //Not selecting pip in VCL
@@ -516,7 +512,7 @@ void check_encoder()
         curr_sel = 0;
       switch (curr_sel){
         case 1: 
-          min_sel=VENTMODE_PCL;max_sel=VENTMODE_PCL;
+          min_sel=0;max_sel=2;
           encoderPos=oldEncPos=vent_mode;
         break;
         case 2: 
@@ -552,57 +548,51 @@ void check_encoder()
       update_options = true;
     }
     lastButtonPress = millis();
-
   }
 
 
   if (oldEncPos != encoderPos) {
-//  if (millis()-lastButtonPress>50)
-//  {
-      if (curr_sel != 0) {
-        if ( encoderPos > max_sel ) {
-           encoderPos=oldEncPos=max_sel; 
-        } else if ( encoderPos < min_sel ) {
-            encoderPos=oldEncPos=min_sel;
-          } else {
-         
-          oldEncPos = encoderPos;
-          switch (curr_sel) {
-            case 1:
-              vent_mode = encoderPos;
-              break;
-            case 2:
-              options.respiratoryRate = encoderPos;
-              break;
-            case 3:
-              options.percInspEsp=encoderPos;
-              break;
-            case 4:
-              if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL)
-                options.tidalVolume = encoderPos;
-              else{ //manual
-                options.percVolume =encoderPos;
-               // Serial.print("Encoder pos: ");Serial.println(encoderPos);
-               // Serial.print("Perc vol: ");Serial.println(options.percVolume);
-              }
-              break;
-            case 5:
-              options.peakInspiratoryPressure = encoderPos;
-              break;
-            case 6:
-              options.peakEspiratoryPressure = encoderPos;
-              break;
-          }
-          show_changed_options = true;
-          update_options=true;
-        }//Valid range
-    
-      }//oldEncPos != encoderPos and valid between range
-  } 
-//  }else{
-//    encoderPos = oldEncPos = encpos_bck;
-//    
-//    }
+
+    if (curr_sel != 0) {
+      if ( encoderPos > max_sel ) {
+         encoderPos=oldEncPos=max_sel; 
+      } else if ( encoderPos < min_sel ) {
+          encoderPos=oldEncPos=min_sel;
+        } else {
+       
+        oldEncPos = encoderPos;
+        switch (curr_sel) {
+          case 1:
+            vent_mode = encoderPos;
+            break;
+          case 2:
+            options.respiratoryRate = encoderPos;
+            break;
+          case 3:
+            options.percInspEsp=encoderPos;
+            break;
+          case 4:
+            if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL)
+              options.tidalVolume = encoderPos;
+            else{ //manual
+              options.percVolume =encoderPos;
+             // Serial.print("Encoder pos: ");Serial.println(encoderPos);
+             // Serial.print("Perc vol: ");Serial.println(options.percVolume);
+            }
+            break;
+          case 5:
+            options.peakInspiratoryPressure = encoderPos;
+            break;
+          case 6:
+            options.peakEspiratoryPressure = encoderPos;
+            break;
+        }
+        show_changed_options = true;
+        update_options=true;
+      }//Valid range
+  
+    }//oldEncPos != encoderPos and valid between range
+  }
 }
 
 
