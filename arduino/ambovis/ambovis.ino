@@ -48,7 +48,7 @@ FlexyStepper * stepper = new FlexyStepper();
 // - EXTERNAL VARIABLES //
 //////////////////////////
 float pressure_p;   //EXTERN!!
-byte vent_mode = VENTMODE_MAN; //0
+byte vent_mode = VENTMODE_PCL; //0
 Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
 float pressure_p0;
@@ -506,12 +506,9 @@ void check_encoder()
       //Serial.println(curr_sel);
       //Clean all marks
 
-      vent_mode=VENTMODE_MAN;
+      vent_mode=VENTMODE_PCL;
       curr_sel++; //NOT +=1, is a byte
 
-//      if (curr_sel==1)
-//        curr_sel++;
-      
       if ((vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_MAN) && curr_sel==5) curr_sel++; //Not selecting pip in VCL
       if (vent_mode==VENTMODE_PCL && curr_sel==4) curr_sel++; //Not selecting pip in VCL 
             
@@ -519,7 +516,7 @@ void check_encoder()
         curr_sel = 0;
       switch (curr_sel){
         case 1: 
-          min_sel=2;max_sel=2;
+          min_sel=VENTMODE_PCL;max_sel=VENTMODE_PCL;
           encoderPos=oldEncPos=vent_mode;
         break;
         case 2: 
