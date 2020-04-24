@@ -46,7 +46,7 @@ FlexyStepper * stepper = new FlexyStepper();
 // - EXTERNAL VARIABLES //
 //////////////////////////
 float pressure_p;   //EXTERN!!
-byte vent_mode = VENTMODE_MAN; //0
+byte vent_mode = VENTMODE_PCL; //0
 Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
 float pressure_p0;
@@ -499,7 +499,7 @@ void check_encoder()
   byte btnState = digitalRead(PIN_ENC_SW);
   //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
   if (btnState == LOW) {
-    if (millis() - lastButtonPress > 400) {
+    if (millis() - lastButtonPress > 200) {
       //Serial.println(curr_sel);
       //Clean all marks
       
