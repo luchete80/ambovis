@@ -524,7 +524,7 @@ void MechVentilation::update(void)
                     Serial.println("Homing failed");
 #endif
             } else{
-              _stepper->setCurrentPositionInSteps(int(STEPPER_HIGHEST_POSITION*0.12));
+              //_stepper->setCurrentPositionInSteps(int(STEPPER_HIGHEST_POSITION*0.12));
               
               }
             
@@ -536,7 +536,7 @@ void MechVentilation::update(void)
         }
         /* Status update and reset timer, for next time */
         currentTime = 0;
-        _setState(Init_Exsufflation);
+        _setState(Init_Insufflation);
     }
     break;
 
