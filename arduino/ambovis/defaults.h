@@ -6,8 +6,8 @@
 
 //Connections and Debug Defs
 //#define ACCEL_STEPPER 1
-//#define DEBUG_UPDATE 1 // 
-#define DEBUG_OFF 1 //Release version
+#define DEBUG_UPDATE 1 // 
+//#define DEBUG_OFF 1 //Release version
 //#define P_HONEYWELL 1
 
 #define BMP_I2C 1  //Pressure Sensor
@@ -18,7 +18,7 @@
 //#define PRUEBAS 1 // testing over arduino without sensors
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
-#define TIME_BASE 50                 // msec
+#define TIME_BASE 10                 // msec
 #define TIME_SENSOR 100               // msec
 #define TIME_SEND_CONFIGURATION 2000 // msec
 #define V_HONEY_P0 0.5145
@@ -40,14 +40,14 @@
 //#define STEPPER_LOWEST_POSITION     (STEPPER_MICROSTEPS *  -100)   // Steps
 //#define STEPPER_HIGHEST_POSITION    (STEPPER_MICROSTEPS *   100)   // Steps
 #define STEPPER_LOWEST_POSITION     (-10)   // Steps
-//#define STEPPER_HIGHEST_POSITION    ( 1200)   //270º
-#define STEPPER_HIGHEST_POSITION    ( 1280)   //330º
+#define STEPPER_HIGHEST_POSITION    ( 1200)   //270º
+//#define STEPPER_HIGHEST_POSITION    ( 1280)   //330º
 #define STEPPER_SPEED_DEFAULT       (400)   // Steps/s
 #define STEPPER_SPEED_MAX           (STEPPER_MICROSTEPS * 1600)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_SPEED_MAX_VCL       (1200)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
-#define STEPPER_SPEED_MAX_EXSUFF    (1600)
-#define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  400)   // Steps/s2
-#define STEPPER_ACC_INSUFFLATION    (STEPPER_MICROSTEPS *  800)   // Steps/s2
+#define STEPPER_SPEED_MAX_EXSUFF    (2000)
+#define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  1200)   // Steps/s2
+#define STEPPER_ACC_INSUFFLATION    (STEPPER_MICROSTEPS *  1200)   // Steps/s2
 
 // Valores por defecto
 #define DEFAULT_HEIGHT 170 // cm

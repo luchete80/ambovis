@@ -4,7 +4,7 @@
 #include "Sensors.h"
 #include "MechVentilation.h"
 #include "src/TimerOne/TimerOne.h"
-//#include "src/TimerTwo/TimerTwo.h"
+#include "src/TimerTwo/TimerTwo.h"
 
 #include "src/AutoPID/AutoPID.h"
 #ifdef ACCEL_STEPPER
@@ -29,8 +29,6 @@ int Compression_perc = 8; //80%
 volatile String debugMsg[15];
 volatile byte debugMsgCounter = 0;
 #endif
-
-//TimerOne Timer2;
 
 #ifdef ACCEL_STEPPER
 AccelStepper *stepper = new AccelStepper(
@@ -66,7 +64,7 @@ unsigned long lastReadSensor = 0;
 
 State static lastState;
 bool show_changed_options = false; //Only for display
-//bool update_options = false;
+bool update_options = false;
 
 unsigned long time_update_display = 100; //ms
 unsigned long last_update_display;
@@ -293,7 +291,7 @@ void setup() {
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
-  writeLine(1, "AMBOVIS 0423_v1",1);
+  writeLine(1, "AMBOVIS 0425_v1",1);
 
   // configura la ventilación
   ventilation -> start();
@@ -335,6 +333,8 @@ void setup() {
 
   Timer1.initialize(50);
   Timer1.attachInterrupt(timer1Isr);
+
+  //Timer2.init(30000,timer2Isr);
 }
 
 /**
@@ -379,7 +379,7 @@ void loop() {
     p_dpt    =200.*float(analogRead(A1))*DEFAULT_PA_TO_CM_H20*100./1024.; //From DPT, AS MAX RANGE (100 Pa or more) //PA TO CMH2O
     
     #ifdef DEBUG_UPDATE
-      Serial.print("Honey Volt at p0: ");Serial.println(analogRead(A0)/1023.);
+      //Serial.print("Honey Volt at p0: ");Serial.println(analogRead(A0)/1023.);
     #endif
     //0.42 is level (0 to 1) of zero dp
     //0.1 is a correction
@@ -392,15 +392,17 @@ void loop() {
     #else
       pressure_p = p_bmp;
     #endif
-
+//    
 //    if (p_honey<0)
 //      _flux=1000./60.*(1.005747e-1*pow(p_dpt,4) + 2.247666*pow(p_dpt,3) + 1.760981e+1*(p_dpt,2) + 7.057159E+1*p_dpt - 8.168219E+00);
 //    else
 //      _flux=1000./60.*(-3.779710E-02*pow(p_dpt,4) + 1.046894E+00*pow(p_dpt,3) - 1.029272E+01*pow(p_dpt,2) + 5.379200E+01*p_dpt + 8.455071E+00);
+//    
 //    _flux-=150.;
+    //Serial.print("Flujo: "); Serial.print(_flux);Serial.println(" ");
     
     #ifdef DEBUG_OFF
-//      Serial.print(p_bmp);Serial.print(" ");Serial.print(p_honey);Serial.print(" ");Serial.print("0.0");Serial.print(" ");-Serial.println(p_dpt);
+      Serial.print(p_bmp);Serial.print(" ");Serial.print(p_honey);Serial.print(" ");Serial.print("0.0");Serial.print(" ");-Serial.println(p_dpt);
       //Serial.print(int(p_bmp));Serial.print(" ");Serial.print(int(p_honey));Serial.print(" ");Serial.print(int(ptest));Serial.print(" ");Serial.println(int(_flux);
       //sprintf(string, "%f %f",(float)( pressure_p - pressure_p0), temp);
 //      Serial.print(pressure_p - pressure_p0);Serial.print(" ");Serial.println(temp);
@@ -444,10 +446,10 @@ void loop() {
         last_cycle = ventilation->getCycleNum();
         last_update_display = millis();
 
-//        if (update_options) { //Changed options applies when cycle changed
+        if (update_options) { //Changed options applies when cycle changed
           ventilation->change_config(options);
-//          update_options = false;
-//        }
+          update_options = false;
+        }
       }
   }//Read Sensor
 
@@ -462,7 +464,7 @@ void loop() {
     debugMsgCounter = 0;
   }
 #endif
-
+//
   //LUCIANO----------------------
   if ( millis () - last_vent_time > TIME_BASE ) {
     ventilation -> update();
@@ -487,6 +489,11 @@ void timer1Isr(void)
     stepper -> processMovement(); //LUCIANO
     //Serial.print("Speed");Serial.println(_stepperSpeed);
     #endif
+}
+
+void timer2Isr(void)
+{
+  ventilation -> update();
 }
 
 //
@@ -543,7 +550,7 @@ void check_encoder()
 
       old_curr_sel = curr_sel;
       show_changed_options = true;
-      //update_options = true;
+      update_options = true;
     }
     lastButtonPress = millis();
   }
@@ -586,7 +593,7 @@ void check_encoder()
             break;
         }
         show_changed_options = true;
-        //update_options=true;
+        update_options=true;
       }//Valid range
   
     }//oldEncPos != encoderPos and valid between range
