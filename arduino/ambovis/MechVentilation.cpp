@@ -121,12 +121,13 @@ void MechVentilation::_setInspiratoryCycle(void)
     float timeoutCycle = ((float)60) * 1000 / ((float)_rpm); // Tiempo de ciclo en msegundos
     //_timeoutIns = timeoutCycle * DEFAULT_POR_INSPIRATORIO / 100;
     _timeoutIns = timeoutCycle / (float(_percIE+1));
-    _timeoutEsp = (timeoutCycle) - _timeoutIns;
-    //#ifdef DEBUG_UPDATE
+	_timeoutEsp = (timeoutCycle) - _timeoutIns;    
+	#ifdef DEBUG_UPDATE
       Serial.print("Timeout Cycle");Serial.println(timeoutCycle);
       Serial.print("_timeoutIns");Serial.println(_timeoutIns);
       Serial.print("_timeoutEsp");Serial.println(_timeoutEsp);
-    //#endif
+	#endif
+    
 }
 
 //LUCIANO 
@@ -256,15 +257,13 @@ void MechVentilation::update(void)
         #else
         // Note: this can only be called when the motor is stopped
         //IMPORTANT FROM https://github.com/Stan-Reifel/FlexyStepper/blob/master/Documentation.md
-        
         _stepper->setSpeedInStepsPerSecond(STEPPER_SPEED_DEFAULT);
         _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_INSUFFLATION);
-        
+
         if (vent_mode!=VENTMODE_MAN)  //VCL && PCL
           _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
-        else {
-          highest_man_pos=int (STEPPER_HIGHEST_POSITION*(float)_percVol/10.);
-          _stepper->setTargetPositionInSteps(highest_man_pos);
+        else { //MANUAL MODE
+          _stepper->setTargetPositionInSteps(int (STEPPER_HIGHEST_POSITION*(float)_percVol/10.));
           _stepperSpeed=STEPPER_HIGHEST_POSITION*(float(_percVol)/10.)/( (float)(_timeoutIns/1000) * DEFAULT_FRAC_CYCLE_VCL_INSUFF);//En [ml/s]
           if (_stepperSpeed>STEPPER_SPEED_MAX)
             _stepperSpeed=STEPPER_SPEED_MAX;
@@ -272,6 +271,7 @@ void MechVentilation::update(void)
             Serial.print("Speed Man:");Serial.print(_stepperSpeed);
           #endif
           _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
+ 
         #endif
         }
 
@@ -297,7 +297,7 @@ void MechVentilation::update(void)
     {
 
         /* Stepper control: set end position */
-           
+            
         if (vent_mode==VENTMODE_VCL && _mlInsVol>_tidalVol){
             _stepper->setTargetPositionToStop();
             //_setState(Init_Exsufflation); NOT BEGIN TO INSUFFLATE!
@@ -368,26 +368,22 @@ void MechVentilation::update(void)
                 
 
               if (vent_mode !=VENTMODE_MAN){  //only if auto
-                  // TODO: if _currentPressure > _pip + 5, trigger alarm
-                  #ifdef ACCEL_STEPPER  //LUCIANO
-                    stepper->setSpeed(_stepperSpeed);
-                    stepper->moveTo(STEPPER_HIGHEST_POSITION);
-                  #else
-                    _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
-                    if (_stepperSpeed >= 0){
-                        _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
-                    } else{
-                        //_stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
-                        if (!_stepper->motionComplete())
-                          _stepper->setTargetPositionToStop();
-                    }
-                  #endif
-              } else { //MANUAL MODE
-                #ifdef DEBUG_UPDATE
-                 // Serial.print("Position: ");Serial.println(_stepper->getCurrentPositionInSteps());
-                #endif
+                // TODO: if _currentPressure > _pip + 5, trigger alarm
+                #ifdef ACCEL_STEPPER  //LUCIANO
+                  stepper->setSpeed(_stepperSpeed);
+                  stepper->moveTo(STEPPER_HIGHEST_POSITION);
+                #else
+                _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
+                if (_stepperSpeed >= 0){
+                    _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
                 }
-
+                else{
+                    //_stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
+                    if (!_stepper->motionComplete())
+                      _stepper->setTargetPositionToStop();
+                }
+              }//vent mode
+              #endif
               //Serial.println("CUrrtime");Serial.println(_msecTimerCnt);
               //Serial.println("timeout");Serial.println(_msecTimeoutInsufflation);
   
@@ -466,15 +462,22 @@ void MechVentilation::update(void)
 //        }
 //#endif
         // Time has expired
+        //if (currentTime > totalCyclesInThisState)
         if(_msecTimerCnt > _timeoutEsp) 
         {
-            if (_stepper->motionComplete()) {
-              _setState(Init_Insufflation);
-              _startWasTriggeredByPatient = false;
-              _msecTimerStartCycle=millis();
-            } else {
-              Serial.println("EXSUFF TIMEOUT ERROR, WAITING TO STOP");
-              }
+            if (!_stepper->motionComplete())
+            {
+                // motor not finished, force motor to stop in current position
+                //BUG
+                //_stepper->setTargetPositionInSteps(_stepper->getCurrentPositionInSteps());
+                _stepper->setTargetPositionToStop();
+            }
+            /* Status update and reset timer, for next time */
+            _setState(Init_Insufflation);
+            _startWasTriggeredByPatient = false;
+            _msecTimerStartCycle=millis();
+
+            _cyclenum++;
           }
         else    //Time hasnot expired
         {
