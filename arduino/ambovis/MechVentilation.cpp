@@ -263,8 +263,8 @@ void MechVentilation::update(void)
         if (vent_mode!=VENTMODE_MAN)  //VCL && PCL
           _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
         else { //MANUAL MODE
-          _stepper->setTargetPositionInSteps(int (STEPPER_HIGHEST_POSITION*(float)_percVol/10.));
-          _stepperSpeed=STEPPER_HIGHEST_POSITION*(float(_percVol)/10.)/( (float)(_timeoutIns/1000) * DEFAULT_FRAC_CYCLE_VCL_INSUFF);//En [ml/s]
+          _stepper->setTargetPositionInSteps(int (STEPPER_HIGHEST_POSITION*(float)_percVol/100.));
+          _stepperSpeed=STEPPER_HIGHEST_POSITION*(float(_percVol)/100.)/( (float)(_timeoutIns/1000) * DEFAULT_FRAC_CYCLE_VCL_INSUFF);//En [ml/s]
           if (_stepperSpeed>STEPPER_SPEED_MAX)
             _stepperSpeed=STEPPER_SPEED_MAX;
           #ifdef DEBUG_UPDATE

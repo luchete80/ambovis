@@ -102,6 +102,20 @@ https://liliputing.com/2019/01/android-x86-8-1-released-lets-you-run-oreo-on-des
 git config --global credential.helper 'cache --timeout 7200'
 
 ---------------------------------
+ARDUINO MAPS para buscar
+FORO: https://github.com/maniacbug/StandardCplusplus/blob/master/map
+
+https://github.com/maniacbug/StandardCplusplus/blob/master/map
+http://andybrown.me.uk/ws/2011/01/15/the-standard-template-library-stl-for-avr-with-c-streams/
+
+tests 
+http://www.gammon.com.au/forum/?id=11119
+
+Otro: puede usarse el find_if:
+https://poesiabinaria.net/2016/02/como-buscar-en-un-vector-o-una-lista-de-mapas-en-c/
+
+
+----------------------------------
 ONLINE SIMULATORS
 
 
