@@ -415,13 +415,13 @@ void loop() {
 //      _flux=1000./60.*(-3.779710E-02*pow(p_dpt,4) + 1.046894E+00*pow(p_dpt,3) - 1.029272E+01*pow(p_dpt,2) + 5.379200E+01*p_dpt + 8.455071E+00);
 //    
 //    _flux-=150.;
-    _flux=(float)po_flux[findClosest2(dp,75,p_dpt)];
+//    _flux=(float)po_flux[findClosest2(dp,75,p_dpt)];
     //Serial.print("Flujo: "); Serial.print(_flux);Serial.println(" ");
     
     #ifdef DEBUG_OFF
       //Serial.print(p_bmp);Serial.print(" ");Serial.print(p_honey);Serial.print(" ");Serial.print("0.0");Serial.println(" ");Serial.println(_flux);
-      Serial.print("0.0 0.0 0.0 ");
-      Serial.println(_flux);
+//      Serial.print("0.0 0.0 0.0 ");
+//      Serial.println(_flux);
       //Serial.print(int(p_bmp));Serial.print(" ");Serial.print(int(p_honey));Serial.print(" ");Serial.print(int(ptest));Serial.print(" ");Serial.println(int(_flux);
       //sprintf(string, "%f %f",(float)( pressure_p - pressure_p0), temp);
 //      Serial.print(pressure_p - pressure_p0);Serial.print(" ");Serial.println(temp);
