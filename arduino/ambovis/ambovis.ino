@@ -44,6 +44,7 @@ FlexyStepper * stepper = new FlexyStepper();
 // - EXTERNAL VARIABLES //
 //////////////////////////
 float pressure_p;   //EXTERN!!
+byte pressure_sec,psec_max;
 byte vent_mode = VENTMODE_MAN; //0
 Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
@@ -239,12 +240,13 @@ void setup() {
   sensors = new Sensors();
 
   int check = sensors -> begin();
-//  if (check) {
-//    if (check == 1) {
-//      writeLine("Sensor BMP ERROR");
-//      writeLine("Error BMP280");
-//      Serial.println(F("Could not find sensor BME280 number 1, check wiring!"));
-//    } else if (check == 2) {
+  if (check) {
+    if (check == 1) {
+      writeLine("Sensor BMP ERROR");
+      writeLine("Error BMP280");
+      Serial.println(F("Could not find sensor BME280 number 1, check wiring!"));
+    } }
+//    else if (check == 2) {
 //      Serial.println(F("Could not find sensor BME280 number 2, check wiring!"));
 //    }
 //    delay(500);
@@ -389,6 +391,7 @@ void loop() {
     
     #ifdef P_HONEYWELL
       pressure_p = p_honey;
+      pressure_sec=byte(p_bmp);
     #else
       pressure_p = p_bmp;
     #endif
@@ -640,6 +643,11 @@ void display_lcd ( ) {
   dtostrf(pressure_min, 2, 0, tempstr);
   writeLine(3, String(tempstr), 16);  
   
+  writeLine(3, "PS: ", 1);
+  
+  dtostrf(psec_max, 2, 0, tempstr);
+  writeLine(3, String(tempstr), 4);  
+
 
   lcd_clearxy(0,0);
   lcd_clearxy(0,1);lcd_clearxy(9,1);

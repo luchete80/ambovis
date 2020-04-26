@@ -213,6 +213,9 @@ void MechVentilation::update(void)
     if (pressure_p>pressure_max) {
           pressure_max=pressure_p;
     }
+    if (pressure_sec>psec_max) {
+          psec_max=pressure_sec;
+    }
     if (pressure_p < pressure_min){
         pressure_min=pressure_p;
     }
@@ -232,6 +235,7 @@ void MechVentilation::update(void)
       #endif
           
       pressure_max=0;
+      psec_max=0;
       pressure_min=60;
 
 #if DEBUG_UPDATE
