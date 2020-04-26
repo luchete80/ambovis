@@ -465,25 +465,25 @@ void MechVentilation::update(void)
         //if (currentTime > totalCyclesInThisState)
         if(_msecTimerCnt > _timeoutEsp) 
         {
-//            if (!_stepper->motionComplete())
-//            {
+            if (!_stepper->motionComplete())
+            {
 //                // motor not finished, force motor to stop in current position
 //                //BUG
 //                //_stepper->setTargetPositionInSteps(_stepper->getCurrentPositionInSteps());
 //                _stepper->setTargetPositionToStop();
-//            }
+            }
 //            /* Status update and reset timer, for next time */
-//            _setState(Init_Insufflation);
-//            _startWasTriggeredByPatient = false;
-//            _msecTimerStartCycle=millis();
+            _setState(Init_Insufflation);
+            _startWasTriggeredByPatient = false;
+            _msecTimerStartCycle=millis();
 
-            if (_stepper->motionComplete()) {
-              _setState(Init_Insufflation);
-              _startWasTriggeredByPatient = false;
-              _msecTimerStartCycle=millis();
-            } else {
-              Serial.println("EXSUFF TIMEOUT ERROR, WAITING TO STOP");
-              }
+  //          if (_stepper->motionComplete()) {
+  //           _setState(Init_Insufflation);
+  //             _startWasTriggeredByPatient = false;
+  //           _msecTimerStartCycle=millis();
+ //           } else {
+ //             Serial.println("EXSUFF TIMEOUT ERROR, WAITING TO STOP");
+  //            }
           }
         else    //Time hasnot expired
         {
