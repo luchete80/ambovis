@@ -274,7 +274,7 @@ void MechVentilation::update(void)
  
         #endif
         }
-   
+
         if (vent_mode==VENTMODE_PCL){
             max_accel=(_pip-20)/20.*(5000-500)+500;
             max_speed=(_pip-20)/20.*(5000-500)+500;
@@ -465,27 +465,31 @@ void MechVentilation::update(void)
         //if (currentTime > totalCyclesInThisState)
         if(_msecTimerCnt > _timeoutEsp) 
         {
-            if (!_stepper->motionComplete())
-            {
-//                // motor not finished, force motor to stop in current position
-//                //BUG
-//                //_stepper->setTargetPositionInSteps(_stepper->getCurrentPositionInSteps());
-//                _stepper->setTargetPositionToStop();
-            }
-//            /* Status update and reset timer, for next time */
-            _setState(Init_Insufflation);
-            _startWasTriggeredByPatient = false;
-            _msecTimerStartCycle=millis();
+				/////////////////////////// ********** ORIGINAL 
+						// if (!_stepper->motionComplete())
+						// {
+							// // motor not finished, force motor to stop in current position
+							// //BUG
+							// //_stepper->setTargetPositionInSteps(_stepper->getCurrentPositionInSteps());
+							// _stepper->setTargetPositionToStop();
+						// }
+						// /* Status update and reset timer, for next time */
+						// _setState(Init_Insufflation);
+						// _startWasTriggeredByPatient = false;
+						// _msecTimerStartCycle=millis();
+           //_cyclenum++;  //THIS ALWAYS SGOULD BE PRESENT
+				////////////////////////////////*** ORIGINAL
 
-  //          if (_stepper->motionComplete()) {
-  //           _setState(Init_Insufflation);
-  //             _startWasTriggeredByPatient = false;
-  //           _msecTimerStartCycle=millis();
- //           } else {
- //             Serial.println("EXSUFF TIMEOUT ERROR, WAITING TO STOP");
-  //            }
-          }
-        else    //Time hasnot expired
+        //////////////////// NEW //////////////////////////
+  			//if (_stepper->motionComplete()&& _stepper->getCurrentPositionInSteps()==STEPPER_LOWEST_POSITION) {
+        if (_stepper->getCurrentPositionInSteps()==STEPPER_LOWEST_POSITION) {
+  				  _setState(Init_Insufflation);
+  				  //_startWasTriggeredByPatient = false;
+  				  _msecTimerStartCycle=millis();
+            _cyclenum++;  //THIS ALWAYS SGOULD BE PRESENT
+  		    }
+        /////////////////// NEW ///////////////////////////
+        } else    //Time hasnot expired
         {
 //            _pid->run(pressure_p, (float)_peep, &_stepperSpeed);
 //            _pid->run(float(pressure_p-pressure_p0), (float)_peep, &_stepperSpeed);

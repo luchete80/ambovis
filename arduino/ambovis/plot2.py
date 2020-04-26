@@ -52,7 +52,7 @@ axs.flat[0].set_xlim(0,view_time)
 axs.flat[0].set_ylim(0,60)
 
 axs.flat[1].set_xlim(0,view_time)
-axs.flat[1].set_ylim(0,50)
+axs.flat[1].set_ylim(0,1000)
 
 axs.flat[0].legend([line1, line2, line3],["BMP280", "A0", "Honeywell (A1)"])
 axs.flat[1].legend([line4],["Flux"])

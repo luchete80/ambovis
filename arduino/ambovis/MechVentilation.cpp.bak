@@ -262,7 +262,7 @@ void MechVentilation::update(void)
 
         if (vent_mode!=VENTMODE_MAN)  //VCL && PCL
           _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
-        else {
+        else { //MANUAL MODE
           _stepper->setTargetPositionInSteps(int (STEPPER_HIGHEST_POSITION*(float)_percVol/10.));
           _stepperSpeed=STEPPER_HIGHEST_POSITION*(float(_percVol)/10.)/( (float)(_timeoutIns/1000) * DEFAULT_FRAC_CYCLE_VCL_INSUFF);//En [ml/s]
           if (_stepperSpeed>STEPPER_SPEED_MAX)
@@ -271,7 +271,7 @@ void MechVentilation::update(void)
             Serial.print("Speed Man:");Serial.print(_stepperSpeed);
           #endif
           _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
-          _stepper->setAccelerationInStepsPerSecondPerSecond(3000);
+ 
         #endif
         }
 
