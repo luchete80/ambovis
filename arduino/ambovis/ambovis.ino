@@ -293,7 +293,7 @@ void setup() {
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
-  writeLine(1, "AMBOVIS R_0_2",4);
+  writeLine(1, "AMBOVIS 2604_v3",4);
 
   // configura la ventilación
   ventilation -> start();
@@ -626,8 +626,8 @@ void display_lcd ( ) {
   writeLine(2, "IE:1:", 1);
 
   dtostrf(ventilation->getInsVol(), 4, 0, tempstr);
-  //writeLine(1, String(tempstr), 15);
-  writeLine(1, "---", 16);
+  writeLine(1, String(tempstr), 15);
+  //writeLine(1, "---", 16);
 
   writeLine(2, String(options.percInspEsp), 6);
   
