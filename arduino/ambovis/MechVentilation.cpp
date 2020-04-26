@@ -333,11 +333,13 @@ void MechVentilation::update(void)
         else //Time has not expired (State Insufflation)
         {
             if (!wait_NoMove){
-  
-              //Serial.print("volume:");Serial.println(_mlInsVol);
+
+              #ifdef DEBUG_UPDATE
+                Serial.print("volume:");Serial.println(_mlInsVol);
+              #endif
               //_mlInsVol+=float(_flux*(TIME_BASE));//flux in l and time in msec, results in ml
               //_mlInsVol+=float((_flux-_flux_0)*(millis()-last_vent_time));//flux in l and time in msec, results in ml 
-              _mlInsVol+=_flux*float((millis()-last_vent_time));//flux in l and time in msec, results in ml                  
+              _mlInsVol+=_flux*float((millis()-last_vent_time))*0.001;//flux in l and time in msec, results in ml                  
               //#endif
                 //flujo remanente   
                 float rem_flux;
