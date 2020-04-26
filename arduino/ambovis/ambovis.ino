@@ -291,7 +291,7 @@ void setup() {
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
-  writeLine(1, "AMBOVIS 0425_v1",1);
+  writeLine(1, "AMBOVIS R_0_1",4);
 
   // configura la ventilación
   ventilation -> start();

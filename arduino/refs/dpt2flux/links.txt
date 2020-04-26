@@ -1,0 +1,70 @@
+https://www.geeksforgeeks.org/find-closest-number-array/
+
+
+DE 
+https://en.wikipedia.org/wiki/Binary_search_algorithm
+
+function binary_search(A, n, T) is
+    L := 0
+    R := n − 1
+    while L ≤ R do
+        m := floor((L + R) / 2)
+        if A[m] < T then
+            L := m + 1
+        else if A[m] > T then
+            R := m - 1
+        else:
+            return m
+    return unsuccessful
+	
+	
+In the above procedure, the algorithm checks whether the middle element ({\displaystyle m}m) is equal to the target ({\displaystyle T}T) in every iteration. Some implementations leave out this check during each iteration. The algorithm would perform this check only when one element is left (when {\displaystyle L=R}{\displaystyle L=R}). This results in a faster comparison loop, as one comparison is eliminated per iteration. However, it requires one more iteration on average.[8]
+
+function binary_search_alternative(A, n, T) is
+    L := 0
+    R := n − 1
+    while L != R do
+        m := ceil((L + R) / 2)
+        if A[m] > T then
+            R := m - 1
+        else:
+            L := m
+    if A[L] = T then
+        return L
+    return unsuccessful
+	
+
+FROM  :
+https://rosettacode.org/wiki/Binary_search
+
+  BinarySearch_Right(A[0..N-1], value) {
+      low = 0
+      high = N - 1
+      while (low <= high) {
+          // invariants: value >= A[i] for all i < low
+                         value < A[i] for all i > high
+          mid = (low + high) / 2
+          if (A[mid] > value)
+              high = mid - 1
+          else
+              low = mid + 1
+      }
+      return low
+  }
+  
+ LEFTMOST INSERTION 
+ 
+  BinarySearch_Left(A[0..N-1], value) {
+      low = 0
+      high = N - 1
+      while (low <= high) {
+          // invariants: value > A[i] for all i < low
+                         value <= A[i] for all i > high
+          mid = (low + high) / 2
+          if (A[mid] >= value)
+              high = mid - 1
+          else
+              low = mid + 1
+      }
+      return low
+  }
