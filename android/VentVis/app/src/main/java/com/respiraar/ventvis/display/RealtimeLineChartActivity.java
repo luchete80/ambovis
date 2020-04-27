@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
@@ -29,6 +30,7 @@ import com.respiraar.ventvis.communication.SerialDevice;
 import com.respiraar.ventvis.communication.UsbService;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 
 public class RealtimeLineChartActivity extends ChartBase implements
@@ -36,6 +38,7 @@ public class RealtimeLineChartActivity extends ChartBase implements
 
     private RealtimeLine chartPressure;
     private RealtimeLine chartFlow;
+    private RealtimeLine chartVol;
     private SerialDevice serialDevice;
 
     @Override
@@ -51,50 +54,59 @@ public class RealtimeLineChartActivity extends ChartBase implements
 
         serialDevice = new SerialDevice(new MyHandler(this), this);
 
-        chartPressure = new RealtimeLine(findViewById(R.id.chart1), this, tfLight, "Pressure");
-        chartFlow = new RealtimeLine(findViewById(R.id.chart2), this, tfLight, "Flow");
+        chartPressure = new RealtimeLine(findViewById(R.id.chart1), this, tfLight,
+                "Pressure", 60.0, 0.0, 40.0);
+        chartFlow = new RealtimeLine(findViewById(R.id.chart2),this, tfLight,
+                "Flow", 60.0, 0.0, 1000.0);
+        chartVol = new RealtimeLine(findViewById(R.id.chart3),this, tfLight,
+                "Vol", 60.0, 0.0, 700.0);
 
         feedMultiple();
     }
 
     private void testAddEntry() {
 
-        float valPressure = (float) (Math.random() * 40 + 30f);
-        float valFlow = (float) (Math.random() * 40 + 30f);
+        ArrayList<Pair> pressures = new ArrayList<>();
+        ArrayList<Pair> fluxes = new ArrayList<>();
+        ArrayList<Pair> vols = new ArrayList<>();
 
-        TextView valuePip = findViewById(R.id.valuePip);
-        valuePip.setText(String.format("%.2f", valPressure));
+        Pair<String, Float> p_bmp = Pair.create("BMP280",
+                (float) (Math.random() * 40 + 30f));
+        pressures.add(p_bmp);
+        Pair<String, Float> p_honey = Pair.create("HONEYWELL (A1)",
+                (float) (Math.random() * 40 + 30f));
+        pressures.add(p_honey);
+        Pair<String, Float> p_dpt = Pair.create("A0",
+                (float) (Math.random() * 40 + 30f));
+        pressures.add(p_dpt);
+        Pair<String, Float> flux = Pair.create("Flux [ml/s]",
+                (float) (Math.random() * 100 + 30f));
+        fluxes.add(flux);
+        Pair<String, Float> vol = Pair.create("Volume [ml]",
+                (float) (Math.random() * 700 + 30f));
+        vols.add(vol);
 
-        TextView valuePeep = findViewById(R.id.valuePeep);
-        valuePeep.setText(String.format("%.2f", valPressure * 10));
-
-        TextView valueFr = findViewById(R.id.valueFr);
-        valueFr.setText(String.format("%.2f", valFlow));
-
-        TextView valueVol = findViewById(R.id.valueVol);
-        valueVol.setText(String.format("%.2f", valFlow *10));
-
-        chartPressure.addValue(valPressure);
-        chartFlow.addValue(valFlow);
+        addEntry(pressures, fluxes, vols);
     }
 
     @SuppressLint("DefaultLocale")
-    public void addEntry(float valPressure, float valFlow) {
+    public void addEntry(ArrayList<Pair> pressures, ArrayList<Pair> flux, ArrayList<Pair> vol) {
 
         TextView valuePip = findViewById(R.id.valuePip);
-        valuePip.setText(String.format("%.2f", valPressure));
+        valuePip.setText(String.format("%.2f", 0.0));
 
         TextView valuePeep = findViewById(R.id.valuePeep);
-        valuePeep.setText(String.format("%.2f", valPressure * 10));
+        valuePeep.setText(String.format("%.2f", 0.0));
 
         TextView valueFr = findViewById(R.id.valueFr);
-        valueFr.setText(String.format("%.2f", valFlow));
+        valueFr.setText(String.format("%.2f", (float)flux.get(0).second));
 
         TextView valueVol = findViewById(R.id.valueVol);
-        valueVol.setText(String.format("%.2f", valFlow *10));
+        valueVol.setText(String.format("%.2f", (float)vol.get(0).second));
 
-        chartPressure.addValue(valPressure);
-        chartFlow.addValue(valFlow);
+        chartPressure.addValue(pressures);
+        chartFlow.addValue(flux);
+        chartVol.addValue(vol);
     }
 
     private Thread thread;
@@ -105,7 +117,6 @@ public class RealtimeLineChartActivity extends ChartBase implements
             thread.interrupt();
 
         final Runnable runnable = new Runnable() {
-
             @Override
             public void run() {
             }
@@ -116,8 +127,6 @@ public class RealtimeLineChartActivity extends ChartBase implements
             @Override
             public void run() {
                 while (!Thread.currentThread().isInterrupted()) {
-
-                    // Don't generate garbage runnables inside the loop.
                     runOnUiThread(runnable);
 
                     try {
@@ -188,6 +197,7 @@ public class RealtimeLineChartActivity extends ChartBase implements
     protected void saveToGallery() {
         saveToGallery(chartPressure.getChart(), "RealtimeLineChartActivity");
         saveToGallery(chartFlow.getChart(), "RealtimeLineChartActivity");
+        saveToGallery(chartVol.getChart(), "RealtimeLineChartActivity");
     }
 
     @Override
@@ -219,33 +229,28 @@ public class RealtimeLineChartActivity extends ChartBase implements
                 case UsbService.MESSAGE_FROM_SERIAL_PORT:
                     String data = (String) msg.obj;
                     String[] dataArray = data.split("\\s");
-                    //Parse data as described here:
-                    // https://gitlab.com/reesistencia/reespirator-beagle-touch/-/blob/master/src/respyrator/ui.py
-                    // Unused data is commented for now.
 
-                    switch (dataArray[0]) {
-                        case "CONFIG":
-                            //config_pip = Float.parseFloat(dataArray[1]);
-                            //config_peep = Float.parseFloat(dataArray[2];
-                            //config_fr = Float.parseFloat(dataArray[3];
-                            break;
-                        case "DT":
-                            float pres1 = (Float.parseFloat(dataArray[1])) / (float) 1000.0;
-                            //pres2 = Float.parseFloat(dataArray[3]);
-                            //# vol = Float.parseFloat(dataArray[3]);
-                            float flow = (Float.parseFloat(dataArray[4])) / (float) 1000.0;
-                            mActivity.get().addEntry(pres1, flow);
-                            break;
-                        case "VOL":
-                            //vol = Float.parseFloat(dataArray[1];
-                            break;
-                        case "EOC":
-                            //pip = Float.parseFloat(dataArray[1];
-                            //peep = Float.parseFloat(dataArray[2];
-                            //vol = Float.parseFloat(dataArray[3];
-                            break;
-                    }
-                    break;
+                    ArrayList<Pair> pressures = new ArrayList<>();
+                    ArrayList<Pair> fluxes = new ArrayList<>();
+                    ArrayList<Pair> vols = new ArrayList<>();
+
+                    Pair<String, Float> p_bmp = Pair.create("BMP280",
+                            Float.parseFloat(dataArray[0]));
+                    pressures.add(p_bmp);
+                    Pair<String, Float> p_honey = Pair.create("HONEYWELL (A1)",
+                            Float.parseFloat(dataArray[1]));
+                    pressures.add(p_honey);
+                    Pair<String, Float> p_dpt = Pair.create("A0",
+                            Float.parseFloat(dataArray[2]));
+                    pressures.add(p_dpt);
+                    Pair<String, Float> flux = Pair.create("Flux [ml/s]",
+                            Float.parseFloat(dataArray[3]));
+                    fluxes.add(flux);
+                    Pair<String, Float> vol = Pair.create("Volume [ml]",
+                            Float.parseFloat(dataArray[4]));
+                    vols.add(vol);
+
+                    mActivity.get().addEntry(pressures, fluxes, vols);
             }
         }
     }
