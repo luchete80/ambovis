@@ -12,7 +12,7 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);     // Initialize the LED_BUILTIN pin as an output
 
 Serial.detectBaudrate();
-  Serial.begin(9600);
+  Serial.begin(115200);
 
    Serial.detectBaudrate();// may also be called before Serial.begin()
   // There must be activity on the serial port for the baudrate to be detected
