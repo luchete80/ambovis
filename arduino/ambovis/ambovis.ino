@@ -49,7 +49,6 @@ byte vent_mode = VENTMODE_MAN; //0
 Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
 float pressure_p0;
-float _mlInsVol,_mllastInsVol;
 float _flux,_flux_0;
 //float _stepperSpeed;
 bool send_data=false;
@@ -431,7 +430,7 @@ void loop() {
       update_display = false;
     State state = ventilation->getState();
     if (!update_display)
-      if (ventilation->getCycleNum() != last_cycle && state == State_Exsufflation) {
+      if (ventilation->getCycleNum() != last_cycle && state == State_Insufflation) {
         //Serial.print("Insuflated Vol: "); Serial.println(ventilation->getInsVol());
         lcd.clear();  //display_lcd do not clear screnn in order to not blink
         display_lcd();

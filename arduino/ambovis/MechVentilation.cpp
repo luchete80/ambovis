@@ -16,6 +16,7 @@ float pressure_max;
 float pressure_min;
 
 static int highest_man_pos;
+float _mlInsVol,_mllastInsVol;
 
 MechVentilation::MechVentilation(
         #ifdef ACCEL_STEPPER
@@ -188,7 +189,7 @@ void MechVentilation::update(void)
     _mlInsVol+=_flux*float((millis()-last_vent_time))*0.001;//flux in l and time in msec, results in ml          
      #ifdef DEBUG_UPDATE
       //Serial.print("volume:");Serial.print("Flux:");Serial.print("dt:");
-      Serial.print(_mlInsVol);Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.println((millis()-last_vent_time));
+      Serial.print(_mlInsVol);Serial.print(" ");Serial.print("last ins vol");Serial.println(_mllastInsVol);
     #endif
     last_vent_time = millis();
     
@@ -258,7 +259,10 @@ void MechVentilation::update(void)
         totalCyclesInThisState = (_timeoutIns) / TIME_BASE;
 
         _msecTimerStartCycle=millis();  //Luciano
+        
+        _mllastInsVol=_mlInsVol;
         _mlInsVol=0.;
+        
         wait_NoMove=false;
         /* Stepper control: set acceleration and end-position */
 
@@ -313,7 +317,6 @@ void MechVentilation::update(void)
             _stepper->setTargetPositionToStop();
             //_setState(Init_Exsufflation); NOT BEGIN TO INSUFFLATE!
             wait_NoMove=true;
-            _mllastInsVol=_mlInsVol;
           }
         
         // time expired
@@ -331,8 +334,6 @@ void MechVentilation::update(void)
                 #endif
             }
             _setState(Init_Exsufflation);
-            _mllastInsVol=_mlInsVol;
-
             if (_recruitmentMode) {
                 deactivateRecruitment();
             }
