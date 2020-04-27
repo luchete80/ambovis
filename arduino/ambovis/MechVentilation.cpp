@@ -226,9 +226,9 @@ void MechVentilation::update(void)
     {
     case Init_Insufflation:
     {
+
       #ifdef DEBUG_UPDATE
-        Serial.print("max pressure: ");Serial.println(pressure_max);
-        Serial.print("min pressure: ");Serial.println(pressure_min);        
+        Serial.println("INSUFLACION ");        
       #endif
 
       last_pressure_max=pressure_max;
@@ -303,8 +303,9 @@ void MechVentilation::update(void)
     {
 
         /* Stepper control: set end position */
-            
+        //Serial.print ("_tidalVol");Serial.println(_tidalVol);
         if (vent_mode==VENTMODE_VCL && _mlInsVol>_tidalVol){
+            //Serial.print("VOLUMEN ALCANZADO");
             _stepper->setTargetPositionToStop();
             //_setState(Init_Exsufflation); NOT BEGIN TO INSUFFLATE!
             wait_NoMove=true;
@@ -331,12 +332,8 @@ void MechVentilation::update(void)
         }
         else //Time has not expired (State Insufflation)
         {
-            if (!wait_NoMove){
-              //_mlInsVol+=float(_flux*(TIME_BASE));//flux in l and time in msec, results in ml
-              //_mlInsVol+=float((_flux-_flux_0)*(millis()-last_vent_time));//flux in l and time in msec, results in ml         
-              //#endif
-                //flujo remanente   
-                float rem_flux;
+            if (!wait_NoMove){  
+               float rem_flux;
                if(_mlInsVol<0) //avoid first instance errors
                 rem_flux=_tidalVol/((float)(_timeoutIns-_msecTimerCnt) * DEFAULT_FRAC_CYCLE_VCL_INSUFF)*1000;//En [ml/s]
                else
@@ -358,10 +355,9 @@ void MechVentilation::update(void)
                     if (_stepperSpeed > max_speed)
                       _stepperSpeed=max_speed;
                }                
-//               #ifdef DEBUG_UPDATE
-//                Serial.print("Speed: "); Serial.println(int(_stepperSpeed));       
-//               // Serial.print("pip 30, dp");Serial.println(pressure_p - pressure_p0);                
-//               #endif
+               #ifdef DEBUG_UPDATE
+                Serial.print("Speed: "); Serial.println(int(_stepperSpeed));                      
+               #endif
                
                 
 //               Serial.print("Speed");Serial.println(_stepperSpeed);
@@ -374,6 +370,11 @@ void MechVentilation::update(void)
                   stepper->moveTo(STEPPER_HIGHEST_POSITION);
                 #else
                 _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
+
+                if (_stepperSpeed == 0){
+                  _stepper->setTargetPositionToStop();
+                  //Serial.print("VELOCIDAD CERO!");
+                }                  
                 if (_stepperSpeed >= 0){
                     _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
                 }
@@ -396,7 +397,7 @@ void MechVentilation::update(void)
     break;
     case Init_Exsufflation:
     {
-      
+        Serial.println("EXSUF ");    
       _msecTimerStartCycle=millis();
       //Serial.print("Current pressure");Serial.println(_currentPressure);
       

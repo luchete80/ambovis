@@ -6,8 +6,8 @@
 
 //Connections and Debug Defs
 //#define ACCEL_STEPPER 1
-//#define DEBUG_UPDATE 1 // 
-#define DEBUG_OFF 1 //Release version
+#define DEBUG_UPDATE 1 // 
+//#define DEBUG_OFF 1 //Release version
 #define P_HONEYWELL 1
 #define RANGE_DPT 100.0F
 
@@ -19,7 +19,7 @@
 //#define PRUEBAS 1 // testing over arduino without sensors
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
-#define TIME_BASE   25                 // msec
+#define TIME_BASE   50                 // msec
 #define TIME_SENSOR 20               // msec
 #define TIME_SEND_CONFIGURATION 2000 // msec
 #define V_HONEY_P0 0.5145
