@@ -217,17 +217,6 @@ void MechVentilation::update(void)
         _sensor_error_detected = false; //clear flag
     }
 
-    //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
-    if (pressure_p>pressure_max) {
-          pressure_max=pressure_p;
-    }
-    if (pressure_sec>psec_max) {
-          psec_max=pressure_sec;
-    }
-    if (pressure_p < pressure_min){
-        pressure_min=pressure_p;
-    }
-
     // Check pressures
     evaluatePressure();
 
@@ -241,7 +230,9 @@ void MechVentilation::update(void)
         Serial.print("max pressure: ");Serial.println(pressure_max);
         Serial.print("min pressure: ");Serial.println(pressure_min);        
       #endif
-          
+
+      last_pressure_max=pressure_max;
+      last_pressure_min=pressure_min;
       pressure_max=0;
       psec_max=0;
       pressure_min=60;

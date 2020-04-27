@@ -45,6 +45,8 @@ FlexyStepper * stepper = new FlexyStepper();
 //////////////////////////
 float pressure_p;   //EXTERN!!
 byte pressure_sec,psec_max;
+float last_pressure_max,last_pressure_min;
+
 byte vent_mode = VENTMODE_MAN; //0
 Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
@@ -426,6 +428,23 @@ void loop() {
     /*
        Notify insufflated volume
     */
+
+      //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
+      if (pressure_p>pressure_max) {
+          #ifdef DEBUG_UPDATE
+            Serial.print("Presion maxima alcanzada: ");Serial.println(pressure_p);
+          #endif
+            pressure_max=pressure_p;
+      }
+      if (pressure_sec>psec_max) {
+            psec_max=pressure_sec;
+      }
+      if (pressure_p < pressure_min){
+          pressure_min=pressure_p;
+      }
+  }//Read Sensor
+
+
     if (ventilation->getCycleNum() != last_cycle)
       update_display = false;
     State state = ventilation->getState();
@@ -443,8 +462,7 @@ void loop() {
           update_options = false;
         }
       }
-  }//Read Sensor
-
+      
   //  //    if (Serial2.available()) {
   //  //        readIncomingMsg();
   //  //    }
@@ -628,17 +646,20 @@ void display_lcd ( ) {
   //writeLine(1, "---", 16);
 
   writeLine(2, String(options.percInspEsp), 6);
-  
-  dtostrf(pressure_max, 2, 0, tempstr);
+
+  #ifdef DEBUG_UPDATE
+    Serial.print("Presion mostrada: ");Serial.println(pressure_max);
+  #endif
+  dtostrf(last_pressure_max, 2, 0, tempstr);
   writeLine(2, String(tempstr), 16);  
   
   #ifdef DEBUG_UPDATE
-  Serial.print("Max press conv: ");Serial.println(tempstr);
+    Serial.print("Max press conv: ");Serial.println(tempstr);
     Serial.print("Min Max press");  Serial.print(pressure_min);Serial.print(" ");Serial.println(pressure_max);
   #endif
     
   writeLine(3, "PEEP:" + String(options.peakEspiratoryPressure), 8);
-  dtostrf(pressure_min, 2, 0, tempstr);
+  dtostrf(last_pressure_min, 2, 0, tempstr);
   writeLine(3, String(tempstr), 16);  
   
   writeLine(3, "PS: ", 1);
