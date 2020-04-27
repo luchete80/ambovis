@@ -430,7 +430,7 @@ void loop() {
       update_display = false;
     State state = ventilation->getState();
     if (!update_display)
-      if (ventilation->getCycleNum() != last_cycle && state == State_Insufflation) {
+      if (ventilation->getCycleNum() != last_cycle && state == State_Exsufflation) {
         //Serial.print("Insuflated Vol: "); Serial.println(ventilation->getInsVol());
         lcd.clear();  //display_lcd do not clear screnn in order to not blink
         display_lcd();
