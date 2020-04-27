@@ -1,0 +1,1820 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<data>
+  <config>
+    <!--first_site type="meta_site" id="A1100"/-->
+    <title><![CDATA[Primus® Product Trainer]]></title>
+    <site_layer value="true" type="enter_fullscreen" />
+  </config>
+  <main_sites>
+    <!-- navipoint-->
+    <site id="B1000">
+      <label><![CDATA[Was ist Was]]></label>
+      <!-- subpoint -->
+      <subsite id="B1100" type="hotspots">
+        <label><![CDATA[Frontansicht]]></label>
+        <backgroundImage><![CDATA[assets/global/img/backgrounds/bg_hotspots.jpg]]></backgroundImage>
+        <title><![CDATA[Frontansicht]]></title>
+        <headline><![CDATA[Einführung in den Primus Anästhesie Arbeitsplatz]]></headline>
+        <copy><![CDATA[Mehr Informationen zu speziellen Komponenten des Primus Anästhesiearbeitsplatzes erhalten Sie über die Links auf der linken Seite. Fahren Sie mit der Maus über das Gerät, um mehr Informationen zu erhalten.]]></copy>
+        <image><![CDATA[assets/global/img/B1100/B1100.jpg]]></image>
+        <hotspots colorOnImage="0xf6a800" colorTextBoxOver="0xD6E7F7" colorTextBoxOut="0xFDFDFD">
+          <hotspot type="square" width="64" height="71" x="167" y="55">
+            <copy><![CDATA[Bildschirm mit Bedienoberfläche und Drehknopf]]></copy>
+            <moreLink url="B2110"><![CDATA[mehr]]></moreLink>
+          </hotspot>
+          <hotspot type="circle" width="5" height="5" x="221" y="131">
+            <copy><![CDATA[Hauptschalter]]></copy>
+          </hotspot>
+          <hotspot type="circle" width="8" height="8" x="189" y="130">
+            <copy><![CDATA[O<font size="8">2</font>-Notdosierung Safety O<font size="8">2</font>]]></copy>
+            <moreLink url="B1140"><![CDATA[mehr]]></moreLink>
+          </hotspot>
+          <hotspot type="circle" width="8" height="8" x="178" y="130">
+            <copy><![CDATA[Knopf für O<font size="8">2</font>-Flush O<font size="8">2</font>+]]></copy>
+            <moreLink url="B1140"><![CDATA[mehr]]></moreLink>
+          </hotspot>
+          <hotspot type="square" width="81" height="16" x="168" y="151">
+            <copy><![CDATA[Schreibplatte]]></copy>
+          </hotspot>
+          <hotspot type="square" width="73" height="18" x="139" y="163">
+            <copy><![CDATA[Atemsystem]]></copy>
+            <moreLink url="B1160"><![CDATA[mehr]]></moreLink>
+          </hotspot>
+          <hotspot type="circle" width="8" height="8" x="175" y="188">
+            <copy><![CDATA[Entriegelungsknopf Ventilator-Einschub]]></copy>
+          </hotspot>
+          <hotspot type="square" width="26" height="44" x="177" y="197">
+            <copy><![CDATA[Absorber (optionaler Einwegabsorber Drägersorb CLIC)]]></copy>
+            <moreLink url="B1150"><![CDATA[mehr]]></moreLink>
+          </hotspot>
+          <hotspot type="square" width="104" height="48" x="132" y="248">
+            <copy><![CDATA[Schubladenmodul]]></copy>
+          </hotspot>
+          <hotspot type="circle" width="36" height="36" x="110" y="319">
+            <copy><![CDATA[Räder mit Feststellbremse]]></copy>
+          </hotspot>
+          <hotspot type="square" width="28" height="38" x="84" y="162">
+            <copy><![CDATA[Endotracheale Absaugung (optional)]]></copy>
+            <moreLink url="B1120"><![CDATA[mehr]]></moreLink>
+          </hotspot>
+          <hotspot type="square" width="12" height="26" x="146" y="128">
+            <copy><![CDATA[Wasserfalle mit Anschluss für Probengasleitung]]></copy>
+            <moreLink url="B1130"><![CDATA[mehr]]></moreLink>
+          </hotspot>
+          <hotspot type="square" width="64" height="62" x="111" y="66">
+            <copy><![CDATA[Vapore mit Interlocksystem]]></copy>
+            <moreLink url="B1110"><![CDATA[mehr]]></moreLink>
+          </hotspot>
+          <hotspot type="square" width="15" height="45" x="94" y="88">
+            <copy><![CDATA[Externer Frischgasausgang (optional)]]></copy>
+          </hotspot>
+          <hotspot type="square" width="134" height="26" x="103" y="32">
+            <copy><![CDATA[Obere Abstellplatte (für externe Monitore)]]></copy>
+          </hotspot>
+          <hotspot type="square" width="100" height="100" x="4" y="43">
+            <copy><![CDATA[Patientenmonitor Delta XL (Primus kann mit Dräger Infinity Patientenmonitoring kombiniert werden. Weitere Informationen erhalten sie auf der Dräger Website)]]></copy>
+          </hotspot>
+          <hotspot type="square" width="52" height="48" x="223" y="2">
+            <copy><![CDATA[Lampe]]></copy>
+          </hotspot>
+        </hotspots>
+        <!-- subsub point -->
+        <subsubsite id="B1110" type="article">
+          <label><![CDATA[Vapore]]></label>
+          <title><![CDATA[Vapore]]></title>
+          <items>
+            <item type="text" style="articleHeadline"><![CDATA[Vapore mit Interlock System]]></item>
+            <item type="image"><![CDATA[assets/global/img/B1110/vapor_funktionsskizze.jpg]]></item>
+            <item type="text" style="articleCopy"><![CDATA[Das Interlocksystem trägt und verbindet die Vaporeinheiten mit dem Anästhesiearbeitsplatz. Vapore sind dafür bestimmt, dem Frischgasflow eine kontrollierte Menge Narkosemittel beizufügen.
+
+An dem Primus Anästhesiearbeitsplatz können bis zu zwei Vapore angebracht werden.
+
+Dräger Vapor® 2000 ist ein unbeheizter, kalibrierter Anästhesiemittel-Verdunster. Er dient zur Anreicherung von flüssigen Anästhesiemitteln in trockene, medizinische Gase in einem Narkosegerät. Die bereitgestellte Konzentration wird üblicherweise von Betriebs- und Umgebungsbedingungen, wie z.B. Temperatur, Gasfluss und Beatmungsdruck nicht beeinflusst.
+
+D-Vapor – beheizter, kalibrierter Anästhesiemittel-Verdunster. Er dient zur Anreicherung von flüssigen Anästhesiemitteln in trockene, medizinische Gase in einem Narkosegerät.]]></item>
+            <item type="text" style="articleHeadline"><![CDATA[Vapore mit Auto Exclusion System]]></item>
+            <item type="image"><![CDATA[assets/global/img/B1110/D-12789-2009_1000.jpg]]></item>
+            <!--item type="image"><![CDATA[assets/global/img/B1110/MT-5215-2004.jpg]]></item-->
+            <item type="text" style="articleCopy"><![CDATA[Das komfortable Stecksystem für den Dräger Auto Exclusion Vapor ist eine Vapor-Schnittstelle der neusten Generation für alle Vapore der Serien Vapor 2000 und D-Vapor. Das System erleichtert den Alltag, erhöht die Effizienz und Flexibilität und verhindert Bedienfehler. Das Auto Exclusion Schnellmontage-System verhindert effektiv die Möglichkeit der Aktivierung mehr als eines Vapors gleichzeitig. Sobald einer der Vapore aufgedreht ist, wird der andere automatisch blockiert. Dies erhöht die Patientensicherheit und verringert die Wahrscheinlichkeit gravierender Anwenderfehler.]]></item>
+            <item type="image"><![CDATA[assets/global/img/B1110/D-12806-2009.jpg]]></item>
+            <item type="text" style="articleHeadline"><![CDATA[Abwärtskompatibilität und Funktionalität]]></item>
+            <item type="text" style="articleCopy"><![CDATA[Dräger Vapore mit Auto Exclusion Adapter können weiterhin mit der standardmäßigen Dräger Steckverbindung Interlock 2 verwendet werden.]]></item>
+            <!--item type="image"><![CDATA[assets/global/img/B1110/Auto-Exclusion-2.jpg]]></item-->
+            <item type="text" style="articleFootnote"><![CDATA[Vapore mit dem Auto Exclusion System sind nicht in jedem Land verfügbar.]]></item>
+          </items>
+        </subsubsite>
+        <!-- subsub point -->
+        <subsubsite id="B1120" type="article">
+          <label><![CDATA[Endotracheale Absaugeinheit]]></label>
+          <title><![CDATA[Endotracheale Absaugeinheit]]></title>
+          <items>
+            <item type="text" style="articleCopy"><![CDATA[Endotracheale Bronchusabsaugungen werden zum Absaugen von Sekret aus den Luftwegen, insbesondere bei beatmeten Patienten verwendet.
+						
+Das Antriebsgas ist typenabhängig AIR, AIR/O<font size="8">2</font> oder VAC.
+
+Es gibt folgende Gerätetypen:
+– Bronchus-Absaugung mit Ejektor.
+– Bronchus-Absaugung mit Vakuum.]]></item>
+            <item type="image"><![CDATA[assets/global/img/B1120/B1120.jpg]]></item>
+          </items>
+        </subsubsite>
+        <!-- subsub point -->
+        <subsubsite id="B1130" type="article">
+          <label><![CDATA[WaterLock® 2]]></label>
+          <title><![CDATA[WaterLock® 2]]></title>
+          <items>
+            <item type="image"><![CDATA[assets/global/img/B1130/D-12348-2009.jpg]]></item>
+            <item type="text" style="articleHeadline"><![CDATA[Sicherer Schutz gegen Wasser und Bakterien]]></item>
+            <item type="text" style="articleCopy"><![CDATA[Die WaterLock 2 ist eine nicht wiederverwendbare Wasserfalle, in der Feuchtigkeit vom Probengas getrennt wird. Dadurch wird die Gasmessung vor Feuchtigkeit, Bakterien und Viren geschützt. Dräger hat diese Wasserfalle WaterLock 2 mit zwei wasserabweisenden Membranen ausgestattet. Dieses doppelte Membran-Schutzsystem sorgt dafür, dass keine Kondensation in das Probengas gelangt. Selbst wenn die Probengasleitung in das Sekret-Absaugsystem fällt, wie z.B. während eines Patientenwechsels, gelangt kein Wasser in das Gasmesssystem. Zwei selbstversiegelnde Filterelemente erhöhen die Sicherheit: wenn sie verstopft sind, werden sie blau.]]></item>
+            <item type="text" style="articleHeadline"><![CDATA[Sichere und einfache Handhabung]]></item>
+            <item type="text" style="articleCopy"><![CDATA[Zum Entleeren der Wasserfalle WaterLock 2 entfernen Sie sie einfach aus dem Halter, stecken Sie eine Spritze in die Verbindung und saugen Sie das Wasser heraus.]]></item>
+            <item type="image"><![CDATA[assets/global/img/B1130/waterfall.jpg]]></item>
+            <item type="text" style="articleHeadline"><![CDATA[Einsetzen und Ersetzen der Waterlock 2]]></item>
+            <item type="text" style="articleCopy"><![CDATA[- Nach erreichen der maximalen Lebensdauer von 4 Wochen.
+- Wenn eine Fehlermeldung auf dem Monitor des Anästehsie-Arbeitsplatzes
+  angezeigt wird.
+- Wenn die Fehlermeldung nach Entleeren noch auf dem Monitor des 
+  Arbeitsplatzes angezeigt wird.
+- Wenn sie stark verschmutzt ist.
+- Wenn die Quelldichtungen an den Verbindungsstellen blau werden.]]></item>
+          </items>
+        </subsubsite>
+        <!-- subsub point -->
+        <subsubsite id="B1140" type="hotspots">
+          <label><![CDATA[O<font size="8">2</font>-Flush und Safety O<font size="8">2</font>]]></label>
+          <backgroundImage><![CDATA[assets/global/img/backgrounds/bg_hotspots.jpg]]></backgroundImage>
+          <title><![CDATA[O<font size="8">2</font> Flush und O<font size="8">2</font>-Notdosierung Safety O<font size="8">2</font>]]></title>
+          <headline><![CDATA[]]></headline>
+          <copy><![CDATA[Fahren Sie mit der Maus über das Gerät oder dem Text neben dem Bild, um mehr Informationen zu erhalten.]]></copy>
+          <image><![CDATA[assets/global/img/B1140/mt5562001.jpg]]></image>
+          <hotspots colorOnImage="0xf6a800" colorTextBoxOver="0xD6E7F7" colorTextBoxOut="0xFDFDFD">
+            <hotspot type="circle" width="90" height="90" x="95" y="218">
+              <copy><![CDATA[Zum Spülen und schnellen Füllen des Atemsystems und des Atembeutels mit O<font size="8">2</font> unter Umgehen des Vapors.
+Der O<font size="8">2</font> Flush liefert mindestens einen stabilen Flow von 35 l/min.]]></copy>
+            </hotspot>
+            <hotspot type="circle" width="98" height="98" x="231" y="190">
+              <copy><![CDATA[Die O<font size="8">2</font>-Notdosierung "Safety O<font size="8">2</font>" ist eine Sicherheitsfunktion, die auch beim ausgeschalteten Gerät oder im Standby funktioniert. Durch Drücken des Sicherheitsknopfes und Einstellen eines entsprechenden O<font size="8">2</font> Flows (0-12 L/min) kann der Patient mit Sauerstoff versorgt werden. Der O<font size="8">2</font> Flow geht über die Vapore wodurch volatile Anästhetika mitdosiert werden können. Dieses System funktioniert ebenfalls im Falle eines Gasmischer-Ausfalls.]]></copy>
+            </hotspot>
+          </hotspots>
+        </subsubsite>
+        <!-- subsub point -->
+        <subsubsite id="B1150" type="article">
+          <label><![CDATA[Absorber]]></label>
+          <title><![CDATA[Drägersorb® Absorber]]></title>
+          <items>
+            <item type="image"><![CDATA[assets/global/img/B1150/kombiniertes-bild.jpg]]></item>
+            <item type="text" style="articleHeadline"><![CDATA[1. Drägersorb®]]></item>
+            <item type="text" style="articleCopy"><![CDATA[Anwendungsprinzip:
+Enthält einen Kanister Atemkalk. Dieser wird verwendet, um das vom Patienten ausgeatmete Kohlendioxid aufzunehmen.
+Während der eintretenden chemischen Reaktion werden Wasser und Wärme generiert, wodurch die Gase auf Ihrem Weg durch den Atemkalk klimatisiert werden.
+
+Drägersorb® 800 Plus, 5 l (176 fl oz.) 
+Atemkalk in Pillenform mit Farbindikator von weiß auf violett. Für die Aufnahme von Kohlendioxid (CO<font size="8">2</font>) aus Atemgas in Inhalations-Anästhesiegeräten mit Rückatemsystem.
+
+Drägersorb® Free, 5 l (176 fl oz.) 
+Atemkalk in Pillenform mit Farbindikator von weiß auf violett. Für die Aufnahme von Kohlendioxid (CO<font size="8">2</font>) aus Atemgas in Inhalations-Anästhesiegeräten mit Rückatemsystem. In Verwendung mit Sevoflurane verhindert Drägersorb Free die Bildung von Compound A und Kohlenstoffmonoxid.
+]]></item>
+            <item type="text" style="articleHeadline"><![CDATA[2. Drägersorb® CLIC]]></item>
+            <item type="image"><![CDATA[assets/global/img/B1150/B1150.jpg]]></item>
+            <item type="text" style="articleCopy"><![CDATA[
+Drägersorb® CLIC, 1,2 L (42.2 fl oz.) 
+Der Einwegabsorber Drägersorb CLIC für Dräger-Anästhesiegeräte wird mittels eines Adapters am vorhandenen Absorber angebracht. Eine schnelle, saubere und benutzerfreundliche Einweglösung. Drägersorb CLIC ist gefüllt mit Drägersorb 800 Plus, 1,2 L (42,2 fl oz.)  oder 1.2L CLIC Absorber Free
+
+Der Einwegabsorber kann während des Betriebs gewechselt werden. Das Ventil in der Halterung sorgt dafür, dass das Atemsystem dicht versiegelt bleibt, wenn der Absorber entfernt wird.]]></item>
+          </items>
+        </subsubsite>
+        <!-- subsub point -->
+        <subsubsite id="B1160" type="hotspots">
+          <label><![CDATA[Kompakt-Atemsystem]]></label>
+          <backgroundImage><![CDATA[assets/global/img/backgrounds/bg_hotspots.jpg]]></backgroundImage>
+          <title><![CDATA[Kompakt-Atemsystem]]></title>
+          <headline><![CDATA[]]></headline>
+          <copy><![CDATA[Das Atemsystem liefert die vorgesehene (festgelegte) Atemgasmischung an den Patienten und ermöglicht die einfache Entsorgung ausgeatmeter, verbrauchter Gase. Auf seinem Weg durch das Atemsystem wird das Atemgas durch den Atemkalk erwärmt und angefeuchtet. Die integrierte Heizplatte erwärmt das durchströmende Gas zusätzlich und verringert zudem kondensierendes Wasser im Kreislauf.]]></copy>
+          <image><![CDATA[assets/global/img/B1160/B1160.jpg]]></image>
+          <hotspots colorOnImage="0xf6a800" colorTextBoxOver="0xD6E7F7" colorTextBoxOut="0xFDFDFD">
+            <hotspot type="square" width="69" height="177" x="144" y="76">
+              <copy><![CDATA[Handbeatmungsbeutel
+Zur manuellen Beatmung. Ermöglicht eine Unterstützung, Überwachung und Regelung der Atmung.]]></copy>
+            </hotspot>
+            <hotspot type="square" width="46" height="46" x="54" y="37">
+              <copy><![CDATA[Y-Stück
+Verbindet inpiratorische und expiratorische Beatmungsschläuche mit der Patientenseite, z.B. einen Tubus oder einer Maske. Es können optionale Filter vorhanden sein.]]></copy>
+            </hotspot>
+            <hotspot type="square" width="109" height="196" x="5" y="54">
+              <copy><![CDATA[Inspiratorische und expiratorische Schläuche
+Während der Beatmung fließt hier das Gasgemisch zum Patienten und vom Patienten weg]]></copy>
+            </hotspot>
+            <hotspot type="square" width="39" height="46" x="123" y="30">
+              <copy><![CDATA[APL (Adjustable Pressure Limitation - Anpassbare Druckbegrenzung) Ventil:
+Limitiert den maximalen Druck während der manuellen Beatmung und führt während der manuellen und der spontanen Beatmung überschüssiges Gas in das Fortleitungssystem ab.
+
+Am APL Druckkontrollventil lässt sich zwischen manueller Beatmung Man. und spontaner Beatmung Spont. wählen.
+Einstellungen mit dem APL-Ventil werden wie folgt ausgeführt 
+1. Den Einstellknopf drehen, um zwischen manuellem und spontanem Modus zu wechseln
+2. Im manuellen Modus im Uhrzeigersinn drehen, um den Druck zu erhöhen, und gegen den Uhrzeigersinn, um ihn zu verringern
+3. Das APL-Ventil hochziehen, um kurzfristig Druck abzulassen]]></copy>
+            </hotspot>
+            <hotspot type="square" width="121" height="24" x="128" y="68">
+              <copy><![CDATA[Integrierte Heizplatte
+Die integrierte Heizplatte reduziert das Entstehen von kondensierenden Wasser im System, und ermöglicht gleichzeitig eine bessere Anfeuchtung und Erwärmung des Atemgases von Anfang an.]]></copy>
+            </hotspot>
+          </hotspots>
+        </subsubsite>
+        <!-- subsub point -->
+        <subsubsite id="B1170" type="article">
+          <label><![CDATA[Ventilator]]></label>
+          <title><![CDATA[E-Vent™ plus]]></title>
+          <items>
+            <item type="text" style="articleCopy"><![CDATA[Der E-Vent Plus Ventilator benötigt  aufgrund seiner elektronischen Funktionsweise kein Antriebsgas. Dadurch werden Kosten gespart und eine längere Einsatzzeit des Gerätes kann gewährleistet werden wenn keine Zentralgasversorgung vorhanden ist. Im Fall eines Notfalls ist kann die Beatmung ebenfalls mit Umgebungsluft stattfinden.]]></item>
+            <item type="text" style="articleHeadline"><![CDATA[E-Vent™ plus Performance]]></item>
+            <item type="list" style="articleList"><![CDATA[Der elektrisch angetriebene E-Vent™ plus Ventilator bietet höchste Präzision und Geschwindigkeit sowie einen Spitzenflow von 150 L/min.]]></item>
+            <item type="text" style="articleCopy"><![CDATA[	-<textformat blockindent="33"> Schnellste Reaktionszeiten und hoher Spitzenflow notwendig bei assistierter Spontanatmung</textformat>
+	-<textformat blockindent="33"> Annähernd die Performance eines Intensivbeatmungsgerätes</textformat>]]></item>
+            <item type="list" style="articleList"><![CDATA[E-Vent™ plus synchronisiert sich mit dem Exspirationsflow des Patienten und unterstützt durch geregelte Nachführung des Ventilatorkolbens aktiv die Ausatmung und reduziert dadurch die expiratorische Resistance!]]></item>
+            <item type="list" style="articleList"><![CDATA[Dadurch erheblich reduzierte exspiratorische Resistance!]]></item>
+            <item type="list" style="articleList"><![CDATA[Schneller, einfacher Patientenwechsel unterstützt durch körpergewichtsbezogene Voreinstellung der Ventilationsparameter und Alarme]]></item>
+            <item type="list" style="articleList"><![CDATA[Sehr schnelle dynamische Compliancekompensation und eine geringe inspiratorische Systemcompliance]]></item>
+            <item type="list" style="articleList"><![CDATA[Uneingeschränkte Anwendungsmöglichkeiten, speziell auch für die Kinderbeatmung]]></item>
+            <item type="list" style="articleList"><![CDATA[Geringe inspiratorische Compliance]]></item>
+            <item type="list" style="articleList"><![CDATA[Frischgasentkopplung]]></item>
+            <item type="image"><![CDATA[assets/global/img/B1170/B1200_2.png]]></item>
+            <!--item type="image"><![CDATA[assets/global/img/B1170/B1200_1.png]]></item-->
+            <item type="text" style="articleHeadline"><![CDATA[Ventilatortechnologie]]></item>
+            <item type="list" style="articleList"><![CDATA[Elektrisch angetriebene und kontrollierte Kolbenzylindereinheit mit 2 Rollmembranen]]></item>
+            <item type="list" style="articleList"><![CDATA[Durch eine vertikale Bewegung des Kolbens wird entsprechendes Volumen zum Patienten verschoben (Hubvolumen: bis 1400 ml)]]></item>
+            <item type="list" style="articleList"><![CDATA[Im Standby-Betriebsmodus kehrt der Kolben zur unteren Endposition zurück und ist daraufhin bereit für den ersten Atemhub.]]></item>
+            <item type="list" style="articleList"><![CDATA[Im Vol. Mode fährt der Kolben um die Menge des zu liefernden Tidalvolumens zurück.]]></item>
+            <item type="list" style="articleList"><![CDATA[Im Press. Mode und MAN/SPON Mode startet der Kolben an der unteren Endpostion, um jedes Tidalvolumen applizieren zu können.]]></item>
+            <!--item type="image"><![CDATA[assets/global/img/B1170/B1200_3.png]]></item-->
+          </items>
+        </subsubsite>
+      </subsite>
+      <subsite id="B5100" type="hotspots">
+        <label><![CDATA[Rückansicht]]></label>
+        <backgroundImage><![CDATA[assets/global/img/backgrounds/bg_hotspots.jpg]]></backgroundImage>
+        <title><![CDATA[Rückansicht]]></title>
+        <headline><![CDATA[Rückansicht des Primus Arbeitsplatzes]]></headline>
+        <copy><![CDATA[Bewegen Sie den Mauszeiger über das Gerät und über den Text neben dem Bild. Der relevante Bereich wird hervorgehoben.]]></copy>
+        <image><![CDATA[assets/global/img/B5100/B5100.jpg]]></image>
+        <hotspots colorOnImage="0xf6a800" colorTextBoxOver="0xD6E7F7" colorTextBoxOut="0xFDFDFD">
+          <hotspot type="square" width="30" height="14" x="142" y="105">
+            <copy><![CDATA[Konnektoren für Drucksensoren der Reservegasflaschen]]></copy>
+          </hotspot>
+          <hotspot type="square" width="19" height="19" x="180" y="130">
+            <copy><![CDATA[O<font size="8">2</font>-Sensor
+(entfällt bei paramagnetischer O<font size="8">2</font>-Messung)]]></copy>
+          </hotspot>
+          <hotspot type="circle" width="14" height="14" x="200" y="133">
+            <copy><![CDATA[Filter für Lüfter]]></copy>
+          </hotspot>
+          <hotspot type="square" width="10" height="4" x="154" y="181">
+            <copy><![CDATA[Bolzen für Erdungskabel der Zusatzgeräte]]></copy>
+          </hotspot>
+          <hotspot type="square" width="22" height="65" x="143" y="167">
+            <copy><![CDATA[Zusatzsteckdosen mit Sicherungsschaltern]]></copy>
+          </hotspot>
+          <hotspot type="square" width="15" height="15" x="152" y="234">
+            <copy><![CDATA[Tülle für Anästhesiegasfortleitung]]></copy>
+          </hotspot>
+          <hotspot type="square" width="32" height="70" x="143" y="252">
+            <copy><![CDATA[Anästhesiegasfortleitung AGFS]]></copy>
+            <moreLink url="B5110"><![CDATA[mehr]]></moreLink>
+          </hotspot>
+          <hotspot type="square" width="22" height="73" x="84" y="230">
+            <copy><![CDATA[Netzkabel]]></copy>
+          </hotspot>
+          <hotspot type="square" width="9" height="6" x="101" y="223">
+            <copy><![CDATA[Bolzen für Erdungskabel]]></copy>
+          </hotspot>
+          <hotspot type="square" width="32" height="15" x="142" y="140">
+            <copy><![CDATA[Gaseingänge]]></copy>
+            <moreLink url="B5120"><![CDATA[mehr]]></moreLink>
+          </hotspot>
+          <hotspot type="circle" width="6" height="6" x="98" y="138">
+            <copy><![CDATA[Anschluss für optionale Halogenlampe (Abdeckkappe vor Gebrauch entfernen.) 
+Ausschließlich die in der Zubehörliste genannte Lampe verwenden!]]></copy>
+          </hotspot>
+          <hotspot type="square" width="24" height="60" x="94" y="56">
+            <copy><![CDATA[Schnittstellen-Platte]]></copy>
+            <moreLink url="B5130"><![CDATA[mehr]]></moreLink>
+          </hotspot>
+        </hotspots>
+        <!-- subsub point -->
+        <subsubsite id="B5110" type="article">
+          <label><![CDATA[Anästhesiegasfortleitung]]></label>
+          <title><![CDATA[Anästhesiegasfortleitung (AGFS)]]></title>
+          <items>
+            <item type="text" style="articleHeadline"><![CDATA[Ermöglicht die Anbindung eines aktiven oder passiven Fortleitungssystems zur Entfernung überschüssiger Gase]]></item>
+            <item type="text" style="articleCopy"><![CDATA[Die Anästhesiegasfortleitung AGFS ist für die folgenden Zwecke bestimmt:]]></item>
+            <item type="list" style="articleList"><![CDATA[Absaugung und Fortleitung von überschüssigem Anästhesiegas und Exspirationsgas]]></item>
+            <item type="list" style="articleList"><![CDATA[Reduzierung der Anästhesiemittel-Konzentration in der Umgebung des Anästhesie-Arbeitsplatzes]]></item>
+            <item type="list" style="articleList"><![CDATA[Filterung und Fortleitung von kontaminierten Exspirationsgasen während der Beatmung]]></item>
+            <item type="list" style="articleList"><![CDATA[Fortleitung von Probengasen der Monitore]]></item>
+            <item type="text" style="articleCopy"><![CDATA[Das Anästhesiegasfortleitungssystem AGFS wirkt als Offenes System. Die überschüssigen Anästhesiegase/ Exspirationsgase werden in das Puffervolumen des Fortleitungssystems geleitet, aus dem sie mit einem kontinuierlichen Volumenstrom über das Transfersystem in das Entsorgungssystem
+abgeführt werden.
+Die Öffnungen im Fortleitungssystem verhindern, dass sich der Exspirationswiderstand erhöht oder dass ein Unterdruck im Atemsystem entsteht.]]></item>
+            <item type="image"><![CDATA[assets/global/img/B5110/B5110.jpg]]></item>
+          </items>
+        </subsubsite>
+        <!-- subsub point -->
+        <subsubsite id="B5120" type="hotspots">
+          <label><![CDATA[Gasanschlüsse]]></label>
+          <backgroundImage><![CDATA[assets/global/img/backgrounds/bg_hotspots.jpg]]></backgroundImage>
+          <title><![CDATA[Gasanschlüsse]]></title>
+          <headline><![CDATA[]]></headline>
+          <copy><![CDATA[Bewegen Sie den Mauszeiger über das Gerät und über den Text neben dem Bild. Der relevante Bereich wird hervorgehoben.]]></copy>
+          <image><![CDATA[assets/global/img/B5120/B2220.jpg]]></image>
+          <hotspots colorOnImage="0xf6a800" colorTextBoxOver="0xD6E7F7" colorTextBoxOut="0xFDFDFD">
+            <hotspot type="square" width="48" height="67" x="250" y="136">
+              <copy><![CDATA[Anschluss für zentrale Gasversorgung O<font size="8">2</font>]]></copy>
+            </hotspot>
+            <hotspot type="square" width="43" height="80" x="249" y="144">
+              <copy><![CDATA[Anschluss für O<font size="8">2</font>-Flasche]]></copy>
+            </hotspot>
+            <hotspot type="square" width="45" height="102" x="192" y="174">
+              <copy><![CDATA[O<font size="8">2</font>-Ausgang für Sauerstoff-Flowröhre (optional)]]></copy>
+            </hotspot>
+            <hotspot type="square" width="46" height="70" x="146" y="138">
+              <copy><![CDATA[Anschluss für zentrale Gasversorgung AIR]]></copy>
+            </hotspot>
+            <hotspot type="square" width="45" height="84" x="139" y="183">
+              <copy><![CDATA[AIR-Ausgang für endotracheale Absaugung (optional)]]></copy>
+            </hotspot>
+            <hotspot type="square" width="42" height="84" x="66" y="145">
+              <copy><![CDATA[Anschluss für N<font size="8">2</font>O-Flasche]]></copy>
+            </hotspot>
+            <hotspot type="square" width="45" height="68" x="65" y="135">
+              <copy><![CDATA[Anschluss für zentrale Gasversorgung N<font size="8">2</font>O]]></copy>
+            </hotspot>
+          </hotspots>
+        </subsubsite>
+        <!-- subsub point end -->
+        <!-- subsub point -->
+        <subsubsite id="B5130" type="hotspots">
+          <label><![CDATA[Schnittstellen-Platte]]></label>
+          <backgroundImage><![CDATA[]]></backgroundImage>
+          <title><![CDATA[Schnittstellen-Platte]]></title>
+          <headline><![CDATA[]]></headline>
+          <copy><![CDATA[Bewegen Sie den Mauszeiger über das Gerät und über den Text neben dem Bild. Der relevante Bereich wird hervorgehoben.]]></copy>
+          <image><![CDATA[assets/global/img/B5130/interface_panel-004.jpg]]></image>
+          <hotspots colorOnImage="0xf6a800" colorTextBoxOver="0xD6E7F7" colorTextBoxOut="0xFDFDFD">
+            <hotspot type="square" width="19" height="41" x="157" y="222">
+              <copy><![CDATA[COM 1 MEDIBUS Schnittstelle
+ 
+MEDIBUS unterstützt
+         - Echtzeit-Daten
+         - alle gemessenen Daten
+         - alle Parametereinstellungen
+         - alle Alarme
+         - Textmeldungen/Ereignisse]]></copy>
+            </hotspot>
+            <hotspot type="square" width="19" height="41" x="157" y="180">
+              <copy><![CDATA[COM 2 - MEDIBUS Schnittstelle]]></copy>
+            </hotspot>
+            <hotspot type="square" width="19" height="41" x="157" y="137">
+              <copy><![CDATA[Anschluss für Dräger IV System (Netzversorgung)]]></copy>
+            </hotspot>
+          </hotspots>
+        </subsubsite>
+        <!-- subsub point end -->
+      </subsite>
+      <!-- subsub point -->
+      <subsite id="B6100" type="360_degree_view">
+        <label><![CDATA[360° Ansicht]]></label>
+        <title><![CDATA[Primus]]></title>
+        <swf_path><![CDATA[assets/global/swf/Primus_09-2009.swf]]></swf_path>
+      </subsite>
+      <subsite id="B2100" type="overview">
+        <label><![CDATA[General User Interface]]></label>
+        <backgroundImage><![CDATA[assets/global/img/backgrounds/bg_hotspots.jpg]]></backgroundImage>
+        <title><![CDATA[General User Interface]]></title>
+        <headline><![CDATA[]]></headline>
+        <copy><![CDATA[Dieser Abschnitt gibt ihnen nähere Informationen zu dem Bereich User Interface. Bewegen Sie den Mauszeiger über das Gerät und über den Text neben dem Bild. Der relevante Bereich wird hervorgehoben.]]></copy>
+        <image><![CDATA[assets/global/img/B2100/Bild_4.JPG]]></image>
+        <!-- subsub point -->
+        <subsubsite id="B2110" type="hotspots">
+          <label><![CDATA[Overview]]></label>
+          <backgroundImage><![CDATA[assets/global/img/backgrounds/bg_hotspots.jpg]]></backgroundImage>
+          <title><![CDATA[Overview]]></title>
+          <headline><![CDATA[Bildschirm mit User Interface]]></headline>
+          <copy><![CDATA[Bewegen Sie den Mauszeiger über das Gerät und über den Text neben dem Bild. Der relevante Bereich wird hervorgehoben.]]></copy>
+          <image><![CDATA[assets/global/img/B2110/B1120_image.png]]></image>
+          <hotspots colorOnImage="0xf6a800" colorTextBoxOver="0xD6E7F7" colorTextBoxOut="0xFDFDFD">
+            <hotspot type="square" width="60" height="10" x="22" y="26">
+              <copy><![CDATA[Statusfeld für den aktuellen Beatmungsmodus]]></copy>
+            </hotspot>
+            <hotspot type="square" width="78" height="13" x="83" y="25">
+              <copy><![CDATA[Alarmfeld für Alarme und ihre Klasse Bis zu drei Alarme können in diesem Bereich dargestellt werden]]></copy>
+            </hotspot>
+            <hotspot type="square" width="71" height="71" x="87" y="40">
+              <copy><![CDATA[Kurvenfeld für Kurven und andere angezeigte Module]]></copy>
+            </hotspot>
+            <hotspot type="square" width="36" height="71" x="160" y="40">
+              <copy><![CDATA[Anzeigefeld für numerische Messwerte]]></copy>
+            </hotspot>
+            <hotspot type="square" width="40" height="98" x="197" y="40">
+              <copy><![CDATA[Softkey der Überwachungsfunktionen]]></copy>
+            </hotspot>
+            <hotspot type="square" width="13" height="13" x="242" y="24">
+              <copy><![CDATA[LEDs zur Anzeige des Alarmstatus]]></copy>
+            </hotspot>
+            <hotspot type="square" width="13" height="13" x="242" y="40">
+              <copy><![CDATA[Taste zur Unterdrückung des akustischen Alarms für 2 Minuten]]></copy>
+            </hotspot>
+            <hotspot type="square" width="15" height="15" x="242" y="86">
+              <copy><![CDATA[Taste zum Wechsel der Bildschirmdarstellung
+(Daten, Trends, Kurven)]]></copy>
+            </hotspot>
+            <hotspot type="square" width="15" height="15" x="242" y="109">
+              <copy><![CDATA[Taste zum Aufrufen der Standardseite]]></copy>
+            </hotspot>
+            <hotspot type="square" width="130" height="46" x="87" y="146">
+              <copy><![CDATA[Softkey für Beatmungseinstellungen]]></copy>
+            </hotspot>
+            <hotspot type="circle" width="31" height="31" x="207" y="200">
+              <copy><![CDATA[Drehknopf: "Wählen, Einstellen, Bestätigen"]]></copy>
+            </hotspot>
+            <hotspot type="square" width="15" height="15" x="242" y="213">
+              <copy><![CDATA[Taste zum Umschalten in den Standby-Modus]]></copy>
+            </hotspot>
+            <hotspot type="square" width="16" height="8" x="182" y="221">
+              <copy><![CDATA[LEDs für die Netzversorgung/Akkuversorgung]]></copy>
+            </hotspot>
+            <hotspot type="square" width="113" height="21" x="86" y="197">
+              <copy><![CDATA[Tasten zur Wahl des Beatmungsmodus]]></copy>
+            </hotspot>
+            <hotspot type="square" width="68" height="15" x="14" y="221">
+              <copy><![CDATA[LED-Anzeigen der Zentralen Gasversorgung und Reservegasflaschen]]></copy>
+            </hotspot>
+            <hotspot type="square" width="56" height="17" x="22" y="200">
+              <copy><![CDATA[Tasten zur Wahl des Trägergases
+(N<font size="8">2</font>O oder Air)]]></copy>
+            </hotspot>
+            <hotspot type="square" width="60" height="44" x="22" y="151">
+              <copy><![CDATA[Softkey der Frischgasdosierungseinstellungen]]></copy>
+            </hotspot>
+            <hotspot type="square" width="130" height="9" x="87" y="138">
+              <copy><![CDATA[Bedienhinweisfeld für die Benutzerführung]]></copy>
+            </hotspot>
+            <hotspot type="square" width="30" height="43" x="23" y="94">
+              <copy><![CDATA[Balkendiagramm für die Gasdosierung
+(virtuelle Flowröhren)]]></copy>
+            </hotspot>
+            <hotspot type="square" width="33" height="43" x="50" y="96">
+              <copy><![CDATA[Balkendiagramm für die Frischgasausnutzung
+(Ökonometer) (optional)]]></copy>
+            </hotspot>
+            <hotspot type="square" width="61" height="55" x="22" y="37">
+              <copy><![CDATA[Messwertfeld für die Gasmessung]]></copy>
+            </hotspot>
+          </hotspots>
+        </subsubsite>
+        <!-- subsub point -->
+        <subsubsite id="B2120" type="article">
+          <label><![CDATA[Drehknopf]]></label>
+          <title><![CDATA[Drehknopf]]></title>
+          <items>
+            <item type="text" style="articleCopy"><![CDATA[Dräger Anästhesiearbeitsplätze besitzen das gleiche Bedienkonzept.
+Der Drehknopf ist das zentrale Bedienelement mit den für alle Einstellungen geltenden Funktionen:]]></item>
+            <item type="list" style="articleList"><![CDATA[Auswählen/einstellen = drehen
+Eine Drehung nach rechts erhöht einen Wert, eine Drehung nach links verringert ihn.]]></item>
+            <item type="list" style="articleList"><![CDATA[Bestätigen = drücken]]></item>
+            <item type="text" style="articleCopy"><![CDATA[Wird die Auswahl nicht bestätigt, wird der Wert oder Parameter nicht geändert.]]></item>
+            <item type="image"><![CDATA[assets/global/img/B2120/Bild_1.jpg]]></item>
+          </items>
+        </subsubsite>
+        <!-- subsub point -->
+        <subsubsite id="B2130" type="hotspots">
+          <label><![CDATA[Bedienkonzept]]></label>
+          <backgroundImage><![CDATA[assets/global/img/backgrounds/bg_hotspots.jpg]]></backgroundImage>
+          <title><![CDATA[Bedienkonzept]]></title>
+          <headline><![CDATA[Struktur des Primus-Bildschirms]]></headline>
+          <copy><![CDATA[Bewegen Sie den Mauszeiger über das Gerät und über den Text neben dem Bild. Der relevante Bereich wird hervorgehoben.]]></copy>
+          <image><![CDATA[assets/global/img/B2120/B5000.png]]></image>
+          <hotspots colorOnImage="0xf6a800" colorTextBoxOver="0xD6E7F7" colorTextBoxOut="0xFDFDFD">
+            <hotspot type="square" width="72" height="64" x="6" y="11">
+              <copy><![CDATA[Das Gasmessungsfeld stellt die derzeitig gemessenen inspiratorischen und expiratorischen Gaskonzentrationen dar. ]]></copy>
+            </hotspot>
+            <hotspot type="square" width="182" height="117" x="78" y="11">
+              <copy><![CDATA[Überwachungsbildschirm 
+- Softkeys für die Überwachung/Konfiguration]]></copy>
+            </hotspot>
+            <hotspot type="square" width="22" height="117" x="267" y="11">
+              <copy><![CDATA[Standardfunktionstasten zur Stummschaltung von Alarmen, durchschalten von Bildschirmdarstellungen und zum Aufrufen des Standardbildschirms]]></copy>
+            </hotspot>
+            <hotspot type="square" width="70" height="152" x="6" y="76">
+              <copy><![CDATA[Frischgasversorgung
+- Softkeys für Frischgasdosierung
+- Hardkeys zur Wahl des Trägergases]]></copy>
+            </hotspot>
+            <hotspot type="square" width="162" height="97" x="78" y="130">
+              <copy><![CDATA[Beatmungseinstellungen
+- Hardkeys für den Beatmungsmodus
+- Softkeys zur Wahl des 
+  Beatmungsmodus]]></copy>
+            </hotspot>
+            <hotspot type="circle" width="38" height="38" x="228" y="214">
+              <copy><![CDATA[Alle Einstellungen werden am Bildschirm mit den entsprechend zugeordneten Tasten und dem zentralen Drehknopf durchgeführt.]]></copy>
+            </hotspot>
+            <hotspot type="square" width="16" height="16" x="270" y="238">
+              <copy><![CDATA[Die Standby-Taste]]></copy>
+            </hotspot>
+          </hotspots>
+        </subsubsite>
+        <!-- subsub point -->
+        <subsubsite id="B2140" type="hotspots">
+          <label><![CDATA[Kurvenseite]]></label>
+          <backgroundImage><![CDATA[assets/global/img/backgrounds/bg_hotspots.jpg]]></backgroundImage>
+          <title><![CDATA[Kurvenseite]]></title>
+          <headline><![CDATA[Kurven des Primus]]></headline>
+          <copy><![CDATA[Bewegen Sie den Mauszeiger über das Gerät und über den Text neben dem Bild. Der relevante Bereich wird hervorgehoben.]]></copy>
+          <image><![CDATA[assets/global/img/B2120/B5000.png]]></image>
+          <hotspots colorOnImage="0xf6a800" colorTextBoxOver="0xD6E7F7" colorTextBoxOut="0xFDFDFD">
+            <hotspot type="square" width="134" height="90" x="79" y="11">
+              <copy><![CDATA[Drei Bildschirm-Layouts sind über die Taste Bildschirm Layout auswählbar. Das aktuell gewählte Bildschirm-Layout ist dunkelgrün hinterlegt.
+Im Menü Standardeinst. können alle drei Bildschirm-Layouts aus drei Kurven und einzelnen Modulen konfiguriert werden
+<b>CO<font size="8">2</font>-Konzentration</b>
+– Kurvendarstellung
+– Numerische Darstellung
+– Trendkurve für CO<font size="8">2</font>
+<b>Atemwegsdruck</b>
+– Kurvendarstellung (PAW)
+– Numerische Darstellung
+– Balkendiagramm
+<b>Flow und Volumen</b>
+– Kurvendarstellung Flow (insp./exsp.)
+– Numerische Darstellung]]></copy>
+            </hotspot>
+          </hotspots>
+        </subsubsite>
+        <!-- subsub point -->
+        <subsubsite id="B2150" type="hotspots">
+          <label><![CDATA[Datenseite]]></label>
+          <backgroundImage><![CDATA[assets/global/img/backgrounds/bg_hotspots.jpg]]></backgroundImage>
+          <title><![CDATA[Datenseite]]></title>
+          <headline><![CDATA[Einstellungen des Primus]]></headline>
+          <copy><![CDATA[Bewegen Sie den Mauszeiger über das Gerät und über den Text neben dem Bild. Der relevante Bereich wird hervorgehoben.]]></copy>
+          <image><![CDATA[assets/global/img/B2140/B5300.png]]></image>
+          <hotspots colorOnImage="0xf6a800" colorTextBoxOver="0xD6E7F7" colorTextBoxOut="0xFDFDFD">
+            <hotspot type="square" width="227" height="151" x="120" y="20">
+              <copy><![CDATA[Alle numerischen Werte werden auf der Datenseite zusammen mit den entsprechenden Messwerten dargestellt]]></copy>
+            </hotspot>
+          </hotspots>
+        </subsubsite>
+        <!-- subsub point -->
+        <subsubsite id="B2160" type="hotspots">
+          <label><![CDATA[Trendseite]]></label>
+          <backgroundImage><![CDATA[assets/global/img/backgrounds/bg_hotspots.jpg]]></backgroundImage>
+          <title><![CDATA[Trendseite]]></title>
+          <headline><![CDATA[Trendseite des Primus]]></headline>
+          <copy><![CDATA[Bewegen Sie den Mauszeiger über das Gerät und über den Text neben dem Bild. Der relevante Bereich wird hervorgehoben.]]></copy>
+          <image><![CDATA[assets/global/img/B2150/B5400.png]]></image>
+          <hotspots colorOnImage="0xf6a800" colorTextBoxOver="0xD6E7F7" colorTextBoxOut="0xFDFDFD">
+            <hotspot type="square" width="226" height="199" x="122" y="22">
+              <copy><![CDATA[Die Trendseite stellt  Messwerte in ihrer zeitlichen Entwicklung seit Beginn der Messung an.
+Maximal speicherbare Zeit: 8 Stunden.
+Wählbare Anzeigekombinationen:
+– A.-Gase
+– MV / CPAT / CO<font size="8">2</font> / O<font size="8">2</font>
+– SpO<font size="8">2</font> Puls (optional)]]></copy>
+            </hotspot>
+          </hotspots>
+        </subsubsite>
+        <subsubsite id="B3130" type="article">
+          <label><![CDATA[Minitrends]]></label>
+          <backgroundImage><![CDATA[assets/global/img/backgrounds/bg_hotspots.jpg]]></backgroundImage>
+          <title><![CDATA[Minitrends]]></title>
+          <items>
+            <item type="image"><![CDATA[assets/global/img/B2160/B5555.png]]></item>
+            <item type="text" style="articleCopy"><![CDATA[Die Option Advanced Views beinhaltet konfigurierbare Trendansichten für neue Parameter: 15 min. Minitrends für PEEP/CPAT, MV*CO<font size="8">2</font> und O<font size="8">2</font> - Uptake. 
+Diese Minitrends können im Parameterfeld angezeigt werden. 
+
+Zusätzlich werden sie auf der Trendbildschirmseite angezeigt]]></item>
+          </items>
+        </subsubsite>
+        <!-- subsub point -->
+        <subsubsite id="B2170" type="hotspots">
+          <label><![CDATA[Alarme: Überblick]]></label>
+          <backgroundImage><![CDATA[assets/global/img/backgrounds/bg_hotspots.jpg]]></backgroundImage>
+          <title><![CDATA[Alarme: Überblick]]></title>
+          <headline><![CDATA[]]></headline>
+          <copy><![CDATA[Bewegen Sie den Mauszeiger über das Gerät und über den Text neben dem Bild. Der relevante Bereich wird hervorgehoben.]]></copy>
+          <image><![CDATA[assets/global/img/B2160/B5500.png]]></image>
+          <hotspots colorOnImage="0xf6a800" colorTextBoxOver="0xD6E7F7" colorTextBoxOut="0xFDFDFD">
+            <hotspot type="square" width="150" height="22" x="124" y="0">
+              <copy><![CDATA[Alarmmeldungen werden nach Priorität im Alarmfeld angezeigt.]]></copy>
+            </hotspot>
+            <hotspot type="square" width="45" height="27" x="345" y="24">
+              <copy><![CDATA[Alarmgrenzen im Betrieb aufrufen: Softkey "Alarmgrenzen" drücken.]]></copy>
+            </hotspot>
+            <hotspot type="square" width="154" height="149" x="122" y="21">
+              <copy><![CDATA[Links befinden sich die Kurven mit den gestrichelt eingeblendeten Alarmgrenzen.]]></copy>
+            </hotspot>
+            <hotspot type="square" width="76" height="149" x="271" y="21">
+              <copy><![CDATA[Die aktuellen Messwerte mit ihren Alarmgrenzen werden zusammengefasst im Feld neben den Kurven dargestellt]]></copy>
+            </hotspot>
+            <!-- new:  -->
+            <hotspot type="square" width="45" height="27" x="346" y="47">
+              <copy><![CDATA[Wenn die Ventilation eingestellt wurde, kann Primus im Beatmungsmodus Volume Mode, Volume AF, Pressure Mode, und Pressure Support (optional) die Alarmgrenzen für das Atemminutenvolumen MV und den Atemwegsdruck PAW automatisch an die aktuellen Messwerte der Ventilation anpassen.]]></copy>
+            </hotspot>
+          </hotspots>
+        </subsubsite>
+        <!-- subsub point -->
+        <subsubsite id="B2180" type="hotspots">
+          <label><![CDATA[Alarme: mehr als 3 Alarme]]></label>
+          <backgroundImage><![CDATA[assets/global/img/backgrounds/bg_hotspots.jpg]]></backgroundImage>
+          <title><![CDATA[Alarme: mehr als 3 Alarme]]></title>
+          <headline><![CDATA[]]></headline>
+          <copy><![CDATA[Bewegen Sie den Mauszeiger über das Gerät und über den Text neben dem Bild. Der relevante Bereich wird hervorgehoben.]]></copy>
+          <image><![CDATA[assets/global/img/B2170/Primus-Titelscreen_Volume_AF-with-3Alarms_neu.png]]></image>
+          <hotspots colorOnImage="0xf6a800" colorTextBoxOver="0xD6E7F7" colorTextBoxOut="0xFDFDFD">
+            <hotspot type="square" width="24" height="19" x="272" y="2">
+              <copy><![CDATA[Bis zu drei Meldungen können gleichzeitig dargestellt werden. Zusätzlich zu einigen Alarmmeldungen werden die entsprechenden Messwerte auf blinkendem Hintergrund im Bildschirm kenntlich gemacht. Bei gleichzeitigem Auftreten von mehr als drei Alarmen erscheint rechts neben dem Alarmfeld das Symbol "more".]]></copy>
+            </hotspot>
+            <hotspot type="square" width="42" height="27" x="348" y="70">
+              <copy><![CDATA[Am rechten Bildschirmrand wird der Softkey "alle Alarme" aktiviert, um die verbleibenden Alarme anzuzeigen.]]></copy>
+            </hotspot>
+          </hotspots>
+        </subsubsite>
+        <!-- subsub point -->
+        <subsubsite id="B2190" type="hotspots">
+          <label><![CDATA[Alarme: sämtliche Alarme]]></label>
+          <backgroundImage><![CDATA[assets/global/img/backgrounds/bg_hotspots.jpg]]></backgroundImage>
+          <title><![CDATA[Alarme: Darstellung sämtlicher Alarme]]></title>
+          <headline><![CDATA[]]></headline>
+          <copy><![CDATA[Bewegen Sie den Mauszeiger über das Gerät und über den Text neben dem Bild. Der relevante Bereich wird hervorgehoben.]]></copy>
+          <image><![CDATA[assets/global/img/B2180/Primus-Titelscreen_Volume_AF-with-4Alarms_neu.jpg]]></image>
+          <hotspots colorOnImage="0xf6a800" colorTextBoxOver="0xD6E7F7" colorTextBoxOut="0xFDFDFD">
+            <hotspot type="square" width="42" height="27" x="348" y="70">
+              <copy><![CDATA[Mit drücken des Softkeys "alle Alarme" wird die oberste Kurvenanzeige  durch bis zu sechs weitere Alarm-Felder für 15 Sekunden ersetzt. Wenn mehr als neun Alarm-Meldungen gleichzeitig aktiv sind, werden die Alarme mit der geringsten Priorität erst angezeigt, wenn insgesamt weniger als neun Alarm-Meldungen aktiv sind.]]></copy>
+            </hotspot>
+          </hotspots>
+        </subsubsite>
+      </subsite>
+      <subsite id="B3100" type="overview">
+        <label><![CDATA[Advanced Monitoring]]></label>
+        <backgroundImage><![CDATA[assets/global/img/backgrounds/bg_general.jpg]]></backgroundImage>
+        <title><![CDATA[Advanced Monitoring]]></title>
+        <headline><![CDATA[]]></headline>
+        <copy><![CDATA[Dieser Abschnitt gibt ihnen nähere Informationen zu der Option Advanced Monitoring]]></copy>
+        <image><![CDATA[assets/global/img/B3100/Bild_3.JPG]]></image>
+        <!-- subsub point -->
+        <subsubsite id="B3110" type="article">
+          <label><![CDATA[Ökonometer]]></label>
+          <title><![CDATA[Ökonometer]]></title>
+          <items>
+            <item type="image"><![CDATA[assets/global/img/B3110/Econometer_2.jpg]]></item>
+            <item type="text" style="articleCopy"><![CDATA[
+Der Bargraph gibt die qualitative Ausnutzung des Frischgasverbrauch an. Wenn die Frischgasdosierung mehr als 1 L/min über dem Gasverbrauch liegt, zeigt das Ökonometer Überschuß (surplus) an. Unterhalb dieses Wertes ist die Frischgasausnutzung effizient (efficient). Wenn weniger Frischgas dosiert wird, als der Patient benötigt, dann befindet sich der Bargraph im roten Bereich für Frischgas-Defizit (deficit), und ein Frischgasalarm wird erzeugt.
+
+Der Gasverbrauch ergibt sich aus
+– Uptake des Patienten,
+– Leckage und
+– dem absorbierten CO<font size="8">2</font>-Volumen.]]></item>
+            <item type="image"><![CDATA[assets/global/img/B3110/Econometer_1.jpg]]></item>
+            <item type="text" style="articleCopy"><![CDATA[Wenn keine Daten zur Berechnung vorhanden sind, dann erscheint die Beschriftung in grau und kein Bargraph ist vorhanden.]]></item>
+          </items>
+        </subsubsite>
+        <!-- subsub point -->
+        <subsubsite id="B3120" type="hotspots">
+          <label><![CDATA[Loops]]></label>
+          <backgroundImage><![CDATA[assets/global/img/backgrounds/bg_hotspots.jpg]]></backgroundImage>
+          <title><![CDATA[Loops]]></title>
+          <headline><![CDATA[]]></headline>
+          <copy><![CDATA[Bewegen Sie den Mauszeiger über das Gerät und über den Text neben dem Bild. Der relevante Bereich wird hervorgehoben.]]></copy>
+          <image><![CDATA[assets/global/img/B3120/Primus-Titelscreen_Volume_A.png]]></image>
+          <hotspots colorOnImage="0xf6a800" colorTextBoxOver="0xD6E7F7" colorTextBoxOut="0xFDFDFD">
+            <hotspot type="square" width="41" height="25" x="348" y="144">
+              <copy><![CDATA[Um das Loopdisplay anzuzeigen drücken sie den Softkey Loop im Standarddisplay.]]></copy>
+            </hotspot>
+            <hotspot type="square" width="150" height="98" x="126" y="71">
+              <copy><![CDATA[P/V- und V/Flow-Loops: schnelle Analyse von Veränderungen der Lungenmechanik durch gleichzeitige Anzeige von Referenz- und Echtzeit-Loops. Neben den relevanten numerischen Daten des Referenz-Loops werden auch die numerischen Daten des Echtzeit-Loops angezeigt]]></copy>
+            </hotspot>
+          </hotspots>
+        </subsubsite>
+        <!-- subsub point -->
+      </subsite>
+      <subsite id="B4100" type="overview">
+        <label><![CDATA[Ventilationsmodi]]></label>
+        <backgroundImage><![CDATA[assets/global/img/backgrounds/bg_general.jpg]]></backgroundImage>
+        <title><![CDATA[Ventilationsmodi]]></title>
+        <headline><![CDATA[]]></headline>
+        <copy><![CDATA[Dieser Abschnitt gibt ihnen nähere Informationen zu dem Bereich Ventilationsmodi]]></copy>
+        <image><![CDATA[assets/global/img/B4100/Bild_2.JPG]]></image>
+        <!-- subsub point -->
+        <subsubsite id="B4110" type="article">
+          <label><![CDATA[Volumenkontrollierte Beatmung]]></label>
+          <title><![CDATA[Volumenkontrollierte Beatmung]]></title>
+          <items>
+            <item type="text" style="articleSubline"><![CDATA[Volumenkontrollierte Beatmung mit konstantem Inspirationsflow]]></item>
+            <item type="image"><![CDATA[assets/global/img/B4110/Volume_controlled_ventilation_1.jpg]]></item>
+            <item type="text" style="articleCopy"><![CDATA[
+Zweckbestimmung
+Anästhesien an lungengesunden, relaxierten bzw. teilrelaxierten Patienten. Das Ziel ist, ein konstantes Volumen bzw. konstantes "et CO<font size="8">2</font>" zu erhalten.
+
+Volumenkontrollierter Beatmungsmodus mit festem mandatorischen Atemvolumen VT und Frequenz Freq. (früher IPPV), sowie mit zuschaltbarer Synchronisation (früher SIMV(VC)) und einstellbarer Druckunterstützung von Spontanatemhüben (früher SIMV(VC)+PS, optional).
+
+Der Atemzyklus wird über die Frequenz Freq., die Inspirationszeit TINSP, die inspiratorische Pausenzeit TIP:TINSP und das Atemvolumen VT definiert.
+
+Die Volumenkontrollierte Beatmung erreicht alle Patientengruppen (20-1400 ml, f 3-100 min-1) ohne Wechsel von Komponenten und reduziert die inspiratorische System-compliance und erlaubt vom ersten Atemzug an eine korrekte Lieferung  des eingestellten Atemzugvolumens (Compliance Kompensation)]]></item>
+            <item type="text" style="articleSubline"><![CDATA[Synchronisation der volumenkontrollierten Beatmung und Spontanatmung ]]></item>
+            <item type="image"><![CDATA[assets/global/img/B4110/Volume_controlled_ventilation_2.jpg]]></item>
+            <item type="text" style="articleCopy"><![CDATA[
+Die Aktivierung der Synchronisation erfolgt, wenn ein Wert für die Triggerempfindlichkeit eingegeben wird. Auf dem Bildschirm wird im Statusfeld des Beatmungsmodes "sync“ angezeigt.
+
+Die Empfindlichkeit des Flow-Triggers steuert die Synchronisation. Der maximale zeitliche Abstand der kontrollierten Beatmungs-Hübe wird mit der Frequenz eingestellt. Um die Frequenz konstant zu halten, wird beim vorzeitigen Triggern im nächsten Beatmungs-Zyklus die Zeit ausgeglichen.
+
+Ein vom Patienten ausgelöster Beatmungs-Hub wird in der Druckkurve und in der Flow-Kurve durch eine durchgehende Linie gekennzeichnet (Triggerindikator). Das aktive Flow-Trigger-Fenster entspricht den letzten 25% der jeweiligen Exspirationszeit.]]></item>
+          </items>
+        </subsubsite>
+        <!-- subsub point -->
+        <subsubsite id="B4120" type="article">
+          <label><![CDATA[AutoFlow (optional)]]></label>
+          <title><![CDATA[AutoFlow (optional)]]></title>
+          <items>
+            <item type="text" style="articleSubline"><![CDATA[Volumenkontrollierte Beatmung mit Autofloww]]></item>
+            <item type="image"><![CDATA[assets/global/img/B4120/Auto_Flow_1.jpg]]></item>
+            <item type="text" style="articleCopy"><![CDATA[
+Volume AF ist ein druckkontrollierter Beatmungsmodus mit garantiertem Atemvolumen VT und garantierter Frequenz Freq. sowie mit zuschaltbarer Synchronisation und einstellbarer Druckunterstützung von Spontanatemhüben (optional).
+
+Volume AF verbindet die Vorteile druckkontrollierter und volumenkontrollierter Beatmungsmodi. Das eingestellte Tidalvolumen VT wird in einem druckkontrollierten Beatmungsmodus verabreicht. Der Inspirationsdruck passt sich automatisch an das eingestellte Tidalvolumen an, begrenzt durch einen Maximaldruck PMAX. Wenn die Beatmung mit Volume AF gestartet wird, ist der erste mandatorische Atemhub volumenkontrolliert, um das erforderliche Druckniveau zu bestimmen, falls es nicht aus einem vorherigen Beatmungsmodus bekannt ist.
+
+Primus passt den inspiratorischen Druck automatisch an die sich ändernden Lungenbedingungen an, dies geschieht in Schritten von max. ±3 mbar pro Atemzyklus.
+
+Das in einem Atemzyklus verabreichte Tidalvolumen ist auf 130 % des eingestellten Tidalvolumens begrenzt. Wenn die Volumenbegrenzung aktiv ist, wird der Inspirationsdruck des folgenden Atemhubs auf 75 % des Zieldrucks reduziert, jedoch begrenzt auf ein Maximum von 15 mbar über PEEP.]]></item>
+            <item type="text" style="articleSubline"><![CDATA[Synchronisation der volumenkontrollierten Beatmung mit Autoflow und Spontanatmung]]></item>
+            <item type="image"><![CDATA[assets/global/img/B4120/Auto_Flow_2.jpg]]></item>
+            <item type="text" style="articleCopy"><![CDATA[
+Die Aktivierung der Synchronisation erfolgt über die Eingabe eines Wertes für die Triggerempfindlichkeit.Ein vom Patienten ausgelöster mandatorischer Atemhub wird in der Druckkurve und in der Flowkurve durch eine durchgehende vertikale schwarze Linie gekennzeichnet (Triggerindikator). Das aktive Fenster für den patientengetriggerten Hub entspricht den letzten 25 % der jeweiligen Exspirationszeit.
+
+Bei Volume AF kann der Patient außerdem die Inspirationsphase während der letzten 50 % der anzuwendenden Inspirationszeit beenden, wenn die Synchronisation aktiviert ist. Eine durch den Patienten beendete Inspirationsphase wird in der Druckkurve und in der Flowkurve durch eine durchgehende vertikale schwarze Linie gekennzeichnet (Triggerindikator).]]></item>
+            <item type="text" style="articleSubline"><![CDATA[Automatische Anpassung]]></item>
+            <item type="text" style="articleCopy"><![CDATA[
+Cpat bekannt von einem vorangegangenen Beatmungsmode: 
+1. Hub: Pinsp = VT / Cpat       
+-> Der Zieldruck wird benutzt 
+Ab dem ersten Hub wird das Tidalvolumen mit dem kleinsten notwendigen Druck appliziert.]]></item>
+            <item type="image"><![CDATA[assets/global/img/B4120/Auto_Flow_3.jpg]]></item>
+            <item type="text" style="articleCopy"><![CDATA[Cpat unbekannt: 
+1. Hub: volumekontrolliert       
+->VT 
+2. Hub:  Pinsp = VT / Cpat       
+-> Zieldruck wird benutzt]]></item>
+            <item type="image"><![CDATA[assets/global/img/B4120/Auto_Flow_4.jpg]]></item>
+            <item type="text" style="articleSubline"><![CDATA[Änderung des Tidalvolumens von 300ml auf 420ml]]></item>
+            <item type="image"><![CDATA[assets/global/img/B4120/Auto_Flow_5.jpg]]></item>
+            <item type="text" style="articleCopy"><![CDATA[
+Tidalvolumen vergrößern:  
+Der Druckanstieg wird in Schritten von max. 3mbar durchgeführt 
+Tidalvolumen verkleinern:  
+Der Druck passt sicht direkt nach der Formel Pinsp neu = VT neu / VT alt * Pinsp alt an.]]></item>
+            <item type="text" style="articleSubline"><![CDATA[Änderung der Patientencompliance]]></item>
+            <item type="image"><![CDATA[assets/global/img/B4120/Auto_Flow_6.jpg]]></item>
+            <item type="text" style="articleCopy"><![CDATA[
+Ändert sich die Compliance des Patienten während der Beatmung mit Volume AutoFlow, so passt sich Pinsp automatisch so an, dass das eingestellte VT konstant bleibt. (in druckkontrollierter Beatmung bleibt Pinsp konstant - VT, MV ändern sich)]]></item>
+          </items>
+        </subsubsite>
+        <!-- subsub point -->
+        <subsubsite id="B4130" type="article">
+          <label><![CDATA[Druckkontrollierte Beatmung]]></label>
+          <title><![CDATA[Druckkontrollierte Beatmung]]></title>
+          <items>
+            <item type="text" style="articleSubline"><![CDATA[Druckkontrollierte Beatmung mit dezellerierendem Flow]]></item>
+            <item type="image"><![CDATA[assets/global/img/B4130/Pressure_CV_1.jpg]]></item>
+            <item type="text" style="articleCopy"><![CDATA[
+Zweckbestimmung
+Anästhesien an lungenkranken Patienten (inhomogene Lunge), Neonaten, Kinder-Maskenbeatmung, Lungenfisteln, Larynx-Masken, Inversed Ratio Ventilation, bei relaxierten bzw. teilrelaxierten Patienten.
+
+Druckkontrollierte Beatmung mit fester Druckbegrenzung "Pinsp" und Frequenz "1/freq". Die Synchronisation und die einstellbare Druckunterstützung von Spontanatemhüben (optional) ist zuschaltbar.
+Während der Inspirationszeit "Tinsp" wird dem Patienten kontinuierlich ein Flow appliziert. Die Anstiegsgeschwindigkeit der Druckkurve wird mit der Rampenanstiegszeit "TSlope" voreingestellt. Der maximale zeitliche Abstand der kontrollierten Beatmung wird mit der Frequenz eingestellt. Um die Frequenz konstant zu halten, wird beim vorzeitigen Triggern im nächsten Zyklus die Zeit ausgeglichen.
+Änderungen der Lungencompliance und der Beatmungsparameter beeinflussen das Atemvolumen.]]></item>
+            <item type="text" style="articleSubline"><![CDATA[Synchronisation der druckkontrollierten Beatmung und Spontanatmung ]]></item>
+            <item type="image"><![CDATA[assets/global/img/B4130/Pressure_CV_2.jpg]]></item>
+            <item type="text" style="articleCopy"><![CDATA[
+Die Synchronisation wird aktiviert, wenn ein Trigger-Wert eingegeben wird.
+
+Auf dem Bildschirm wird im Statusfeld des Beatmungsmodes "sync" angezeigt.
+
+Die Empfindlichkeit des Flow-Triggers steuert die Synchronisation.
+
+Ein vom Patienten ausgelöster Atemhub wird in der Druckkurve und in der Flow-Kurve durch eine durchgehende Linie gekennzeichnet (Triggerindikator). Das aktive Flow-Trigger-Fenster entspricht den letzten 25% der jeweiligen Exspirationszeit.
+
+Das Verwenden dieses Beatmungsmodes ermöglicht reduzierte Interaktionen mit dem Anästhesiesystem während der Ausleitung und einen fließenden Übergang von kontrollierter Beatmung zur Spontanatmung.
+
+Der einstellbare Flowtrigger reduziert die Atemarbeit während der Spontanatmungsphasen.]]></item>
+          </items>
+        </subsubsite>
+        <!-- subsub point -->
+        <subsubsite id="B4140" type="article">
+          <label><![CDATA[Advanced Ventilation (optional)]]></label>
+          <title><![CDATA[Advanced Ventilation (optional)]]></title>
+          <items>
+            <item type="text" style="articleSubline"><![CDATA[Unterstützung der Spontanatmung mit Pressure Support ]]></item>
+            <item type="image"><![CDATA[assets/global/img/B4140/Advanced_monitoring_1.JPG]]></item>
+            <item type="text" style="articleCopy"><![CDATA[
+Zweckbestimmung
+Anästhesien an spontanatmenden Patienten mit Larynx-Maske bei OPs ohne Muskelrelaxantien. 
+
+Druckunterstützung bei Spontanatmung. Die Option lässt sich in allen automatischen Beatmungsmodes nutzen. Gleichzeitig ist die Option ein eigenständiger Beatmungsmode. Die spontanen Atembemühungen des Patienten werden durch folgende Faktoren unterstützt:
+
+– Die Empfindlichkeit des Flow-Triggers steuert die Synchronisation.
+– Der eingestellte Druck-Sollwert ist ein Maß für die Druckunterstützung.
+
+Die Anstiegsgeschwindigkeit der Druckkurve wird über die Rampenanstiegszeit "Tslope" voreingestellt.
+
+Zusätzlich lässt sich über die Minimalfrequenz "Freqmin" eine Apnoe-Beatmung einstellen.
+
+Bei fehlender Spontanatemaktivität des Patienten,wird abhängig von der eingestellten Minimalfrequenz "Freqmin", das Beatmungsgerät automatisch aktiviert. Der darauf folgende Beatmungshub ist kein mandatorischer Beatmungshub. Der Patient kann den vom Beatmungsgerät angebotenen Beatmungshub jederzeit durch eigene Atemaktivität beenden.]]></item>
+            <item type="image"><![CDATA[assets/global/img/B4140/Advanced_monitoring_2.JPG]]></item>
+            <item type="text" style="articleCopy"><![CDATA[
+ΔPPS = 0, 1, 2 hPa einstellbar im Pressure Support Mode
+
+Gleichzeitig wird dabei die Minimalfrequenz deaktiviert (und re-aktiviert, wenn ΔPPS größer 2 hPa ist) 
+
+Mit jedem Atemzug des Patienten wird das eingestellte CPAP Niveau gehalten]]></item>
+            <item type="text" style="articleSubline"><![CDATA[Synchronisation der volumengarantierten Beatmung mit Pressure Support und Spontanatmung ]]></item>
+            <item type="image"><![CDATA[assets/global/img/B4140/Advanced_monitoring_4.JPG]]></item>
+            <item type="text" style="articleCopy"><![CDATA[
+Die Druckunterstützung wird aktiviert, wenn während der kontrollierten Beatmung ein Wert für das Niveau der Druckunterstützung "Δpps" eingegeben wird.
+
+Auf dem Bildschirm, wird im Statusfeld des Beatmungsmodes "PressSupp" angezeigt. Die Empfindlichkeit des Flow-Triggers sowie das Niveau von "Δpps" steuern die Synchronisation bzw. die Druckunterstützung. Der maximale zeitliche Abstand der kontrollierten Beatmung wird mit der Frequenz eingestellt. Um die Frequenz konstant zu halten, wird beim vorzeitigen Triggern im nächsten Zyklus die Zeit ausgeglichen.
+
+Wenn zum Zeitpunkt der Aktivierung der Druckunterstützung ohne Synchronisierung beatmet wurde, dann erfolgt eine automatische Aktivierung der Synchronisation mit dem zuletzt genutzten Trigger-Einstellwert.
+
+Wenn die Druckunterstützung mit "AUS“ deaktiviert wird, bleibt die Synchronisation mit dem eingestellten Wert erhalten. Wenn der Trigger mit "AUS“ deaktiviert wird, dann wird automatisch die Druckunterstützung deaktiviert.]]></item>
+          </items>
+        </subsubsite>
+        <!-- subsub point -->
+        <subsubsite id="B4150" type="hotspots">
+          <label><![CDATA[HLM]]></label>
+          <backgroundImage><![CDATA[assets/global/img/backgrounds/bg_hotspots.jpg]]></backgroundImage>
+          <title><![CDATA[HLM]]></title>
+          <headline><![CDATA[]]></headline>
+          <copy><![CDATA[Bewegen Sie den Mauszeiger über das Gerät und über den Text neben dem Bild. Der relevante Bereich wird hervorgehoben.]]></copy>
+          <image><![CDATA[assets/global/img/B3130/HLM_mode.png]]></image>
+          <hotspots colorOnImage="0xf6a800" colorTextBoxOver="0xD6E7F7" colorTextBoxOut="0xFDFDFD">
+            <hotspot type="square" width="51" height="28" x="296" y="92">
+              <copy><![CDATA[Der HLM-Modus ermöglicht eine Patientenüberwachung ohne unnötige Alarmierungen während der extrakorporalen Oxygenierung des Patienten durch eine Herz-Lungen-Maschine (HLM).
+
+Im HLM-Modus:
+-erfolgt die Messung sämtlicher Gaskonzentrationen atemphasen-unabhängig
+-sind CO<font size="8">2</font>-Apnoe- und Druck-Apnoe Alarmierung inaktiv
+-sind Alarme der SpO<font size="8">2</font>-Überwachung inaktiv
+Der HLM-Modus ist in allen aktiven Beatmungsmodi einsetzbar.]]></copy>
+            </hotspot>
+          </hotspots>
+        </subsubsite>
+      </subsite>
+      <!-- subsub point -->
+      <subsite id="B7100" type="text_list">
+        <label><![CDATA[Abkürzungen]]></label>
+        <title><![CDATA[Abkürzungen]]></title>
+        <list>
+          <letter value="A">
+            <item>
+              <left_column><![CDATA[AC]]></left_column>
+              <right_column><![CDATA[Wechselstrom]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[AGS]]></left_column>
+              <right_column><![CDATA[Anästhesiegas-Aufnahmesystem]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[AGFS]]></left_column>
+              <right_column><![CDATA[Anästhesiegas-Fortleitungssystem]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[Air/AIR]]></left_column>
+              <right_column><![CDATA[Medizinische Druckluft]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[APL]]></left_column>
+              <right_column><![CDATA[Adjustable Pressure Limitation]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[ATPD]]></left_column>
+              <right_column><![CDATA[Ambient Temperature and Pressure, Dry / Umgebungstemperatur und Umgebungsdruck, trockenes Gas]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[ATPS]]></left_column>
+              <right_column><![CDATA[Ambient Temperature and Pressure, Saturated / Umgebungstemperatur und Umgebungsdruck, 100 % relative Feuchte]]></right_column>
+            </item>
+          </letter>
+          <letter value="B">
+            <item>
+              <left_column><![CDATA[BTPS]]></left_column>
+              <right_column><![CDATA[Body Temperature and Pressure, Saturated 37 °C (98,6 °F) / Umgebungsdruck, 100 % relative Feuchte]]></right_column>
+            </item>
+          </letter>
+          <letter value="C">
+            <item>
+              <left_column><![CDATA[cmH<font size="8">2</font>O]]></left_column>
+              <right_column><![CDATA[Zentimeter Wassersäule]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[CO<font size="8">2</font>]]></left_column>
+              <right_column><![CDATA[Kohlendioxid]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[COM 1
+COM 2]]></left_column>
+              <right_column><![CDATA[Schnittstellen, die als Medibus-/MEDIBUS.X-SChnittstellen verwendet werden]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[CPAP]]></left_column>
+              <right_column><![CDATA[Continuous Positive Airway Pressure]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[CPAT]]></left_column>
+              <right_column><![CDATA[Compliance des Patienten]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[CSYS]]></left_column>
+              <right_column><![CDATA[Compliance des Systems]]></right_column>
+            </item>
+          </letter>
+          <letter value="D">
+            <item>
+              <left_column><![CDATA[ΔO<font size="8">2</font>]]></left_column>
+              <right_column><![CDATA[Differenz zwischen inspiratorischer und expiratorischer O<font size="8">2</font>-Konzentration]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[ΔPPS]]></left_column>
+              <right_column><![CDATA[Differenzdruck zum PEEP im Pressure-Support-Modus]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[ΔVT]]></left_column>
+              <right_column><![CDATA[Differenz zwischen inspiratorischem und expiratorischem Atemvolumen (Tidalvolumen)]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[Des.]]></left_column>
+              <right_column><![CDATA[Desfluran]]></right_column>
+            </item>
+          </letter>
+          <letter value="E">
+            <item>
+              <left_column><![CDATA[etCO<font size="8">2</font>]]></left_column>
+              <right_column><![CDATA[Endtidale CO<font size="8">2</font>-Konzentration]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[EMV]]></left_column>
+              <right_column><![CDATA[Elektromagnetische Verträglichkeit]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[Enf.]]></left_column>
+              <right_column><![CDATA[Enflurane]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[ESD]]></left_column>
+              <right_column><![CDATA[Elektrostatische Entladung]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[exsp.]]></left_column>
+              <right_column><![CDATA[Expiratorisch]]></right_column>
+            </item>
+          </letter>
+          <letter value="F">
+            <item>
+              <left_column><![CDATA[FG]]></left_column>
+              <right_column><![CDATA[Frischgas]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[FG. extern]]></left_column>
+              <right_column><![CDATA[Betrieb über externen Frischgasausgang (A-Dichtstopfen)]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[Freq./freq.]]></left_column>
+              <right_column><![CDATA[Frequenz]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[FreqMIN]]></left_column>
+              <right_column><![CDATA[Mandatorische Minimalfrequenz im Pressure Support Modus]]></right_column>
+            </item>
+          </letter>
+          <letter value="G"></letter>
+          <letter value="H">
+            <item>
+              <left_column><![CDATA[Hal.]]></left_column>
+              <right_column><![CDATA[Halothan]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[HF Chirurgie]]></left_column>
+              <right_column><![CDATA[Hochfrequenz-Chirurgie]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[HLM]]></left_column>
+              <right_column><![CDATA[Herz-Lungenmaschine]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[HME]]></left_column>
+              <right_column><![CDATA[Wärme- und Feuchtigkeitstauscher (Heat + Moisture Exchange)]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[hPa]]></left_column>
+              <right_column><![CDATA[Hektopascal]]></right_column>
+            </item>
+          </letter>
+          <letter value="I">
+            <item>
+              <left_column><![CDATA[I:E]]></left_column>
+              <right_column><![CDATA[Verhältnis Inspirationszeit zu Exspirationszeit]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[in]]></left_column>
+              <right_column><![CDATA[Inch (Zoll)]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[inCO<font size="8">2</font>]]></left_column>
+              <right_column><![CDATA[Inspiratorische CO<font size="8">2</font>-Konzentration]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[inDes]]></left_column>
+              <right_column><![CDATA[Inspiratorische Desfluran-Konzentration]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[inEnf]]></left_column>
+              <right_column><![CDATA[Inspiratorische Enfluran-Konzentration]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[inHal]]></left_column>
+              <right_column><![CDATA[Inspiratorische Halothan-Konzentration]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[inIso]]></left_column>
+              <right_column><![CDATA[Inspiratorische Isofluran-Konzentration]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[inO<font size="8">2</font>]]></left_column>
+              <right_column><![CDATA[Inspiratorische O<font size="8">2</font>-Konzentration]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[INOP]]></left_column>
+              <right_column><![CDATA[Funktion gestört]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[inSev]]></left_column>
+              <right_column><![CDATA[Inspiratorische Sevofluran-Konzentration]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[insp.]]></left_column>
+              <right_column><![CDATA[Inspiratorisch]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[Iso.]]></left_column>
+              <right_column><![CDATA[Isofluran]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[IV]]></left_column>
+              <right_column><![CDATA[Intravenös]]></right_column>
+            </item>
+          </letter>
+          <letter value="J"></letter>
+          <letter value="K">
+            <item>
+              <left_column><![CDATA[KAL]]></left_column>
+              <right_column><![CDATA[Kalibrierung]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[kg]]></left_column>
+              <right_column><![CDATA[Kilogramm]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[KG]]></left_column>
+              <right_column><![CDATA[Körpergewicht]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[kPa]]></left_column>
+              <right_column><![CDATA[Kilopascal]]></right_column>
+            </item>
+          </letter>
+          <letter value="L">
+            <item>
+              <left_column><![CDATA[lbs.]]></left_column>
+              <right_column><![CDATA[Engl. Pfund (0,453592g)]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[LeakSYS]]></left_column>
+              <right_column><![CDATA[System-Leckage]]></right_column>
+            </item>
+          </letter>
+          <letter value="M">
+            <item>
+              <left_column><![CDATA[MAC]]></left_column>
+              <right_column><![CDATA[Minimum Alveolar Concentration]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[MAN/AUTO]]></left_column>
+              <right_column><![CDATA[Manuelle/maschinelle Beatmung]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[Man.Spont, MAN/SPONT]]></left_column>
+              <right_column><![CDATA[Manuelle Beatmung / Spontanatmung]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[mbar]]></left_column>
+              <right_column><![CDATA[Millibar]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[mmHg]]></left_column>
+              <right_column><![CDATA[Millimeter Quecksilbersäule]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[mL]]></left_column>
+              <right_column><![CDATA[Milliliter]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[MPG]]></left_column>
+              <right_column><![CDATA[Medizinproduktegesetz (deutsches Gesetz über Medizinprodukte)]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[MV]]></left_column>
+              <right_column><![CDATA[Exspiratorisches Minutenvolumen]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[MV*CO<font size="8">2</font>]]></left_column>
+              <right_column><![CDATA[Exspiratorisches Minutenvolumen CO<font size="8">2</font>]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[MVLECK]]></left_column>
+              <right_column><![CDATA[Differenz zwischen inspiratorischem und exspiratorischem Minutenvolumen]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[MVMAND]]></left_column>
+              <right_column><![CDATA[Mandatorisches exspiratorisches Minutenvolumen]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[MVSPON]]></left_column>
+              <right_column><![CDATA[Spontanes exspiratorisches Minutenvolumen]]></right_column>
+            </item>
+          </letter>
+          <letter value="N">
+            <item>
+              <left_column><![CDATA[NiBP]]></left_column>
+              <right_column><![CDATA[Nichtinvasiver Blutdruck]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[N<font size="8">2</font>0]]></left_column>
+              <right_column><![CDATA[Lachgas]]></right_column>
+            </item>
+          </letter>
+          <letter value="O">
+            <item>
+              <left_column><![CDATA[O<font size="8">2</font>]]></left_column>
+              <right_column><![CDATA[Sauerstoff]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[O<font size="8">2</font>+]]></left_column>
+              <right_column><![CDATA[O<font size="8">2</font>-Flush]]></right_column>
+            </item>
+          </letter>
+          <letter value="P">
+            <item>
+              <left_column><![CDATA[PAW]]></left_column>
+              <right_column><![CDATA[Atemwegsdruck]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[PAW-V loop]]></left_column>
+              <right_column><![CDATA[Druck-Volumen-Loop]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[PEAK]]></left_column>
+              <right_column><![CDATA[Spitzendruck]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[PEEP]]></left_column>
+              <right_column><![CDATA[Positiver endexpiratorischer Druck]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[PEIRP]]></left_column>
+              <right_column><![CDATA[Äquivalente isotrope Sendeleistung des benachbarten
+HF-Senders]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[PINSP]]></left_column>
+              <right_column><![CDATA[Inspirationsdruck im Pressure-Mode]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[PLAT]]></left_column>
+              <right_column><![CDATA[Plateaudruck]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[Pleth]]></left_column>
+              <right_column><![CDATA[Plethysmogramm]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[PMAX]]></left_column>
+              <right_column><![CDATA[Maximaldruck]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[PMEAN]]></left_column>
+              <right_column><![CDATA[Mitteldruck]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[ppm]]></left_column>
+              <right_column><![CDATA[Parts per million]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[PS]]></left_column>
+              <right_column><![CDATA[Pressure Support]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[psi]]></left_column>
+              <right_column><![CDATA[Pounds per square inch]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[Pressure / Press. Mode]]></left_column>
+              <right_column><![CDATA[Pressure-Modus, Druckkontrollierte Beatmung]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[Press. Support / Press. Supp.]]></left_column>
+              <right_column><![CDATA[Pressure-Support-Modus, Druckunterstützte Beatmung]]></right_column>
+            </item>
+          </letter>
+          <letter value="Q"></letter>
+          <letter value="R">
+            <item>
+              <left_column><![CDATA[RF]]></left_column>
+              <right_column><![CDATA[Hochfrequenz]]></right_column>
+            </item>
+          </letter>
+          <letter value="S">
+            <item>
+              <left_column><![CDATA[Sev.]]></left_column>
+              <right_column><![CDATA[Sevoflurane]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[SORC]]></left_column>
+              <right_column><![CDATA[Sensitive Oxygen Ratio Controller]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[SpO<font size="8">2</font>]]></left_column>
+              <right_column><![CDATA[Funktionale O<font size="8">2</font>-Sättigung]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[STPD]]></left_column>
+              <right_column><![CDATA[Standard Temperature and Pressure, Dry. 20 °C (68 °F), 1013 hPa, trockenes Gas]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[Sync./sync.]]></left_column>
+              <right_column><![CDATA[Synchronisation]]></right_column>
+            </item>
+          </letter>
+          <letter value="T">
+            <item>
+              <left_column><![CDATA[TEXP]]></left_column>
+              <right_column><![CDATA[Exspirationszeit]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[TIP:TINSP]]></left_column>
+              <right_column><![CDATA[Verhältnis von inspiratorischer Pausenzeit zur Inspirationszeit]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[TINSP]]></left_column>
+              <right_column><![CDATA[Inspirationszeit]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[Trigger]]></left_column>
+              <right_column><![CDATA[Triggerlevel]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[TRAMPE]]></left_column>
+              <right_column><![CDATA[Rampenanstiegszeit]]></right_column>
+            </item>
+          </letter>
+          <letter value="U">
+            <item>
+              <left_column><![CDATA[USV]]></left_column>
+              <right_column><![CDATA[Unterbrechungsfreie Spannungsversorgung]]></right_column>
+            </item>
+          </letter>
+          <letter value="V">
+            <item>
+              <left_column><![CDATA[V]]></left_column>
+              <right_column><![CDATA[Volt]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[VAC]]></left_column>
+              <right_column><![CDATA[Vakuum (z. B. für Endotracheale Absaugung)]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[V-Flow loop]]></left_column>
+              <right_column><![CDATA[Volumen-Flow-Loop]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[Vol%]]></left_column>
+              <right_column><![CDATA[Prozentuale Gasrate in Bezug auf das gesamte Gasvolumen]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[Volume AF]]></left_column>
+              <right_column><![CDATA[Volume Mode, AutoFlow]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[Volume / Vol. Mode]]></left_column>
+              <right_column><![CDATA[Volume-Modus, Volumenkontrollierte Beatmung]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[Volume AF]]></left_column>
+              <right_column><![CDATA[Volume-Modus AutoFlow]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[VT]]></left_column>
+              <right_column><![CDATA[Atemzugvolumen]]></right_column>
+            </item>
+            <item>
+              <left_column><![CDATA[VTINSP]]></left_column>
+              <right_column><![CDATA[Gemessenes inspiratorisches Atemzugvolumen]]></right_column>
+            </item>
+          </letter>
+          <letter value="W"></letter>
+          <letter value="X">
+            <item>
+              <left_column><![CDATA[xMAC]]></left_column>
+              <right_column><![CDATA[Vielfaches von MAC]]></right_column>
+            </item>
+          </letter>
+          <letter value="Y"></letter>
+          <letter value="Z">
+            <item>
+              <left_column><![CDATA[ZV]]></left_column>
+              <right_column><![CDATA[Zentrale Gasversorgung / Zentrale Versorgungsanlage für O<font size="8">2</font>, N<font size="8">2</font>O, Air und Vakuum]]></right_column>
+            </item>
+          </letter>
+        </list>
+      </subsite>
+      <!-- subsub point -->
+      <subsite id="B8100" type="symbol_list">
+        <label><![CDATA[Symbole]]></label>
+        <title><![CDATA[Symbolerklärung:]]></title>
+        <list>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/hersteller.png]]></left_column>
+            <right_column><![CDATA[Hersteller]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/herstelldatum.png]]></left_column>
+            <right_column><![CDATA[Herstelldatum]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Alarmunterdrueckung_Glocke_Taste.png]]></left_column>
+            <right_column><![CDATA[Alarmton für 2 Minuten unterdrücken, technische Alarme umpriorisieren bzw. quittieren]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Menue-Bildschirm_wechseln_Standardseite_Taste.png]]></left_column>
+            <right_column><![CDATA[Standardseite aufrufen]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Menue-Bildschirm_Zahlen_Taste.png]]></left_column>
+            <right_column><![CDATA[Bildschirmseiten hintereinander aufrufen]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Standby_Taste.png]]></left_column>
+            <right_column><![CDATA[Standby-Taste]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Nichtrueckatemsystem.png]]></left_column>
+            <right_column><![CDATA[Nicht-Rückatemsystem am externen Frischgasausgang]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Herz.png]]></left_column>
+            <right_column><![CDATA[Pulsfrequenz]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Symbol-Frischgasflow.png]]></left_column>
+            <right_column><![CDATA[Frischgasflow fließt]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Uhr.png]]></left_column>
+            <right_column><![CDATA[Aktion wird gerade durchgeführt]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Alarmgrenze_oben-unten.png]]></left_column>
+            <right_column><![CDATA[Untere und obere Alarmgrenzen]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Alarmgrenze_oben_ohne_Anl.png]]></left_column>
+            <right_column><![CDATA[Obere Alarmgrenze]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Alarmgrenze_unten_ohne_Anl.png]]></left_column>
+            <right_column><![CDATA[Untere Alarmgrenze]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Audio-PAUSED_IEC-60417-5319.png]]></left_column>
+            <right_column><![CDATA[Alarmton für 2 Minuten unterdrückt]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Alarm-OFF_IEC-60417-5319.png]]></left_column>
+            <right_column><![CDATA[Alarmüberwachung inaktiv]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Alarm-temp-OFF_IEC-60417-5319.png]]></left_column>
+            <right_column><![CDATA[Alarmüberwachung vorübergehend inaktiv]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/apnea_disabled_symbol.png]]></left_column>
+            <right_column><![CDATA[Apnoe-Alarm abgeschaltet]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Alarmgrenze_oben-unten_aus.png]]></left_column>
+            <right_column><![CDATA[Untere und obere Alarmgrenze abgeschaltet]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Alarmgrenze_oben_aus.png]]></left_column>
+            <right_column><![CDATA[Obere Alarmgrenze abgeschaltet]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Alarmgrenze_unten_aus.png]]></left_column>
+            <right_column><![CDATA[Untere Alarmgrenze abgeschaltet]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Alarmgrenze_aus.png]]></left_column>
+            <right_column><![CDATA[Alarmgrenze oder Messfunktion abgeschaltet]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Code_eingeben.png]]></left_column>
+            <right_column><![CDATA[Vierstelligen Zugangscode eingegeben]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Maennchen_Typ_B.png]]></left_column>
+            <right_column><![CDATA[Schutzklasse Typ B (body)]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Maennchen_Typ_BF.png]]></left_column>
+            <right_column><![CDATA[Schutzklasse Typ BF (body floating)]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/ESD_EMV_Symbol.png]]></left_column>
+            <right_column><![CDATA[ESD-Warnschild, Warnhinweis beachten, siehe "Informationen zur elektromagnetischen Verträglichkeit" auf Seite 10]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/interference.png]]></left_column>
+            <right_column><![CDATA[Störung]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Potentialausgleich.png]]></left_column>
+            <right_column><![CDATA[Anschluss für Potentialausgleichsleitung]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Achtung-Hinweis.png]]></left_column>
+            <right_column><![CDATA[Achtung! Begleitdokumentation beachten!!]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/sicherheitszeichen.png]]></left_column>
+            <right_column><![CDATA[Vorsicht! (Sicherheitszeichen)]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/gebrauchsanweisung_genau_be.png]]></left_column>
+            <right_column><![CDATA[Warnung! Gebrauchsanweisung genauestens beachten]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Ruecksprungpfeil.png]]></left_column>
+            <right_column><![CDATA[Menü verlassen, zurück ins vorherige Menü]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Batterie_mit_XX-Prozent.png]]></left_column>
+            <right_column><![CDATA[Verbleibende Batteriekapazität (unterbrechungsfreie Spannungsversorgung USV)]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Batterie-auf-Geraetefrontfolie.png]]></left_column>
+            <right_column><![CDATA[Batterieversorgung]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Strom.png]]></left_column>
+            <right_column><![CDATA[Netzspannung]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Beatmung_manuell.png]]></left_column>
+            <right_column><![CDATA[Manuelle Beatmung]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Beatmung_auto.png]]></left_column>
+            <right_column><![CDATA[Automatische Beatmung]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/ZV-Stecker.png]]></left_column>
+            <right_column><![CDATA[Anschluss zentrale Gasversorgung (ZV)]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Gasflasche.png]]></left_column>
+            <right_column><![CDATA[Reservegasflasche]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Drehknopf.png]]></left_column>
+            <right_column><![CDATA[Drehknopf]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/UL-US-Zeichen.png]]></left_column>
+            <right_column><![CDATA[UL-Prüfzeichen]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Stecksystem.png]]></left_column>
+            <right_column><![CDATA[Stecksystem für Vapore]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/Hauptschalter.png]]></left_column>
+            <right_column><![CDATA[Ein/Aus-Schalter]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/ableitstrom.png]]></left_column>
+            <right_column><![CDATA[Hinweisschild Ableitstrom]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/W27-DIN-4844-2.png]]></left_column>
+            <right_column><![CDATA[Quetschgefahr]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/sicherung.png]]></left_column>
+            <right_column><![CDATA[Sicherung]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/bestellnummer.png]]></left_column>
+            <right_column><![CDATA[Bestellnummer]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/seriennummer.png]]></left_column>
+            <right_column><![CDATA[Seriennummer]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/chargenbezeichnung.png]]></left_column>
+            <right_column><![CDATA[Chargenbezeichnung]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/sonneneinstrahlung.png]]></left_column>
+            <right_column><![CDATA[Vor Sonneneinstrahlung schützen!]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/temperaturbegrenzung.png]]></left_column>
+            <right_column><![CDATA[Temperaturbegrenzung]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/relative_feuchte.png]]></left_column>
+            <right_column><![CDATA[Relative Feuchte]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/atmospheric_pressure.png]]></left_column>
+            <right_column><![CDATA[Atmosphärischer Druck]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/verpackung_schaden.png]]></left_column>
+            <right_column><![CDATA[Bei beschädigter Verpackung nicht verwenden]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/not_reuse.png]]></left_column>
+            <right_column><![CDATA[Nicht zur Wiederverwendung]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/weee.png]]></left_column>
+            <right_column><![CDATA[WEEE-Kennzeichnung, EU-Richtlinie 2002/96/EG]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/verfallsdatum.png]]></left_column>
+            <right_column><![CDATA[Verfallsdatum]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/co2_absorber_bridge.png]]></left_column>
+            <right_column><![CDATA[Überbrückung CO<font size="8">2</font>-Absorber]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/o2_flush.png]]></left_column>
+            <right_column><![CDATA[O<font size="8">2</font>-Flush]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/sticker_lachgas.png]]></left_column>
+            <right_column><![CDATA[Aufkleber bei Geräten, die mit der Option "Betrieb ohne Lachgas" ausgstattet sind.]]></right_column>
+          </item>
+          <item>
+            <left_column><![CDATA[assets/global/img/B8100/kippgefahr.png]]></left_column>
+            <right_column><![CDATA[Markierung von Flächen am Gerät, bei denen beim Schieben, Anlehnen, Abstützen usw. die Kippgefahr erhöht ist.]]></right_column>
+          </item>
+        </list>
+      </subsite>
+    </site>
+    <site id="C1000">
+      <label><![CDATA[Geführte Simulation]]></label>
+      <!-- subpoint -->
+      <subsite id="C1100" type="fullscreen_simulation">
+        <label><![CDATA[Gerätetest/Selbsttest]]></label>
+        <backgroundImage><![CDATA[assets/global/img/backgrounds/B1100_bg.jpg]]></backgroundImage>
+        <title><![CDATA[Gerätetest/Selbsttest]]></title>
+        <copy><![CDATA[Bitte klicken Sie auf den Start-Knopf um die Anwendung zu starten.]]></copy>
+        <buttonStart><![CDATA[start]]></buttonStart>
+        <buttonClose><![CDATA[close]]></buttonClose>
+        <swf_path><![CDATA[assets/global/swf/simulation.swf]]></swf_path>
+        <xml_path><![CDATA[assets/de/xml/simulation.xml]]></xml_path>
+        <simulation_mode><![CDATA[2]]></simulation_mode>
+      </subsite>
+      <!-- subpoint -->
+      <subsite id="C1300" type="fullscreen_simulation">
+        <label><![CDATA[Manuelle Beatmung]]></label>
+        <backgroundImage><![CDATA[assets/global/img/backgrounds/B1100_bg.jpg]]></backgroundImage>
+        <title><![CDATA[Manuelle Beatmung]]></title>
+        <copy><![CDATA[Bitte klicken Sie auf den Start-Knopf um die Anwendung zu starten.]]></copy>
+        <buttonStart><![CDATA[start]]></buttonStart>
+        <buttonClose><![CDATA[close]]></buttonClose>
+        <swf_path><![CDATA[assets/global/swf/simulation.swf]]></swf_path>
+        <xml_path><![CDATA[assets/de/xml/simulation.xml]]></xml_path>
+        <simulation_mode><![CDATA[3]]></simulation_mode>
+      </subsite>
+      <!-- subpoint -->
+      <subsite id="C1400" type="fullscreen_simulation">
+        <label><![CDATA[Volumengesteuert]]></label>
+        <backgroundImage><![CDATA[assets/global/img/backgrounds/B1100_bg.jpg]]></backgroundImage>
+        <title><![CDATA[Volumengesteuert]]></title>
+        <copy><![CDATA[Bitte klicken Sie auf den Start-Knopf um die Anwendung zu starten.]]></copy>
+        <buttonStart><![CDATA[start]]></buttonStart>
+        <buttonClose><![CDATA[close]]></buttonClose>
+        <swf_path><![CDATA[assets/global/swf/simulation.swf]]></swf_path>
+        <xml_path><![CDATA[assets/de/xml/simulation.xml]]></xml_path>
+        <simulation_mode><![CDATA[4]]></simulation_mode>
+      </subsite>
+      <subsite id="C1500" type="fullscreen_simulation">
+        <label><![CDATA[Notfallinbetriebnahme]]></label>
+        <backgroundImage><![CDATA[assets/global/img/backgrounds/B1100_bg.jpg]]></backgroundImage>
+        <title><![CDATA[Notfallinbetriebnahme]]></title>
+        <copy><![CDATA[Bitte klicken Sie auf den Start-Knopf um die Anwendung zu starten.]]></copy>
+        <buttonStart><![CDATA[start]]></buttonStart>
+        <buttonClose><![CDATA[close]]></buttonClose>
+        <swf_path><![CDATA[assets/global/swf/simulation.swf]]></swf_path>
+        <xml_path><![CDATA[assets/de/xml/simulation.xml]]></xml_path>
+        <simulation_mode><![CDATA[5]]></simulation_mode>
+      </subsite>
+    </site>
+    <site id="D1000">
+      <label><![CDATA[Gasflussdiagramme]]></label>
+      <subsite id="D1100" type="simulation">
+        <showfooter><![CDATA[false]]></showfooter>
+        <label><![CDATA[Ventilations Simulation]]></label>
+        <backgroundImage><![CDATA[assets/global/img/backgrounds/bg_BSection.jpg]]></backgroundImage>
+        <swf_path><![CDATA[assets/global/swf/gaslauf.swf]]></swf_path>
+        <xml_path><![CDATA[assets/de/xml/gaslauf.xml]]></xml_path>
+        <simulation_mode><![CDATA[1]]></simulation_mode>
+      </subsite>
+      <!--subsite id="D1200" type="simulation">
+				<showfooter><![CDATA[false]]></showfooter>
+				<label><![CDATA[kontrollierte Beatmung]]></label>
+				<backgroundImage><![CDATA[assets/global/img/backgrounds/bg_BSection.jpg]]></backgroundImage>	
+				
+				<swf_path><![CDATA[assets/global/swf/gaslauf.swf]]></swf_path>
+				<xml_path><![CDATA[assets/de/xml/gaslauf.xml]]></xml_path>
+				<simulation_mode><![CDATA[2]]></simulation_mode>	
+			</subsite-->
+      <!--subsite id="D1300" type="simulation">
+				<showfooter><![CDATA[false]]></showfooter>
+				<label><![CDATA[Gerätetest/Leckagetest]]></label>
+				<backgroundImage><![CDATA[assets/global/img/backgrounds/bg_BSection.jpg]]></backgroundImage>					
+				
+				<swf_path><![CDATA[assets/global/swf/gaslauf.swf]]></swf_path>
+				<xml_path><![CDATA[assets/de/xml/gaslauf.xml]]></xml_path>
+				<simulation_mode><![CDATA[3]]></simulation_mode>
+			</subsite-->
+      <!--subsite id="D1400" type="simulation">
+				<showfooter><![CDATA[false]]></showfooter>
+				<label><![CDATA[Rückatemsystem]]></label>
+				<backgroundImage><![CDATA[assets/global/img/backgrounds/bg_BSection.jpg]]></backgroundImage>					
+				
+				<swf_path><![CDATA[assets/global/swf/gaslauf.swf]]></swf_path>
+				<xml_path><![CDATA[assets/de/xml/gaslauf.xml]]></xml_path>
+				<simulation_mode><![CDATA[4]]></simulation_mode>
+			</subsite-->
+    </site>
+    <site id="E1000">
+      <label><![CDATA[Simulation]]></label>
+      <!-- subpoint -->
+      <subsite id="E1100" type="article">
+        <label><![CDATA[Anwendung]]></label>
+        <backgroundImage><![CDATA[assets/global/img/backgrounds/B1100_bg.jpg]]></backgroundImage>
+        <title><![CDATA[Simulation]]></title>
+        <headline><![CDATA[Simulation]]></headline>
+        <image><![CDATA[]]></image>
+        <items>
+          <item type="text" style="articleCopy"><![CDATA[Das folgende Programm ist nur für den Gebrauch als zusätzliches Unterrichtsinstrument vorgesehen. Es ersetzt nicht die Einweisung nach MPG. Im Simulationsmodus gleichen die Balkendiagramme und die Messwerte den tatsächlichen Balkendiagrammen und Werten. Das Verändern dieser Einstellungen hat die gleichen Auswirkungen wie in realen Anwendungssituationen, so löst z.B. das Übertreten einer Alarmgrenze einen Alarm aus.
+
+Die Simulation, wie bei der tatsächlichen Bedienung, funktioniert nach dem "Touch-Turn-Confirm" Prinzip.
+- Tastenauswahl: mit der linken Maustaste auf eine Taste klicken
+- Einstellungen: den Drehknopf bei gedrückter linker Maustaste betätigen
+- Bestätigen: auf den Drehknopf drücken]]></item>
+        </items>
+      </subsite>
+      <!-- subpoint: change to simulation later -->
+      <subsite id="E200" type="fullscreen_simulation">
+        <label><![CDATA[Simulation]]></label>
+        <backgroundImage><![CDATA[]]></backgroundImage>
+        <title><![CDATA[Simulation]]></title>
+        <copy><![CDATA[Bitte klicken Sie auf den Start-Knopf um die Anwendung zu starten.
+Zum Beenden dieser Simulation klicken Sie bitte oben rechts auf "Close". Sie gelangen so zurück zum Hauptmenü.]]></copy>
+        <buttonStart><![CDATA[start]]></buttonStart>
+        <buttonClose><![CDATA[close]]></buttonClose>
+        <swf_path><![CDATA[assets/global/swf/simulation.swf]]></swf_path>
+        <xml_path><![CDATA[assets/de/xml/simulation.xml]]></xml_path>
+        <simulation_mode><![CDATA[1]]></simulation_mode>
+      </subsite>
+    </site>
+    <site id="F1000">
+      <label><![CDATA[Produktinformation]]></label>
+      <!-- subpoint -->
+      <subsite id="F1100" type="download">
+        <label><![CDATA[Primus]]></label>
+        <title><![CDATA[Finden Sie mehr Informationen zu Primus:]]></title>
+        <backgroundImage><![CDATA[assets/global/img/backgrounds/B1100_bg.jpg]]></backgroundImage>
+        <copy><![CDATA[]]></copy>
+        <links>
+          <link>
+            <title><![CDATA[Primus]]></title>
+            <url><![CDATA[http://www.draeger.com/Primus]]></url>
+          </link>
+        </links>
+      </subsite>
+    </site>
+  </main_sites>
+  <meta_sites>
+    <!-- home -->
+    <site id="A1100" type="home">
+      <label><![CDATA[Home]]></label>
+      <backgroundImage><![CDATA[assets/global/img/backgrounds/A1110_de.jpg]]></backgroundImage>
+      <headline><![CDATA[Primus Product Trainer]]></headline>
+      <subline><![CDATA[Ihr persönlicher Anästhesieassistent]]></subline>
+    </site>
+    <!-- contact -->
+    <site id="G1000" type="contact">
+      <label><![CDATA[Contact]]></label>
+      <backgroundImage><![CDATA[assets/global/img/backgrounds/bg_F1000.jpg]]></backgroundImage>
+      <headline><![CDATA[Kontakt]]></headline>
+      <copy><![CDATA[Für weitere Informationen zu diesem Product Trainer wenden Sie sich bitte an:
+
+Drägerwerk AG & Co. KGaA
+Moislinger Allee 53-55
+23558 Lübeck
+Germany
+Tel.: +49-451-882-0
+Fax: +49-451-882-2080
+
+Web: <a href="http://www.draeger.com" target="_blank">www.draeger.com</a> 
+E-Mail: <a href="mailto:info@draeger.com">info@draeger.com</a>]]></copy>
+    </site>
+  </meta_sites>
+  <site_layer>
+    <enter_fullscreen>
+      <copy><![CDATA[Für die Komplettansicht bitte Bildschirm vergrößern]]></copy>
+      <button_yes><![CDATA[Vollbild öffnen]]></button_yes>
+      <button_no><![CDATA[Nein]]></button_no>
+    </enter_fullscreen>
+    <exit_fullscreen>
+      <copy><![CDATA[Are you sure you want to quit?]]></copy>
+      <button_yes><![CDATA[Yes]]></button_yes>
+      <button_no><![CDATA[No]]></button_no>
+    </exit_fullscreen>
+  </site_layer>
+  <meta_navigation>
+    <button type="meta_site">
+      <label><![CDATA[Home]]></label>
+      <url><![CDATA[A1100]]></url>
+    </button>
+    <button type="link">
+			<label><![CDATA[Sprachauswahl]]></label>
+			<url><![CDATA[./start.html]]></url>
+	</button>
+    <button type="link">
+		<label><![CDATA[www.draeger.com]]></label>
+		<url><![CDATA[http://www.draeger.com]]></url>
+		<target><![CDATA[_blank]]></target>
+	</button>
+    <button type="meta_site">
+      <label><![CDATA[Kontakt]]></label>
+      <url><![CDATA[G1000]]></url>
+    </button>
+    <logo>
+      <image_path><![CDATA[assets/global/img/logo/draeger_logo.jpg]]></image_path>
+      <url><![CDATA[A1100]]></url>
+    </logo>
+    <fullscreen_toggle>
+      <enter_fullscreen><![CDATA[Enter Fullscreen]]></enter_fullscreen>
+      <exit_fullscreen><![CDATA[Exit Fullscreen]]></exit_fullscreen>
+    </fullscreen_toggle>
+  </meta_navigation>
+  <footer>
+    <version><![CDATA[Version 2.0]]></version>
+    <print><![CDATA[Drucken]]></print>
+    <disclaimer>
+      <label><![CDATA[Disclaimer]]></label>
+      <url><![CDATA[O1000]]></url>
+    </disclaimer>
+    <!--sound>
+			<sound_url><![CDATA[assets/global/sound/loop.mp3]]></sound_url>
+			<sound_on><![CDATA[Sound on]]></sound_on>
+			<sound_off><![CDATA[Sound off]]></sound_off>
+		</sound-->
+    <!-- disclaimer -->
+    <site id="O1000" type="disclaimer">
+      <label><![CDATA[Disclaimer]]></label>
+      <backgroundImage><![CDATA[assets/global/img/backgrounds/bg_D1100.jpg]]></backgroundImage>
+      <image><![CDATA[]]></image>
+      <headline><![CDATA[Disclaimer]]></headline>
+      <copy><![CDATA[® Copyright 2014 Drägerwerk AG & Co. KGaA
+
+Weder die CD-ROM noch jeglicher Teil des Programms darf ohne die schriftliche Genehmigung der Drägerwerk AG & Co. KGaA kopiert oder in irgendeiner Form reproduziert werden.
+
+Die Informationen in diesem Product Trainer werden "wie sie sind" und ohne jegliche Garantien oder Zusagen dargeboten, weder ausdrücklicher noch konkludenter Art. Der Zugang zu und die Verwendung dieses Programms geschieht zum Nutzen und auf die eigene Gefahr des Anwenders. Dieses Programm ist kein Ersatz für die Gebrauchsanweisung. Dieses Gerät darf nur gemäß der jeweiligen Gebrauchsanweisung verwendet werden. Die Gebrauchsanweisung ist vor der Verwendung des Geräts sorgfältig durchzulesen. Der Anwender muss sich gemäß nationalen und lokalen Vorschriften und Empfehlungen mit dem Gerät vertraut machen.
+Das erfolgreiche Absolvieren dieses Trainingsprogramms bedeutet nicht, dass der Teilnehmer volle Kenntnis über die Funktion des Geräts hat, da es der Verantwortung der Einrichtung obliegt, die technische Eignung des Anwenders zu bestimmen. Des Weiteren soll jeder Pfleger, der an diesem Trainingsprogramm teilnimmt, von seinem oder ihrem professionellen Urteilsvermögen und der Erfahrung Gebrauch machen. Während der Verwendung des Geräts sowie im Umgang mit den Patienten ist das gesamte Training und die Expertise (einschließlich des Lesens aller Geräte-Handbücher) anzuwenden.]]></copy>
+    </site>
+  </footer>
+</data>

@@ -184,7 +184,14 @@ void MechVentilation::deactivateRecruitment(void)
  */
 void MechVentilation::update(void)
 {
-
+  
+    _mlInsVol+=_flux*float((millis()-last_vent_time))*0.001;//flux in l and time in msec, results in ml          
+     #ifdef DEBUG_UPDATE
+      //Serial.print("volume:");Serial.print("Flux:");Serial.print("dt:");
+      Serial.print(_mlInsVol);Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.println((millis()-last_vent_time));
+    #endif
+    last_vent_time = millis();
+    
     static int totalCyclesInThisState = 0;
     static int currentTime = 0;
     static int flowSetpoint = 0;
@@ -333,13 +340,8 @@ void MechVentilation::update(void)
         else //Time has not expired (State Insufflation)
         {
             if (!wait_NoMove){
-
-              #ifdef DEBUG_UPDATE
-                Serial.print("volume:");Serial.println(_mlInsVol);Serial.print("Flux:");Serial.println(_flux);
-              #endif
               //_mlInsVol+=float(_flux*(TIME_BASE));//flux in l and time in msec, results in ml
-              //_mlInsVol+=float((_flux-_flux_0)*(millis()-last_vent_time));//flux in l and time in msec, results in ml 
-              _mlInsVol+=_flux*float((millis()-last_vent_time))*0.001;//flux in l and time in msec, results in ml                  
+              //_mlInsVol+=float((_flux-_flux_0)*(millis()-last_vent_time));//flux in l and time in msec, results in ml         
               //#endif
                 //flujo remanente   
                 float rem_flux;

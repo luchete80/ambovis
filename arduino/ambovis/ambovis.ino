@@ -404,7 +404,7 @@ void loop() {
     //Serial.print("Flujo: "); Serial.print(_flux);Serial.println(" ");
     
     #ifdef DEBUG_OFF
-    Serial.print(p_bmp);Serial.print(" ");Serial.print(p_honey);Serial.print(" ");Serial.print(p_dpt);Serial.print(" ");Serial.println(_flux);
+    Serial.print(p_bmp);Serial.print(" ");Serial.print(p_honey);Serial.print(" ");Serial.print(p_dpt);Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol);
     //sprintf(string, "DT %05d %05d %05d %06d", ((int)p_bmp), ((int)p_honey), 0 , ((int)_flux));
     //Serial.println(string);
     //free(string);
@@ -461,7 +461,6 @@ void loop() {
   //LUCIANO----------------------
   if ( millis () - last_vent_time > TIME_BASE ) {
     ventilation -> update();
-    last_vent_time = millis();
   }
 
   //HERE changed_options flag is not updating until cycle hcanges

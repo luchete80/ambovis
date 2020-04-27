@@ -20,19 +20,21 @@ ydata = []
 y2data = []
 y3data = []
 y4data = []
+y5data = []
 #yrange = [-0.1,5.1]
 yrange = [0.,500.]
 view_time = 4 # seconds of data to view at once
 duration = 24 # total seconds to collect data
 
 #fig1 = plt.figure()
-fig1,axs = plt.subplots(2)
+fig1,axs = plt.subplots(3)
 
 # http://matplotlib.org/users/text_props.html
 # fig1.suptitle('live updated data', fontsize='18', fontweight='bold')
 # plt.xlabel('time, seconds', fontsize='14', fontstyle='italic')
 axs[0].set(xlabel='time', ylabel='Pressure [CMH2O]')
 axs[1].set(xlabel='time', ylabel='Flux     [ml/s]')
+axs[2].set(xlabel='time', ylabel='Volume   [ml]')
 #plt.ylabel('Presion, CMH2O', fontsize='14', fontstyle='italic')
 #plt.axes().grid(True)
 # line1, = plt.plot(ydata,marker='o',markersize=4,linestyle='dotted',markerfacecolor='green') #ORIGINAL
@@ -43,6 +45,8 @@ line1, = axs[0].plot(ydata,marker='o',markersize=4,linestyle='dotted',markerface
 line2, = axs[0].plot(y2data,marker='o',markersize=4,linestyle='dotted',markerfacecolor='blue') #ORIGINAL
 line3, = axs[0].plot(y3data,marker='o',markersize=4,linestyle='dotted',markerfacecolor='red') #ORIGINAL
 line4, = axs[1].plot(y4data,marker='o',markersize=4,linestyle='dotted',markerfacecolor='red') #ORIGINAL
+line5, = axs[2].plot(y4data,marker='o',markersize=4,linestyle='dotted',markerfacecolor='red') #ORIGINAL
+
 
 #subplot limits 
 # plt.ylim([-500,500]) #ORIGINAL
@@ -54,8 +58,12 @@ axs.flat[0].set_ylim(0,40)
 axs.flat[1].set_xlim(0,view_time)
 axs.flat[1].set_ylim(0,1000)
 
+axs.flat[2].set_xlim(0,view_time)
+axs.flat[2].set_ylim(0,800)
+
 axs.flat[0].legend([line1, line2, line3],["BMP280", "A0", "Honeywell (A1)"])
-axs.flat[1].legend([line4],["Flux"])
+axs.flat[1].legend([line4],["Flux [ml/s]"])
+axs.flat[2].legend([line5],["Volume [ml]"])
 
 
 #for (m), subplot in numpy.ndenumerate(axs):
@@ -82,6 +90,7 @@ while run:
         y2data.append(float(data[1]))
         y3data.append(float(data[2]))
         y4data.append(float(data[3]))
+        y5data.append(float(data[4]))
         
         timepoints.append(time()-start_time)
         current_time = timepoints[-1]
@@ -98,12 +107,16 @@ while run:
 
         line4.set_xdata(timepoints)
         line4.set_ydata(y4data)
+		
+        line5.set_xdata(timepoints)
+        line5.set_ydata(y5data)        
         
-        # slide the viewing frame along
+		# slide the viewing frame along
         if current_time > view_time:
             #plt.xlim([current_time-view_time,current_time])
             axs.flat[0].set_xlim(current_time-view_time,current_time)
             axs.flat[1].set_xlim(current_time-view_time,current_time)
+            axs.flat[2].set_xlim(current_time-view_time,current_time)
             
         # when time's up, kill the collect+plot loop
         #if timepoints[-1] > duration: run=False
