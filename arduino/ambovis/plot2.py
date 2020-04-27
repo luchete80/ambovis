@@ -9,7 +9,7 @@ from time import time
 # If you're not using Linux, you'll need to change this
 # check the Arduino IDE to see what serial port it's attached to
 #ser = serial.Serial('/dev/ttyACM0', 115200)
-ser = serial.Serial('com4', 115200)
+ser = serial.Serial('com5', 115200)
 
 # set plot to animated
 plt.ion() 
@@ -49,7 +49,7 @@ line4, = axs[1].plot(y4data,marker='o',markersize=4,linestyle='dotted',markerfac
 # plt.xlim([0,view_time]) #ORIGINAL
 
 axs.flat[0].set_xlim(0,view_time)
-axs.flat[0].set_ylim(0,60)
+axs.flat[0].set_ylim(0,40)
 
 axs.flat[1].set_xlim(0,view_time)
 axs.flat[1].set_ylim(0,1000)

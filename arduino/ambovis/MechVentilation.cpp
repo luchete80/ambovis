@@ -335,7 +335,7 @@ void MechVentilation::update(void)
             if (!wait_NoMove){
 
               #ifdef DEBUG_UPDATE
-                Serial.print("volume:");Serial.println(_mlInsVol);
+                Serial.print("volume:");Serial.println(_mlInsVol);Serial.print("Flux:");Serial.println(_flux);
               #endif
               //_mlInsVol+=float(_flux*(TIME_BASE));//flux in l and time in msec, results in ml
               //_mlInsVol+=float((_flux-_flux_0)*(millis()-last_vent_time));//flux in l and time in msec, results in ml 
