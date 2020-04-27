@@ -6,15 +6,17 @@
 int count;
 bool led_on;
 
+#define UART_TX_FIFO_SIZE 0x80
+
 void setup() {
   // put your setup code here, to run once:
 
   pinMode(LED_BUILTIN, OUTPUT);     // Initialize the LED_BUILTIN pin as an output
 
-Serial.detectBaudrate();
-  Serial.begin(115200);
 
-   Serial.detectBaudrate();// may also be called before Serial.begin()
+//  Serial.begin(115200);
+
+
   // There must be activity on the serial port for the baudrate to be detected
 
 //  unsigned long detectedBaudrate = Serial.detectBaudrate(TIMEOUT);
@@ -22,13 +24,15 @@ Serial.detectBaudrate();
 //  if (detectedBaudrate) {
 //    Serial.printf("\nDetected baudrate is %lu, switching to that baudrate now...\n", detectedBaudrate);
 //
-//    // Wait for printf to finish
+    // Wait for printf to finish
 //    while (Serial.availableForWrite() != UART_TX_FIFO_SIZE) {
 //      yield();
 //    }
 //
 //    // Clear Tx buffer to avoid extra characters being printed
 //    Serial.flush();
+  Serial.begin(115200);
+//    Serial.begin();
 //
 //    // After this, any writing to Serial will print gibberish on the serial monitor if the baudrate doesn't match
 //    Serial.begin(detectedBaudrate);

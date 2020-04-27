@@ -280,8 +280,8 @@ void MechVentilation::update(void)
         }
 
         if (vent_mode==VENTMODE_PCL){
-            max_accel=(_pip-20)/20.*(5000-500)+500;
-            max_speed=(_pip-20)/20.*(5000-500)+500;
+            max_accel=(_pip-20)/20.*(5000-2000)+2000;
+            max_speed=(_pip-20)/20.*(5000-2000)+2000;
             _stepper->setAccelerationInStepsPerSecondPerSecond(max_accel);          
         }
         
