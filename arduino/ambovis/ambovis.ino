@@ -563,6 +563,10 @@ void check_encoder()
       update_options = true;
     }
     lastButtonPress = millis();
+
+    #ifdef DEBUG_UPDATE
+      Serial.print("Modo: ");Serial.println(vent_mode);
+    #endif
   }
 
 

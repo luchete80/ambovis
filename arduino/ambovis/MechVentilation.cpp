@@ -187,10 +187,6 @@ void MechVentilation::update(void)
 {
   
     _mlInsVol+=_flux*float((millis()-last_vent_time))*0.001;//flux in l and time in msec, results in ml          
-     #ifdef DEBUG_UPDATE
-      //Serial.print("volume:");Serial.print("Flux:");Serial.print("dt:");
-      Serial.print(_mlInsVol);Serial.print(" ");Serial.print("last ins vol");Serial.println(_mllastInsVol);
-    #endif
     last_vent_time = millis();
     
     static int totalCyclesInThisState = 0;
@@ -303,9 +299,7 @@ void MechVentilation::update(void)
     {
 
         /* Stepper control: set end position */
-        //Serial.print ("_tidalVol");Serial.println(_tidalVol);
         if (vent_mode==VENTMODE_VCL && _mlInsVol>_tidalVol){
-            //Serial.print("VOLUMEN ALCANZADO");
             _stepper->setTargetPositionToStop();
             //_setState(Init_Exsufflation); NOT BEGIN TO INSUFFLATE!
             wait_NoMove=true;
@@ -397,7 +391,6 @@ void MechVentilation::update(void)
     break;
     case Init_Exsufflation:
     {
-        Serial.println("EXSUF ");    
       _msecTimerStartCycle=millis();
       //Serial.print("Current pressure");Serial.println(_currentPressure);
       
@@ -482,7 +475,6 @@ void MechVentilation::update(void)
 				////////////////////////////////*** ORIGINAL
 
         //////////////////// NEW //////////////////////////
-  			//if (_stepper->motionComplete()&& _stepper->getCurrentPositionInSteps()==STEPPER_LOWEST_POSITION) {
         if (_stepper->getCurrentPositionInSteps()==STEPPER_LOWEST_POSITION) {
   				  _setState(Init_Insufflation);
   				  //_startWasTriggeredByPatient = false;
