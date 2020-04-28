@@ -207,7 +207,7 @@ extern byte stepper_time;
 extern unsigned long last_vent_time;
 extern float _mlInsVol,_mllastInsVol;
 //extern float _stepperSpeed;
-extern byte pressure_sec,psec_max;
+extern float pressure_sec,psec_max,last_psec_max;
 
 extern float _currentPressure;
 

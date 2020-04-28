@@ -44,7 +44,7 @@ FlexyStepper * stepper = new FlexyStepper();
 // - EXTERNAL VARIABLES //
 //////////////////////////
 float pressure_p;   //EXTERN!!
-byte pressure_sec,psec_max;
+float pressure_sec,psec_max,last_psec_max;
 float last_pressure_max,last_pressure_min;
 
 byte vent_mode = VENTMODE_MAN; //0
@@ -407,28 +407,9 @@ void loop() {
     
     #ifdef DEBUG_OFF
     Serial.print(p_bmp);Serial.print(" ");Serial.print(p_honey);Serial.print(" ");Serial.print(p_dpt);Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol);
-    //sprintf(string, "DT %05d %05d %05d %06d", ((int)p_bmp), ((int)p_honey), 0 , ((int)_flux));
-    //Serial.println(string);
-    //free(string);
-    //    //Serial.println("Insuflated: "+String(ventilation->getInsVol()));
-    //
-    //    //        Serial2.println(string);
-    //    //Serial.println(string);
-    //    //free(string);
-
-    ////////////////////////////// MOTOR RUNNING MAKING NOISE //////////////////////////////
     #endif
 
-    //    if (pressure.state == SensorStateFailed) {
-    //      //TODO sensor fail. do something
-    //      //Serial.println(F("FALLO Sensor"));
-    //      // TODO: BUZZ ALARMS LIKE HELL
-    //    }
     lastReadSensor = millis();
-
-    /*
-       Notify insufflated volume
-    */
 
       //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
       if (pressure_p>pressure_max) {
@@ -655,7 +636,7 @@ void display_lcd ( ) {
   #ifdef DEBUG_UPDATE
     Serial.print("Presion mostrada: ");Serial.println(pressure_max);
   #endif
-  dtostrf(last_pressure_max, 2, 0, tempstr);
+  dtostrf(last_pressure_max, 2, 1, tempstr);
   writeLine(2, String(tempstr), 16);  
   
   #ifdef DEBUG_UPDATE
@@ -664,12 +645,12 @@ void display_lcd ( ) {
   #endif
     
   writeLine(3, "PEEP:" + String(options.peakEspiratoryPressure), 8);
-  dtostrf(last_pressure_min, 2, 0, tempstr);
+  dtostrf(last_pressure_min, 2, 1, tempstr);
   writeLine(3, String(tempstr), 16);  
   
   writeLine(3, "PS: ", 1);
   
-  dtostrf(psec_max, 2, 0, tempstr);
+  dtostrf(last_psec_max, 2, 1, tempstr);
   writeLine(3, String(tempstr), 4);  
 
 

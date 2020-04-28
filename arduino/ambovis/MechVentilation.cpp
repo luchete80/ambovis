@@ -229,6 +229,7 @@ void MechVentilation::update(void)
 
       last_pressure_max=pressure_max;
       last_pressure_min=pressure_min;
+      last_psec_max=psec_max;
       pressure_max=0;
       psec_max=0;
       pressure_min=60;
