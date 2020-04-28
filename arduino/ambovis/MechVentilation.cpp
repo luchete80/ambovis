@@ -272,8 +272,10 @@ void MechVentilation::update(void)
         }
 
         if (vent_mode==VENTMODE_PCL){
-            max_accel=(_pip-20)/20.*(5000-2000)+2000;
-            max_speed=(_pip-20)/20.*(5000-2000)+2000;
+            //max_accel=(_pip-20)/20.*(5000-2000)+2000;
+            //max_speed=(_pip-20)/20.*(5000-2000)+2000;
+            max_accel=4000;
+            max_speed=4000;
             _stepper->setAccelerationInStepsPerSecondPerSecond(max_accel);          
         }
         
@@ -346,10 +348,6 @@ void MechVentilation::update(void)
                #ifdef DEBUG_UPDATE
                 Serial.print("Speed: "); Serial.println(int(_stepperSpeed));                      
                #endif
-               
-                
-//               Serial.print("Speed");Serial.println(_stepperSpeed);
-                
 
               if (vent_mode !=VENTMODE_MAN){  //only if auto
                 // TODO: if _currentPressure > _pip + 5, trigger alarm

@@ -6,7 +6,7 @@
 
 //Connections and Debug Defs
 //#define ACCEL_STEPPER 1
-//#define DEBUG_UPDATE 1 // 
+#define DEBUG_UPDATE 1 // 
 #define DEBUG_OFF 1 //Release version
 #define P_HONEYWELL 1
 #define RANGE_DPT 100.0F
@@ -89,9 +89,9 @@
 // PID settings and gains
 #define PID_MIN -20000 // TODO: check direction implementation
 #define PID_MAX 20000
-#define PID_KP 0.01
-#define PID_KI 0.01
-#define PID_KD 0.01
+#define PID_KP 300.01
+#define PID_KI 100.01
+#define PID_KD 200.01
 #define PID_TS TIME_BASE
 #define PID_BANGBANG 8
 

@@ -46,7 +46,7 @@ float pressure_p;   //EXTERN!!
 float pressure_sec,psec_max,last_psec_max;
 float last_pressure_max,last_pressure_min;
 
-byte vent_mode = VENTMODE_MAN; //0
+byte vent_mode = VENTMODE_PCL; //0
 //Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
 float pressure_p0;
@@ -58,7 +58,7 @@ char tempstr[5],tempstr2[5];
 unsigned long lastButtonPress;
 int curr_sel, old_curr_sel;
 float _currentPressure = 0.0;
-float p_honey,p_bmp,p_dpt;
+float p_dpt;
 
 unsigned long lastReadSensor = 0;
 
@@ -185,7 +185,8 @@ void setup() {
   // TODO: Añadir aquí la configuarcion inicial desde puerto serie
   options.respiratoryRate = DEFAULT_RPM;
   options.percInspEsp=3;//1:1 to 1:4, is denom
-  options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
+  //options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
+  options.peakInspiratoryPressure = 10.;
   options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
   options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
   options.hasTrigger = false;
@@ -262,75 +263,35 @@ void setup() {
 //
 byte last_cycle = 0;
 bool update_display = false;
-float ptest;
 char string[100];
 void loop() {
 
   check_encoder();
 
   time = millis();
-  //  unsigned long static lastSendConfiguration = 0;
-  //
-  //  if (time > lastSendConfiguration + TIME_SEND_CONFIGURATION)
-  //  {
-  //    Serial.print(F("CONFIG "));
-  //    Serial.print(ventilation -> getPeakInspiratoryPressure());
-  //    Serial.print(F(" "));
-  //    Serial.print(ventilation -> getPeakEspiratoryPressure());
-  //    Serial.print(F(" "));
-  //    Serial.println(ventilation -> getRPM());
-  //    lastSendConfiguration = time;
-  //  }
-  //
-  if (time > lastReadSensor + TIME_SENSOR)
-  {
-    //    //Is not anymore in classes
-    //Serial.print("PRessure");Serial.println(pressure_p);
 
-    ////////////////////////////// MOTOR RUNNING MAKING NOISE //////////////////////////////
-    //    sensors -> readPressure();
-    //    SensorPressureValues_t pressure = sensors -> getRelativePressureInCmH20();
-    //
-    // A0: PRESSURE (HOEYWELL)
-    //A1: Volume (DPT)
-    //A2: Test Mode pressure (DPT)
-    //ptest   =float(analogRead(A2))*25.49/1024.; //From DPT, AS MAX RANGE, for testing
-    p_dpt    =RANGE_DPT*float(analogRead(A1))*DEFAULT_PA_TO_CM_H20/1024.; //From DPT, AS MAX RANGE (100 Pa or more) //PA TO CMH2O
-    
-    #ifdef DEBUG_UPDATE
-      //Serial.print("Honey Volt at p0: ");Serial.println(analogRead(A0)/1023.);
-    #endif
-    //0.42 is level (0 to 1) of zero dp
-    //0.1 is a correction
-    //p_honey = (( float ( analogRead(A0) )/1023.- 0.51) * 5.0/V_SUPPLY_HONEY  - 0.1)/0.8*DEFAULT_PSI_TO_CM_H20*2.; //Data sheet figure 2 analog pressure, calibration from 10% to 90%
-    p_honey = (( float ( analogRead(A0) )/1023.) * 5.0/V_SUPPLY_HONEY  - 0.1 + (V_HONEY_P0-0.5))/0.8*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20; //Data sheet figure 2 analog pressure, calibration from 10% to 90%
-//    p_bmp = _pres1Sensor.readPressure() * DEFAULT_PA_TO_CM_H20 - pressure_p0;
-    
-      pressure_p = p_honey;
+  if (time > lastReadSensor + TIME_SENSOR){
+
+    //A0: PRESSURE (HOEYWELL) A1: Volume (DPT) A2: Test Mode pressure (DPT)
+    p_dpt    =RANGE_DPT*float(analogRead(A1))*DEFAULT_PA_TO_CM_H20/1024.; //From DPT, AS MAX RANGE (100 Pa or more) //PA TO CMH2O    
+    pressure_p = (( float ( analogRead(A0) )/1023.) * 5.0/V_SUPPLY_HONEY  - 0.1 + (V_HONEY_P0-0.5))/0.8*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20; //Data sheet figure 2 analog pressure, calibration from 10% to 90%
  
     if (p_dpt > 0){
       _flux=16.667*(float)po_flux_pos[findClosest2(dp_pos,38,p_dpt)];
     }else{
       //_flux=-16.667*(float)po_flux_neg[findClosest2(dp_neg,38,p_dpt)];
       _flux=0.;
-    }
-    //Serial.print("Flujo: "); Serial.print(_flux);Serial.println(" ");
-    
+    }    
     #ifdef DEBUG_OFF
-    Serial.print(p_bmp);Serial.print(" ");Serial.print(p_honey);Serial.print(" ");Serial.print(p_dpt);Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol);
+//    Serial.print(pressure_p);Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol);
+    Serial.print(pressure_p);Serial.print(" ");Serial.print("0.0");Serial.print(" ");Serial.println("0.0");
     #endif
 
     lastReadSensor = millis();
 
       //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
       if (pressure_p>pressure_max) {
-          #ifdef DEBUG_UPDATE
-            Serial.print("Presion maxima alcanzada: ");Serial.println(pressure_p);
-          #endif
             pressure_max=pressure_p;
-      }
-      if (pressure_sec>psec_max) {
-            psec_max=pressure_sec;
       }
       if (pressure_p < pressure_min){
           pressure_min=pressure_p;
@@ -355,20 +316,7 @@ void loop() {
           update_options = false;
         }
       }
-      
-  //  //    if (Serial2.available()) {
-  //  //        readIncomingMsg();
-  //  //    }
-#if DEBUG_STATE_MACHINE
-  if (debugMsgCounter) {
-    for (byte i = 0; i < debugMsgCounter; i++) {
-      Serial.println(debugMsg[i]);
-    }
-    debugMsgCounter = 0;
-  }
-#endif
-//
-  //LUCIANO----------------------
+
   if ( millis () - last_vent_time > TIME_BASE ) {
     ventilation -> update();
   }
@@ -379,9 +327,8 @@ void loop() {
       last_update_display = millis();
       show_changed_options=false;
     }
-  
-
-}
+ 
+}//LOOP
 
 void timer1Isr(void)
 {
@@ -442,7 +389,7 @@ void check_encoder()
         break;
         case 5: 
           encoderPos=oldEncPos=options.peakInspiratoryPressure;
-          min_sel=20;max_sel=40;
+          min_sel=10;max_sel=40;
         break;
         case 6: 
           encoderPos=oldEncPos=options.peakEspiratoryPressure;
