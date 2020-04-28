@@ -1,76 +1,30 @@
-#define TIMEOUT (10000UL)     // Maximum time to wait for serial activity to start
-
 #define DT 50 // Loop sleep time (ms)
 #define CYCLE 60
 
 int count;
-bool led_on;
-
-#define UART_TX_FIFO_SIZE 0x80
 
 void setup() {
-  // put your setup code here, to run once:
-
-  pinMode(LED_BUILTIN, OUTPUT);     // Initialize the LED_BUILTIN pin as an output
-
-
-//  Serial.begin(115200);
-
-
-  // There must be activity on the serial port for the baudrate to be detected
-
-//  unsigned long detectedBaudrate = Serial.detectBaudrate(TIMEOUT);
-
-//  if (detectedBaudrate) {
-//    Serial.printf("\nDetected baudrate is %lu, switching to that baudrate now...\n", detectedBaudrate);
-//
-    // Wait for printf to finish
-//    while (Serial.availableForWrite() != UART_TX_FIFO_SIZE) {
-//      yield();
-//    }
-//
-//    // Clear Tx buffer to avoid extra characters being printed
-//    Serial.flush();
   Serial.begin(115200);
-//    Serial.begin();
-//
-//    // After this, any writing to Serial will print gibberish on the serial monitor if the baudrate doesn't match
-//    Serial.begin(detectedBaudrate);
-//  } else {
-//    Serial.println("\nNothing detected");
-//  }
-//
-//  led_on = false;
-//  count = 0;
-//  digitalWrite(LED_BUILTIN, HIGH); // Active is low in the ESP
+  count = 0;
 }
 
 void loop() {
 
   count++;
-  int pressure1 = (int)(sin(2.0 * 3.1416 * ((float)(count) / ((float) CYCLE) )) * 30+2);
-  int pressure2 = 0;
-  int volume = 0;
-  int flow = (int)(cos(2.0 * 3.1416 * ((float)(count) / ((float) CYCLE) )) * 20000 + 50000);
+  float p_bmp = fabs(sin(2.0 * 3.1416 * ((float)(count) / ((float) CYCLE) ))) * 20+2;
+  float p_honey = p_bmp + 5;
+  float p_dpt = fabs(sin(2.0 * 3.1416 * ((float)(count) / ((float) CYCLE) ))) * 30+2;
+  float flux = fabs(cos(2.0 * 3.1416 * ((float)(count) / ((float) CYCLE) ))) * 1000;
+  float vol = fabs(cos(2.0 * 3.1416 * ((float)(count) / ((float) CYCLE) ))) * 700;
   if (count == CYCLE)
-  {
     count = 0;
-    if (led_on) {
-      digitalWrite(LED_BUILTIN, HIGH);
-      led_on = false;
-    }
-    else {
-      digitalWrite(LED_BUILTIN, LOW);
-      led_on = true; 
-    }
 
-  }
+  Serial.print(p_bmp);Serial.print(" "); //presure CMH2O 0 - 40
+  Serial.print(p_honey);Serial.print(" ");
+  Serial.print(p_dpt);Serial.print(" ");
+  Serial.print(flux);Serial.print(" "); // Flux ml/s 0 - 1000
+  Serial.println(vol); // Volume ml 0 - 700
   
-  char string[100];
-  sprintf(string, "DT %05d %05d %05d %06d", pressure1, pressure2, volume, flow);
-  //sprintf(string, "%05d %05d", pressure1, pressure2);
-  Serial.println(string);
-  
-  delay(DT);                      // Wait for two seconds (to demonstrate the active low LED)
+  delay(DT); // Wait for two seconds
 
 }
