@@ -24,15 +24,12 @@ MechVentilation::MechVentilation(
       #else
         FlexyStepper *stepper,
       #endif
-    
-    Sensors *sensors,
     AutoPID *pid,
     VentilationOptions_t options)
 {
 
     _init(
         stepper,
-        sensors,
         pid,
         options);
 }
@@ -199,19 +196,18 @@ void MechVentilation::update(void)
 #endif
 
   _msecTimerCnt=(unsigned long)(millis()-_msecTimerStartCycle);
-    SensorPressureValues_t pressures = _sensors->getRelativePressureInCmH20();
 
-    if (pressures.state != SensorStateOK)
-    {                                  // Sensor error detected: return to zero position and continue from there
-        _sensor_error_detected = true; //An error was detected in sensors
-        /* Status update, for this time */
-        // TODO: SAVE PREVIOUS CYCLE IN MEMORY AND RERUN IT
-        Serial.println("fail sensor");
-        _setState(State_Exsufflation);
-    }
-    else {
-        _sensor_error_detected = false; //clear flag
-    }
+//    if (pressures.state != SensorStateOK)
+//    {                                  // Sensor error detected: return to zero position and continue from there
+//        _sensor_error_detected = true; //An error was detected in sensors
+//        /* Status update, for this time */
+//        // TODO: SAVE PREVIOUS CYCLE IN MEMORY AND RERUN IT
+//        Serial.println("fail sensor");
+//        _setState(State_Exsufflation);
+//    }
+//    else {
+//        _sensor_error_detected = false; //clear flag
+//    }
 
     // Check pressures
     evaluatePressure();
@@ -240,9 +236,6 @@ void MechVentilation::update(void)
 #endif
         // Close Solenoid Valve
         digitalWrite(PIN_SOLENOID, SOLENOID_CLOSED);
-
-        // Reset volume
-        _sensors->resetVolumeIntegrator();
 
         totalCyclesInThisState = (_timeoutIns) / TIME_BASE;
 
@@ -402,10 +395,6 @@ void MechVentilation::update(void)
         digitalWrite(PIN_SOLENOID, SOLENOID_OPEN);
 
         totalCyclesInThisState = _timeoutEsp / TIME_BASE;
-        //Serial.println("Ciclos exsuff"+String(totalCyclesInThisState));
-        _sensors->saveVolume();
-        _sensors->resetVolumeIntegrator();
-
 
 #if DEBUG_STATE_MACHINE
         debugMsg[debugMsgCounter++] = "ExsuflationTime=" + String(totalCyclesInThisState);
@@ -564,13 +553,11 @@ void MechVentilation::update(void)
 
 void MechVentilation::_init(
     FlexyStepper *stepper,
-    Sensors *sensors,
     AutoPID *pid,
     VentilationOptions_t options)
 {
     /* Set configuration parameters */
     _stepper = stepper;
-    _sensors = sensors;
     _pid = pid;
     _rpm = options.respiratoryRate;
     _pip = options.peakInspiratoryPressure;

@@ -1,7 +1,6 @@
 #include "defaults.h"
 #include "pinout.h"
 #include "calc.h"
-#include "Sensors.h"
 #include "MechVentilation.h"
 #include "src/TimerOne/TimerOne.h"
 #include "src/TimerTwo/TimerTwo.h"
@@ -48,7 +47,7 @@ float pressure_sec,psec_max,last_psec_max;
 float last_pressure_max,last_pressure_min;
 
 byte vent_mode = VENTMODE_MAN; //0
-Adafruit_BMP280 _pres1Sensor;
+//Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
 float pressure_p0;
 float _flux,_flux_0;
@@ -125,67 +124,16 @@ void PinB() {
   sei(); //restart interrupts
 }
 
-Sensors * sensors;
 AutoPID * pid;
 MechVentilation * ventilation;
 
 VentilationOptions_t options;
-
-/**
-   Read commands
-*/
-
-
-void readIncomingMsg (void) {
-  char* msg = (char*)malloc(100);
-  //Serial2.readStringUntil('\n').toCharArray(msg, 100);
-  int pip, peep, fr;
-  if (String(msg).substring(0, 6) == "CONFIG") {
-    int rc = sscanf(msg, "CONFIG PIP %d", &pip);
-    if (rc == 1) {
-      ventilation->setPeakInspiratoryPressure(pip);
-    } else {
-      int rc = sscanf(msg, "CONFIG PEEP %d", &peep);
-      if (rc == 1) {
-        ventilation->setPeakEspiratoryPressure(peep);
-      } else {
-        int rc = sscanf(msg, "CONFIG BPM %d", &fr);
-        if (rc == 1) {
-          ventilation->setRPM(fr);
-        }
-      }
-    }
-  }
-  else if (String(msg).substring(0, 7) == "RECRUIT")
-  {
-    uint8_t tmp = 255;
-    int rc = sscanf(msg, "RECRUIT %d", &tmp);
-    switch (tmp)
-    {
-      case 0:
-        Serial.println("ACK 0");
-        ventilation->deactivateRecruitment();
-        break;
-      case 1:
-        Serial.println("ACK 1");
-        ventilation->activateRecruitment();
-        break;
-      default:
-        break;
-    }
-  }
-  free(msg);
-}
 
 #ifdef LCD_I2C
 LiquidCrystal_I2C lcd(0x3F, 20, 4);
 #else
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
 #endif
-
-/**
-   Setup
-*/
 
 void writeLine(int line, String message = "", int offsetLeft = 0) {
   lcd.setCursor(0, line);
@@ -206,14 +154,7 @@ void lcd_selxy(int x, int y) {
 }
 
 void setup() {
-
-//  float a=dp[0];
-  // Puertos serie
   Serial.begin(115200);
-  //Serial2.begin(115200);
-  //Serial.println(F("Setup"));
-
-//  flux_neg[0]=1.;
 
 #ifdef LCD_I2C
   lcd.begin();  //I2C
@@ -223,36 +164,11 @@ void setup() {
   //lcd.backlight();
   lcd.clear();
   lcd.setCursor(0, 0);
-  //---------------------
-  //
-  //  // Zumbador
+
   pinMode(PIN_BUZZ, OUTPUT);
   digitalWrite(PIN_BUZZ, HIGH); // test zumbador
   delay(100);
   digitalWrite(PIN_BUZZ, LOW);
-  //
-  //  // FC efecto hall
-  //  pinMode(PIN_ENDSTOP, INPUT_PULLUP); // el sensor de efecto hall da un 1 cuando detecta
-  //
-  //  // Solenoid
-  //  pinMode(PIN_SOLENOID, OUTPUT);
-
-  // Sensores de presión
-  sensors = new Sensors();
-
-  int check = sensors -> begin();
-  if (check) {
-    if (check == 1) {
-      writeLine("Sensor BMP ERROR");
-      writeLine("Error BMP280");
-      Serial.println(F("Could not find sensor BME280 number 1, check wiring!"));
-    } }
-//    else if (check == 2) {
-//      Serial.println(F("Could not find sensor BME280 number 2, check wiring!"));
-//    }
-//    delay(500);
-//    sensors -> begin();
-//  }
 
   // PID
   pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
@@ -278,7 +194,6 @@ void setup() {
 
   ventilation = new MechVentilation(
     stepper,
-    sensors,
     pid,
     options
   );
@@ -300,7 +215,7 @@ void setup() {
   ventilation -> start();
   ventilation -> update();
 
-  sensors -> readPressure();
+  //sensors -> readPressure();
 
   display_lcd();
 
@@ -320,7 +235,8 @@ void setup() {
   last_update_display = millis();
 
   //MAKE AN IF IF_2_PRESS_SENSORS
-  pressure_p0 = _pres1Sensor.readPressure() * DEFAULT_PA_TO_CM_H20;
+  //_pres1Sensor.begin();
+  //pressure_p0 = _pres1Sensor.readPressure() * DEFAULT_PA_TO_CM_H20;
   //pressure_p0 = 103100.0* DEFAULT_PA_TO_CM_H20;
   #ifdef DEBUG_UPDATE
     Serial.print("Pressure_p0");Serial.print(pressure_p0);
@@ -388,14 +304,9 @@ void loop() {
     //0.1 is a correction
     //p_honey = (( float ( analogRead(A0) )/1023.- 0.51) * 5.0/V_SUPPLY_HONEY  - 0.1)/0.8*DEFAULT_PSI_TO_CM_H20*2.; //Data sheet figure 2 analog pressure, calibration from 10% to 90%
     p_honey = (( float ( analogRead(A0) )/1023.) * 5.0/V_SUPPLY_HONEY  - 0.1 + (V_HONEY_P0-0.5))/0.8*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20; //Data sheet figure 2 analog pressure, calibration from 10% to 90%
-    p_bmp = _pres1Sensor.readPressure() * DEFAULT_PA_TO_CM_H20 - pressure_p0;
+//    p_bmp = _pres1Sensor.readPressure() * DEFAULT_PA_TO_CM_H20 - pressure_p0;
     
-    #ifdef P_HONEYWELL
       pressure_p = p_honey;
-      pressure_sec=byte(p_bmp);
-    #else
-      pressure_p = p_bmp;
-    #endif
  
     if (p_dpt > 0){
       _flux=16.667*(float)po_flux_pos[findClosest2(dp_pos,38,p_dpt)];

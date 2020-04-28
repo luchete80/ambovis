@@ -13,8 +13,8 @@
 #include "pinout.h"
 #include "defaults.h"
 #include "calc.h"
-#include "Sensors.h"
 #include "src/AutoPID/AutoPID.h"
+#include "Sensors.h"
 
 #ifdef ACCEL_STEPPER
 #include "src/AccelStepper/AccelStepper.h"
@@ -65,7 +65,6 @@ public:
       #else
         FlexyStepper *_stepper,
       #endif
-        Sensors *sensors,
         AutoPID *pid,
         VentilationOptions_t options);
 
@@ -126,7 +125,6 @@ private:
         #else
         FlexyStepper *_stepper,
         #endif
-        Sensors *sensors,
         AutoPID *pid,
         VentilationOptions_t options);
 #if 0
@@ -150,7 +148,6 @@ private:
     #else
     FlexyStepper *_stepper;
     #endif
-    Sensors *_sensors;
     AutoPID *_pid;
     /** Flow trigger activation. */
     bool _hasTrigger;
