@@ -6,8 +6,8 @@
 
 //Connections and Debug Defs
 //#define ACCEL_STEPPER 1
-#define DEBUG_UPDATE 1 // 
-//#define DEBUG_OFF 1 //Release version
+//#define DEBUG_UPDATE 1 // 
+#define DEBUG_OFF 1 //Release version
 #define P_HONEYWELL 1
 #define RANGE_DPT 100.0F
 

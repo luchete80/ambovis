@@ -208,7 +208,7 @@ void setup() {
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
-  writeLine(1, "AMBOVIS 2804_v1",4);
+  writeLine(1, "AMBOVIS 2904_v2",4);
 
   // configura la ventilación
   ventilation -> start();
@@ -262,6 +262,7 @@ void setup() {
 byte last_cycle = 0;
 bool update_display = false;
 char string[100];
+byte pos;
 void loop() {
 
   check_encoder();
@@ -273,9 +274,12 @@ void loop() {
     //A0: PRESSURE (HOEYWELL) A1: Volume (DPT) A2: Test Mode pressure (DPT)
     p_dpt    =RANGE_DPT*float(analogRead(A1))*DEFAULT_PA_TO_CM_H20/1024.; //From DPT, AS MAX RANGE (100 Pa or more) //PA TO CMH2O    
     pressure_p = (( float ( analogRead(A0) )/1023.) * 5.0/V_SUPPLY_HONEY  - 0.1 + (V_HONEY_P0-0.5))/0.8*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20; //Data sheet figure 2 analog pressure, calibration from 10% to 90%
+
+    pos=findClosest(dp_pos,38,p_dpt);
  
     if (p_dpt > 0){
-      _flux=16.667*(float)po_flux_pos[findClosest2(dp_pos,38,p_dpt)];
+//      _flux=16.667*(float)po_flux_pos[findClosest(dp_pos,38,p_dpt)];
+        _flux=po_flux_pos[pos]+(po_flux_pos[pos+1]-po_flux_pos[pos])*(p_dpt-dp_pos[pos])/(dp_pos[pos+1]-dp_pos[pos]);
     }else{
       //_flux=-16.667*(float)po_flux_neg[findClosest2(dp_neg,38,p_dpt)];
       _flux=0.;
@@ -531,16 +535,15 @@ void display_lcd ( ) {
 
 }
 
-int findClosest2(float arr[], int n, float target) 
-{ 
+int findClosest(float arr[], int n, float target) { 
     int i = 0, j = n-1, mid = 0; 
-    while (i < j) { 
+    while ( j - i > 1 ) { 
         mid = (i + j) / 2;  
         if (target < arr[mid]) { 
-            j = mid - 1; 
+            j = mid; 
         } else {       // If target is greater than mid 
-            i = mid + 1;  } 
+            i = mid;  } 
         //Serial.print("i,j: ");Serial.print(i);Serial.print(",");Serial.println(j);
         } 
-    return mid;
+    return i;
 } 
