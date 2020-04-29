@@ -19,7 +19,7 @@
 //#define PRUEBAS 1 // testing over arduino without sensors
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
-#define TIME_BASE   10                 // msec
+#define TIME_BASE   50                 // msec
 #define TIME_SENSOR 10               // msec
 #define TIME_SEND_CONFIGURATION 2000 // msec
 #define V_HONEY_P0 0.5145

@@ -279,14 +279,16 @@ void loop() {
  
     if (p_dpt > 0){
 //      _flux=16.667*(float)po_flux_pos[findClosest(dp_pos,38,p_dpt)];
-        _flux=po_flux_pos[pos]+(po_flux_pos[pos+1]-po_flux_pos[pos])*(p_dpt-dp_pos[pos])/(dp_pos[pos+1]-dp_pos[pos]);
+        _flux=16.667*(po_flux_pos[pos]+(po_flux_pos[pos+1]-po_flux_pos[pos])*(p_dpt-dp_pos[pos])/(dp_pos[pos+1]-dp_pos[pos]));
     }else{
       //_flux=-16.667*(float)po_flux_neg[findClosest2(dp_neg,38,p_dpt)];
       _flux=0.;
     }    
     #ifdef DEBUG_OFF
-    Serial.print(pressure_p);Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol);
-//    Serial.print(pressure_p);Serial.print(" ");Serial.print("0.0");Serial.print(" ");Serial.println("0.0");
+    //Serial.print(pressure_p);Serial.print(" 0.0 0.0 ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol);
+//    Serial.print(pressure_p);Serial.print(" ");Serial.print("0.0");Serial.print(" ");Serial.println("0.0"); //EVALUATE PRESSURE
+    //Serial.print("0.0 ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol); //EVALUATE FLUX
+    Serial.print(int(pressure_p));Serial.print(" ");Serial.print(int(_flux));Serial.print(" ");Serial.println(int(_mlInsVol)); //EVALUATE FLUX
     #endif
 
     lastReadSensor = millis();
@@ -432,16 +434,16 @@ void check_encoder()
             options.percInspEsp=encoderPos;
             break;
           case 4:
-//            if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
+            if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
               options.tidalVolume = encoderPos;
-//              #ifdef DEBUG_UPDATE
-//              Serial.print("tidal ");Serial.print(options.tidalVolume);Serial.print("encoder pos");Serial.print(encoderPos);
-//              #endif
-//              } else { //manual
-//              options.percVolume =encoderPos;
-//             // Serial.print("Encoder pos: ");Serial.println(encoderPos);
-//             // Serial.print("Perc vol: ");Serial.println(options.percVolume);
-//            }
+              #ifdef DEBUG_UPDATE
+              Serial.print("tidal ");Serial.print(options.tidalVolume);Serial.print("encoder pos");Serial.print(encoderPos);
+              #endif
+              } else { //manual
+              options.percVolume =encoderPos;
+             // Serial.print("Encoder pos: ");Serial.println(encoderPos);
+             // Serial.print("Perc vol: ");Serial.println(options.percVolume);
+            }
             break;
           case 5:
             options.peakInspiratoryPressure = encoderPos;
