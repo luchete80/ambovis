@@ -212,7 +212,7 @@ void MechVentilation::update(void)
     // Check pressures
     evaluatePressure();
 
-    refreshWatchDogTimer();
+    //refreshWatchDogTimer();
 
     switch (_currentState)
     {

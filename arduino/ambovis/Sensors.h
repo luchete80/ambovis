@@ -5,8 +5,6 @@
 //#include "src/Adafruit_Sensor/Adafruit_Sensor.h"
 //#include "src/Adafruit_BMP280/Adafruit_BMP280.h"
 #include "src/Pressure_Sensor/Pressure_Sensor.h"
-#include "calc.h"
-
 #include "defaults.h"
 
 extern float pressure_max;

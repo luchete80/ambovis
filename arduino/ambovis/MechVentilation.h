@@ -12,7 +12,6 @@
 #include <inttypes.h>
 #include "pinout.h"
 #include "defaults.h"
-#include "calc.h"
 #include "src/AutoPID/AutoPID.h"
 #include "Sensors.h"
 

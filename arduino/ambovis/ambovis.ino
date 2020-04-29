@@ -1,6 +1,5 @@
 #include "defaults.h"
 #include "pinout.h"
-#include "calc.h"
 #include "MechVentilation.h"
 #include "src/TimerOne/TimerOne.h"
 #include "src/TimerTwo/TimerTwo.h"
