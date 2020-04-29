@@ -42,7 +42,6 @@ FlexyStepper * stepper = new FlexyStepper();
 // - EXTERNAL VARIABLES //
 //////////////////////////
 float pressure_p;   //EXTERN!!
-float pressure_sec,psec_max,last_psec_max;
 float last_pressure_max,last_pressure_min;
 
 byte vent_mode = VENTMODE_PCL; //0
@@ -379,7 +378,7 @@ void check_encoder()
         case 4: 
           if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
             encoderPos=oldEncPos=options.tidalVolume;
-            min_sel=DEFAULT_MIN_VOLUMEN_TIDAL;max_sel=DEFAULT_MAX_VOLUMEN_TIDAL;
+            min_sel=200;max_sel=800;
           } else {//Manual
             encoderPos=oldEncPos=options.percVolume;
 //            Serial.print("Encoder pos: ");Serial.println(encoderPos);
@@ -429,13 +428,16 @@ void check_encoder()
             options.percInspEsp=encoderPos;
             break;
           case 4:
-            if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL)
+//            if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
               options.tidalVolume = encoderPos;
-            else{ //manual
-              options.percVolume =encoderPos;
-             // Serial.print("Encoder pos: ");Serial.println(encoderPos);
-             // Serial.print("Perc vol: ");Serial.println(options.percVolume);
-            }
+//              #ifdef DEBUG_UPDATE
+//              Serial.print("tidal ");Serial.print(options.tidalVolume);Serial.print("encoder pos");Serial.print(encoderPos);
+//              #endif
+//              } else { //manual
+//              options.percVolume =encoderPos;
+//             // Serial.print("Encoder pos: ");Serial.println(encoderPos);
+//             // Serial.print("Perc vol: ");Serial.println(options.percVolume);
+//            }
             break;
           case 5:
             options.peakInspiratoryPressure = encoderPos;
@@ -504,11 +506,7 @@ void display_lcd ( ) {
   writeLine(3, "PEEP:" + String(options.peakEspiratoryPressure), 8);
   dtostrf(last_pressure_min, 2, 1, tempstr);
   writeLine(3, String(tempstr), 16);  
-  
-  writeLine(3, "PS: ", 1);
-  
-  dtostrf(last_psec_max, 2, 1, tempstr);
-  writeLine(3, String(tempstr), 4);  
+ 
 
 
   lcd_clearxy(0,0);

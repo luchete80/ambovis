@@ -168,7 +168,7 @@ private:
     byte _percIE;
     byte _percVol;  //MANUAL MODE, 1 TO 10
 
-    unsigned short _tidalVol;
+    short _tidalVol;
     bool wait_NoMove;
 
     /* Configuration */

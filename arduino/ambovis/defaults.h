@@ -7,7 +7,7 @@
 //Connections and Debug Defs
 //#define ACCEL_STEPPER 1
 #define DEBUG_UPDATE 1 // 
-#define DEBUG_OFF 1 //Release version
+//#define DEBUG_OFF 1 //Release version
 #define P_HONEYWELL 1
 #define RANGE_DPT 100.0F
 
@@ -106,7 +106,7 @@ typedef struct {
     float triggerThreshold;
     byte percInspEsp;
     bool hasTrigger;
-    unsigned short tidalVolume;  //in ml
+    short tidalVolume;  //in ml
     byte modeCtl;
     byte percVolume;   //For manual mode: 1 to 10
 } VentilationOptions_t;
