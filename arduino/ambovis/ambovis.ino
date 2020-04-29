@@ -184,7 +184,7 @@ void setup() {
   options.respiratoryRate = DEFAULT_RPM;
   options.percInspEsp=3;//1:1 to 1:4, is denom
   //options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
-  options.peakInspiratoryPressure = 10.;
+  options.peakInspiratoryPressure = 25.;
   options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
   options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
   options.hasTrigger = false;
@@ -281,8 +281,8 @@ void loop() {
       _flux=0.;
     }    
     #ifdef DEBUG_OFF
-//    Serial.print(pressure_p);Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol);
-    Serial.print(pressure_p);Serial.print(" ");Serial.print("0.0");Serial.print(" ");Serial.println("0.0");
+    Serial.print(pressure_p);Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol);
+//    Serial.print(pressure_p);Serial.print(" ");Serial.print("0.0");Serial.print(" ");Serial.println("0.0");
     #endif
 
     lastReadSensor = millis();

@@ -19,8 +19,8 @@
 //#define PRUEBAS 1 // testing over arduino without sensors
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
-#define TIME_BASE   50                 // msec
-#define TIME_SENSOR 20               // msec
+#define TIME_BASE   10                 // msec
+#define TIME_SENSOR 10               // msec
 #define TIME_SEND_CONFIGURATION 2000 // msec
 #define V_HONEY_P0 0.5145
 
@@ -54,8 +54,8 @@
 #define DEFAULT_HEIGHT 170 // cm
 #define DEFAULT_SEX 0 // 0: varón, 1: mujer
 #define DEFAULT_ML_POR_KG_DE_PESO_IDEAL 7
-#define DEFAULT_MAX_VOLUMEN_TIDAL 800
-#define DEFAULT_MIN_VOLUMEN_TIDAL 240
+#define DEFAULT_MAX_VTIDAL 800
+#define DEFAULT_MIN_VTIDAL 240
 #define DEFAULT_FRAC_CYCLE_VCL_INSUFF 0.75
 #define DEFAULT_TRIGGER_THRESHOLD 3.0
 #define DEFAULT_RPM 14
@@ -89,9 +89,15 @@
 // PID settings and gains
 #define PID_MIN -20000 // TODO: check direction implementation
 #define PID_MAX 20000
-#define PID_KP 300.01
-#define PID_KI 50.01
-#define PID_KD 200.01
+
+//#define PID_KP 300.01
+//#define PID_KI 50.01
+//#define PID_KD 200.01
+
+#define PID_KP 100.01
+#define PID_KI 5.01
+#define PID_KD 20.01
+
 #define PID_TS TIME_BASE
 #define PID_BANGBANG 8
 

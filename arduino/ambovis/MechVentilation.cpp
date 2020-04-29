@@ -246,8 +246,8 @@ void MechVentilation::update(void)
         /* Stepper control: set acceleration and end-position */
 
         #ifdef ACCEL_STEPPER
-        stepper->setSpeed(STEPPER_SPEED_DEFAULT);
-        stepper->moveTo(STEPPER_HIGHEST_POSITION);
+        _stepper->setSpeed(STEPPER_SPEED_DEFAULT);
+        _stepper->moveTo(STEPPER_HIGHEST_POSITION);
         #else
         // Note: this can only be called when the motor is stopped
         //IMPORTANT FROM https://github.com/Stan-Reifel/FlexyStepper/blob/master/Documentation.md
@@ -265,16 +265,13 @@ void MechVentilation::update(void)
             Serial.print("Speed Man:");Serial.print(_stepperSpeed);
           #endif
           _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
- 
+        } 
         #endif
-        }
+
 
         if (vent_mode==VENTMODE_PCL){
-            //max_accel=(_pip-20)/20.*(5000-2000)+2000;
-            //max_speed=(_pip-20)/20.*(5000-2000)+2000;
-            max_accel=4000;
-            max_speed=4000;
-            _stepper->setAccelerationInStepsPerSecondPerSecond(max_accel);          
+            max_accel=3000;
+            max_speed=1600;
         }
         
         _pid->reset();
@@ -336,22 +333,20 @@ void MechVentilation::update(void)
                 if (_stepperSpeed>STEPPER_SPEED_MAX_VCL)
                   _stepperSpeed=STEPPER_SPEED_MAX_VCL;
                } else if (vent_mode==VENTMODE_PCL) {
-                  if ( (pressure_p)<0)
-                    _stepperSpeed=STEPPER_SPEED_DEFAULT;
-                  else
-                    _pid->run(pressure_p, (float)_pip, &_stepperSpeed);
-                    if (_stepperSpeed > max_speed)
-                      _stepperSpeed=max_speed;
+
+                  _pid->run(pressure_p, (float)_pip, &_stepperSpeed);
+                  if (_stepperSpeed > max_speed)
+                    _stepperSpeed=max_speed;
                }                
                #ifdef DEBUG_UPDATE
-                Serial.print("Speed: "); Serial.println(int(_stepperSpeed));                      
+                Serial.print("Pres, pip: "); Serial.print(int(pressure_p)); Serial.print(" "); Serial.print(int(_pip));  Serial.print("Speed: "); Serial.println(int(_stepperSpeed));                      
                #endif
 
               if (vent_mode !=VENTMODE_MAN){  //only if auto
                 // TODO: if _currentPressure > _pip + 5, trigger alarm
                 #ifdef ACCEL_STEPPER  //LUCIANO
-                  stepper->setSpeed(_stepperSpeed);
-                  stepper->moveTo(STEPPER_HIGHEST_POSITION);
+                  _stepper->setSpeed(_stepperSpeed);
+                  _stepper->moveTo(STEPPER_HIGHEST_POSITION);
                 #else
                 _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
 
@@ -359,14 +354,17 @@ void MechVentilation::update(void)
                   _stepper->setTargetPositionToStop();
                   //Serial.print("VELOCIDAD CERO!");
                 }                  
-                if (_stepperSpeed >= 0){
+                if (_stepperSpeed > 0){
                     _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
                 }
                 else{
-                    //_stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
-                    if (!_stepper->motionComplete())
-                      _stepper->setTargetPositionToStop();
+                    _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
+                   // if (!_stepper->motionComplete())
+                   //   _stepper->setTargetPositionToStop();
                 }
+
+                    if ( (pressure_p)>_pip)
+                      _stepper->setTargetPositionToStop();
               }//vent mode
               #endif
               //Serial.println("CUrrtime");Serial.println(_msecTimerCnt);
@@ -398,7 +396,7 @@ void MechVentilation::update(void)
 
 
         /* Stepper control*/
-        #ifdef ACCEL
+        #ifdef ACCEL_STEPPER
 
         #else
         _stepper->setSpeedInStepsPerSecond(STEPPER_ACC_EXSUFFLATION);
@@ -537,18 +535,23 @@ void MechVentilation::update(void)
         _setState(Init_Insufflation);
     }
     break;
-
-    case State_Error:
-        break;
-    default:
-        //TODO
-        break;
+//
+//    case State_Error:
+//        break;
+//    default:
+//        //TODO
+//        break;
     }
       
 }//update
 
 void MechVentilation::_init(
+#ifdef ACCEL_STEPPER
+    AccelStepper *stepper,
+#else
     FlexyStepper *stepper,
+#endif
+
     AutoPID *pid,
     VentilationOptions_t options)
 {
@@ -617,3 +620,15 @@ void MechVentilation::change_config(VentilationOptions_t options)
 
     _mode = options.modeCtl;
 }
+
+//**
+// FOR ACCEL_STEPPER
+//FROM https://forum.arduino.cc/index.php?topic=394355.0
+//void moveToHome() {
+//    limitSwitchState = digitalRead(limitSwitchPin);
+//    while (limitSwitchState == HIGH) { // this assumes it will be LOW when pressed
+//       // move one step towards switch
+//       limitSwitchState = digitalRead(limitSwitchPin);
+//    }
+//    stepperPosition = 0;
+//}

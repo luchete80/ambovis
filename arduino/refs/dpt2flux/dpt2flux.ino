@@ -5,8 +5,7 @@ int po_flux[]={-200,-190,-180,-170,-160,-150,-140,-130,-120,-110,-100,-90,-80,-7
 float p_dpt;
 #define DEFAULT_PA_TO_CM_H20 0.0102F
 
-int findClosest2(float arr[], int n, float target) 
-{ 
+int findClosest2(float arr[], int n, float target) { 
     int i = 0, j = n-1, mid = 0; 
     while (i < j) { 
         mid = (i + j) / 2;  
@@ -14,8 +13,29 @@ int findClosest2(float arr[], int n, float target)
             j = mid - 1; 
         } else {       // If target is greater than mid 
             i = mid + 1;  } 
-        Serial.print("i,j: ");Serial.print(i);Serial.print(",");Serial.println(j);} 
+        Serial.print("i,j: ");Serial.print(i);Serial.print(",");Serial.println(j);
+        } 
     return mid;
+} 
+
+int findClosest3(float arr[], int n, float target) { 
+    int i = 0, j = n-1, mid = 0; 
+    while ( j - i > 1 ) { 
+        mid = (i + j) / 2;  
+        if (target < arr[mid]) { 
+            j = mid; 
+        } else {       // If target is greater than mid 
+            i = mid;  } 
+        Serial.print("i,j: ");Serial.print(i);Serial.print(",");Serial.println(j);
+        } 
+    return i;
+} 
+
+int getClosest(int val1, int val2, int target) { 
+    if (target - val1 >= val2 - target) 
+        return val2; 
+    else
+        return val1; 
 } 
 
 void setup()
@@ -26,24 +46,26 @@ void setup()
 }
 
 int pos;
+
+float res;
 void loop ()
 {
 	//p_dpt=200.*float(analogRead(A1))*DEFAULT_PA_TO_CM_H20*100./1024.; //From DPT, AS MAX RANGE (100 Pa or more) //PA TO CMH2O
 	
 	
 	p_dpt=random(-9, 11);
+  //p_dpt=-7;
 	Serial.print("pdpt is ");Serial.println(p_dpt);
-	// if (p_dpt<0){
-		
-		
-	// } else {
-		
-	// }
+ 
 	//int findClosest(float arr[], int n, float target) 
-	pos=findClosest2(dp,75,p_dpt);
+	pos=findClosest3(dp,75,p_dpt);
 	Serial.print("Position is ");Serial.println(pos);
+
+  res=po_flux[pos]+(po_flux[pos+1]-po_flux[pos])*(p_dpt-dp[pos])/(dp[pos+1]-dp[pos]);
 	
-	Serial.print("Flux is ");Serial.println(po_flux[pos]);
+	Serial.print("Flux        is ");Serial.println(po_flux[pos]);
+  Serial.print("InterpFlux  is ");Serial.println(res);
+  
   Serial.println("***************************");
 	delay(500);
 }
