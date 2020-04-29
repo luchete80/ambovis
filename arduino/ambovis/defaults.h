@@ -94,7 +94,7 @@
 //#define PID_KI 50.01
 //#define PID_KD 200.01
 
-#define PID_KP 100.01
+#define PID_KP 20.01
 #define PID_KI 5.01
 #define PID_KD 20.01
 
