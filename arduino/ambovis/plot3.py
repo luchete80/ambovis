@@ -6,13 +6,37 @@ import numpy as np
 from matplotlib import pyplot as plt
 from time import time
 
+# From https://github.com/pyserial/pyserial/issues/216
+class ReadLine:
+    def __init__(self, s):
+        self.buf = bytearray()
+        self.s = s
+
+    def readline(self):
+        i = self.buf.find(b"\n")
+        if i >= 0:
+            r = self.buf[:i+1]
+            self.buf = self.buf[i+1:]
+            return r
+        while True:
+            i = max(1, min(2048, self.s.in_waiting))
+            data = self.s.read(i)
+            i = data.find(b"\n")
+            if i >= 0:
+                r = self.buf + data[:i+1]
+                self.buf[0:] = data[i+1:]
+                return r
+            else:
+                self.buf.extend(data)
+
 # If you're not using Linux, you'll need to change this
 # check the Arduino IDE to see what serial port it's attached to
-#ser = serial.Serial('/dev/ttyACM0', 115200)
-ser = serial.Serial('com4', 115200)
+s = serial.Serial('/dev/ttyUSB0', 115200)
+#s = serial.Serial('com4', 115200)
+serial = ReadLine(s)
 
 # set plot to animated
-plt.ion() 
+plt.ion()
 
 start_time = time()
 timepoints = []
@@ -39,7 +63,7 @@ line2, = axs[1].plot(y2data,marker='o',markersize=4,linestyle='dotted',markerfac
 line3, = axs[2].plot(y3data,marker='o',markersize=4,linestyle='dotted',markerfacecolor='red') #ORIGINAL
 
 
-#subplot limits 
+#subplot limits
 # plt.ylim([-500,500]) #ORIGINAL
 # plt.xlim([0,view_time]) #ORIGINAL
 
@@ -63,16 +87,15 @@ axs.flat[2].legend([line3],["Volume [ml]"])
 # subplot.set_xlim([0,view_time])
 # subplot.set_ylim(500)
 
-# flush any junk left in the serial buffer
-ser.flushInput()
 # ser.reset_input_buffer() # for pyserial 3.0+
 run = True
+last_plot = time()
 
 # collect the data and plot a moving frame
 while run:
-    ser.reset_input_buffer()
-    data = ser.readline().split(b' ')
-    #while ser.isReceiving != True:
+    # Get the data from the serial device
+    data = serial.readline().split(b' ')
+    t = time()
 
     # sometimes the incoming data is garbage, so just 'try' to do this
     try:
@@ -81,11 +104,17 @@ while run:
         ydata.append(float(data[0]))
         y2data.append(float(data[1]))
         y3data.append(float(data[2]))
-        
-        timepoints.append(time()-start_time)
+        timepoints.append(t - start_time)
+
+    # if the try statement throws an error, just do nothing
+    except:
+        pass
+
+    # update the plotted data 50 times per second
+    if t - last_plot > 0.02:
+
         current_time = timepoints[-1]
-        
-        # update the plotted data
+
         line1.set_xdata(timepoints)
         line1.set_ydata(ydata)
 
@@ -94,20 +123,19 @@ while run:
 
         line3.set_xdata(timepoints)
         line3.set_ydata(y3data)
-	  
+
         # slide the viewing frame along
         if current_time > view_time:
-        	#plt.xlim([current_time-view_time,current_time])
-        	axs.flat[0].set_xlim(current_time-view_time,current_time)
-        	axs.flat[1].set_xlim(current_time-view_time,current_time)
-        	axs.flat[2].set_xlim(current_time-view_time,current_time)
-                
-        	# when time's up, kill the collect+plot loop
-        	#if timepoints[-1] > duration: run=False
-    
-    # if the try statement throws an error, just do nothing
-    except: pass
-    
+            #plt.xlim([current_time-view_time,current_time])
+            axs.flat[0].set_xlim(current_time-view_time,current_time)
+            axs.flat[1].set_xlim(current_time-view_time,current_time)
+            axs.flat[2].set_xlim(current_time-view_time,current_time)
+
+        # when time's up, kill the collect+plot loop
+        #if timepoints[-1] > duration: run=False
+
+        last_plot = time()
+
     # update the plot
     fig1.canvas.draw()
 
@@ -129,4 +157,4 @@ while run:
 
 #fig2.show()
 
-ser.close()
+s.close()

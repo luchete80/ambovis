@@ -223,6 +223,16 @@ public class RealtimeLineChartActivity extends ChartBase implements
             mActivity = new WeakReference<>(activity);
         }
 
+        public float GetFloat(String s) {
+            // regular expression for an integer number
+            try {
+                return Float.parseFloat(s);
+            }
+            catch (NumberFormatException ex) {
+                return -40000; // Use a number outside scale
+            }
+        }
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -235,19 +245,19 @@ public class RealtimeLineChartActivity extends ChartBase implements
                     ArrayList<Pair> vols = new ArrayList<>();
 
                     Pair<String, Float> p_bmp = Pair.create("BMP280",
-                            Float.parseFloat(dataArray[0]));
+                            GetFloat(dataArray[0]));
                     pressures.add(p_bmp);
                     Pair<String, Float> p_honey = Pair.create("HONEYWELL (A1)",
-                            Float.parseFloat(dataArray[1]));
+                            GetFloat(dataArray[1]));
                     pressures.add(p_honey);
                     Pair<String, Float> p_dpt = Pair.create("A0",
-                            Float.parseFloat(dataArray[2]));
+                            GetFloat(dataArray[2]));
                     pressures.add(p_dpt);
                     Pair<String, Float> flux = Pair.create("Flux [ml/s]",
-                            Float.parseFloat(dataArray[3]));
+                            GetFloat(dataArray[3]));
                     fluxes.add(flux);
                     Pair<String, Float> vol = Pair.create("Volume [ml]",
-                            Float.parseFloat(dataArray[4]));
+                            GetFloat(dataArray[4]));
                     vols.add(vol);
 
                     mActivity.get().addEntry(pressures, fluxes, vols);
