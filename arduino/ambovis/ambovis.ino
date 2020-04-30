@@ -252,7 +252,6 @@ void setup() {
   Timer1.initialize(50);
   Timer1.attachInterrupt(timer1Isr);
 
-  Serial.print("Array values");
 }
 
 /**
@@ -285,10 +284,10 @@ void loop() {
       _flux=0.;
     }    
     #ifdef DEBUG_OFF
-    //Serial.print(pressure_p);Serial.print(" 0.0 0.0 ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol);
+    Serial.print(pressure_p);Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol);
 //    Serial.print(pressure_p);Serial.print(" ");Serial.print("0.0");Serial.print(" ");Serial.println("0.0"); //EVALUATE PRESSURE
     //Serial.print("0.0 ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol); //EVALUATE FLUX
-    Serial.print(int(pressure_p));Serial.print(" ");Serial.print(int(_flux));Serial.print(" ");Serial.println(int(_mlInsVol)); //EVALUATE FLUX
+    //Serial.print("0 ");Serial.print(int(_flux));Serial.print(" ");Serial.println(int(_mlInsVol)); //EVALUATE FLUX
     #endif
 
     lastReadSensor = millis();

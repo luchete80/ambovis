@@ -12,7 +12,7 @@ import pandas as pd
  
  
 class serialPlot:
-    def __init__(self, serialPort = '/dev/ttyUSB0', serialBaud = 38400, plotLength = 100, dataNumBytes = 2):
+    def __init__(self, serialPort = 'com4', serialBaud = 115200, plotLength = 100, dataNumBytes = 2):
         self.port = serialPort
         self.baud = serialBaud
         self.plotMaxLength = plotLength
