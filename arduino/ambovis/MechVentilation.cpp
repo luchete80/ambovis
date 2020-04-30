@@ -16,8 +16,9 @@ float pressure_max;
 float pressure_min;
 
 static int highest_man_pos;
-float _mlInsVol,_mllastInsVol;
 unsigned long _msecTimerStartCycle;
+
+bool adding_vol;
 
 MechVentilation::MechVentilation(
         #ifdef ACCEL_STEPPER
@@ -183,8 +184,9 @@ void MechVentilation::deactivateRecruitment(void)
  */
 void MechVentilation::update(void)
 {
-  
-    _mlInsVol+=_flux*float((millis()-last_vent_time))*0.001;//flux in l and time in msec, results in ml          
+    if ( adding_vol ){
+      _mlInsVol+=_flux*float((millis()-last_vent_time))*0.001;//flux in l and time in msec, results in ml 
+    }
     last_vent_time = millis();
     
     static int totalCyclesInThisState = 0;
@@ -219,7 +221,7 @@ void MechVentilation::update(void)
     {
     case Init_Insufflation:
     {
-
+      adding_vol=true;
       #ifdef DEBUG_UPDATE
         Serial.println("INSUFLACION ");        
       #endif
@@ -231,7 +233,7 @@ void MechVentilation::update(void)
 
 #if DEBUG_UPDATE
         Serial.println("Starting insuflation");
-        Serial.print("pressure_max");
+        Serial.print("pressure_max: ");
 #endif
         // Close Solenoid Valve
         digitalWrite(PIN_SOLENOID, SOLENOID_CLOSED);
@@ -285,11 +287,11 @@ void MechVentilation::update(void)
         _setState(State_Insufflation);
 
         currentTime = millis();
+        display_needs_update=true;
     }
     break;
     case State_Insufflation:
     {
-
         /* Stepper control: set end position */
         if (vent_mode==VENTMODE_VCL && _mlInsVol>_tidalVol){
             _stepper->setTargetPositionToStop();
@@ -383,9 +385,9 @@ void MechVentilation::update(void)
       _msecTimerStartCycle=millis();
       //Serial.print("Current pressure");Serial.println(_currentPressure);
       
-#if DEBUG_UPDATE
-        //Serial.println("Starting exsuflation");
-#endif
+//#if DEBUG_UPDATE
+        Serial.println("Starting exsuflation");
+//#endif
         // Open Solenoid Valve
         digitalWrite(PIN_SOLENOID, SOLENOID_OPEN);
 
@@ -419,11 +421,16 @@ void MechVentilation::update(void)
 
         /* Status update and reset timer, for next time */
         _setState(State_Exsufflation);
+    
+        display_needs_update=true;
+        last_pressure_max=pressure_max;
     }
     break;
     case State_Exsufflation:
-    {
+    { 
     
+      if ( _flux < 10.)
+        adding_vol=false;
 //#if 0
 //        if (_stepper->motionComplete())
 //        {

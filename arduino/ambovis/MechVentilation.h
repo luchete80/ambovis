@@ -205,5 +205,6 @@ extern float _mlInsVol,_mllastInsVol;
 extern float pressure_sec,psec_max,last_psec_max;
 extern unsigned long _msecTimerStartCycle; //CADA semiciclo
 extern float _currentPressure;
+extern bool display_needs_update;
 
 #endif /* INC_MECHANICAL_VENTILATION_H */

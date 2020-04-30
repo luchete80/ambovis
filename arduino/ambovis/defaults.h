@@ -6,7 +6,7 @@
 
 //Connections and Debug Defs
 //#define ACCEL_STEPPER 1
-//#define DEBUG_UPDATE 1 // 
+//#define DEBUG_UPDATE 1 //
 #define DEBUG_OFF 1 //Release version
 #define P_HONEYWELL 1
 #define RANGE_DPT 100.0F
@@ -19,7 +19,7 @@
 //#define PRUEBAS 1 // testing over arduino without sensors
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
-#define TIME_BASE   50                 // msec
+#define TIME_BASE   25                 // msec
 #define TIME_SENSOR 10               // msec
 #define TIME_SEND_CONFIGURATION 2000 // msec
 #define V_HONEY_P0 0.5145
@@ -96,7 +96,7 @@
 
 #define PID_KP 100.01
 #define PID_KI 5.01
-#define PID_KD 20.01
+#define PID_KD 15.01
 
 #define PID_TS TIME_BASE
 #define PID_BANGBANG 8
@@ -106,15 +106,15 @@
 #define SOLENOID_OPEN 1
 
 typedef struct {
-    short respiratoryRate;
-    short peakInspiratoryPressure;
-    short peakEspiratoryPressure;
-    float triggerThreshold;
-    byte percInspEsp;
-    bool hasTrigger;
-    short tidalVolume;  //in ml
-    byte modeCtl;
-    byte percVolume;   //For manual mode: 1 to 10
+  short respiratoryRate;
+  short peakInspiratoryPressure;
+  short peakEspiratoryPressure;
+  float triggerThreshold;
+  byte percInspEsp;
+  bool hasTrigger;
+  short tidalVolume;  //in ml
+  byte modeCtl;
+  byte percVolume;   //For manual mode: 1 to 10
 } VentilationOptions_t;
 
 #define MODE_VOL_CTL 0
@@ -129,6 +129,6 @@ typedef struct {
 extern byte vent_mode;
 extern bool send_data;
 
-extern int max_speed,max_accel;
+extern int max_speed, max_accel;
 
 #endif // DEFAULTS_H

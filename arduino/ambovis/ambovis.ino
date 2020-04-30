@@ -19,7 +19,7 @@
 #include "src/Pressure_Sensor/Pressure_Sensor.h"  //LUCIANO: MPX5050DP
 
 int pressure_flux;  //For calculating flux
-
+float _mlInsVol=0,_mllastInsVol;
 
 int Compression_perc = 8; //80%
 
@@ -44,7 +44,7 @@ FlexyStepper * stepper = new FlexyStepper();
 float pressure_p;   //EXTERN!!
 float last_pressure_max,last_pressure_min;
 
-byte vent_mode = VENTMODE_PCL; //0
+byte vent_mode = VENTMODE_MAN; //0
 //Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
 float pressure_p0;
@@ -59,27 +59,28 @@ float _currentPressure = 0.0;
 float p_dpt;
 
 unsigned long lastReadSensor = 0;
+bool display_needs_update=false;
 
 
 State static lastState;
 bool show_changed_options = false; //Only for display
 bool update_options = false;
 
-unsigned long time_update_display = 100; //ms
+unsigned long time_update_display = 20; //ms
 unsigned long last_update_display;
 
-
+extern float _mlInsVol,_mllastInsVol;
 extern byte stepper_time = 50;
 unsigned long last_stepper_time;
 unsigned long last_vent_time;
 unsigned long time;
 
 
-//float dp_neg[]={-9.709861146,-8.828793439,-7.868898584,-7.118529669,-6.295077605,-5.530065589,-4.803049529,-4.196388314,-3.480106395,-2.991823428,-2.444452733,-2.030351958,-1.563385753,-1.207061607,-0.877207832,-0.606462279,-0.491216024,-0.377891785,-0.295221736,-0.216332764,-0.151339196,-0.096530072,-0.052868293,-0.047781395,-0.039664506,-0.03312327,-0.028644966,-0.023566372,-0.020045692,-0.014830113,-0.011688636,-0.008176254,-0.006117271,-0.003937171,-0.001999305,-0.00090924,-0.00030358,0};
+//float dp_neg[]={-0.877207832,-0.606462279,-0.491216024,-0.377891785,-0.295221736,-0.216332764,-0.151339196,-0.096530072,-0.052868293,-0.047781395,-0.039664506,-0.03312327,-0.028644966,-0.023566372,-0.020045692,-0.014830113,-0.011688636,-0.008176254,-0.006117271,-0.003937171,-0.001999305,-0.00090924,-0.00030358,0};
 float dp_pos[]={0.,0.000242233,0.000837976,0.002664566,0.004602432,0.007024765,0.009325981,0.012111664,0.01441288,0.017561913,0.023012161,0.029794693,0.037061691,0.043771552,0.051474571,0.05874157,0.109004974,0.176879848,0.260808033,0.365700986,0.504544509,0.630753349,0.795599072,1.216013465,1.60054669,2.087678384,2.547210457,3.074176245,3.676588011,4.385391541,5.220403813,5.947168311,6.794489065,7.662011691,8.642594913,9.810447693,10.7793808,11.95257389};
 //byte po_flux_neg[]={200,190,180,170,160,150,140,130,120,110,100,90,80,70,60,50,45,40,35,30,25,20,15,14,13,12,11,10,9,8,7,6,5,4,3,0,0};  //Negative values!
 //byte po_flux_pos[]={0,0,0,3,4,5,6,7,8,9,10,11,12,13,14,15,20,25,30,35,40,45,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200};
-
+//byte po_flux_neg[]={-1000,-833.3333333,-750,-666.6666667,-583.3333333,-500,-416.6666667,-333.3333333,-250,-233.3333333,-216.6666667,-200,-183.3333333,-166.6666667,-150,-133.3333333,-116.6666667,-100,-83.33333333,-66.66666667,-50,0,0,0};
 byte po_flux_pos[]={0,0,0,50,66.66666667,83.33333333,100,116.6666667,133.3333333,150,166.6666667,183.3333333,200,216.6666667,233.3333333,250,333.3333333,416.6666667,500,583.3333333,666.6666667,750,833.3333333,1000};
 
 
@@ -98,7 +99,8 @@ byte reading = 0; //somewhere to store the direct values we read from our interr
 byte max_sel,min_sel; //According to current selection
 
 void display_lcd ( );
-float f_dpt;
+float f_dpt,corr_dpt;
+float f1_honey,f2_honey;
 
 //
 void PinA() {
@@ -256,9 +258,12 @@ void setup() {
   Timer1.attachInterrupt(timer1Isr);
 
   f_dpt=(float)RANGE_DPT*DEFAULT_PA_TO_CM_H20/1023.;
-  #ifdef DEBUG_UPDATE
+  //corr_dpt=RANGE_DPT*DEFAULT_PA_TO_CM_H20/2.;
+  f1_honey=5.0*DEFAULT_PSI_TO_CM_H20*2/(1023*0.8*V_SUPPLY_HONEY);
+  
+  //#ifdef DEBUG_UPDATE
     Serial.print("Honey Volt at p0: ");Serial.println(analogRead(A0)/1023.);
-  #endif
+  //#endif
 
 }
 
@@ -279,21 +284,22 @@ void loop() {
   if (time > lastReadSensor + TIME_SENSOR){
 
     //A0: PRESSURE (HOEYWELL) A1: Volume (DPT) A2: Test Mode pressure (DPT)
-    p_dpt    =f_dpt*float(analogRead(A1)); //From DPT, AS MAX RANGE (100 Pa or more) //PA TO CMH2O    
-    pressure_p = (( float ( analogRead(A0) )/1023.) * 5.0/V_SUPPLY_HONEY  - 0.1 + (V_HONEY_P0-0.5))/0.8*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20; //Data sheet figure 2 analog pressure, calibration from 10% to 90%
+    //0.1 is from the 0.5 readed initially by the honeywell
+    p_dpt    =f_dpt*float(analogRead(A1)); //ONE DIRECTION
+    //p_dpt      = f_dpt*float(analogRead(A1)) - corr_dpt;
+    //pressure_p = (( float ( analogRead(A0) )/1023.) * 5.0/V_SUPPLY_HONEY  - 0.1 + (V_HONEY_P0-0.5))/0.8*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20; //Data sheet figure 2 analog pressure, calibration from 10% to 90%
 
     //pos=findClosest(dp_pos,38,p_dpt);
-    pos=findClosest(dp_pos,24,p_dpt);
- 
-    if (p_dpt > 0){
-//      _flux=16.667*(float)po_flux_pos[findClosest(dp_pos,38,p_dpt)];
-        _flux = po_flux_pos[pos] + ( po_flux_pos[pos+1] - po_flux_pos[pos] ) * ( p_dpt - dp_pos[pos] ) / ( dp_pos[pos+1] - dp_pos[pos]);
-    }else{
-      //_flux=-16.667*(float)po_flux_neg[findClosest2(dp_neg,38,p_dpt)];
-      _flux=0.;
-    }    
+//    if ( p_dpt > 0 ) {
+      pos=findClosest(dp_pos,24,p_dpt);
+      _flux = po_flux_pos[pos] + ( po_flux_pos[pos+1] - po_flux_pos[pos] ) * ( p_dpt - dp_pos[pos] ) / ( dp_pos[pos+1] - dp_pos[pos]);
+//    } else {
+//        pos=findClosest(dp_neg,24,p_dpt);
+//        _flux = po_flux_neg[pos] + ( po_flux_neg[pos+1] - po_flux_neg[pos] ) * ( p_dpt - dp_neg[pos] ) / ( dp_neg[pos+1] - dp_neg[pos]);      
+//      }    
     #ifdef DEBUG_OFF
     Serial.print(pressure_p);Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol);
+    //Serial.println(p_dpt);
 //    Serial.print(millis());Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol); //Flux
 //    Serial.print(pressure_p);Serial.print(" ");Serial.print("0.0");Serial.print(" ");Serial.println("0.0"); //EVALUATE PRESSURE
     //Serial.print("0.0 ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol); //EVALUATE FLUX
@@ -301,7 +307,7 @@ void loop() {
     #endif
 
     #ifdef DEBUG_UPDATE
-    Serial.print(millis()-_msecTimerStartCycle);Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol); //Flux
+    //Serial.print(millis()-_msecTimerStartCycle);Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol); //Flux
     #endif
 
     lastReadSensor = millis();
@@ -309,37 +315,61 @@ void loop() {
       //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
       if (pressure_p>pressure_max) {
             pressure_max=pressure_p;
-      }
+       }
       if (pressure_p < pressure_min){
           pressure_min=pressure_p;
       }
   }//Read Sensor
 
 
-    if (ventilation->getCycleNum() != last_cycle)
-      update_display = false;
+  /////////////////////// ORIG ///////////////////
+
+//      if (ventilation->getCycleNum() != last_cycle)
+//      update_display = false;
+//    State state = ventilation->getState();
+//    if (!update_display)
+//      if (ventilation->getCycleNum() != last_cycle && state == State_Exsufflation) {
+//        //Serial.print("Insuflated Vol: "); Serial.println(ventilation->getInsVol());
+//        lcd.clear();  //display_lcd do not clear screnn in order to not blink
+//        display_lcd();
+//        update_display = true;
+//        last_cycle = ventilation->getCycleNum();
+//        last_update_display = millis();
+//
+//        if (update_options) { //Changed options applies when cycle changed
+//          ventilation->change_config(options);
+//          update_options = false;
+//        }
+//      }
+      //////////////////////////////////////
     State state = ventilation->getState();
-    if (!update_display)
-      if (ventilation->getCycleNum() != last_cycle && state == State_Exsufflation) {
-        //Serial.print("Insuflated Vol: "); Serial.println(ventilation->getInsVol());
+    if ( ventilation -> getCycleNum () != last_cycle ) {
+        last_cycle = ventilation->getCycleNum(); 
+        Serial.println("Cycle changed");
         lcd.clear();  //display_lcd do not clear screnn in order to not blink
         display_lcd();
         update_display = true;
-        last_cycle = ventilation->getCycleNum();
         last_update_display = millis();
+    }
 
-        if (update_options) { //Changed options applies when cycle changed
+    if (display_needs_update) {
+        lcd.clear();  //display_lcd do not clear screnn in order to not blink
+        display_lcd();
+        display_needs_update = false;
+    }
+
+      if ( update_options ) {
           ventilation->change_config(options);
           update_options = false;
-        }
-      }
+      //show_changed_options=true;
+    }//
 
   if ( millis () - last_vent_time > TIME_BASE ) {
     ventilation -> update();
   }
 
   //HERE changed_options flag is not updating until cycle hcanges
-  if ( show_changed_options && ((millis() - last_update_display) > time_update_display) ) {
+  if (show_changed_options && ((millis() - last_update_display) > time_update_display) ) {
       display_lcd();  //WITHOUT CLEAR!
       last_update_display = millis();
       show_changed_options=false;
@@ -427,7 +457,7 @@ void check_encoder()
 
 
   if (oldEncPos != encoderPos) {
-
+    show_changed_options = true;
     if (curr_sel != 0) {
       if ( encoderPos > max_sel ) {
          encoderPos=oldEncPos=max_sel; 
@@ -445,6 +475,7 @@ void check_encoder()
             break;
           case 3:
             options.percInspEsp=encoderPos;
+            //pressure_max = 0;
             break;
           case 4:
             if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
