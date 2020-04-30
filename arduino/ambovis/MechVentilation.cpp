@@ -17,6 +17,7 @@ float pressure_min;
 
 static int highest_man_pos;
 float _mlInsVol,_mllastInsVol;
+unsigned long _msecTimerStartCycle;
 
 MechVentilation::MechVentilation(
         #ifdef ACCEL_STEPPER

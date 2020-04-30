@@ -182,7 +182,6 @@ private:
 
         /** Timer counter in seconds. */
     //Este tambien es mio
-    unsigned long _msecTimerStartCycle; //CADA semiciclo
    
     unsigned long _msecTimerCnt; //esteno necesita ser tan grande
     /**  Insufflation timeout in seconds. */
@@ -204,7 +203,7 @@ extern unsigned long last_vent_time;
 extern float _mlInsVol,_mllastInsVol;
 //extern float _stepperSpeed;
 extern float pressure_sec,psec_max,last_psec_max;
-
+extern unsigned long _msecTimerStartCycle; //CADA semiciclo
 extern float _currentPressure;
 
 #endif /* INC_MECHANICAL_VENTILATION_H */
