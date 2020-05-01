@@ -201,10 +201,14 @@ private:
 extern byte stepper_time;
 extern unsigned long last_vent_time;
 extern float _mlInsVol,_mllastInsVol;
+//_mlInsVol2;
 //extern float _stepperSpeed;
 extern float pressure_sec,psec_max,last_psec_max;
 extern unsigned long _msecTimerStartCycle; //CADA semiciclo
 extern float _currentPressure;
 extern bool display_needs_update;
+extern byte flux_count;
+extern unsigned long flux_filter_time;
+extern float flux_sum;
 
 #endif /* INC_MECHANICAL_VENTILATION_H */

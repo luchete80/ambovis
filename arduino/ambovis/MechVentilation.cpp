@@ -18,7 +18,7 @@ float pressure_min;
 static int highest_man_pos;
 unsigned long _msecTimerStartCycle;
 
-bool adding_vol;
+//bool adding_vol;
 
 MechVentilation::MechVentilation(
         #ifdef ACCEL_STEPPER
@@ -182,11 +182,20 @@ void MechVentilation::deactivateRecruitment(void)
 /**
  * It's called from timer1Isr
  */
-void MechVentilation::update(void)
+void MechVentilation :: update ( void )
 {
-    if ( adding_vol ){
-      _mlInsVol+=_flux*float((millis()-last_vent_time))*0.001;//flux in l and time in msec, results in ml 
-    }
+    //#ifdef FILTER_FLUX
+//    if ( adding_vol && flux_count > 4){
+//      //_mlInsVol+=_flux*float((millis()-last_vent_time))*0.001;//flux in l and time in msec, results in ml 
+//      _mlInsVol2+=flux_sum/5.*float( ( millis() - flux_filter_time ) ) * 0.001;//flux in l and time in msec, results in ml 
+//      flux_count=0;
+//    } else {
+//      flux_sum+=_flux;
+//      flux_filter_time=millis();
+//      }
+    //#else
+    _mlInsVol+=_flux*float((millis()-last_vent_time))*0.001;//flux in l and time in msec, results in ml 
+    //#endif
     last_vent_time = millis();
     
     static int totalCyclesInThisState = 0;
@@ -221,7 +230,12 @@ void MechVentilation::update(void)
     {
     case Init_Insufflation:
     {
-      adding_vol=true;
+      //Filter vars
+      flux_filter_time=millis();
+      flux_count=0;
+      //flux_sum=0;
+      
+      //adding_vol=true;
       #ifdef DEBUG_UPDATE
         Serial.println("INSUFLACION ");        
       #endif
@@ -243,6 +257,7 @@ void MechVentilation::update(void)
         _msecTimerStartCycle=millis();  //Luciano
         
         _mllastInsVol=_mlInsVol;
+        //_mlInsVol2=0;
         _mlInsVol=0.;
         
         wait_NoMove=false;
@@ -386,7 +401,7 @@ void MechVentilation::update(void)
       //Serial.print("Current pressure");Serial.println(_currentPressure);
       
 //#if DEBUG_UPDATE
-        Serial.println("Starting exsuflation");
+//        Serial.println("Starting exsuflation");
 //#endif
         // Open Solenoid Valve
         digitalWrite(PIN_SOLENOID, SOLENOID_OPEN);
@@ -429,8 +444,8 @@ void MechVentilation::update(void)
     case State_Exsufflation:
     { 
     
-      if ( _flux < 10.)
-        adding_vol=false;
+//      if ( _flux < 10.)
+//        adding_vol=false;
 //#if 0
 //        if (_stepper->motionComplete())
 //        {

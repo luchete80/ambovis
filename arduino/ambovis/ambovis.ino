@@ -20,6 +20,7 @@
 
 int pressure_flux;  //For calculating flux
 float _mlInsVol=0,_mllastInsVol;
+//float _mlInsVol2;
 
 int Compression_perc = 8; //80%
 
@@ -60,6 +61,8 @@ float p_dpt;
 
 unsigned long lastReadSensor = 0;
 bool display_needs_update=false;
+byte flux_count;
+unsigned long flux_filter_time;
 
 
 State static lastState;
@@ -74,6 +77,7 @@ extern byte stepper_time = 50;
 unsigned long last_stepper_time;
 unsigned long last_vent_time;
 unsigned long time;
+float flux_sum;
 
 
 //float dp_neg[]={-0.877207832,-0.606462279,-0.491216024,-0.377891785,-0.295221736,-0.216332764,-0.151339196,-0.096530072,-0.052868293,-0.047781395,-0.039664506,-0.03312327,-0.028644966,-0.023566372,-0.020045692,-0.014830113,-0.011688636,-0.008176254,-0.006117271,-0.003937171,-0.001999305,-0.00090924,-0.00030358,0};
@@ -262,7 +266,7 @@ void setup() {
   f1_honey=5.0*DEFAULT_PSI_TO_CM_H20*2/(1023*0.8*V_SUPPLY_HONEY);
   
   //#ifdef DEBUG_UPDATE
-    Serial.print("Honey Volt at p0: ");Serial.println(analogRead(A0)/1023.);
+    //Serial.print("Honey Volt at p0: ");Serial.println(analogRead(A0)/1023.);
   //#endif
 
 }
@@ -296,9 +300,14 @@ void loop() {
 //    } else {
 //        pos=findClosest(dp_neg,24,p_dpt);
 //        _flux = po_flux_neg[pos] + ( po_flux_neg[pos+1] - po_flux_neg[pos] ) * ( p_dpt - dp_neg[pos] ) / ( dp_neg[pos+1] - dp_neg[pos]);      
-//      }    
+//      }
+    flux_count++;    //Filter
+
+    
     #ifdef DEBUG_OFF
     Serial.print(pressure_p);Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol);
+    //Serial.print(millis());Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.print(_mlInsVol);Serial.print(" ");Serial.println(_mlInsVol2);
+    //Serial.print(millis());Serial.print(" ");Serial.println(p_dpt);
     //Serial.println(p_dpt);
 //    Serial.print(millis());Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol); //Flux
 //    Serial.print(pressure_p);Serial.print(" ");Serial.print("0.0");Serial.print(" ");Serial.println("0.0"); //EVALUATE PRESSURE
@@ -345,7 +354,6 @@ void loop() {
     State state = ventilation->getState();
     if ( ventilation -> getCycleNum () != last_cycle ) {
         last_cycle = ventilation->getCycleNum(); 
-        Serial.println("Cycle changed");
         lcd.clear();  //display_lcd do not clear screnn in order to not blink
         display_lcd();
         update_display = true;

@@ -31,7 +31,7 @@ class ReadLine:
 
 # If you're not using Linux, you'll need to change this
 # check the Arduino IDE to see what serial port it's attached to
-s = serial.Serial('/dev/ttyUSB0', 115200)
+s = serial.Serial('com4', 115200)
 #s = serial.Serial('com4', 115200)
 serial = ReadLine(s)
 
