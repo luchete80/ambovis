@@ -217,7 +217,7 @@ void setup() {
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
-  writeLine(1, "AMBOVIS 2904_v2",4);
+  writeLine(1, "AMBOVIS 0105_v1",4);
 
   // configura la ventilación
   ventilation -> start();
@@ -291,7 +291,7 @@ void loop() {
     //0.1 is from the 0.5 readed initially by the honeywell
     p_dpt    =f_dpt*float(analogRead(A1)); //ONE DIRECTION
     //p_dpt      = f_dpt*float(analogRead(A1)) - corr_dpt;
-    //pressure_p = (( float ( analogRead(A0) )/1023.) * 5.0/V_SUPPLY_HONEY  - 0.1 + (V_HONEY_P0-0.5))/0.8*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20; //Data sheet figure 2 analog pressure, calibration from 10% to 90%
+    pressure_p = (( float ( analogRead(A0) )/1023.) * 5.0/V_SUPPLY_HONEY  - 0.1 + (V_HONEY_P0-0.5))/0.8*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20; //Data sheet figure 2 analog pressure, calibration from 10% to 90%
 
     //pos=findClosest(dp_pos,38,p_dpt);
 //    if ( p_dpt > 0 ) {
