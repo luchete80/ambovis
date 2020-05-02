@@ -546,7 +546,7 @@ void display_lcd ( ) {
   writeLine(2, "IE:1:", 1);
 
   dtostrf(ventilation->getInsVol(), 4, 0, tempstr);
-  writeLine(1, String(tempstr), 15);
+  writeLine(1, String(tempstr), 16);
   //writeLine(1, "---", 16);
 
   writeLine(2, String(options.percInspEsp), 6);
