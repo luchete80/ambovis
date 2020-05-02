@@ -110,8 +110,8 @@ while run:
         # store the entire dataset for later
         #ydata.append(float(data[0])*5.0/1024
         ydata.append(int(data[0]))
-		y2data.append(int(data[1]))
-		y3data.append(int(data[2]))
+        y2data.append(int(data[1]))
+        y3data.append(int(data[2]))
         timepoints.append(t - start_time)
 		#timepoints.append(float(data[0]/1000.) - start_time)
 
@@ -128,11 +128,11 @@ while run:
 
         #print(ydata)
 
-        # line2.set_xdata(timepoints)
-        # line2.set_ydata(y2data)
+        line2.set_xdata(timepoints)
+        line2.set_ydata(y2data)
 
-        # line3.set_xdata(timepoints)
-        # line3.set_ydata(y3data)
+        line3.set_xdata(timepoints)
+        line3.set_ydata(y3data)
 
         # slide the viewing frame along
         if current_time > view_time:

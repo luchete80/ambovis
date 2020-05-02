@@ -218,7 +218,7 @@ void setup() {
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
-  writeLine(1, "AMBOVIS 0105_v1",4);
+  writeLine(1, "AMBOVIS R_0_4",4);
 
   // configura la ventilación
   ventilation -> start();
@@ -289,7 +289,7 @@ void loop() {
 //    
     #ifdef DEBUG_OFF
     if (millis() > lastShowSensor + TIME_SHOW) {
-      Serial.print(millis());Serial.print(" ");Serial.print(int(pressure_p));Serial.print(" ");Serial.print(int(_flux));Serial.print(" ");Serial.println(int(_mlInsVol));
+      /*Serial.print(millis());Serial.print(" ");*/Serial.print(int(pressure_p));Serial.print(" ");Serial.print(int(_flux));Serial.print(" ");Serial.println(int(_mlInsVol));
       lastShowSensor=millis();
     }
     #endif
