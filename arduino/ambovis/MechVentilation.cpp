@@ -437,8 +437,8 @@ void MechVentilation :: update ( void )
         /* Status update and reset timer, for next time */
         _setState(State_Exsufflation);
     
-        display_needs_update=true;
-        last_pressure_max=pressure_max;
+        //display_needs_update=true;
+        //last_pressure_max=pressure_max;
     }
     break;
     case State_Exsufflation:
