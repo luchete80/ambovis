@@ -45,7 +45,7 @@ y2data = []
 y3data = []
 #yrange = [-0.1,5.1]
 yrange = [0.,500.]
-view_time = 4 # seconds of data to view at once
+view_time = 5 # seconds of data to view at once
 duration = 24 # total seconds to collect data
 
 #fig1 = plt.figure()
@@ -59,10 +59,11 @@ axs[1].set(xlabel='time', ylabel='Flux     [ml/s]')
 axs[2].set(xlabel='time', ylabel='Volume   [ml]')
 
 #line1, = axs[0].plot(ydata,marker='o',markersize=4,linestyle='dotted',markerfacecolor='green') #ORIGINAL
-line1, = axs[0].plot(ydata)
-line2, = axs[1].plot(y2data,marker='o',markersize=4,linestyle='dotted',markerfacecolor='blue') #ORIGINAL
-line3, = axs[2].plot(y3data,marker='o',markersize=4,linestyle='dotted',markerfacecolor='red') #ORIGINAL
-
+line1, = axs[0].plot(ydata,color='red')
+line2, = axs[1].plot(y2data,color='green')
+line3, = axs[2].plot(y3data)
+#line2, = axs[1].plot(y2data,marker='o',markersize=4,linestyle='dotted',markerfacecolor='blue') #ORIGINAL
+#line3, = axs[2].plot(y3data,marker='o',markersize=4,linestyle='dotted',markerfacecolor='red') #ORIGINAL
 
 #subplot limits
 # plt.ylim([-500,500]) #ORIGINAL
@@ -72,10 +73,10 @@ axs.flat[0].set_xlim(0,view_time)
 axs.flat[0].set_ylim(0,40)
 
 axs.flat[1].set_xlim(0,view_time)
-axs.flat[1].set_ylim(0,1500)
+axs.flat[1].set_ylim(0,400)
 
 axs.flat[2].set_xlim(0,view_time)
-axs.flat[2].set_ylim(-1000,1000)
+axs.flat[2].set_ylim(0,800)
 
 axs.flat[0].legend([line1],["BMP280", "A0", "Honeywell (A1)"])
 axs.flat[1].legend([line2],["Flux [ml/s]"])
@@ -126,8 +127,6 @@ while run:
         line1.set_xdata(timepoints)
         line1.set_ydata(ydata)
 
-        #print(ydata)
-
         line2.set_xdata(timepoints)
         line2.set_ydata(y2data)
 
@@ -137,8 +136,8 @@ while run:
         # slide the viewing frame along
         if current_time > view_time:
             axs.flat[0].set_xlim(current_time-view_time,current_time)
-            # axs.flat[1].set_xlim(current_time-view_time,current_time)
-            # axs.flat[2].set_xlim(current_time-view_time,current_time)
+            axs.flat[1].set_xlim(current_time-view_time,current_time)
+            axs.flat[2].set_xlim(current_time-view_time,current_time)
 
         # when time's up, kill the collect+plot loop
         #if timepoints[-1] > duration: run=False
@@ -148,6 +147,8 @@ while run:
 		
         if(cnt>50):                            #If you have 50 or more points, delete the first one from the array
             ydata.pop(0)                       #This allows us to just see the last 50 data points
+            y2data.pop(0)  
+            y3data.pop(0)
             timepoints.pop(0)
     # update the plot
     fig1.canvas.draw()

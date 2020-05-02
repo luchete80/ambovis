@@ -415,10 +415,10 @@ void check_encoder()
       
       curr_sel++; //NOT +=1, is a byte
 
-      if ((vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_MAN) && curr_sel==5) curr_sel++; //Not selecting pip in VCL
+      //if ((vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_MAN) && curr_sel==5) curr_sel++; //Not selecting pip in VCL
       if (vent_mode==VENTMODE_PCL && curr_sel==4) curr_sel++; //Not selecting pip in VCL 
             
-      if (curr_sel > 6)
+      if (curr_sel > 5)
         curr_sel = 0;
       switch (curr_sel){
         case 1: 
@@ -562,7 +562,7 @@ void display_lcd ( ) {
     Serial.print("Min Max press");  Serial.print(pressure_min);Serial.print(" ");Serial.println(pressure_max);
   #endif
     
-  writeLine(3, "PEEP:" + String(options.peakEspiratoryPressure), 8);
+  writeLine(3, "PEEP: -", 8);
   dtostrf(last_pressure_min, 2, 1, tempstr);
   writeLine(3, String(tempstr), 16);  
  
