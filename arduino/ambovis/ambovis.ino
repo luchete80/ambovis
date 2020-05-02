@@ -60,6 +60,7 @@ float _currentPressure = 0.0;
 float p_dpt;
 
 unsigned long lastReadSensor = 0;
+unsigned long lastShowSensor = 0;
 bool display_needs_update=false;
 byte flux_count;
 unsigned long flux_filter_time;
@@ -238,7 +239,7 @@ void setup() {
   pinMode(PIN_ENC_SW, INPUT_PULLUP);
   //btnState=digitalRead(9);
 
-  lastReadSensor = millis();
+  lastReadSensor =   lastShowSensor = millis();
   lastState = ventilation->getState();
   last_update_display = millis();
 
@@ -285,6 +286,14 @@ void loop() {
 
   time = millis();
 
+//    
+    #ifdef DEBUG_OFF
+    if (millis() > lastShowSensor + TIME_SHOW) {
+      Serial.print(millis());Serial.print(" ");Serial.print(int(pressure_p));Serial.print(" ");Serial.print(int(_flux));Serial.print(" ");Serial.println(int(_mlInsVol));
+      lastShowSensor=millis();
+    }
+    #endif
+    
   if (time > lastReadSensor + TIME_SENSOR){
 
     //A0: PRESSURE (HOEYWELL) A1: Volume (DPT) A2: Test Mode pressure (DPT)
@@ -303,17 +312,9 @@ void loop() {
 //      }
     flux_count++;    //Filter
 
-    
-    #ifdef DEBUG_OFF
-    Serial.print(pressure_p);Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol);
-    //Serial.print(millis());Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.print(_mlInsVol);Serial.print(" ");Serial.println(_mlInsVol2);
-    //Serial.print(millis());Serial.print(" ");Serial.println(p_dpt);
-    //Serial.println(p_dpt);
-//    Serial.print(millis());Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol); //Flux
-//    Serial.print(pressure_p);Serial.print(" ");Serial.print("0.0");Serial.print(" ");Serial.println("0.0"); //EVALUATE PRESSURE
-    //Serial.print("0.0 ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol); //EVALUATE FLUX
-    //Serial.print("0 ");Serial.print(int(_flux));Serial.print(" ");Serial.println(int(_mlInsVol)); //EVALUATE FLUX
-    #endif
+//    #ifdef DEBUG_OFF
+//      Serial.print(millis());Serial.print(" ");Serial.print(int(pressure_p));Serial.print(" ");Serial.print(int(_flux));Serial.print(" ");Serial.println(int(_mlInsVol));
+//    #endif
 
     #ifdef DEBUG_UPDATE
     //Serial.print(millis()-_msecTimerStartCycle);Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol); //Flux
