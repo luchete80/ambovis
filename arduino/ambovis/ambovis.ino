@@ -218,7 +218,7 @@ void setup() {
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
-  writeLine(1, "AMBOVIS 0205_v1",4);
+  writeLine(1, "AMBOVIS 0305_v1",4);
 
   // configura la ventilación
   ventilation -> start();
@@ -524,12 +524,12 @@ void display_lcd ( ) {
 
   switch (vent_mode){
     case VENTMODE_VCL:
-      writeLine(0, "MOD:VCL", 1); 
+      writeLine(0, "MOD:VCV", 1); 
       writeLine(1, "V:" + String(options.tidalVolume), 10);    
       writeLine(2, "PIP : - ", 8);
     break;
     case VENTMODE_PCL:
-      writeLine(0, "MOD:PCL", 1); 
+      writeLine(0, "MOD:PCV", 1); 
       writeLine(2, "PIP :" + String(options.peakInspiratoryPressure), 8);
       writeLine(1, "V: - ", 10);
     break;    
