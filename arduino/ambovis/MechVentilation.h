@@ -2,7 +2,6 @@
  *
  * @file MechVentilation.h
  *
- * This is the mechanical ventilation software module.
  * It handles the mechanical ventilation control loop.
  */
 #ifndef INC_MECHANICAL_VENTILATION_H
@@ -108,7 +107,7 @@ public:
 
     float getInsVol(void);
 
-    byte getCycleNum(){return _cyclenum;};
+    unsigned long getCycleNum(){return _cyclenum;};
     void change_config(VentilationOptions_t);
 
 
@@ -185,7 +184,7 @@ private:
    
     unsigned long _msecTimerCnt; //esteno necesita ser tan grande
     /**  Insufflation timeout in seconds. */
-    byte _cyclenum;    //Not important value, only for printing control
+    unsigned long _cyclenum;    //Not important value, only for printing control
     
 
     /** Stepper speed. Steps per seconds. */

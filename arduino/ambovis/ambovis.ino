@@ -276,7 +276,7 @@ void setup() {
    Loop
 */
 //
-byte last_cycle = 0;
+unsigned long last_cycle = 0;
 bool update_display = false;
 char string[100];
 byte pos;
