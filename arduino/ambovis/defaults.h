@@ -22,6 +22,7 @@
 #define TIME_BASE   25                 // msec
 #define TIME_SENSOR 10               // msec
 #define TIME_SHOW 50
+#define TIME_SAVE 5000
 #define TIME_SEND_CONFIGURATION 2000 // msec
 #define V_HONEY_P0 0.5145
 

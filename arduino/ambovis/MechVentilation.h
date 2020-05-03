@@ -108,6 +108,7 @@ public:
     float getInsVol(void);
 
     unsigned long getCycleNum(){return _cyclenum;};
+    void setCycleNum(unsigned long cyc){_cyclenum=cyc;}
     void change_config(VentilationOptions_t);
 
 

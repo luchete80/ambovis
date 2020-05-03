@@ -18,6 +18,8 @@
 #endif
 #include "src/Pressure_Sensor/Pressure_Sensor.h"  //LUCIANO: MPX5050DP
 
+#include <EEPROM.h>
+
 int pressure_flux;  //For calculating flux
 float _mlInsVol=0,_mllastInsVol;
 //float _mlInsVol2;
@@ -61,6 +63,7 @@ float p_dpt;
 
 unsigned long lastReadSensor = 0;
 unsigned long lastShowSensor = 0;
+unsigned long lastSave = 0;
 bool display_needs_update=false;
 byte flux_count;
 unsigned long flux_filter_time;
@@ -79,6 +82,8 @@ unsigned long last_stepper_time;
 unsigned long last_vent_time;
 unsigned long time;
 float flux_sum;
+
+unsigned long last_cycle;
 
 
 //float dp_neg[]={-0.877207832,-0.606462279,-0.491216024,-0.377891785,-0.295221736,-0.216332764,-0.151339196,-0.096530072,-0.052868293,-0.047781395,-0.039664506,-0.03312327,-0.028644966,-0.023566372,-0.020045692,-0.014830113,-0.011688636,-0.008176254,-0.006117271,-0.003937171,-0.001999305,-0.00090924,-0.00030358,0};
@@ -218,7 +223,7 @@ void setup() {
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
-  writeLine(1, "AMBOVIS 0305_v1",4);
+  writeLine(1, "AMBOVIS 0305_v2",4);
 
   // configura la ventilación
   ventilation -> start();
@@ -269,14 +274,14 @@ void setup() {
   //#ifdef DEBUG_UPDATE
     //Serial.print("Honey Volt at p0: ");Serial.println(analogRead(A0)/1023.);
   //#endif
-
+  EEPROM.get(0,last_cycle);
+  ventilation->setCycleNum(last_cycle);
 }
 
 /**
    Loop
 */
 //
-unsigned long last_cycle = 0;
 bool update_display = false;
 char string[100];
 byte pos;
@@ -293,6 +298,11 @@ void loop() {
       lastShowSensor=millis();
     }
     #endif
+
+    if (millis() > lastSave + TIME_SAVE) {
+      EEPROM.put(0,last_cycle);
+      lastSave=millis();
+    }
     
   if (time > lastReadSensor + TIME_SENSOR){
 
@@ -562,11 +572,13 @@ void display_lcd ( ) {
     Serial.print("Min Max press");  Serial.print(pressure_min);Serial.print(" ");Serial.println(pressure_max);
   #endif
     
-  writeLine(3, "PEEP: -", 8);
+  writeLine(3, "PEEP: -", 11);
   dtostrf(last_pressure_min, 2, 1, tempstr);
   writeLine(3, String(tempstr), 16);  
- 
 
+
+  writeLine(3, "C: -", 1);
+  writeLine(3, String(last_cycle), 3);
 
   lcd_clearxy(0,0);
   lcd_clearxy(0,1);lcd_clearxy(9,1);

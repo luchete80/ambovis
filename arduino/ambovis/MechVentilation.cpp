@@ -602,7 +602,6 @@ void MechVentilation::_init(
     /* Initialize internal state */
     _currentState = State_Homing;
     _stepperSpeed = STEPPER_SPEED_DEFAULT;
-    _cyclenum=0;
     //
     // connect and configure the stepper motor to its IO pins
     //
