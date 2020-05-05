@@ -210,5 +210,8 @@ extern bool display_needs_update;
 extern byte flux_count;
 extern unsigned long flux_filter_time;
 extern float flux_sum;
+extern VentilationOptions_t options;
+extern MechVentilation * ventilation;
+extern unsigned long last_cycle;
 
 #endif /* INC_MECHANICAL_VENTILATION_H */

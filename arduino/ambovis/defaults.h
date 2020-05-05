@@ -1,9 +1,8 @@
-
 #ifndef _DEFAULTS_H
 #define _DEFAULTS_H
 
 #include "Arduino.h"
-
+//#define LCD_I2C 1 //IT DOES NOT WORK WITH ENCODER
 //Connections and Debug Defs
 //#define ACCEL_STEPPER 1
 //#define DEBUG_UPDATE 1 //
@@ -12,7 +11,6 @@
 #define RANGE_DPT 100.0F
 
 #define BMP_I2C 1  //Pressure Sensor
-//#define LCD_I2C 1 //IT DOES NOT WORK WITH ENCODER
 
 
 //#define DEBUG_STATE_MACHINE 1
@@ -107,7 +105,9 @@
 #define SOLENOID_CLOSED 0
 #define SOLENOID_OPEN 1
 
-typedef struct {
+class VentilationOptions_t {
+
+  public:
   short respiratoryRate;
   short peakInspiratoryPressure;
   short peakEspiratoryPressure;
@@ -117,7 +117,10 @@ typedef struct {
   short tidalVolume;  //in ml
   byte modeCtl;
   byte percVolume;   //For manual mode: 1 to 10
-} VentilationOptions_t;
+
+  VentilationOptions_t(){}
+  ~VentilationOptions_t(){}
+};
 
 #define MODE_VOL_CTL 0
 #define MODE_VOL_CTL 1
