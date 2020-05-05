@@ -87,6 +87,7 @@ float flux_sum;
 unsigned long last_cycle;
 
 byte menu_number=0;
+byte alarm_max_pressure=35;
 
 //MENU
 unsigned long lastButtonPress;

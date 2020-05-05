@@ -213,5 +213,6 @@ extern float flux_sum;
 extern VentilationOptions_t options;
 extern MechVentilation * ventilation;
 extern unsigned long last_cycle;
+extern byte alarm_max_pressure;
 
 #endif /* INC_MECHANICAL_VENTILATION_H */

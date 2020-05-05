@@ -79,7 +79,6 @@
 #define DEFAULT_RECRUITMENT_PIP 40
 
 // Alarmas
-#define ALARM_MAX_PRESSURE 35 // cm H2O
 #define ALARM_MIN_PRESSURE 1  // cm H2O
 
 // Válvula de emergencia

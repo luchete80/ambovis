@@ -3,6 +3,7 @@
 #include "menu.h"
 #include "MechVentilation.h"  //options
 
+static bool clear_all_display;
 
 void init_display()
 {
@@ -42,41 +43,55 @@ void check_encoder ( ) {
 
       //if ((vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_MAN) && curr_sel==5) curr_sel++; //Not selecting pip in VCL
       if (vent_mode==VENTMODE_PCL && curr_sel==4) curr_sel++; //Not selecting pip in VCL 
-            
-      if (curr_sel > 5)
-        curr_sel = 0;
-      switch (curr_sel){
-        case 1: 
-          min_sel=0;max_sel=2;
-          encoderPos=oldEncPos=vent_mode;
-        break;
-        case 2: 
-          encoderPos=oldEncPos=options.respiratoryRate;
-          min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
-        break;
-        case 3:
-          encoderPos=oldEncPos=options.percInspEsp;
-          min_sel=1;max_sel=4;        
-        break;
-        case 4: 
-          if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
-            encoderPos=oldEncPos=options.tidalVolume;
-            min_sel=200;max_sel=800;
-          } else {//Manual
-            encoderPos=oldEncPos=options.percVolume;
-//            Serial.print("Encoder pos: ");Serial.println(encoderPos);
-            min_sel=40;max_sel=100;            
-          } break;
-        case 5: 
-          encoderPos=oldEncPos=options.peakInspiratoryPressure;
-          min_sel=10;max_sel=40;
-        break;
-        case 6: 
-          encoderPos=oldEncPos=options.peakEspiratoryPressure;
-          min_sel=5;max_sel=20;
-        break;
-      }
 
+      if ( menu_number == 0 ) {
+        if (curr_sel > 5) {
+          curr_sel=1;
+          menu_number+=1;
+          clear_all_display=true;
+          display_lcd();
+        } 
+      } else if (menu_number == 1) {
+         if (curr_sel > 2) {
+          menu_number=0;          
+         }
+        
+      }
+      switch (curr_sel){
+              case 1: 
+                //if ( menu_number == 0) {
+                  min_sel=0;max_sel=2;
+                  encoderPos=oldEncPos=vent_mode;
+                /*} else if ( menu_number == 1 ) {                
+                  min_sel=20;max_sel=50;
+                  encoderPos=oldEncPos=alarm_max_pressure;
+                  }*/     
+              break;
+              case 2: 
+                encoderPos=oldEncPos=options.respiratoryRate;
+                min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
+              break;
+              case 3:
+                encoderPos=oldEncPos=options.percInspEsp;
+                min_sel=1;max_sel=4;        
+              break;
+              case 4: 
+                if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
+                  encoderPos=oldEncPos=options.tidalVolume;
+                  min_sel=200;max_sel=800;
+                } else {//Manual
+                  encoderPos=oldEncPos=options.percVolume;
+      //            Serial.print("Encoder pos: ");Serial.println(encoderPos);
+                  min_sel=40;max_sel=100;            
+                } break;
+              case 5: 
+                encoderPos=oldEncPos=options.peakInspiratoryPressure;
+                min_sel=10;max_sel=40;
+              break;
+              case 6: 
+                encoderPos=oldEncPos=options.peakEspiratoryPressure;
+                min_sel=5;max_sel=20;
+              break;
       old_curr_sel = curr_sel;
       show_changed_options = true;
       update_options = true;
@@ -96,39 +111,41 @@ void check_encoder ( ) {
          encoderPos=oldEncPos=max_sel; 
       } else if ( encoderPos < min_sel ) {
           encoderPos=oldEncPos=min_sel;
-        } else {
-       
+        } else {       
         oldEncPos = encoderPos;
         switch (curr_sel) {
-          case 1:
-            vent_mode = encoderPos;
-            break;
-          case 2:
-            options.respiratoryRate = encoderPos;
-            break;
-          case 3:
-            options.percInspEsp=encoderPos;
-            //pressure_max = 0;
-            break;
-          case 4:
-            if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
-              options.tidalVolume = encoderPos;
-              #ifdef DEBUG_UPDATE
-              Serial.print("tidal ");Serial.print(options.tidalVolume);Serial.print("encoder pos");Serial.print(encoderPos);
-              #endif
-              } else { //manual
-              options.percVolume =encoderPos;
-             // Serial.print("Encoder pos: ");Serial.println(encoderPos);
-             // Serial.print("Perc vol: ");Serial.println(options.percVolume);
-            }
-            break;
-          case 5:
-            options.peakInspiratoryPressure = encoderPos;
-            break;
-          case 6:
-            options.peakEspiratoryPressure = encoderPos;
-            break;
-        }
+              case 1:
+                //if ( menu_number == 0 ) vent_mode = encoderPos;
+                /*else                     */alarm_max_pressure = encoderPos;
+                break;
+              case 2:
+                options.respiratoryRate = encoderPos;
+                break;
+              case 3:
+                options.percInspEsp=encoderPos;
+                //pressure_max = 0;
+                break;
+              case 4:
+                if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
+                  options.tidalVolume = encoderPos;
+                  #ifdef DEBUG_UPDATE
+                  Serial.print("tidal ");Serial.print(options.tidalVolume);Serial.print("encoder pos");Serial.print(encoderPos);
+                  #endif
+                  } else { //manual
+                  options.percVolume =encoderPos;
+                 // Serial.print("Encoder pos: ");Serial.println(encoderPos);
+                 // Serial.print("Perc vol: ");Serial.println(options.percVolume);
+                }
+                break;
+              case 5:
+                options.peakInspiratoryPressure = encoderPos;
+                break;
+              case 6:
+                options.peakEspiratoryPressure = encoderPos;
+                break;
+    
+          }//menu 2
+        }//switch curr_sel
         show_changed_options = true;
         update_options=true;
       }//Valid range
@@ -141,9 +158,9 @@ void check_encoder ( ) {
 
 
 void display_lcd ( ) {
-
-  if (menu_number==0) {
-  
+    if (clear_all_display)
+        lcd.clear();
+  if (menu_number==0) {  
     lcd_clearxy(5,1,3); lcd_clearxy(12,1,4);
     lcd_clearxy(5,2,2); lcd_clearxy(13,2,2);
     lcd_clearxy(13,3,2);
@@ -196,11 +213,15 @@ void display_lcd ( ) {
     writeLine(3, "C: -", 1);
     writeLine(3, String(last_cycle), 3);
   
+  } else if (menu_number ==1 ){//OTHER SETTINGS
+    writeLine(0, "PIP AL:" + String(alarm_max_pressure), 1); 
+        
+  }//menu_number
+
     lcd_clearxy(0,0);
     lcd_clearxy(0,1);lcd_clearxy(9,1);
     lcd_clearxy(0,2);lcd_clearxy(7,2);
     lcd_clearxy(7,3);
-    
     switch(curr_sel){
           case 1: 
             lcd_selxy(0,0);break;
@@ -215,9 +236,7 @@ void display_lcd ( ) {
           case 6: 
             lcd_selxy(7,3);break;
       }
-  } else if (menu_number ==1 ){//OTHER SETTINGS
-    writeLine(0, "PIP AL:", 1); 
-        
-  }//menu_number
+      
+  clear_all_display=false;
 
 }

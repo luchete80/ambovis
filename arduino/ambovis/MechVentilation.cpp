@@ -136,7 +136,7 @@ float MechVentilation::getCurrentPressure(){
       
 void MechVentilation::evaluatePressure(void)
 {
-    if (_currentPressure > ALARM_MAX_PRESSURE)
+    if (_currentPressure > alarm_max_pressure)
     {
         digitalWrite(PIN_BUZZ, HIGH);
         _currentAlarm = Alarm_Overpressure;
