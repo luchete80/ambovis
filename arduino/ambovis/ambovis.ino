@@ -160,8 +160,7 @@ VentilationOptions_t options;
 void setup() {
 
   Serial.begin(115200);
-
-
+  init_display();
 
   pinMode(PIN_BUZZ, OUTPUT);
   digitalWrite(PIN_BUZZ, HIGH); // test zumbador
@@ -279,7 +278,7 @@ void loop() {
 //    
     #ifdef DEBUG_OFF
     if (millis() > lastShowSensor + TIME_SHOW) {
-      /*Serial.print(millis());Serial.print(" ");*/Serial.print(int(pressure_p));Serial.print(" ");Serial.print(int(_flux));Serial.print(" ");Serial.println(int(_mlInsVol));
+      Serial.print(int(pressure_p));Serial.print(" ");Serial.print(int(_flux));Serial.print(" ");Serial.print(int(_mlInsVol));Serial.print(" ");Serial.println(last_cycle);
       lastShowSensor=millis();
     }
     #endif
@@ -350,14 +349,14 @@ void loop() {
     State state = ventilation->getState();
     if ( ventilation -> getCycleNum () != last_cycle ) {
         last_cycle = ventilation->getCycleNum(); 
-        lcd.clear();  //display_lcd do not clear screnn in order to not blink
+        //lcd.clear();  //display_lcd do not clear screnn in order to not blink
         display_lcd();
         update_display = true;
         last_update_display = millis();
     }
 
     if (display_needs_update) {
-        lcd.clear();  //display_lcd do not clear screnn in order to not blink
+        //lcd.clear();  //display_lcd do not clear screnn in order to not blink
         display_lcd();
         display_needs_update = false;
     }

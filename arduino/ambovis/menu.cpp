@@ -142,7 +142,7 @@ void check_encoder ( ) {
 
 void display_lcd ( ) {
 
-  //if (menu_number==0) {
+  if (menu_number==0) {
   
     lcd_clearxy(5,1,3); lcd_clearxy(12,1,4);
     lcd_clearxy(5,2,2); lcd_clearxy(13,2,2);
@@ -215,8 +215,9 @@ void display_lcd ( ) {
           case 6: 
             lcd_selxy(7,3);break;
       }
-//  } else if (menu_number ==1 ){
-//    
-//  }//menu_number
+  } else if (menu_number ==1 ){//OTHER SETTINGS
+    writeLine(0, "PIP AL:", 1); 
+        
+  }//menu_number
 
 }
