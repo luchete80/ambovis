@@ -222,7 +222,6 @@ void display_lcd ( ) {
     lcd_clearxy(0,0);
     lcd_clearxy(0,1);lcd_clearxy(9,1);
     lcd_clearxy(0,2);lcd_clearxy(7,2);
-    lcd_clearxy(7,3);
     switch(curr_sel){
           case 1: 
             lcd_selxy(0,0);break;
@@ -234,8 +233,6 @@ void display_lcd ( ) {
             lcd_selxy(9,1);break;
           case 5: 
             lcd_selxy(7,2);break;
-          case 6: 
-            lcd_selxy(7,3);break;
       }
       
   clear_all_display=false;

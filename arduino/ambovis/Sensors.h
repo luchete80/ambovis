@@ -7,11 +7,10 @@
 #include "src/Pressure_Sensor/Pressure_Sensor.h"
 #include "defaults.h"
 
-extern float pressure_max;
-extern float pressure_min;
+extern float pressure_max,pressure_min,pressure_peep;
 extern float pressure_p;  //DIFFERENTIALS!
 extern float pressure_p0;
-extern float last_pressure_max,last_pressure_min;
+extern float last_pressure_max,last_pressure_min,last_pressure_peep;
 
           
 extern float _flux,_flux_0;

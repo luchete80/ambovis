@@ -47,7 +47,8 @@ LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PI
 
 
 float pressure_p;   //EXTERN!!
-float last_pressure_max,last_pressure_min;
+float last_pressure_max,last_pressure_min,last_pressure_peep;
+float pressure_peep;
 
 byte vent_mode = VENTMODE_MAN; //0
 //Adafruit_BMP280 _pres1Sensor;
@@ -164,9 +165,11 @@ void setup() {
   init_display();
 
   pinMode(PIN_BUZZ, OUTPUT);
-  digitalWrite(PIN_BUZZ, HIGH); // test zumbador
-  delay(100);
-  digitalWrite(PIN_BUZZ, LOW);
+  digitalWrite(PIN_BUZZ, LOW); // test zumbador
+  delay(500);
+  digitalWrite(PIN_BUZZ, HIGH);
+  //beep(100); //Beep
+  //tone(PIN_BUZZ, 1000, 500);
 
   // PID
   pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);

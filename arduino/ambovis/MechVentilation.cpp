@@ -138,7 +138,8 @@ void MechVentilation::evaluatePressure(void)
 {
     if (_currentPressure > alarm_max_pressure)
     {
-        digitalWrite(PIN_BUZZ, HIGH);
+        //digitalWrite(PIN_BUZZ, HIGH);
+        //tone(PIN_BUZZ, 1000, 1000);
         _currentAlarm = Alarm_Overpressure;
         //Serial.println("Overpressure");
     }
@@ -150,7 +151,7 @@ void MechVentilation::evaluatePressure(void)
     else
     {
         if (_currentAlarm != No_Alarm) {
-            digitalWrite(PIN_BUZZ, LOW);
+            //digitalWrite(PIN_BUZZ, LOW);
             _currentAlarm = No_Alarm;
         }
     }
