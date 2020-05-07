@@ -15,6 +15,20 @@
 
 #include <EEPROM.h>
 
+#include <SPI.h>
+#include <U8g2lib.h>
+U8G2_SH1106_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
+byte ygr[128];
+
+
+
+#ifdef DEBUG_PID
+float errpid_prom=0;
+float errpid_prom_sig=0;
+byte ciclo_errpid=0;
+#endif
+bool test_pid=false;
+
 int pressure_flux;  //For calculating flux
 float _mlInsVol=0,_mllastInsVol;
 //float _mlInsVol2;
@@ -51,7 +65,7 @@ float pressure_p;   //EXTERN!!
 float last_pressure_max,last_pressure_min,last_pressure_peep;
 float pressure_peep;
 
-byte vent_mode = VENTMODE_MAN; //0
+byte vent_mode = VENTMODE_PCL; //0
 //Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
 float pressure_p0;
@@ -318,7 +332,7 @@ void loop() {
     #ifdef DEBUG_OFF
       Serial.print(millis()-_msecTimerStartCycle);Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol); //Flux
     #else
-      Serial.print(analogRead(A0));Serial.print(" ");Serial.println(pressure_p);
+      //Serial.print(" ");Serial.print(pressure_p);Serial.print(" ");Serial.println();
     #endif
     
     lastReadSensor = millis();
@@ -360,6 +374,23 @@ void loop() {
         display_lcd();
         update_display = true;
         last_update_display = millis();
+
+        #ifdef DEBUG_PID
+        if (vent_mode=VENTMODE_PCL) {
+          float err=(float)(pressure_max-options.peakInspiratoryPressure)/options.peakInspiratoryPressure;
+          errpid_prom+=fabs(err);
+          errpid_prom_sig+=err;
+          Serial.println("Error PID: ");Serial.print(err,5);
+          ciclo_errpid++;
+
+          if (ciclo_errpid>4){
+            errpid_prom/=5.; errpid_prom_sig/=5.;
+            Serial.print(options.peakInspiratoryPressure);Serial.print(" ");Serial.print(errpid_prom,5);Serial.print(" ");Serial.println(errpid_prom_sig,5);
+            errpid_prom=0.; errpid_prom_sig=0.;
+            ciclo_errpid=0;
+          }
+        }
+        #endif
     }
 
     if (display_needs_update) {

@@ -5,7 +5,8 @@
 //#define LCD_I2C 1 //IT DOES NOT WORK WITH ENCODER
 //Connections and Debug Defs
 //#define ACCEL_STEPPER 1
-#define DEBUG_UPDATE 1 //
+//#define DEBUG_UPDATE 1 //
+#define DEBUG_PID 1
 //#define DEBUG_OFF 1 //Release version
 #define P_HONEYWELL 1
 #define RANGE_DPT 100.0F
@@ -89,13 +90,9 @@
 #define PID_MIN -20000 // TODO: check direction implementation
 #define PID_MAX 20000
 
-//#define PID_KP 300.01
-//#define PID_KI 50.01
-//#define PID_KD 200.01
-
-#define PID_KP 50.01
-#define PID_KI 20.01
-#define PID_KD 100.01
+#define PID_KP 100.01
+#define PID_KI 5.01
+#define PID_KD 30.01
 
 #define PID_TS TIME_BASE
 #define PID_BANGBANG 8

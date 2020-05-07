@@ -246,10 +246,6 @@ void MechVentilation :: update ( void )
       pressure_max=0;
       pressure_min=60;
 
-#if DEBUG_UPDATE
-        Serial.println("Starting insuflation");
-        Serial.print("pressure_max: ");
-#endif
         // Close Solenoid Valve
         digitalWrite(PIN_SOLENOID, SOLENOID_CLOSED);
 
@@ -280,13 +276,12 @@ void MechVentilation :: update ( void )
           _stepperSpeed=STEPPER_HIGHEST_POSITION*(float(_percVol)/100.)/( (float)(_timeoutIns/1000) * DEFAULT_FRAC_CYCLE_VCL_INSUFF);//En [ml/s]
           if (_stepperSpeed>STEPPER_SPEED_MAX)
             _stepperSpeed=STEPPER_SPEED_MAX;
-          #ifdef DEBUG_UPDATE
-            Serial.print("Speed Man:");Serial.print(_stepperSpeed);
-          #endif
           _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
         } 
         #endif
-
+        #ifdef DEBUG_UPDATE
+          Serial.print(pressure_p);Serial.print(" ");Serial.print(_stepperSpeed);
+        #endif
 
         if (vent_mode==VENTMODE_PCL){
             max_accel=2600;

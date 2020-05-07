@@ -1,0 +1,6 @@
+https://www.instructables.com/id/Temperature-and-Humidity-Chart-With-OLED-Display/
+
+https://randomnerdtutorials.com/guide-for-oled-display-with-arduino/
+http://arduino-er.blogspot.com/2015/04/display-waveform-on-mini-oled-with.html
+
+https://github.com/olikraus/U8glib_Arduino
