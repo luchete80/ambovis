@@ -5,8 +5,8 @@
 //#define LCD_I2C 1 //IT DOES NOT WORK WITH ENCODER
 //Connections and Debug Defs
 //#define ACCEL_STEPPER 1
-//#define DEBUG_UPDATE 1 //
-#define DEBUG_OFF 1 //Release version
+#define DEBUG_UPDATE 1 //
+//#define DEBUG_OFF 1 //Release version
 #define P_HONEYWELL 1
 #define RANGE_DPT 100.0F
 
@@ -22,7 +22,7 @@
 #define TIME_SHOW 50
 #define TIME_SAVE 5000
 #define TIME_SEND_CONFIGURATION 2000 // msec
-#define V_HONEY_P0 0.5145
+#define V_HONEY_P0 0.49874F //Analog/1023
 
 // Sensores
 #define ENABLED_SENSOR_VOLUME 1
@@ -65,7 +65,7 @@
 #define DEFAULT_PEAK_INSPIRATORY_PRESSURE 25
 #define DEFAULT_PEAK_ESPIRATORY_PRESSURE 5
 
-#define V_SUPPLY_HONEY 5.23F
+#define V_SUPPLY_HONEY 4.8F
 // #define DEFAULT_PEAK_ESPIRATORY_PRESSURE 6
 
 #define DEFAULT_PRESSURE_V_FLUX_K1 1.

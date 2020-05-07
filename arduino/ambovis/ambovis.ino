@@ -36,6 +36,7 @@ AccelStepper *stepper = new AccelStepper(
 FlexyStepper * stepper = new FlexyStepper();
 #endif
 
+static float corr_fs;
 //////////////////////////
 // - EXTERNAL VARIABLES //
 //////////////////////////
@@ -259,11 +260,14 @@ void setup() {
   //corr_dpt=RANGE_DPT*DEFAULT_PA_TO_CM_H20/2.;
   f1_honey=5.0*DEFAULT_PSI_TO_CM_H20*2/(1023*0.8*V_SUPPLY_HONEY);
   
-  //#ifdef DEBUG_UPDATE
-    //Serial.print("Honey Volt at p0: ");Serial.println(analogRead(A0)/1023.);
-  //#endif
+  #ifdef DEBUG_UPDATE
+    Serial.print("Honey Volt at p0: ");Serial.println(analogRead(A0)/1023.);
+  #endif
   EEPROM.get(0,last_cycle);
   ventilation->setCycleNum(last_cycle);
+  
+  //FS=(vout/vs)+pmin*0.8/(PMax-pmin)-0.1 //Donde vout/vs es V_HONEY_P0
+  corr_fs=V_HONEY_P0+(-1.)*0.8/2. - 0.1;
 }
 
 /**
@@ -279,14 +283,6 @@ void loop() {
 
   time = millis();
 
-//    
-    #ifdef DEBUG_OFF
-    if (millis() > lastShowSensor + TIME_SHOW) {
-      Serial.print(int(pressure_p));Serial.print(" ");Serial.print(int(_flux));Serial.print(" ");Serial.print(int(_mlInsVol));Serial.print(" ");Serial.println(last_cycle);
-      lastShowSensor=millis();
-    }
-    #endif
-
     if (millis() > lastSave + TIME_SAVE) {
       EEPROM.put(0,last_cycle);
       lastSave=millis();
@@ -297,8 +293,13 @@ void loop() {
     //A0: PRESSURE (HOEYWELL) A1: Volume (DPT) A2: Test Mode pressure (DPT)
     //0.1 is from the 0.5 readed initially by the honeywell
     p_dpt    =f_dpt*float(analogRead(A1)); //ONE DIRECTION
+    //From datasheet:
+    //vout/vs = 0.8/(PMax-pmin)*(p-pmin) + 0.1 + fs --->>> ESTE FS SE LO AGREGO POR EL CERO
+    //FS=(vout/vs)+pmin*0.8/(PMax-pmin)-0.1 //Donde vout/vs es V_HONEY_P0
     //p_dpt      = f_dpt*float(analogRead(A1)) - corr_dpt;
-    pressure_p = (( float ( analogRead(A0) )/1023.) * 5.0/V_SUPPLY_HONEY  - 0.1 + (V_HONEY_P0-0.5))/0.8*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20; //Data sheet figure 2 analog pressure, calibration from 10% to 90%
+    //p= (vo/vs - 0.1)*(Pmax-pmin)/0.8+pmin --> SIN CORRECCION
+    //
+    pressure_p = (( float ( analogRead(A0) )/1023.) /* 5.0/V_SUPPLY_HONEY */ - 0.1 /* - corr_fs */)/0.8*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20; //Data sheet figure 2 analog pressure, calibration from 10% to 90%
 
     //pos=findClosest(dp_pos,38,p_dpt);
 //    if ( p_dpt > 0 ) {
@@ -314,10 +315,12 @@ void loop() {
 //      Serial.print(millis());Serial.print(" ");Serial.print(int(pressure_p));Serial.print(" ");Serial.print(int(_flux));Serial.print(" ");Serial.println(int(_mlInsVol));
 //    #endif
 
-    #ifdef DEBUG_UPDATE
-    //Serial.print(millis()-_msecTimerStartCycle);Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol); //Flux
+    #ifdef DEBUG_OFF
+      Serial.print(millis()-_msecTimerStartCycle);Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol); //Flux
+    #else
+      Serial.print(analogRead(A0));Serial.print(" ");Serial.println(pressure_p);
     #endif
-
+    
     lastReadSensor = millis();
 
       //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)

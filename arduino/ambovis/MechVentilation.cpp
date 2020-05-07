@@ -290,7 +290,7 @@ void MechVentilation :: update ( void )
 
         if (vent_mode==VENTMODE_PCL){
             max_accel=3000;
-            max_speed=1600;
+            max_speed=1200;
         }
         
         _pid->reset();
