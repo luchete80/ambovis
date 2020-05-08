@@ -15,13 +15,6 @@
 
 #include <EEPROM.h>
 
-#include <SPI.h>
-#include <U8g2lib.h>
-U8G2_SH1106_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
-byte ygr[128];
-
-
-
 #ifdef DEBUG_PID
 float errpid_prom=0;
 float errpid_prom_sig=0;
@@ -325,14 +318,8 @@ void loop() {
 //      }
     flux_count++;    //Filter
 
-//    #ifdef DEBUG_OFF
-//      Serial.print(millis());Serial.print(" ");Serial.print(int(pressure_p));Serial.print(" ");Serial.print(int(_flux));Serial.print(" ");Serial.println(int(_mlInsVol));
-//    #endif
-
     #ifdef DEBUG_OFF
-      Serial.print(millis()-_msecTimerStartCycle);Serial.print(" ");Serial.print(_flux);Serial.print(" ");Serial.println(_mlInsVol); //Flux
-    #else
-      //Serial.print(" ");Serial.print(pressure_p);Serial.print(" ");Serial.println();
+      Serial.print(millis());Serial.print(" ");Serial.print(int(pressure_p));Serial.print(" ");Serial.print(int(_flux));Serial.print(" ");Serial.println(int(_mlInsVol));
     #endif
     
     lastReadSensor = millis();
