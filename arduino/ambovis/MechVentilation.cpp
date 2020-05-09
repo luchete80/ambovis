@@ -118,7 +118,7 @@ void MechVentilation::setPeakEspiratoryPressure(float peep)
 
 void MechVentilation::_setInspiratoryCycle(void)
 {
-    float timeoutCycle = ((float)60) * 1000 / ((float)_rpm); // Tiempo de ciclo en msegundos
+    timeoutCycle = ((float)60) * 1000.0f / ((float)_rpm); // Tiempo de ciclo en msegundos
     //_timeoutIns = timeoutCycle * DEFAULT_POR_INSPIRATORIO / 100;
     _timeoutIns = timeoutCycle / (float(_percIE+1));
 	_timeoutEsp = (timeoutCycle) - _timeoutIns;    
@@ -209,6 +209,11 @@ void MechVentilation :: update ( void )
 #endif
 
   _msecTimerCnt=(unsigned long)(millis()-_msecTimerStartCycle);
+  
+  cycle_pos=byte( (float) ( (_msecTimerCnt)/(float)timeoutCycle * 127.0f) );
+  int extra_time=0;
+  if (_currentState == State_Exsufflation) extra_time=_timeoutIns;
+  cycle_pos=byte( (float) ( (_msecTimerCnt+(float)extra_time)/(float)timeoutCycle * 127.0f) );
 
 //    if (pressures.state != SensorStateOK)
 //    {                                  // Sensor error detected: return to zero position and continue from there

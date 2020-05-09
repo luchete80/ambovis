@@ -196,6 +196,7 @@ private:
     bool _startWasTriggeredByPatient = false;
     //float _currentFlow = 0.0;
     //float _currentVolume = 0.0;
+    float timeoutCycle;
 };
 
 extern byte stepper_time;
@@ -214,5 +215,7 @@ extern VentilationOptions_t options;
 extern MechVentilation * ventilation;
 extern unsigned long last_cycle;
 extern byte alarm_max_pressure;
+extern byte cycle_pos; //0 to 127
+
 
 #endif /* INC_MECHANICAL_VENTILATION_H */

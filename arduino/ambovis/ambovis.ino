@@ -92,6 +92,7 @@ unsigned long last_stepper_time;
 unsigned long last_vent_time;
 unsigned long time;
 float flux_sum;
+byte cycle_pos;
 
 unsigned long last_cycle;
 
@@ -294,7 +295,14 @@ void loop() {
       EEPROM.put(0,last_cycle);
       lastSave=millis();
     }
-    
+//
+//      #ifdef DEBUG_OFF
+//  if ( millis > lastShowSensor + TIME_SHOW ) {
+//      lastShowSensor=millis(); 
+//      Serial.print(cycle_pos);Serial.print(" ");Serial.print(int(pressure_p));Serial.print(" ");Serial.print(int(_flux));Serial.print(" ");Serial.println(int(_mlInsVol));
+//  }
+//  #endif
+  
   if (time > lastReadSensor + TIME_SENSOR){
 
     //A0: PRESSURE (HOEYWELL) A1: Volume (DPT) A2: Test Mode pressure (DPT)
@@ -319,9 +327,12 @@ void loop() {
     flux_count++;    //Filter
 
     #ifdef DEBUG_OFF
-      Serial.print(millis());Serial.print(" ");Serial.print(int(pressure_p));Serial.print(" ");Serial.print(int(_flux));Serial.print(" ");Serial.println(int(_mlInsVol));
+//      char buffer[50];
+//      sprintf(buffer, "%d,%d,%d,%d\n", int(cycle_pos),int(pressure_p), int(_flux), int(_mlInsVol));
+//      Serial.print(buffer);
+       Serial.print(cycle_pos);Serial.print(" ");Serial.print(int(pressure_p));Serial.print(" ");Serial.print(int(_flux));Serial.print(" ");Serial.println(int(_mlInsVol));
     #endif
-    
+//    
     lastReadSensor = millis();
 
       //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
