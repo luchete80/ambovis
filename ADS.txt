@@ -1,0 +1,2 @@
+http://henrysbench.capnfatz.com/henrys-bench/arduino-voltage-measurements/arduino-ads1115-module-getting-started-tutorial/
+https://www.prometec.net/arduino-y-adc-ads1x15/

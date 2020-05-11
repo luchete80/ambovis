@@ -5,7 +5,7 @@
 //#define LCD_I2C 1 //IT DOES NOT WORK WITH ENCODER
 //Connections and Debug Defs
 //#define ACCEL_STEPPER 1
-#define DEBUG_UPDATE 1 //
+//#define DEBUG_UPDATE 1 //
 //#define DEBUG_PID 1
 #define DEBUG_OFF 1 //Release version
 #define P_HONEYWELL 1
@@ -59,7 +59,7 @@
 #define DEFAULT_MIN_VTIDAL 240
 #define DEFAULT_FRAC_CYCLE_VCL_INSUFF 0.75
 #define DEFAULT_TRIGGER_THRESHOLD 3.0
-#define DEFAULT_RPM 20
+#define DEFAULT_RPM 14
 #define DEFAULT_MAX_RPM 24
 #define DEFAULT_MIN_RPM 3
 #define DEFAULT_POR_INSPIRATORIO 33.3333F // %

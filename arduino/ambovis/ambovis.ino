@@ -15,6 +15,13 @@
 
 #include <EEPROM.h>
 
+// FOR ADS
+#include <Wire.h>
+#include <Adafruit_ADS1015.h>
+Adafruit_ADS1115 ads(0x48);
+float Voltage = 0.0;
+
+
 #ifdef DEBUG_PID
 float errpid_prom=0;
 float errpid_prom_sig=0;
@@ -58,7 +65,7 @@ float pressure_p;   //EXTERN!!
 float last_pressure_max,last_pressure_min,last_pressure_peep;
 float pressure_peep;
 
-byte vent_mode = VENTMODE_PCL; //0
+byte vent_mode = VENTMODE_MAN; //0
 //Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
 float pressure_p0;
@@ -93,6 +100,7 @@ unsigned long last_vent_time;
 unsigned long time;
 float flux_sum;
 byte cycle_pos;
+int16_t adc0;
 
 unsigned long last_cycle;
 
@@ -168,6 +176,7 @@ VentilationOptions_t options;
 ////extern LiquidCrystal lcd;
 //#endif
 
+float p_dpt0;
 void setup() {
 
   Serial.begin(250000);
@@ -201,7 +210,7 @@ void setup() {
   options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
   options.hasTrigger = false;
   options.tidalVolume = 300;
-  options.percVolume= 80;  //1 to 10
+  options.percVolume= 100;  //1 to 10
 
   ventilation = new MechVentilation(
     stepper,
@@ -273,15 +282,25 @@ void setup() {
   #endif
   EEPROM.get(0,last_cycle);
   ventilation->setCycleNum(last_cycle);
-  
+
+    ads.begin();
+    adc0 = ads.readADC_SingleEnded(0);
+    Voltage = (adc0 * 0.1875)/1000;
+    p_dpt0 = ( Voltage /* 5.0/V_SUPPLY_HONEY */ - 0.1 *4.8/* - corr_fs */)/(0.8*4.8)*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20;
+    Serial.print("Honey Volt at p0: ");Serial.println(Voltage);
+    
   //FS=(vout/vs)+pmin*0.8/(PMax-pmin)-0.1 //Donde vout/vs es V_HONEY_P0
-  corr_fs=V_HONEY_P0+(-1.)*0.8/2. - 0.1;
+  corr_fs=Voltage/4.8+(-1.)*0.8/2. - 0.1;
+
+    
 }
 
 /**
    Loop
 */
 //
+
+
 bool update_display = false;
 char string[100];
 byte pos;
@@ -299,8 +318,8 @@ void loop() {
       #ifdef DEBUG_OFF
   if ( millis() > lastShowSensor + TIME_SHOW ) {
       lastShowSensor=millis(); 
-      Serial.print(int(cycle_pos));Serial.print(",");Serial.println(pressure_p);
-      //Serial.print(",");Serial.println(p_dpt);
+      Serial.print(int(cycle_pos));Serial.print(",");Serial.print(pressure_p);Serial.print(",");Serial.println(p_dpt);
+      //Serial.print(int(cycle_pos));Serial.print(",");Serial.print(Voltage);Serial.print(",");Serial.print(p_dpt);
       //Serial.print(int(_flux));Serial.print(",");Serial.println(int(_mlInsVol));
   }
   #endif
@@ -315,12 +334,19 @@ void loop() {
     //FS=(vout/vs)+pmin*0.8/(PMax-pmin)-0.1 //Donde vout/vs es V_HONEY_P0
     //p_dpt      = f_dpt*float(analogRead(A1)) - corr_dpt;
     //p= (vo/vs - 0.1)*(Pmax-pmin)/0.8+pmin --> SIN CORRECCION
-    //
     pressure_p = (( float ( analogRead(A0) )/1023.) /* 5.0/V_SUPPLY_HONEY */ - 0.1 /* - corr_fs */)/0.8*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20; //Data sheet figure 2 analog pressure, calibration from 10% to 90%
 
     //pos=findClosest(dp_pos,38,p_dpt);
 //    if ( p_dpt > 0 ) {
-      pos=findClosest(dp_pos,24,p_dpt);
+
+    //#ifdef ADS
+    adc0 = ads.readADC_SingleEnded(0);
+    Voltage = (adc0 * 0.1875)/1000;
+    p_dpt = ( Voltage /* 5.0/V_SUPPLY_HONEY */ - 0.1 *4.8 /*- corr_fs */)/(0.8*4.8)*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20;
+    //#endif
+    
+     // pos=findClosest(dp_pos,24,p_dpt-p_dpt0);
+     pos=findClosest(dp_pos,24,p_dpt-p_dpt0);
       _flux = po_flux_pos[pos] + ( po_flux_pos[pos+1] - po_flux_pos[pos] ) * ( p_dpt - dp_pos[pos] ) / ( dp_pos[pos+1] - dp_pos[pos]);
 //    } else {
 //        pos=findClosest(dp_neg,24,p_dpt);
