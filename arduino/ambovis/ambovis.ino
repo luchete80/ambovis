@@ -170,7 +170,7 @@ VentilationOptions_t options;
 
 void setup() {
 
-  Serial.begin(115200);
+  Serial.begin(250000);
   init_display();
 
   pinMode(PIN_BUZZ, OUTPUT);
@@ -194,9 +194,9 @@ void setup() {
 
   // TODO: Añadir aquí la configuarcion inicial desde puerto serie
   options.respiratoryRate = DEFAULT_RPM;
-  options.percInspEsp=3;//1:1 to 1:4, is denom
+  options.percInspEsp=2;//1:1 to 1:4, is denom
   //options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
-  options.peakInspiratoryPressure = 25.;
+  options.peakInspiratoryPressure = 30.;
   options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
   options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
   options.hasTrigger = false;
@@ -295,13 +295,15 @@ void loop() {
       EEPROM.put(0,last_cycle);
       lastSave=millis();
     }
-//
-//      #ifdef DEBUG_OFF
-//  if ( millis > lastShowSensor + TIME_SHOW ) {
-//      lastShowSensor=millis(); 
-//      Serial.print(cycle_pos);Serial.print(" ");Serial.print(int(pressure_p));Serial.print(" ");Serial.print(int(_flux));Serial.print(" ");Serial.println(int(_mlInsVol));
-//  }
-//  #endif
+
+      #ifdef DEBUG_OFF
+  if ( millis() > lastShowSensor + TIME_SHOW ) {
+      lastShowSensor=millis(); 
+      Serial.print(int(cycle_pos));Serial.print(",");Serial.println(pressure_p);
+      //Serial.print(",");Serial.println(p_dpt);
+      //Serial.print(int(_flux));Serial.print(",");Serial.println(int(_mlInsVol));
+  }
+  #endif
   
   if (time > lastReadSensor + TIME_SENSOR){
 
@@ -330,7 +332,7 @@ void loop() {
 //      char buffer[50];
 //      sprintf(buffer, "%d,%d,%d,%d\n", int(cycle_pos),int(pressure_p), int(_flux), int(_mlInsVol));
 //      Serial.print(buffer);
-       Serial.print(cycle_pos);Serial.print(" ");Serial.print(int(pressure_p));Serial.print(" ");Serial.print(int(_flux));Serial.print(" ");Serial.println(int(_mlInsVol));
+//       Serial.print(cycle_pos);Serial.print(" ");Serial.print(int(pressure_p));Serial.print(" ");Serial.print(int(_flux));Serial.print(" ");Serial.println(int(_mlInsVol));
     #endif
 //    
     lastReadSensor = millis();

@@ -289,8 +289,7 @@ void MechVentilation :: update ( void )
         #endif
 
         if (vent_mode==VENTMODE_PCL){
-            max_accel=2600;
-            max_speed=1200;
+            max_speed=3400;
         }
         
         _pid->reset();
@@ -537,7 +536,7 @@ void MechVentilation :: update ( void )
             if (_stepper->moveToHomeInSteps(
                     STEPPER_HOMING_DIRECTION,
                     STEPPER_HOMING_SPEED,
-                    2000, //ATTENTION
+                    4000, //ATTENTION
                     PIN_ENDSTOP) != true)
             {
 #if DEBUG_UPDATE

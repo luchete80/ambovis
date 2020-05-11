@@ -5,7 +5,7 @@
 //#define LCD_I2C 1 //IT DOES NOT WORK WITH ENCODER
 //Connections and Debug Defs
 //#define ACCEL_STEPPER 1
-//#define DEBUG_UPDATE 1 //
+#define DEBUG_UPDATE 1 //
 //#define DEBUG_PID 1
 #define DEBUG_OFF 1 //Release version
 #define P_HONEYWELL 1
@@ -32,24 +32,24 @@
 #endif
 
 // Valores motor
-#define STEPPER_MICROSTEPS 4
+#define STEPPER_MICROSTEPS 16
 #define STEPPER_STEPS_PER_REVOLUTION 200
 
 #define STEPPER_MICROSTEPS_PER_REVOLUTION (STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS)
 //#define STEPPER_DIR 1
 #define STEPPER_HOMING_DIRECTION    (1)
-#define STEPPER_HOMING_SPEED        (STEPPER_MICROSTEPS * 1000)   // Steps/s
+#define STEPPER_HOMING_SPEED        (STEPPER_MICROSTEPS * 2000)   // Steps/s
 //#define STEPPER_LOWEST_POSITION     (STEPPER_MICROSTEPS *  -100)   // Steps
 //#define STEPPER_HIGHEST_POSITION    (STEPPER_MICROSTEPS *   100)   // Steps
 #define STEPPER_LOWEST_POSITION     (-10)   // Steps
-#define STEPPER_HIGHEST_POSITION    ( 1240)   //270º
+#define STEPPER_HIGHEST_POSITION    ( 2500)   //270º
 //#define STEPPER_HIGHEST_POSITION    ( 1280)   //330º
 #define STEPPER_SPEED_DEFAULT       (400)   // Steps/s
-#define STEPPER_SPEED_MAX           (1600*6)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
+#define STEPPER_SPEED_MAX           (STEPPER_MICROSTEPS*400)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_SPEED_MAX_VCL       (1200)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_SPEED_MAX_EXSUFF    (2000)
 #define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  1200)   // Steps/s2
-#define STEPPER_ACC_INSUFFLATION    (STEPPER_MICROSTEPS *  1200)   // Steps/s2
+#define STEPPER_ACC_INSUFFLATION    (STEPPER_MICROSTEPS *  2000)   // Steps/s2
 
 // Valores por defecto
 #define DEFAULT_HEIGHT 170 // cm
@@ -59,7 +59,7 @@
 #define DEFAULT_MIN_VTIDAL 240
 #define DEFAULT_FRAC_CYCLE_VCL_INSUFF 0.75
 #define DEFAULT_TRIGGER_THRESHOLD 3.0
-#define DEFAULT_RPM 14
+#define DEFAULT_RPM 20
 #define DEFAULT_MAX_RPM 24
 #define DEFAULT_MIN_RPM 3
 #define DEFAULT_POR_INSPIRATORIO 33.3333F // %
@@ -90,9 +90,9 @@
 #define PID_MIN -20000 // TODO: check direction implementation
 #define PID_MAX 20000
 
-#define PID_KP 100.01
-#define PID_KI 5.01
-#define PID_KD 30.01
+#define PID_KP 500.01
+#define PID_KI 40.01
+#define PID_KD 100.01
 
 #define PID_TS TIME_BASE
 #define PID_BANGBANG 8

@@ -20,16 +20,6 @@ void setup(void) {
   u8g2.begin();
 }
 
-// void loop(void) {
-  // u8g2.firstPage();
-  // do {
-    // //u8g2.setFont(u8g2_font_ncenB14_tr);
-    // u8g2.setFont(u8g2_font_7x14B_tf);
-    // u8g2.drawStr(0,10,"Hello!");
-  // } while ( u8g2.nextPage() );
-  // delay(1000);
-// }
-
 void drawY(){
   u8g2.drawPixel(0, y[0]);
   for(int i=1; i<CYCLE+1; i++){
@@ -49,6 +39,9 @@ void loop(void) {
 
   y[count  ]=byte(flux);
   y[count+1]=byte(flux);
+
+  int incoming = Serial.available();
+
   
   time=millis();
   u8g2.firstPage();
