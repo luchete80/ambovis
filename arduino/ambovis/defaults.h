@@ -20,7 +20,7 @@
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE   25                 // msec
 #define TIME_SENSOR 10               // msec
-#define TIME_SHOW 50
+#define TIME_SHOW 80
 #define TIME_SAVE 5000
 #define TIME_SEND_CONFIGURATION 2000 // msec
 #define V_HONEY_P0 0.49874F //Analog/1023
@@ -47,9 +47,9 @@
 #define STEPPER_SPEED_DEFAULT       (400)   // Steps/s
 #define STEPPER_SPEED_MAX           (STEPPER_MICROSTEPS*400)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_SPEED_MAX_VCL       (1200)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
-#define STEPPER_SPEED_MAX_EXSUFF    (2000)
-#define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  1200)   // Steps/s2
-#define STEPPER_ACC_INSUFFLATION    (STEPPER_MICROSTEPS *  2000)   // Steps/s2
+#define STEPPER_SPEED_EXSUFF        (4000)
+#define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  2000)   // Steps/s2
+#define STEPPER_ACC_INSUFFLATION    (STEPPER_MICROSTEPS *  1000)   // Steps/s2
 
 // Valores por defecto
 #define DEFAULT_HEIGHT 170 // cm
@@ -90,7 +90,7 @@
 #define PID_MIN -20000 // TODO: check direction implementation
 #define PID_MAX 20000
 
-#define PID_KP 500.01
+#define PID_KP 800.01
 #define PID_KI 40.01
 #define PID_KD 100.01
 

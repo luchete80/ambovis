@@ -1,4 +1,4 @@
-#define DT 50 // Loop sleep time (ms)
+#define DT 100 // Loop sleep time (ms)
 #define CYCLE 127
 
 int count;
@@ -22,10 +22,10 @@ void loop() {
     scale++;
   }
   char buffer[50];
-//  sprintf(buffer, "%d,%d,%d,%d\n", count,int(p_bmp), int(flux), int(vol));
-//  Serial.print(buffer);
+  //sprintf(buffer, "<%d,%d,%d>\n", count,int(p_bmp), int(flux), int(vol));
+  //Serial.print(buffer);
 //    
- Serial.print(count);Serial.print(",");Serial.println(int(p_bmp));
+  Serial.print(count);Serial.print(",");Serial.print(int(p_bmp));Serial.print(",");Serial.println(int(vol));
 //  
   delay(DT); // Wait for two seconds
 

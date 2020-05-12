@@ -18,8 +18,8 @@
 // FOR ADS
 #include <Wire.h>
 #include <Adafruit_ADS1015.h>
-Adafruit_ADS1115 ads(0x48);
-float Voltage = 0.0;
+//Adafruit_ADS1115 ads(0x48);
+//float Voltage = 0.0;
 
 
 #ifdef DEBUG_PID
@@ -51,6 +51,7 @@ FlexyStepper * stepper = new FlexyStepper();
 #endif
 
 static float corr_fs;
+static byte alarm_state=0;  //0: No alarm 1: peep 2: pip 3:both
 //////////////////////////
 // - EXTERNAL VARIABLES //
 //////////////////////////
@@ -179,7 +180,7 @@ VentilationOptions_t options;
 float p_dpt0;
 void setup() {
 
-  Serial.begin(250000);
+  Serial.begin(115200);
   init_display();
 
   pinMode(PIN_BUZZ, OUTPUT);
@@ -283,14 +284,14 @@ void setup() {
   EEPROM.get(0,last_cycle);
   ventilation->setCycleNum(last_cycle);
 
-    ads.begin();
-    adc0 = ads.readADC_SingleEnded(0);
-    Voltage = (adc0 * 0.1875)/1000;
-    p_dpt0 = ( Voltage /* 5.0/V_SUPPLY_HONEY */ - 0.1 *4.8/* - corr_fs */)/(0.8*4.8)*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20;
-    Serial.print("Honey Volt at p0: ");Serial.println(Voltage);
+//    ads.begin();
+//    adc0 = ads.readADC_SingleEnded(0);
+//    Voltage = (adc0 * 0.1875)/1000;
+//    p_dpt0 = ( Voltage /* 5.0/V_SUPPLY_HONEY */ - 0.1 *4.8/* - corr_fs */)/(0.8*4.8)*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20;
+//    Serial.print("Honey Volt at p0: ");Serial.println(Voltage);
     
   //FS=(vout/vs)+pmin*0.8/(PMax-pmin)-0.1 //Donde vout/vs es V_HONEY_P0
-  corr_fs=Voltage/4.8+(-1.)*0.8/2. - 0.1;
+//  corr_fs=Voltage/4.8+(-1.)*0.8/2. - 0.1;
 
     
 }
@@ -314,11 +315,12 @@ void loop() {
       EEPROM.put(0,last_cycle);
       lastSave=millis();
     }
-
-      #ifdef DEBUG_OFF
+  
+  #ifdef DEBUG_OFF
   if ( millis() > lastShowSensor + TIME_SHOW ) {
       lastShowSensor=millis(); 
-      Serial.print(int(cycle_pos));Serial.print(",");Serial.print(pressure_p);Serial.print(",");Serial.println(p_dpt);
+      Serial.print(byte(cycle_pos));Serial.print(",");Serial.print(byte(pressure_p));Serial.print(",");Serial.print(int(alarm_state));Serial.print(",");Serial.println(byte(_flux));
+      //Serial.print(p_dpt);Serial.print(",");Serial.println(int(alarm_state));
       //Serial.print(int(cycle_pos));Serial.print(",");Serial.print(Voltage);Serial.print(",");Serial.print(p_dpt);
       //Serial.print(int(_flux));Serial.print(",");Serial.println(int(_mlInsVol));
   }
@@ -339,11 +341,11 @@ void loop() {
     //pos=findClosest(dp_pos,38,p_dpt);
 //    if ( p_dpt > 0 ) {
 
-    //#ifdef ADS
-    adc0 = ads.readADC_SingleEnded(0);
-    Voltage = (adc0 * 0.1875)/1000;
-    p_dpt = ( Voltage /* 5.0/V_SUPPLY_HONEY */ - 0.1 *4.8 /*- corr_fs */)/(0.8*4.8)*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20;
-    //#endif
+//    //#ifdef ADS
+//    adc0 = ads.readADC_SingleEnded(0);
+//    Voltage = (adc0 * 0.1875)/1000;
+//    p_dpt = ( Voltage /* 5.0/V_SUPPLY_HONEY */ - 0.1 *4.8 /*- corr_fs */)/(0.8*4.8)*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20;
+//    //#endif
     
      // pos=findClosest(dp_pos,24,p_dpt-p_dpt0);
      pos=findClosest(dp_pos,24,p_dpt-p_dpt0);
@@ -393,6 +395,12 @@ void loop() {
 //        }
 //      }
       //////////////////////////////////////
+    if ( last_pressure_max > alarm_max_pressure) {
+        alarm_state = 2;
+    } else {
+        alarm_state = 0;
+    }
+    
     State state = ventilation->getState();
     if ( ventilation -> getCycleNum () != last_cycle ) {
         last_cycle = ventilation->getCycleNum(); 

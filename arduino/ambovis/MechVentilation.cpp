@@ -289,7 +289,7 @@ void MechVentilation :: update ( void )
         #endif
 
         if (vent_mode==VENTMODE_PCL){
-            max_speed=3400;
+            max_speed=4000;
         }
         
         _pid->reset();
@@ -417,9 +417,8 @@ void MechVentilation :: update ( void )
         #ifdef ACCEL_STEPPER
 
         #else
-        _stepper->setSpeedInStepsPerSecond(STEPPER_ACC_EXSUFFLATION);
-        _stepper->setAccelerationInStepsPerSecondPerSecond(
-            STEPPER_ACC_EXSUFFLATION);
+        _stepper->setSpeedInStepsPerSecond(STEPPER_SPEED_EXSUFF);
+        _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_EXSUFFLATION);
         //LUCIANO
         //_stepper->setTargetPositionInSteps(
           //  STEPPER_DIR * (STEPPER_LOWEST_POSITION));
@@ -494,7 +493,7 @@ void MechVentilation :: update ( void )
 //            _pid->run(pressure_p, (float)_peep, &_stepperSpeed);
 //            _pid->run(float(pressure_p-pressure_p0), (float)_peep, &_stepperSpeed);
 //LUCIANO
-              _stepper->setSpeedInStepsPerSecond(1200);
+              _stepper->setSpeedInStepsPerSecond(4000);
              // Serial.println(_stepperSpeed);
 //            if (_stepperSpeed >= 0)
 //                _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
