@@ -9,8 +9,21 @@ const byte numChars = 32;
 char receivedChars[numChars]; // an array to store the received data
 char messageFromPC[32] = {0};
 int last_t;
-int integerFromPC [3];
+int integerFromPC [4];
 float floatFromPC = 0.0;
+
+int buzzer=3; //pin
+unsigned long timebuzz=0;
+bool isbuzzeron=false;
+#define TIME_BUZZER 500
+
+#define GREEN_LED   4
+#define YELLOW_LED  5
+#define RED_LED     6
+
+enum _state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
+
+_state state;
 
 char recvChar;
 char endMarker = '>';
@@ -39,6 +52,8 @@ byte x[128],y[64];
 
 byte rx[128],ry[128];
 char buffer[10];
+
+
 void loop() {
   recvWithEndMarker();
   showNewData();
@@ -73,7 +88,34 @@ void loop() {
       if (integerFromPC[0]<10)
         valsreaded=0;
   //}
-  delay(10);
+
+    state = integerFromPC[3];
+
+    switch (state){
+        case NO_ALARM:
+          digitalWrite(GREEN_LED,HIGH); digitalWrite(YELLOW_LED,LOW); digitalWrite(RED_LED,LOW);      
+        break;
+        case PEEP_ALARM:
+          digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,HIGH); digitalWrite(RED_LED,LOW);      
+        break;
+        case PIP_ALARM:
+          digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,LOW); digitalWrite(RED_LED,HIGH);      
+        break;  
+        case PEEP_PIP_ALARM:
+          digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,HIGH); digitalWrite(RED_LED,HIGH);      
+        break;
+      }
+    
+    //Check buzzer
+    if (state!=NO_ALARM) {
+        if (millis() > timebuzz + TIME_BUZZER) {
+            digitalWrite(buzzer,!isbuzzeron);
+            isbuzzeron=!isbuzzeron;
+        }
+    } else {
+      digitalWrite(buzzer,1); //Inverted logic
+      isbuzzeron=true;        //Inverted logic
+    }
 }
 
 void recvWithEndMarker() {

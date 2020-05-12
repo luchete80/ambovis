@@ -214,7 +214,7 @@ extern float flux_sum;
 extern VentilationOptions_t options;
 extern MechVentilation * ventilation;
 extern unsigned long last_cycle;
-extern byte alarm_max_pressure;
+extern byte alarm_max_pressure,alarm_peep_pressure;
 extern byte cycle_pos; //0 to 127
 
 
