@@ -1,4 +1,3 @@
-#include "defaults.h"
 #include "pinout.h"
 #include "MechVentilation.h"
 #include "src/TimerOne/TimerOne.h"
@@ -16,11 +15,12 @@
 #include <EEPROM.h>
 
 // FOR ADS
+#ifdef USE_ADC
 #include <Wire.h>
 #include <Adafruit_ADS1015.h>
 //Adafruit_ADS1115 ads(0x48);
 //float Voltage = 0.0;
-
+#endif
 
 #ifdef DEBUG_PID
 float errpid_prom=0;
@@ -34,11 +34,6 @@ float _mlInsVol=0,_mllastInsVol;
 //float _mlInsVol2;
 
 int Compression_perc = 8; //80%
-
-#if DEBUG_STATE_MACHINE
-volatile String debugMsg[15];
-volatile byte debugMsgCounter = 0;
-#endif
 
 #ifdef ACCEL_STEPPER
 AccelStepper *stepper = new AccelStepper(
@@ -284,26 +279,21 @@ void setup() {
   EEPROM.get(0,last_cycle);
   ventilation->setCycleNum(last_cycle);
 
-//    ads.begin();
-//    adc0 = ads.readADC_SingleEnded(0);
-//    Voltage = (adc0 * 0.1875)/1000;
-//    p_dpt0 = ( Voltage /* 5.0/V_SUPPLY_HONEY */ - 0.1 *4.8/* - corr_fs */)/(0.8*4.8)*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20;
-//    Serial.print("Honey Volt at p0: ");Serial.println(Voltage);
-    
+  #ifdef USE_ADC
+  //    ads.begin();
+  //    adc0 = ads.readADC_SingleEnded(0);
+  //    Voltage = (adc0 * 0.1875)/1000;
+  //    p_dpt0 = ( Voltage /* 5.0/V_SUPPLY_HONEY */ - 0.1 *4.8/* - corr_fs */)/(0.8*4.8)*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20;
+  //    Serial.print("Honey Volt at p0: ");Serial.println(Voltage);
+  
   //FS=(vout/vs)+pmin*0.8/(PMax-pmin)-0.1 //Donde vout/vs es V_HONEY_P0
 //  corr_fs=Voltage/4.8+(-1.)*0.8/2. - 0.1;
-
+  #endif
     
 }
 
-/**
-   Loop
-*/
-//
-
 
 bool update_display = false;
-char string[100];
 byte pos;
 void loop() {
 

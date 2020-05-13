@@ -7,14 +7,13 @@
 //#define ACCEL_STEPPER 1
 //#define DEBUG_UPDATE 1 //
 //#define DEBUG_PID 1
+//#define USE_ADC
 #define DEBUG_OFF 1 //Release version
 #define P_HONEYWELL 1
 #define RANGE_DPT 100.0F
 
 #define BMP_I2C 1  //Pressure Sensor
 
-
-//#define DEBUG_STATE_MACHINE 1
 //#define PRUEBAS 1 // testing over arduino without sensors
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
