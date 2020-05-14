@@ -1,11 +1,3 @@
-/** Mechanical ventilation.
- *
- * @file MechVentilation.cpp
- *
- * This is the mechanical ventilation software module.
- * It handles the mechanical ventilation control loop.
- */
-
 #include "MechVentilation.h"
 
 int currentWaitTriggerTime = 0;
@@ -130,38 +122,7 @@ void MechVentilation::_setInspiratoryCycle(void)
     
 }
 
-//LUCIANO 
-float MechVentilation::getCurrentPressure(){
-  return _currentPressure;}
       
-void MechVentilation::evaluatePressure(void)
-{
-    if (_currentPressure > alarm_max_pressure)
-    {
-        //digitalWrite(PIN_BUZZ, HIGH);
-        //tone(PIN_BUZZ, 1000, 1000);
-        _currentAlarm = Alarm_Overpressure;
-        //Serial.println("Overpressure");
-    }
-    // else if (_currentPressure < ALARM_MIN_PRESSURE)
-    // {
-        // digitalWrite(PIN_BUZZ, HIGH);
-        // _currentAlarm = Alarm_Underpressure;
-    // }
-    else
-    {
-        if (_currentAlarm != No_Alarm) {
-            //digitalWrite(PIN_BUZZ, LOW);
-            _currentAlarm = No_Alarm;
-        }
-    }
-
-    // Valve
-    if (_currentPressure > VALVE_MAX_PRESSURE)
-    {
-        digitalWrite(PIN_SOLENOID, SOLENOID_OPEN);
-    }
-}
 
 void MechVentilation::activateRecruitment(void)
 {
@@ -195,7 +156,7 @@ void MechVentilation :: update ( void )
 //      flux_filter_time=millis();
 //      }
     //#else
-    _mlInsVol+=_flux*float((millis()-last_vent_time))*0.001;//flux in l and time in msec, results in ml 
+    //_mlInsVol+=_flux*float((millis()-last_vent_time))*0.001;//flux in l and time in msec, results in ml 
     //#endif
     last_vent_time = millis();
     
@@ -227,11 +188,6 @@ void MechVentilation :: update ( void )
 //        _sensor_error_detected = false; //clear flag
 //    }
 
-    // Check pressures
-    evaluatePressure();
-
-    //refreshWatchDogTimer();
-
     switch (_currentState)
     {
     case Init_Insufflation:
@@ -258,9 +214,12 @@ void MechVentilation :: update ( void )
 
         _msecTimerStartCycle=millis();  //Luciano
         
-        _mllastInsVol=_mlInsVol;
+        _mllastInsVol=int(_mlInsVol);
+        _mllastExsVol=int(fabs(_mlExsVol));
+        
         //_mlInsVol2=0;
         _mlInsVol=0.;
+        _mlExsVol=0.;
         
         wait_NoMove=false;
         /* Stepper control: set acceleration and end-position */
@@ -624,13 +583,11 @@ void MechVentilation::_setAlarm(Alarm alarm)
     _currentAlarm = alarm;
 }
 
-float MechVentilation::getInsVol()
-{
-    return _mllastInsVol;
+float MechVentilation::getInsVol() {
+    return (_mllastInsVol+_mllastExsVol)/2.;
 }
 
-void MechVentilation::change_config(VentilationOptions_t options)
-{
+void MechVentilation::change_config(VentilationOptions_t options) {
     _rpm = options.respiratoryRate;
     _pip = options.peakInspiratoryPressure;
     _peep = options.peakEspiratoryPressure;
@@ -641,15 +598,3 @@ void MechVentilation::change_config(VentilationOptions_t options)
 
     _mode = options.modeCtl;
 }
-
-//**
-// FOR ACCEL_STEPPER
-//FROM https://forum.arduino.cc/index.php?topic=394355.0
-//void moveToHome() {
-//    limitSwitchState = digitalRead(limitSwitchPin);
-//    while (limitSwitchState == HIGH) { // this assumes it will be LOW when pressed
-//       // move one step towards switch
-//       limitSwitchState = digitalRead(limitSwitchPin);
-//    }
-//    stepperPosition = 0;
-//}

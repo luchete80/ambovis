@@ -72,16 +72,6 @@ public:
     void start(void);
     /** Stop mechanical ventilation. */
     void stop(void);
-    /** Alarms */
-    void evaluatePressure(void);
-    /** Update mechanical ventilation.
-     *
-     * If any control variable were to change, new value
-     * would be applied at the beginning of the next ventilation
-     * cycle.
-     *
-     * @note This method must be called on a timer loop.
-     */
     void update(void);
 
     /** Recruitment */
@@ -201,12 +191,12 @@ private:
 
 extern byte stepper_time;
 extern unsigned long last_vent_time;
-extern float _mlInsVol,_mllastInsVol;
+extern float _mlInsVol,_mlExsVol;
+extern int _mllastInsVol,_mllastExsVol;
 //_mlInsVol2;
 //extern float _stepperSpeed;
 extern float pressure_sec,psec_max,last_psec_max;
 extern unsigned long _msecTimerStartCycle; //CADA semiciclo
-extern float _currentPressure;
 extern bool display_needs_update;
 extern byte flux_count;
 extern unsigned long flux_filter_time;
