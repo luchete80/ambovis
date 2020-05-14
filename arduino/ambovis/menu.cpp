@@ -216,7 +216,7 @@ void display_lcd ( ) {
   
   } else if (menu_number ==1 ){//OTHER SETTINGS
     writeLine(0, "PIP  AL:" + String(alarm_max_pressure), 1); 
-    writeLine(1, "PEEP AL:" + String(alarm_max_pressure), 1); 
+    writeLine(1, "PEEP AL:" + String(alarm_peep_pressure), 1); 
         
   }//menu_number
 

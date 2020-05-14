@@ -100,6 +100,7 @@ unsigned long last_cycle;
 
 byte menu_number=0;
 byte alarm_max_pressure=35;
+byte alarm_peep_pressure=10;
 
 //MENU
 unsigned long lastButtonPress;
@@ -112,7 +113,7 @@ unsigned long lastButtonPress;
 //byte po_flux_neg[]={-1000,-833.3333333,-750,-666.6666667,-583.3333333,-500,-416.6666667,-333.3333333,-250,-233.3333333,-216.6666667,-200,-183.3333333,-166.6666667,-150,-133.3333333,-116.6666667,-100,-83.33333333,-66.66666667,-50,0,0,0};
 //byte po_flux_pos[]={0,0,0,50,66.66666667,83.33333333,100,116.6666667,133.3333333,150,166.6666667,183.3333333,200,216.6666667,233.3333333,250,333.3333333,416.6666667,500,583.3333333,666.6666667,750,833.3333333,1000};
 
-float dp[]={-2.444452733,-2.030351958,-1.563385753,-1.207061607,-0.877207832,-0.606462279,-0.491216024,-0.377891785,-0.295221736,-0.216332764,-0.151339196,-0.096530072,-0.052868293,-0.047781395,-0.039664506,-0.03312327,-0.028644966,-0.023566372,-0.020045692,-0.014830113,-0.011688636,-0.008176254,-0.006117271,-0.003937171,-0.001999305,-0.00090924,-0.00030358,0,0.000242233,0.000837976,0.002664566,0.004602432,0.007024765,0.009325981,0.012111664,0.01441288,0.017561913,0.023012161,0.029794693,0.037061691,0.043771552,0.051474571,0.05874157,0.109004974,0.176879848,0.260808033,0.365700986,0.504544509,0.630753349,0.795599072,1.216013465,1.60054669,2.087678384,2.547210457,3.074176245};
+//float dp[]={-2.444452733,-2.030351958,-1.563385753,-1.207061607,-0.877207832,-0.606462279,-0.491216024,-0.377891785,-0.295221736,-0.216332764,-0.151339196,-0.096530072,-0.052868293,-0.047781395,-0.039664506,-0.03312327,-0.028644966,-0.023566372,-0.020045692,-0.014830113,-0.011688636,-0.008176254,-0.006117271,-0.003937171,-0.001999305,-0.00090924,-0.00030358,0,0.000242233,0.000837976,0.002664566,0.004602432,0.007024765,0.009325981,0.012111664,0.01441288,0.017561913,0.023012161,0.029794693,0.037061691,0.043771552,0.051474571,0.05874157,0.109004974,0.176879848,0.260808033,0.365700986,0.504544509,0.630753349,0.795599072,1.216013465,1.60054669,2.087678384,2.547210457,3.074176245};
 //FLUX IS -100 to +100, has to be added 100 
 byte po_flux[]={0,10,20,30,40,50,55,60,65,70,75,80,85,86,87,88,89,90,91,92,93,94,95,96,97,100,100,100,100,100,103,104,105,106,107,108,109,110,111,112,113,114,115,120,125,130,135,140,145,150,160,170,180,190,200};
 
@@ -312,12 +313,13 @@ void loop() {
   #ifdef DEBUG_OFF
   if ( millis() > lastShowSensor + TIME_SHOW ) {
       lastShowSensor=millis(); 
-      //Serial.print(byte(cycle_pos));Serial.print(",");Serial.print(byte(pressure_p));Serial.print(",");Serial.print(int(alarm_state));Serial.print(",");Serial.println(byte(_flux));
+      Serial.print(byte(cycle_pos));Serial.print(",");Serial.print(byte(pressure_p));Serial.print(",");Serial.println(int(alarm_state));
+      //Serial.print(",");Serial.println(byte(_flux));
       //Serial.print(p_dpt);Serial.print(",");Serial.println(int(alarm_state));
       //Serial.print(int(cycle_pos));Serial.print(",");Serial.print(Voltage,3);Serial.print(",");
       //Serial.print(int(Voltage*1000));Serial.print(",");
       //Serial.println(analogRead(A1));
-      Serial.print(p_dpt);Serial.print(",");Serial.print(_flux);Serial.print(",");Serial.print(int(_mlInsVol));;Serial.print(",");Serial.println(int(ventilation->getInsVol()));
+      //Serial.print(p_dpt);Serial.print(",");Serial.print(_flux);Serial.print(",");Serial.print(int(_mlInsVol));;Serial.print(",");Serial.println(int(ventilation->getInsVol()));
       //Serial.print(int(_flux));Serial.print(",");Serial.println(int(_mlInsVol));
   }
   #endif
@@ -349,10 +351,10 @@ void loop() {
 //     pos=findClosest(dp_pos,38,p_dpt);
 //      _flux = po_flux_pos[pos] + ( float (po_flux_pos[pos+1]) - float (po_flux_pos[pos]) ) * ( p_dpt - float(dp_pos[pos]) ) / (float)( dp_pos[pos+1] - dp_pos[pos]);
       //IF POSITIVE AND NEGATIVE
-      pos=findClosest(dp,55,p_dpt);
+//      pos=findClosest(dp,55,p_dpt);
       //flux should be shifted up (byte storage issue)
-      _flux = po_flux[pos] - 100 + ( float (po_flux[pos+1]-100) - float (po_flux[pos]-100) ) * ( p_dpt - float(dp[pos]) ) / (float)( dp[pos+1] - dp[pos]);      
-      _flux *=16.6667; 
+//      _flux = po_flux[pos] - 100 + ( float (po_flux[pos+1]-100) - float (po_flux[pos]-100) ) * ( p_dpt - float(dp[pos]) ) / (float)( dp[pos+1] - dp[pos]);      
+//      _flux *=16.6667; 
       
 //    } else {
 //        pos=findClosest(dp_neg,24,p_dpt);
