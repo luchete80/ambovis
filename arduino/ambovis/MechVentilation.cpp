@@ -246,10 +246,6 @@ void MechVentilation :: update ( void )
         #ifdef DEBUG_UPDATE
           Serial.print(pressure_p);Serial.print(" ");Serial.print(_stepperSpeed);
         #endif
-
-        if (vent_mode==VENTMODE_PCL){
-            max_speed=4000;
-        }
         
         _pid->reset();
 
@@ -312,11 +308,15 @@ void MechVentilation :: update ( void )
                } else if (vent_mode==VENTMODE_PCL) {
 
                   _pid->run(pressure_p, (float)_pip, &_stepperSpeed);
-                  if (_stepperSpeed > max_speed)
-                    _stepperSpeed=max_speed;
+                  _stepperAccel=( _stepperSpeed - _stepper -> getCurrentVelocityInStepsPerSecond() ) / PID_TS * 1000.;
+                  if (_stepperSpeed > STEPPER_SPEED_MAX)
+                    _stepperSpeed=STEPPER_SPEED_MAX;
+                  if (_stepperAccel > STEPPER_ACCEL_MAX)
+                    _stepperAccel=STEPPER_ACCEL_MAX;
                }                
                #ifdef DEBUG_UPDATE
-                Serial.print("Pres, pip: "); Serial.print(int(pressure_p)); Serial.print(" "); Serial.print(int(_pip));  Serial.print("Speed: "); Serial.println(int(_stepperSpeed));                      
+                Serial.print("Pres, pip: "); Serial.print(int(pressure_p)); Serial.print(" "); Serial.print(int(_pip));  Serial.print("reqSpeed: "); Serial.print(int(_stepperSpeed));  
+                Serial.print("Curr Speed: "); Serial.print(int(_stepper->getCurrentVelocityInStepsPerSecond()));  Serial.print("Accel: "); Serial.println(int(_stepperAccel));                    
                #endif
 
               if (vent_mode !=VENTMODE_MAN){  //only if auto
@@ -326,7 +326,8 @@ void MechVentilation :: update ( void )
                   _stepper->moveTo(STEPPER_HIGHEST_POSITION);
                 #else
                 _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
-
+                _stepper->setAccelerationInStepsPerSecondPerSecond(abs(_stepperAccel));
+                
                 if (_stepperSpeed == 0){
                   _stepper->setTargetPositionToStop();
                   //Serial.print("VELOCIDAD CERO!");

@@ -41,6 +41,10 @@ void setup() {
   Serial.println("<Arduino is ready>");
   u8g2.begin();
   pinMode(buzzer, OUTPUT); //Set buzzerPin as output
+  pinMode(GREEN_LED, OUTPUT); //Set buzzerPin as output
+  pinMode(YELLOW_LED, OUTPUT); //Set buzzerPin as output
+  pinMode(RED_LED, OUTPUT); //Set buzzerPin as output
+  
   digitalWrite(buzzer, LOW); //Set buzzerPin as output
   u8g2.setFont(u8g2_font_6x10_tf);
   u8g2.setFontRefHeightExtendedText();
@@ -86,10 +90,13 @@ void loop() {
 //          u8g2.drawStr( 0, 10, "x: ");
 //          itoa(integerFromPC[0], buffer, 10);
 //          u8g2.drawStr( 20, 10, buffer);
-//           
-          u8g2.drawStr( 0, 20, "p: ");
+//          
+          for (int i=0;i<6;i++)
+              u8g2.drawLine(0,13+i*10,2,13+i*10); 
+                   
+          u8g2.drawStr( 10, 0, "p: ");
           itoa(integerFromPC[1], buffer, 10);
-          u8g2.drawStr( 20,20, buffer);
+          u8g2.drawStr( 30,0, buffer);
 //          
           u8g2.drawStr( 80, 0, "st: ");
           itoa(state, buffer, 10);
@@ -98,7 +105,14 @@ void loop() {
 //          u8g2.drawStr( 40, 0, integerFromPC[1]);
 //          u8g2.drawStr( 20, 0, Serial.parseInt());
 //          u8g2.drawStr( 45, 0, a);
-//          
+//        
+          if (state == 1 ) {
+            u8g2.drawStr( 60, 20, "AL peep ");
+          } else if (state == 2 ){
+            u8g2.drawStr( 60, 20, "AL pip");
+          } else if (state == 3){
+            u8g2.drawStr( 60, 20, "AL pip/peep");
+          }
           drawY2();
           newData = false;
       } while ( u8g2.nextPage() );

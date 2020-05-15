@@ -180,6 +180,7 @@ private:
 
     /** Stepper speed. Steps per seconds. */
     float _stepperSpeed;
+    float _stepperAccel;
     
     bool _running = false;
     bool _sensor_error_detected;

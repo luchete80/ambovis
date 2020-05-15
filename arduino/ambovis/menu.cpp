@@ -70,8 +70,13 @@ void check_encoder ( ) {
          } 
         break;
         case 2: 
-          encoderPos=oldEncPos=options.respiratoryRate;
-          min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
+            if ( menu_number == 0 ) {
+                encoderPos=oldEncPos=options.respiratoryRate;
+                min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
+                } else if ( menu_number == 1 ) {
+                    min_sel=5;max_sel=15;
+                    encoderPos=oldEncPos=alarm_peep_pressure;                          
+                }
         break;
         case 3:
           encoderPos=oldEncPos=options.percInspEsp;
@@ -120,11 +125,12 @@ void check_encoder ( ) {
         oldEncPos = encoderPos;
         switch (curr_sel) {
           case 1:
-            if ( menu_number == 0 ) vent_mode = encoderPos;
-            else                    alarm_max_pressure = encoderPos;
+            if ( menu_number == 0 ) vent_mode           = encoderPos;
+            else                    alarm_max_pressure  = encoderPos;
             break;
           case 2:
-            options.respiratoryRate = encoderPos;
+            if ( menu_number == 0 ) options.respiratoryRate = encoderPos;
+            else                    alarm_peep_pressure     = encoderPos;
             break;
           case 3:
             options.percInspEsp=encoderPos;
@@ -161,6 +167,23 @@ void check_encoder ( ) {
 void display_lcd ( ) {
     if (clear_all_display)
         lcd.clear();
+    
+    lcd_clearxy(0,0);
+    lcd_clearxy(0,1);lcd_clearxy(9,1);
+    lcd_clearxy(0,2);lcd_clearxy(7,2);
+    switch(curr_sel){
+          case 1: 
+            lcd_selxy(0,0);break;
+          case 2: 
+            lcd_selxy(0,1);break;
+          case 3:
+            lcd_selxy(0,2);break;
+          case 4: 
+            lcd_selxy(9,1);break;
+          case 5: 
+            lcd_selxy(7,2);break;
+      }
+      
   if (menu_number==0) {  
     lcd_clearxy(5,1,3); lcd_clearxy(12,1,4);
     lcd_clearxy(5,2,2); lcd_clearxy(13,2,2);
@@ -219,22 +242,6 @@ void display_lcd ( ) {
     writeLine(1, "PEEP AL:" + String(alarm_peep_pressure), 1); 
         
   }//menu_number
-
-    lcd_clearxy(0,0);
-    lcd_clearxy(0,1);lcd_clearxy(9,1);
-    lcd_clearxy(0,2);lcd_clearxy(7,2);
-    switch(curr_sel){
-          case 1: 
-            lcd_selxy(0,0);break;
-          case 2: 
-            lcd_selxy(0,1);break;
-          case 3:
-            lcd_selxy(0,2);break;
-          case 4: 
-            lcd_selxy(9,1);break;
-          case 5: 
-            lcd_selxy(7,2);break;
-      }
       
   clear_all_display=false;
 

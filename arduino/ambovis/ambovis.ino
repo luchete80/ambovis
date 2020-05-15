@@ -100,7 +100,7 @@ unsigned long last_cycle;
 
 byte menu_number=0;
 byte alarm_max_pressure=35;
-byte alarm_peep_pressure=10;
+byte alarm_peep_pressure=5;
 
 //MENU
 unsigned long lastButtonPress;
@@ -385,10 +385,19 @@ void loop() {
       }
   }//Read Sensor
 
+    //enum _state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
     if ( last_pressure_max > alarm_max_pressure) {
-        alarm_state = 2;
+        if ( last_pressure_min > alarm_peep_pressure ) { 
+            alarm_state = 3;
+        } else {
+            alarm_state = 2;
+        }
     } else {
-        alarm_state = 0;
+        if ( last_pressure_min > alarm_peep_pressure ) { 
+            alarm_state = 1;
+        } else {
+            alarm_state = 0;
+        }
     }
     
     State state = ventilation->getState();
