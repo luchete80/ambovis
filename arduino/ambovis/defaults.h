@@ -5,9 +5,9 @@
 //#define LCD_I2C 1 //IT DOES NOT WORK WITH ENCODER
 //Connections and Debug Defs
 //#define ACCEL_STEPPER 1
-//#define DEBUG_UPDATE 1 //
+#define DEBUG_UPDATE 1 //
 //#define DEBUG_PID 1
-//#define USE_ADC 1
+#define USE_ADC 1
 #define DEBUG_OFF 1 //Release version
 #define P_HONEYWELL 1
 #define RANGE_DPT 100.0F
@@ -70,7 +70,6 @@
 // #define DEFAULT_PEAK_ESPIRATORY_PRESSURE 6
 
 #define DEFAULT_PRESSURE_V_FLUX_K1 1.
-
 // Presión
 #define DEFAULT_PA_TO_CM_H20 0.0102F
 #define DEFAULT_PSI_TO_CM_H20 70.306957F

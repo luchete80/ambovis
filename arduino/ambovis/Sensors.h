@@ -14,7 +14,6 @@ extern float last_pressure_max,last_pressure_min,last_pressure_peep;
 
           
 extern float _flux;
-extern Pressure_Sensor _dpsensor;  //Used for venturi
 //extern Adafruit_BMP280 _pres1Sensor;
 
 #endif

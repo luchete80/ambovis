@@ -14,6 +14,12 @@
 
 #include <EEPROM.h>
 
+#ifdef DEBUG_UPDATE
+float ins_prom, ins_error;
+float ins_max,ins_min,err_sum;
+unsigned long ciclo,ins_sum;
+#endif
+
 // FOR ADS
 #ifdef USE_ADC
 #include <Wire.h>
@@ -113,7 +119,7 @@ unsigned long lastButtonPress;
 //byte po_flux_neg[]={-1000,-833.3333333,-750,-666.6666667,-583.3333333,-500,-416.6666667,-333.3333333,-250,-233.3333333,-216.6666667,-200,-183.3333333,-166.6666667,-150,-133.3333333,-116.6666667,-100,-83.33333333,-66.66666667,-50,0,0,0};
 //byte po_flux_pos[]={0,0,0,50,66.66666667,83.33333333,100,116.6666667,133.3333333,150,166.6666667,183.3333333,200,216.6666667,233.3333333,250,333.3333333,416.6666667,500,583.3333333,666.6666667,750,833.3333333,1000};
 
-//float dp[]={-2.444452733,-2.030351958,-1.563385753,-1.207061607,-0.877207832,-0.606462279,-0.491216024,-0.377891785,-0.295221736,-0.216332764,-0.151339196,-0.096530072,-0.052868293,-0.047781395,-0.039664506,-0.03312327,-0.028644966,-0.023566372,-0.020045692,-0.014830113,-0.011688636,-0.008176254,-0.006117271,-0.003937171,-0.001999305,-0.00090924,-0.00030358,0,0.000242233,0.000837976,0.002664566,0.004602432,0.007024765,0.009325981,0.012111664,0.01441288,0.017561913,0.023012161,0.029794693,0.037061691,0.043771552,0.051474571,0.05874157,0.109004974,0.176879848,0.260808033,0.365700986,0.504544509,0.630753349,0.795599072,1.216013465,1.60054669,2.087678384,2.547210457,3.074176245};
+float dp[]={-2.444452733,-2.030351958,-1.563385753,-1.207061607,-0.877207832,-0.606462279,-0.491216024,-0.377891785,-0.295221736,-0.216332764,-0.151339196,-0.096530072,-0.052868293,-0.047781395,-0.039664506,-0.03312327,-0.028644966,-0.023566372,-0.020045692,-0.014830113,-0.011688636,-0.008176254,-0.006117271,-0.003937171,-0.001999305,-0.00090924,-0.00030358,0,0.000242233,0.000837976,0.002664566,0.004602432,0.007024765,0.009325981,0.012111664,0.01441288,0.017561913,0.023012161,0.029794693,0.037061691,0.043771552,0.051474571,0.05874157,0.109004974,0.176879848,0.260808033,0.365700986,0.504544509,0.630753349,0.795599072,1.216013465,1.60054669,2.087678384,2.547210457,3.074176245};
 //FLUX IS -100 to +100, has to be added 100 
 byte po_flux[]={0,10,20,30,40,50,55,60,65,70,75,80,85,86,87,88,89,90,91,92,93,94,95,96,97,100,100,100,100,100,103,104,105,106,107,108,109,110,111,112,113,114,115,120,125,130,135,140,145,150,160,170,180,190,200};
 
@@ -287,20 +293,27 @@ void setup() {
     p_dpt0 += 0.5*(( Voltage /* 5.0/V_SUPPLY_HONEY */ - 0.1 *4.8/* - corr_fs */)/(0.8*4.8)*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20);
     }
     p_dpt0/=10.0;
-    Serial.print("Honey Volt at p0: ");Serial.println(Voltage);
-    Serial.print("dpt_0: ");Serial.println(p_dpt0);
+    Serial.print("MPX Volt at p0: ");Serial.println(Voltage*1000,3);
     //FS=(vout/vs)+pmin*0.8/(PMax-pmin)-0.1 //Donde vout/vs es V_HONEY_P0
     //corr_fs=Voltage/4.8+(-1.)*0.8/2. - 0.1;
     p_dpt0=0.20;
   #endif
-    
+    #ifdef DEBUG_UPDATE
+    ins_prom=ins_sum=0;
+    ins_max=0.;ins_min=10000.0;
+    ciclo=0;
+    err_sum=0;
+    #endif
+
 }
 
 
 bool update_display = false;
 byte pos;
+
 void loop() {
 
+  
   check_encoder();
 
   time = millis();
@@ -313,13 +326,13 @@ void loop() {
   #ifdef DEBUG_OFF
   if ( millis() > lastShowSensor + TIME_SHOW ) {
       lastShowSensor=millis(); 
-      Serial.print(byte(cycle_pos));Serial.print(",");Serial.print(byte(pressure_p));Serial.print(",");Serial.println(int(alarm_state));
-      //Serial.print(",");Serial.println(byte(_flux));
+      //Serial.print(byte(cycle_pos));Serial.print(",");Serial.print(byte(pressure_p));Serial.print(",");Serial.print(int(alarm_state));Serial.print(",");Serial.println(_flux);
       //Serial.print(p_dpt);Serial.print(",");Serial.println(int(alarm_state));
       //Serial.print(int(cycle_pos));Serial.print(",");Serial.print(Voltage,3);Serial.print(",");
       //Serial.print(int(Voltage*1000));Serial.print(",");
       //Serial.println(analogRead(A1));
-      //Serial.print(p_dpt);Serial.print(",");Serial.print(_flux);Serial.print(",");Serial.print(int(_mlInsVol));;Serial.print(",");Serial.println(int(ventilation->getInsVol()));
+      //Serial.println(p_dpt);
+      Serial.print(p_dpt);Serial.print(",");Serial.print(_flux);Serial.print(",");Serial.print(int(_mlInsVol));;Serial.print(",");Serial.println(int(ventilation->getInsVol()));
       //Serial.print(int(_flux));Serial.print(",");Serial.println(int(_mlInsVol));
   }
   #endif
@@ -342,19 +355,23 @@ void loop() {
     #ifdef USE_ADC
     adc0 = ads.readADC_SingleEnded(0);
     Voltage = (adc0 * 0.1875)/1000;
-    p_dpt = 0.5*(( Voltage /* 5.0/V_SUPPLY_HONEY */ - 0.1 *5.15 /*- corr_fs */)/(0.8*5.15)*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20);
-    #endif
+    //Vout = VS*(0.018*P+0.04) ± ERROR
+    //VS = 5.0 Vdc
+    //EL 0.04 es el 48que aparece en 0
+    //Por eso como yaesta restado no se tiene en cuenta 
+    //0.04=48*/1024
+    p_dpt=(Voltage/5.-0.0488)/0.09*1000*DEFAULT_PA_TO_CM_H20;
+  #endif
 
     
-     // pos=findClosest(dp_pos,24,p_dpt-p_dpt0);
-     p_dpt-=p_dpt0;
+//     p_dpt-=p_dpt0;
 //     pos=findClosest(dp_pos,38,p_dpt);
 //      _flux = po_flux_pos[pos] + ( float (po_flux_pos[pos+1]) - float (po_flux_pos[pos]) ) * ( p_dpt - float(dp_pos[pos]) ) / (float)( dp_pos[pos+1] - dp_pos[pos]);
       //IF POSITIVE AND NEGATIVE
-//      pos=findClosest(dp,55,p_dpt);
+      pos=findClosest(dp,55,p_dpt);
       //flux should be shifted up (byte storage issue)
-//      _flux = po_flux[pos] - 100 + ( float (po_flux[pos+1]-100) - float (po_flux[pos]-100) ) * ( p_dpt - float(dp[pos]) ) / (float)( dp[pos+1] - dp[pos]);      
-//      _flux *=16.6667; 
+      _flux = po_flux[pos] - 100 + ( float (po_flux[pos+1]-100) - float (po_flux[pos]-100) ) * ( p_dpt - float(dp[pos]) ) / (float)( dp[pos+1] - dp[pos]);      
+      _flux *=16.6667; 
       
 //    } else {
 //        pos=findClosest(dp_neg,24,p_dpt);
@@ -423,6 +440,22 @@ void loop() {
             ciclo_errpid=0;
           }
         }
+        #endif
+
+        ciclo++;
+        #ifdef DEBUG_UPDATE
+          if (ciclo>2) { //First cycles measure bady
+          if (_mllastInsVol>ins_max)ins_max=_mllastInsVol;
+          if (_mllastInsVol<ins_min)ins_min=_mllastInsVol;
+          ins_sum+=_mllastInsVol;
+          ins_prom=ins_sum/(ciclo-2);
+          ins_error=(ins_max-ins_min)/ins_prom;
+          float err=fabs(_mllastInsVol-ins_prom)/ins_prom;
+          Serial.print("Error actual: ");Serial.println(err*100);
+          err_sum+=err;
+          Serial.print("Count Flujo prom, max,min, error max, eerr prom: ");Serial.print(ciclo);Serial.print(",");Serial.print(ins_prom);Serial.print(",");  
+          Serial.print(ins_min);Serial.print(",");Serial.print(ins_max);Serial.print(",");Serial.print(ins_error*100);Serial.print(",");Serial.println(err_sum/((float)ciclo-2.)*100);
+          }
         #endif
     }
 

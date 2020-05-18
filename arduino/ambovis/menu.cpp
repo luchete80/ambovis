@@ -212,7 +212,8 @@ void display_lcd ( ) {
     writeLine(1, "BPM:" + String(options.respiratoryRate), 1);
     writeLine(2, "IE:1:", 1);
   
-    dtostrf(ventilation->getInsVol(), 4, 0, tempstr);
+    //dtostrf(ventilation->getInsVol(), 4, 0, tempstr);
+    dtostrf(_mllastInsVol, 4, 0, tempstr);
     writeLine(1, String(tempstr), 16);
     //writeLine(1, "---", 16);
   
