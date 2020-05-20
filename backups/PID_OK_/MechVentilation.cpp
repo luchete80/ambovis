@@ -1,3 +1,11 @@
+/** Mechanical ventilation.
+ *
+ * @file MechVentilation.cpp
+ *
+ * This is the mechanical ventilation software module.
+ * It handles the mechanical ventilation control loop.
+ */
+
 #include "MechVentilation.h"
 
 int currentWaitTriggerTime = 0;
@@ -122,7 +130,38 @@ void MechVentilation::_setInspiratoryCycle(void)
     
 }
 
+//LUCIANO 
+float MechVentilation::getCurrentPressure(){
+  return _currentPressure;}
       
+void MechVentilation::evaluatePressure(void)
+{
+    if (_currentPressure > alarm_max_pressure)
+    {
+        //digitalWrite(PIN_BUZZ, HIGH);
+        //tone(PIN_BUZZ, 1000, 1000);
+        _currentAlarm = Alarm_Overpressure;
+        //Serial.println("Overpressure");
+    }
+    // else if (_currentPressure < ALARM_MIN_PRESSURE)
+    // {
+        // digitalWrite(PIN_BUZZ, HIGH);
+        // _currentAlarm = Alarm_Underpressure;
+    // }
+    else
+    {
+        if (_currentAlarm != No_Alarm) {
+            //digitalWrite(PIN_BUZZ, LOW);
+            _currentAlarm = No_Alarm;
+        }
+    }
+
+    // Valve
+    if (_currentPressure > VALVE_MAX_PRESSURE)
+    {
+        digitalWrite(PIN_SOLENOID, SOLENOID_OPEN);
+    }
+}
 
 void MechVentilation::activateRecruitment(void)
 {
@@ -146,16 +185,28 @@ void MechVentilation::deactivateRecruitment(void)
  */
 void MechVentilation :: update ( void )
 {
+    //#ifdef FILTER_FLUX
+//    if ( adding_vol && flux_count > 4){
+//      //_mlInsVol+=_flux*float((millis()-last_vent_time))*0.001;//flux in l and time in msec, results in ml 
+//      _mlInsVol2+=flux_sum/5.*float( ( millis() - flux_filter_time ) ) * 0.001;//flux in l and time in msec, results in ml 
+//      flux_count=0;
+//    } else {
+//      flux_sum+=_flux;
+//      flux_filter_time=millis();
+//      }
+    //#else
+    _mlInsVol+=_flux*float((millis()-last_vent_time))*0.001;//flux in l and time in msec, results in ml 
+    //#endif
     last_vent_time = millis();
     
     static int totalCyclesInThisState = 0;
     static int currentTime = 0;
     static int flowSetpoint = 0;
 
-    #if DEBUG_STATE_MACHINE
+#if DEBUG_STATE_MACHINE
     extern volatile String debugMsg[];
     extern volatile byte debugMsgCounter;
-    #endif
+#endif
 
   _msecTimerCnt=(unsigned long)(millis()-_msecTimerStartCycle);
   
@@ -176,16 +227,19 @@ void MechVentilation :: update ( void )
 //        _sensor_error_detected = false; //clear flag
 //    }
 
+    // Check pressures
+    evaluatePressure();
+
+    //refreshWatchDogTimer();
+
     switch (_currentState)
     {
     case Init_Insufflation:
     {
       //Filter vars
-      #ifdef FLUX_FILTER
       flux_filter_time=millis();
       flux_count=0;
       //flux_sum=0;
-      #endif
       
       //adding_vol=true;
       #ifdef DEBUG_UPDATE
@@ -204,12 +258,9 @@ void MechVentilation :: update ( void )
 
         _msecTimerStartCycle=millis();  //Luciano
         
-        _mllastInsVol=int(_mlInsVol);
-        _mllastExsVol=int(fabs(_mlExsVol));
-        
+        _mllastInsVol=_mlInsVol;
         //_mlInsVol2=0;
         _mlInsVol=0.;
-        _mlExsVol=0.;
         
         wait_NoMove=false;
         /* Stepper control: set acceleration and end-position */
@@ -236,6 +287,10 @@ void MechVentilation :: update ( void )
         #ifdef DEBUG_UPDATE
           Serial.print(pressure_p);Serial.print(" ");Serial.print(_stepperSpeed);
         #endif
+
+        if (vent_mode==VENTMODE_PCL){
+            max_speed=3400;
+        }
         
         _pid->reset();
 
@@ -298,16 +353,11 @@ void MechVentilation :: update ( void )
                } else if (vent_mode==VENTMODE_PCL) {
 
                   _pid->run(pressure_p, (float)_pip, &_stepperSpeed);
-                  _stepperAccel=0.75*( _stepperSpeed - _stepper -> getCurrentVelocityInStepsPerSecond() ) / PID_TS * 1000.;
-                  if (_stepperSpeed > STEPPER_SPEED_MAX)
-                    _stepperSpeed=STEPPER_SPEED_MAX;
-                  if (_stepperAccel > STEPPER_ACCEL_MAX)
-                    _stepperAccel=STEPPER_ACCEL_MAX;
+                  if (_stepperSpeed > max_speed)
+                    _stepperSpeed=max_speed;
                }                
                #ifdef DEBUG_UPDATE
-                Serial.print("Req accel: ");Serial.println(_stepperAccel);
-                Serial.print("Pres, pip: "); Serial.print(int(pressure_p)); Serial.print(" "); Serial.print(int(_pip));  Serial.print("reqSpeed: "); Serial.print(int(_stepperSpeed));  
-                Serial.print("Curr Speed: "); Serial.print(int(_stepper->getCurrentVelocityInStepsPerSecond()));  Serial.print("Accel: "); Serial.println(int(_stepperAccel));                    
+                Serial.print("Pres, pip: "); Serial.print(int(pressure_p)); Serial.print(" "); Serial.print(int(_pip));  Serial.print("Speed: "); Serial.println(int(_stepperSpeed));                      
                #endif
 
               if (vent_mode !=VENTMODE_MAN){  //only if auto
@@ -317,8 +367,7 @@ void MechVentilation :: update ( void )
                   _stepper->moveTo(STEPPER_HIGHEST_POSITION);
                 #else
                 _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
-                _stepper->setAccelerationInStepsPerSecondPerSecond(abs(_stepperAccel));
-                
+
                 if (_stepperSpeed == 0){
                   _stepper->setTargetPositionToStop();
                   //Serial.print("VELOCIDAD CERO!");
@@ -368,8 +417,9 @@ void MechVentilation :: update ( void )
         #ifdef ACCEL_STEPPER
 
         #else
-        _stepper->setSpeedInStepsPerSecond(STEPPER_SPEED_EXSUFF);
-        _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_EXSUFFLATION);
+        _stepper->setSpeedInStepsPerSecond(STEPPER_ACC_EXSUFFLATION);
+        _stepper->setAccelerationInStepsPerSecondPerSecond(
+            STEPPER_ACC_EXSUFFLATION);
         //LUCIANO
         //_stepper->setTargetPositionInSteps(
           //  STEPPER_DIR * (STEPPER_LOWEST_POSITION));
@@ -444,7 +494,7 @@ void MechVentilation :: update ( void )
 //            _pid->run(pressure_p, (float)_peep, &_stepperSpeed);
 //            _pid->run(float(pressure_p-pressure_p0), (float)_peep, &_stepperSpeed);
 //LUCIANO
-              _stepper->setSpeedInStepsPerSecond(4000);
+              _stepper->setSpeedInStepsPerSecond(1200);
              // Serial.println(_stepperSpeed);
 //            if (_stepperSpeed >= 0)
 //                _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
@@ -575,11 +625,13 @@ void MechVentilation::_setAlarm(Alarm alarm)
     _currentAlarm = alarm;
 }
 
-float MechVentilation::getInsVol() {
-    return (_mllastInsVol+_mllastExsVol)/2.;
+float MechVentilation::getInsVol()
+{
+    return _mllastInsVol;
 }
 
-void MechVentilation::change_config(VentilationOptions_t options) {
+void MechVentilation::change_config(VentilationOptions_t options)
+{
     _rpm = options.respiratoryRate;
     _pip = options.peakInspiratoryPressure;
     _peep = options.peakEspiratoryPressure;
@@ -590,3 +642,15 @@ void MechVentilation::change_config(VentilationOptions_t options) {
 
     _mode = options.modeCtl;
 }
+
+//**
+// FOR ACCEL_STEPPER
+//FROM https://forum.arduino.cc/index.php?topic=394355.0
+//void moveToHome() {
+//    limitSwitchState = digitalRead(limitSwitchPin);
+//    while (limitSwitchState == HIGH) { // this assumes it will be LOW when pressed
+//       // move one step towards switch
+//       limitSwitchState = digitalRead(limitSwitchPin);
+//    }
+//    stepperPosition = 0;
+//}

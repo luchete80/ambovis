@@ -38,7 +38,13 @@ bool test_pid=false;
 float _mlInsVol=0;
 float _mlExsVol=0;
 int _mllastInsVol,_mllastExsVol;
-//float _mlInsVol2;
+
+#ifdef FLUX_FILTER
+float _mlInsVol2;
+float flux_sum;
+byte flux_count;
+unsigned long flux_filter_time;
+#endif
 
 int Compression_perc = 8; //80%
 
@@ -68,7 +74,7 @@ float pressure_p;   //EXTERN!!
 float last_pressure_max,last_pressure_min,last_pressure_peep;
 float pressure_peep;
 
-byte vent_mode = VENTMODE_MAN; //0
+byte vent_mode = VENTMODE_PCL; //0
 //Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
 float pressure_p0;
@@ -82,8 +88,6 @@ unsigned long lastReadSensor = 0;
 unsigned long lastShowSensor = 0;
 unsigned long lastSave = 0;
 bool display_needs_update=false;
-byte flux_count;
-unsigned long flux_filter_time;
 
 
 State static lastState;
@@ -98,7 +102,6 @@ extern byte stepper_time = 50;
 unsigned long last_stepper_time;
 unsigned long last_vent_time;
 unsigned long time;
-float flux_sum;
 byte cycle_pos;
 int16_t adc0;
 
@@ -110,7 +113,7 @@ byte alarm_peep_pressure=5;
 
 //MENU
 unsigned long lastButtonPress;
-
+float verror;
 
 //float dp_neg[]={-0.877207832,-0.606462279,-0.491216024,-0.377891785,-0.295221736,-0.216332764,-0.151339196,-0.096530072,-0.052868293,-0.047781395,-0.039664506,-0.03312327,-0.028644966,-0.023566372,-0.020045692,-0.014830113,-0.011688636,-0.008176254,-0.006117271,-0.003937171,-0.001999305,-0.00090924,-0.00030358,0};
 //float dp_pos[]={0.,0.000242233,0.000837976,0.002664566,0.004602432,0.007024765,0.009325981,0.012111664,0.01441288,0.017561913,0.023012161,0.029794693,0.037061691,0.043771552,0.051474571,0.05874157,0.109004974,0.176879848,0.260808033,0.365700986,0.504544509,0.630753349,0.795599072,1.216013465,1.60054669,2.087678384,2.547210457,3.074176245,3.676588011,4.385391541,5.220403813,5.947168311,6.794489065,7.662011691,8.642594913,9.810447693,10.7793808,11.95257389};
@@ -235,6 +238,26 @@ void setup() {
 
   writeLine(1, "AMBOVIS 0305_v2",4);
 
+
+  #ifdef USE_ADC
+  p_dpt0=0;
+  ads.begin();
+  verror=0;
+  for (int i=0;i<10;i++) {
+  adc0 = ads.readADC_SingleEnded(0);
+  Voltage = (adc0 * 0.1875)*0.001; //miliVOLT!
+  Serial.print("Voltage: ");Serial.println(Voltage,3);
+  verror += ( Voltage - 5.0*0.04 );
+  //vo=vs(0.09 dp +0.04)+/-verr
+  p_dpt0 += 0.5*(( Voltage /* 5.0/V_SUPPLY_HONEY */ - 0.1 *4.8/* - corr_fs */)/(0.8*4.8)*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20);
+  delay(10);
+  }
+    verror/=10.;//
+    p_dpt0/=10.0;
+  Serial.print("MPX Volt (mV) at p0: ");Serial.println(verror*1000,3);
+  p_dpt0=0.20;
+  #endif
+
   // configura la ventilación
   ventilation -> start();
   ventilation -> update();
@@ -283,21 +306,7 @@ void setup() {
     #endif
     EEPROM.get(0,last_cycle);
     ventilation->setCycleNum(last_cycle);
-
-  #ifdef USE_ADC
-    p_dpt0=0;
-    ads.begin();
-    for (int i=0;i<10;i++) {
-    adc0 = ads.readADC_SingleEnded(0);
-    Voltage = (adc0 * 0.1875)/1000;
-    p_dpt0 += 0.5*(( Voltage /* 5.0/V_SUPPLY_HONEY */ - 0.1 *4.8/* - corr_fs */)/(0.8*4.8)*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20);
-    }
-    p_dpt0/=10.0;
-    Serial.print("MPX Volt at p0: ");Serial.println(Voltage*1000,3);
-    //FS=(vout/vs)+pmin*0.8/(PMax-pmin)-0.1 //Donde vout/vs es V_HONEY_P0
-    //corr_fs=Voltage/4.8+(-1.)*0.8/2. - 0.1;
-    p_dpt0=0.20;
-  #endif
+  
     #ifdef DEBUG_UPDATE
     ins_prom=ins_sum=0;
     ins_max=0.;ins_min=10000.0;
@@ -313,7 +322,7 @@ byte pos;
 
 void loop() {
 
-  
+  State state = ventilation->getState();  
   check_encoder();
 
   time = millis();
@@ -326,14 +335,9 @@ void loop() {
   #ifdef DEBUG_OFF
   if ( millis() > lastShowSensor + TIME_SHOW ) {
       lastShowSensor=millis(); 
-      //Serial.print(byte(cycle_pos));Serial.print(",");Serial.print(byte(pressure_p));Serial.print(",");Serial.print(int(alarm_state));Serial.print(",");Serial.println(_flux);
-      //Serial.print(p_dpt);Serial.print(",");Serial.println(int(alarm_state));
-      //Serial.print(int(cycle_pos));Serial.print(",");Serial.print(Voltage,3);Serial.print(",");
-      //Serial.print(int(Voltage*1000));Serial.print(",");
-      //Serial.println(analogRead(A1));
-      //Serial.println(p_dpt);
-      Serial.print(p_dpt);Serial.print(",");Serial.print(_flux);Serial.print(",");Serial.print(int(_mlInsVol));;Serial.print(",");Serial.println(int(ventilation->getInsVol()));
-      //Serial.print(int(_flux));Serial.print(",");Serial.println(int(_mlInsVol));
+      //Serial.print(byte(cycle_pos));Serial.print(",");Serial.print(byte(pressure_p));Serial.print(",");Serial.print(int(alarm_state));Serial.print(",");Serial.println(int(_flux));
+      Serial.print(p_dpt);Serial.print(",");Serial.print(_flux);Serial.print(",");Serial.print(int(_mlInsVol));Serial.println(int(_mlExsVol));
+      //;Serial.print(",");Serial.println(int(ventilation->getInsVol()));
   }
   #endif
   
@@ -354,13 +358,16 @@ void loop() {
 
     #ifdef USE_ADC
     adc0 = ads.readADC_SingleEnded(0);
-    Voltage = (adc0 * 0.1875)/1000;
+    Voltage = (adc0 * 0.1875)/1000.;//Volts
     //Vout = VS*(0.018*P+0.04) ± ERROR
     //VS = 5.0 Vdc
     //EL 0.04 es el 48que aparece en 0
     //Por eso como yaesta restado no se tiene en cuenta 
     //0.04=48*/1024
-    p_dpt=(Voltage/5.-0.0488)/0.09*1000*DEFAULT_PA_TO_CM_H20;
+    //Serial.print("error: ");Serial.println(verror*1000);
+    //p_dpt=( Voltage/5. - verror -0.04)/0.09*1000*DEFAULT_PA_TO_CM_H20;
+    
+    p_dpt=( ( Voltage - verror+0.001)*0.2 - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20;
   #endif
 
     
@@ -377,12 +384,24 @@ void loop() {
 //        pos=findClosest(dp_neg,24,p_dpt);
 //        _flux = po_flux_neg[pos] + ( po_flux_neg[pos+1] - po_flux_neg[pos] ) * ( p_dpt - dp_neg[pos] ) / ( dp_neg[pos+1] - dp_neg[pos]);      
 //      }
-    flux_count++;    //Filter
 
-    if (_flux>0)
-        _mlInsVol+=_flux*float((millis()-lastReadSensor))*0.001;//flux in l and time in msec, results in ml 
-    else
-        _mlExsVol+=_flux*float((millis()-lastReadSensor))*0.001;//flux in l and time in msec, results in ml 
+//    #ifdef FILTER_FLUX
+//    flux_count++;    //Filter
+//    if ( adding_vol && flux_count > 4){
+//      _mlInsVol2+=flux_sum/5.*float( ( millis() - flux_filter_time ) ) * 0.001;//flux in l and time in msec, results in ml 
+//      flux_count=0;
+//    } else {
+//      flux_sum+=_flux;
+//      flux_filter_time=millis();
+//      }
+//    #endif
+
+    if (_flux<0)
+        //if (state == State_Insufflation)
+          _mlInsVol-=_flux*float((millis()-lastReadSensor))*0.001;//flux in l and time in msec, results in ml 
+    else {
+          _mlExsVol+=_flux*float((millis()-lastReadSensor))*0.001;//flux in l and time in msec, results in ml 
+    }
         
     #ifdef DEBUG_OFF
 //      char buffer[50];
@@ -417,7 +436,6 @@ void loop() {
         }
     }
     
-    State state = ventilation->getState();
     if ( ventilation -> getCycleNum () != last_cycle ) {
         last_cycle = ventilation->getCycleNum(); 
         //lcd.clear();  //display_lcd do not clear screnn in order to not blink
@@ -442,8 +460,8 @@ void loop() {
         }
         #endif
 
-        ciclo++;
         #ifdef DEBUG_UPDATE
+        ciclo++;
           if (ciclo>2) { //First cycles measure bady
           if (_mllastInsVol>ins_max)ins_max=_mllastInsVol;
           if (_mllastInsVol<ins_min)ins_min=_mllastInsVol;

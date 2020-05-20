@@ -7,6 +7,7 @@
 //#define ACCEL_STEPPER 1
 #define DEBUG_UPDATE 1 //
 //#define DEBUG_PID 1
+//#define FILTER_FLUX
 #define USE_ADC 1
 #define DEBUG_OFF 1 //Release version
 #define P_HONEYWELL 1
@@ -19,7 +20,7 @@
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE   25                 // msec
 #define TIME_SENSOR 10               // msec
-#define TIME_SHOW 80    //IF OLED DISPLAY IS USED FASTER THAN 50ms GIVES ERRORS IN THE PLOTS 
+#define TIME_SHOW 10    //IF OLED DISPLAY IS USED FASTER THAN 50ms GIVES ERRORS IN THE PLOTS 
 #define TIME_SAVE 5000
 #define TIME_SEND_CONFIGURATION 2000 // msec
 #define V_HONEY_P0 0.49874F //Analog/1023
@@ -44,8 +45,8 @@
 #define STEPPER_HIGHEST_POSITION    ( 2500)   //270º
 //#define STEPPER_HIGHEST_POSITION    ( 1280)   //330º
 #define STEPPER_SPEED_DEFAULT       (400)   // Steps/s
-#define STEPPER_SPEED_MAX           (STEPPER_MICROSTEPS*800)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
-#define STEPPER_ACCEL_MAX           (10000)
+#define STEPPER_SPEED_MAX           (3400)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
+#define STEPPER_ACCEL_MAX           (5000)
 #define STEPPER_SPEED_MAX_VCL       (1200)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_SPEED_EXSUFF        (4000)
 #define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  2000)   // Steps/s2
@@ -59,8 +60,8 @@
 #define DEFAULT_MIN_VTIDAL 240
 #define DEFAULT_FRAC_CYCLE_VCL_INSUFF 0.75
 #define DEFAULT_TRIGGER_THRESHOLD 3.0
-#define DEFAULT_RPM 14
-#define DEFAULT_MAX_RPM 24
+#define DEFAULT_RPM 18
+#define DEFAULT_MAX_RPM 30
 #define DEFAULT_MIN_RPM 3
 #define DEFAULT_POR_INSPIRATORIO 33.3333F // %
 #define DEFAULT_PEAK_INSPIRATORY_PRESSURE 25
