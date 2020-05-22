@@ -10,8 +10,9 @@
 #define TFT_RST 8
 
 //SPI HARDWARE SHOULD BE PINS CLK #13 AND MISO #11
-Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_MOSI, TFT_CLK, TFT_RST, TFT_MISO);
 
+//Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_MOSI, TFT_CLK, TFT_RST, TFT_MISO); //THIS SHOULD NEVER BE USED!
+Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 
 char a[10],b[10];
 
@@ -47,7 +48,7 @@ int count=0;
 byte escala=32;
 byte x[128],y[64];
 
-byte rx[128],ry[128];
+byte rx[128],ry[128],ry2[128];
 char buffer[10];
 
 void setup() {
@@ -116,14 +117,15 @@ void loop(void) {
 //            u8g2.drawStr( 60, 20, "AL pip/peep");
 //          }
           tft.setRotation(1);
-          drawY2(ILI9341_RED);
+          drawY2(ILI9341_GREEN);
 //          newData = false;
 
       if (last_x<5){
         valsreaded=0;
         wait4statechg=false;
         state=0;
-        //tft.fillRect(0,0, 127,63, ILI9341_BLACK);
+        tft.fillRect(0,0, 63,250, ILI9341_BLACK);
+
       }
   //}
   parseData();
@@ -229,16 +231,17 @@ void drawY(){
       //u8g.drawLine(i-1, y[i-1], i, y[i]);
   }  
 }
-
 void drawY2(uint16_t color){
 //  u8g2.drawPixel(0, y[0]);
 //tft.fillRect(rx[0],0, rx[valsreaded],63, ILI9341_WHITE);
   for(int i=1; i<valsreaded+1; i++){
       //u8g2.drawPixel(rx[i], 63 - ry[i]);
 //      u8g2.drawLine(rx[i-1], 63 - ry[i-1], rx[i], 63 - ry[i]);
-        tft.drawLine(rx[i-1], 63 - ry[i-1], rx[i], 63 - ry[i], color);
+        tft.drawLine(63 - ry[i-1],rx[i-1], 63 - ry[i], rx[i], color);
+        //tft.drawLine(rx[i-1], 63 - ry[i-1], rx[i], 63 - ry[i], color);
       //tft.fillRect(rx[i-1],0, rx[i],63, ILI9341_WHITE);
       //tft.drawLine(rx[i-1], 63 - ry[i-1], rx[i], 63 - ry[i], color);
+        tft.drawLine(160+ry2[i-1],rx[i-1], 160+ry2[i], rx[i], ILI9341_BLUE);
   } 
 
   yield();
@@ -261,7 +264,7 @@ void parseData() {
   integerFromPC[2] = atoi(strtokIndx);     // convert this part to an integer
 
   if (integerFromPC[2]!=0 && !wait4statechg) {
-    state=integerFromPC[2];
+    state=integerFromPC[3];
     wait4statechg=true;
   }
   
@@ -280,11 +283,13 @@ void parseData() {
          last_x=integerFromPC[0];
          rx[valsreaded]=integerFromPC[0];
          ry[valsreaded]=integerFromPC[1];     
+         ry2[valsreaded]=int(float(integerFromPC[2])*0.1f); 
      }
   } else {
              valsreaded+=1;
          last_x=integerFromPC[0];
          rx[valsreaded]=integerFromPC[0];
          ry[valsreaded]=integerFromPC[1];       
+         ry2[valsreaded]=int(float(integerFromPC[2])*0.1f); 
     }
 }

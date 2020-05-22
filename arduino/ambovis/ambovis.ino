@@ -335,8 +335,8 @@ void loop() {
   #ifdef DEBUG_OFF
   if ( millis() > lastShowSensor + TIME_SHOW ) {
       lastShowSensor=millis(); 
-      Serial.print(byte(cycle_pos));Serial.print(",");Serial.print(byte(pressure_p));Serial.print(",");Serial.print(int(_flux));Serial.print(",");Serial.println(int(alarm_state));//
-      //Serial.print(p_dpt);Serial.print(",");Serial.print(_flux);Serial.print(",");Serial.print(int(_mlInsVol));Serial.print(",");Serial.println(int(_mlExsVol));
+      //Serial.print(byte(cycle_pos));Serial.print(",");Serial.print(byte(pressure_p));Serial.print(",");Serial.print(int(_flux));Serial.print(",");Serial.println(int(alarm_state));//
+      Serial.print(p_dpt);Serial.print(",");Serial.print(_flux);Serial.print(",");Serial.print(int(_mlInsVol));Serial.print(",");Serial.println(int(_mlExsVol));
       //;Serial.print(",");Serial.println(int(ventilation->getInsVol()));
   }
   #endif
