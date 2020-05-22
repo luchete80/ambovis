@@ -241,7 +241,10 @@ void display_lcd ( ) {
   } else if (menu_number ==1 ){//OTHER SETTINGS
     writeLine(0, "PIP  AL:" + String(alarm_max_pressure), 1); 
     writeLine(1, "PEEP AL:" + String(alarm_peep_pressure), 1); 
-        
+    
+    #ifdef DEBUG_FLUX
+    writeLine(3, "F: " + String(ciclo) + " " + String(ins_prom,0) + "ml " + String(err_sum/((float)ciclo-2.)*100) + "%", 0);
+    #endif    
   }//menu_number
       
   clear_all_display=false;

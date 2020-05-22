@@ -14,7 +14,7 @@
 
 #include <EEPROM.h>
 
-#ifdef DEBUG_UPDATE
+#ifdef DEBUG_FLUX
 float ins_prom, ins_error;
 float ins_max,ins_min,err_sum;
 unsigned long ciclo,ins_sum;
@@ -74,7 +74,7 @@ float pressure_p;   //EXTERN!!
 float last_pressure_max,last_pressure_min,last_pressure_peep;
 float pressure_peep;
 
-byte vent_mode = VENTMODE_PCL; //0
+byte vent_mode = VENTMODE_MAN; //0
 //Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
 float pressure_p0;
@@ -236,7 +236,7 @@ void setup() {
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
-  writeLine(1, "AMBOVIS R0_4",4);
+  writeLine(1, "AMBOVIS R0_5",4);
 
 
   #ifdef USE_ADC
@@ -307,7 +307,7 @@ void setup() {
     EEPROM.get(0,last_cycle);
     ventilation->setCycleNum(last_cycle);
   
-    #ifdef DEBUG_UPDATE
+    #ifdef DEBUG_FLUX
     ins_prom=ins_sum=0;
     ins_max=0.;ins_min=10000.0;
     ciclo=0;
@@ -335,8 +335,8 @@ void loop() {
   #ifdef DEBUG_OFF
   if ( millis() > lastShowSensor + TIME_SHOW ) {
       lastShowSensor=millis(); 
-      //Serial.print(byte(cycle_pos));Serial.print(",");Serial.print(byte(pressure_p));Serial.print(",");Serial.print(int(alarm_state));Serial.print(",");Serial.println(int(_flux));
-      Serial.print(p_dpt);Serial.print(",");Serial.print(_flux);Serial.print(",");Serial.print(int(_mlInsVol));Serial.println(int(_mlExsVol));
+      Serial.print(byte(cycle_pos));Serial.print(",");Serial.print(byte(pressure_p));Serial.print(",");Serial.print(int(_flux));Serial.print(",");Serial.println(int(alarm_state));//
+      //Serial.print(p_dpt);Serial.print(",");Serial.print(_flux);Serial.print(",");Serial.print(int(_mlInsVol));Serial.print(",");Serial.println(int(_mlExsVol));
       //;Serial.print(",");Serial.println(int(ventilation->getInsVol()));
   }
   #endif
@@ -460,19 +460,18 @@ void loop() {
         }
         #endif
 
-        #ifdef DEBUG_UPDATE
+        #ifdef DEBUG_FLUX
         ciclo++;
           if (ciclo>2) { //First cycles measure bady
-          if (_mllastInsVol>ins_max)ins_max=_mllastInsVol;
           if (_mllastInsVol<ins_min)ins_min=_mllastInsVol;
           ins_sum+=_mllastInsVol;
           ins_prom=ins_sum/(ciclo-2);
           ins_error=(ins_max-ins_min)/ins_prom;
           float err=fabs(_mllastInsVol-ins_prom)/ins_prom;
-          Serial.print("Error actual: ");Serial.println(err*100);
+          //Serial.print("Error actual: ");Serial.println(err*100);
           err_sum+=err;
-          Serial.print("Count Flujo prom, max,min, error max, eerr prom: ");Serial.print(ciclo);Serial.print(",");Serial.print(ins_prom);Serial.print(",");  
-          Serial.print(ins_min);Serial.print(",");Serial.print(ins_max);Serial.print(",");Serial.print(ins_error*100);Serial.print(",");Serial.println(err_sum/((float)ciclo-2.)*100);
+          //Serial.print("Count Flujo prom, max,min, error max, eerr prom: ");Serial.print(ciclo);Serial.print(",");Serial.print(ins_prom);Serial.print(",");  
+          //Serial.print(ins_min);Serial.print(",");Serial.print(ins_max);Serial.print(",");Serial.print(ins_error*100);Serial.print(",");Serial.println(err_sum/((float)ciclo-2.)*100);
           }
         #endif
     }

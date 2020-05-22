@@ -228,9 +228,10 @@ void MechVentilation :: update ( void )
         else { //MANUAL MODE
           _stepper->setTargetPositionInSteps(int (STEPPER_HIGHEST_POSITION*(float)_percVol/100.));
           _stepperSpeed=STEPPER_HIGHEST_POSITION*(float(_percVol)/100.)/( (float)(_timeoutIns/1000) * DEFAULT_FRAC_CYCLE_VCL_INSUFF);//En [ml/s]
+          _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCEL_MAX);
           if (_stepperSpeed>STEPPER_SPEED_MAX)
             _stepperSpeed=STEPPER_SPEED_MAX;
-          _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
+            _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
         } 
         #endif
         #ifdef DEBUG_UPDATE

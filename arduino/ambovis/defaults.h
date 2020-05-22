@@ -7,6 +7,7 @@
 //#define ACCEL_STEPPER 1
 //#define DEBUG_UPDATE 1 //
 //#define DEBUG_PID 1
+#define DEBUG_FLUX 1
 //#define FILTER_FLUX
 #define USE_ADC 1
 #define DEBUG_OFF 1 //Release version
@@ -45,7 +46,7 @@
 #define STEPPER_HIGHEST_POSITION    ( 2500)   //270º
 //#define STEPPER_HIGHEST_POSITION    ( 1280)   //330º
 #define STEPPER_SPEED_DEFAULT       (400)   // Steps/s
-#define STEPPER_SPEED_MAX           (3400)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
+#define STEPPER_SPEED_MAX           (5000)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_ACCEL_MAX           (5000)
 #define STEPPER_SPEED_MAX_VCL       (1200)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_SPEED_EXSUFF        (4000)
@@ -60,7 +61,7 @@
 #define DEFAULT_MIN_VTIDAL 240
 #define DEFAULT_FRAC_CYCLE_VCL_INSUFF 0.75
 #define DEFAULT_TRIGGER_THRESHOLD 3.0
-#define DEFAULT_RPM 18
+#define DEFAULT_RPM 14
 #define DEFAULT_MAX_RPM 30
 #define DEFAULT_MIN_RPM 3
 #define DEFAULT_POR_INSPIRATORIO 33.3333F // %
