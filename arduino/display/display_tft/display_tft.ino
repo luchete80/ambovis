@@ -2,6 +2,10 @@
 #include "Adafruit_GFX.h"
 #include "Adafruit_ILI9341.h"
 
+#define ILI9341_LIGHTGREY 0xC618 /* 192, 192, 192 */
+#define ILI9341_DARKGREY 0x7BEF /* 128, 128, 128 */
+
+
 #define TFT_CLK 13
 #define TFT_MISO 12
 #define TFT_MOSI 11
@@ -25,6 +29,8 @@ int last_t;
 int integerFromPC [5];
 float floatFromPC = 0.0;
 
+int axispos[3]; //from each graph
+
 int buzzer=3; //pin
 unsigned long timebuzz=0;
 bool isbuzzeron=false;
@@ -43,6 +49,7 @@ char recvChar;
 char endMarker = '>';
 boolean newData = false;
 byte valsreaded=0;
+int valsreaded_[3];
 byte last_x=0;
 
 
@@ -63,6 +70,8 @@ void setup() {
   tft.begin();
   tft.fillScreen(ILI9341_BLACK);
 
+  axispos[0]=63;  axispos[1]=160;  axispos[2]=260;
+
 }
 
 
@@ -79,48 +88,7 @@ void loop(void) {
   recvWithEndMarker();
   //recvWithStartEndMarkers();
   showNewData();
-  //y[integerFromPC[0]]=integerFromPC[1];
 
-//   for (int i=0;i<3;i++)
-//      integerFromPC[3]=Serial.parseInt();
-      
-  //y[64]=integerFromPC[1];
-  //if (last_t!=integerFromPC [0])
-  //{
-
-////          u8g2.drawStr( 50, 10, receivedChars);
-////        //Full buffer mode: u8g2.clear() will work, but u8g2.clearBuffer() might be sufficient
-////          //u8g2.drawPixel(126,20);
-////          u8g2.drawStr( 0, 0, "r: ");
-////          itoa(valsreaded, buffer, 10);
-////          u8g2.drawStr( 20, 0,buffer);
-////          
-////          u8g2.drawStr( 0, 10, "x: ");
-////          itoa(integerFromPC[0], buffer, 10);
-////          u8g2.drawStr( 20, 10, buffer);
-////          
-//          for (int i=0;i<6;i++)
-//              u8g2.drawLine(0,13+i*10,2,13+i*10); 
-//                   
-//          u8g2.drawStr( 10, 0, "p: ");
-//          itoa(integerFromPC[1], buffer, 10);
-//          u8g2.drawStr( 30,0, buffer);
-////          
-//          u8g2.drawStr( 80, 0, "st: ");
-//          itoa(state, buffer, 10);
-//          u8g2.drawStr( 100, 0, buffer);
-////          
-////          u8g2.drawStr( 40, 0, integerFromPC[1]);
-////          u8g2.drawStr( 20, 0, Serial.parseInt());
-////          u8g2.drawStr( 45, 0, a);
-////        
-//          if (state == 1 ) {
-//            u8g2.drawStr( 60, 20, "AL peep ");
-//          } else if (state == 2 ){
-//            u8g2.drawStr( 60, 20, "AL pip");
-//          } else if (state == 3){
-//            u8g2.drawStr( 60, 20, "AL pip/peep");
-//          }
           tft.setRotation(1);
           drawY2(ILI9341_GREEN);
 //          newData = false;
@@ -128,11 +96,15 @@ void loop(void) {
       if (last_x<10 && !lcd_cleaned){
         lcd_cleaned=true;
         valsreaded=0;
+        for (int i=0;i<3;i++) 
+          valsreaded_[i]=0;
         wait4statechg=false;
         state=0;
         //tft.fillRect(0,240-last_x, 320,240-last_x+10, ILI9341_BLACK);
         tft.fillScreen(ILI9341_BLACK);
-
+        //AXIS
+        for (int i=0;i<3;i++)
+          tft.drawLine(axispos[i],0, axispos[i], 240, ILI9341_DARKGREY);
       }
       if (last_x>10 && lcd_cleaned){
         lcd_cleaned=false;
@@ -140,14 +112,16 @@ void loop(void) {
   //}
   parseData();
 
-  tft.setRotation(3);
+  tft.setRotation(0);
   tft.setCursor(0, 0);
-  tft.setTextColor(ILI9341_WHITE);  tft.setTextSize(1);
-  tft.println("Hello World!");
-  tft.setTextColor(ILI9341_YELLOW); tft.setTextSize(2);
-  tft.println(1234.56);
-  tft.setTextColor(ILI9341_RED);    tft.setTextSize(3);
-    
+  tft.setTextColor(ILI9341_YELLOW);  tft.setTextSize(2);
+  itoa(state, buffer, 10);
+  tft.println(buffer);
+//  //tft.println("Hello World!");
+//  tft.setTextColor(ILI9341_YELLOW); tft.setTextSize(3);
+//  tft.println(1234.56);
+//  tft.setTextColor(ILI9341_RED);    tft.setTextSize(3);
+//    
     //state = integerFromPC[2];
 
     switch (state){
@@ -155,7 +129,10 @@ void loop(void) {
           digitalWrite(GREEN_LED,HIGH); digitalWrite(YELLOW_LED,LOW); digitalWrite(RED_LED,LOW);      
         break;
         case PEEP_ALARM:
-          digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,HIGH); digitalWrite(RED_LED,LOW);      
+          digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,HIGH); digitalWrite(RED_LED,LOW);  
+          tft.setTextColor(ILI9341_YELLOW); tft.setTextSize(2); 
+          tft.setCursor(160, 0);   
+          tft.println("pip AL");
         break;
         case PIP_ALARM:
           digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,LOW); digitalWrite(RED_LED,HIGH);      
@@ -213,7 +190,6 @@ void recvWithEndMarker() {
   char endMarker = '\n';
   char rc;
 
-  // if (Serial.available() > 0) {
   while (Serial.available() > 0 && newData == false) {
     rc = Serial.read();
     
@@ -243,21 +219,12 @@ void showNewData() {
 }
 
 void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
-//  u8g2.drawPixel(0, y[0]);
-//tft.fillRect(rx[0],0, rx[valsreaded],63, ILI9341_WHITE);
-  for(int i=1; i<valsreaded+1; i++){
-      //u8g2.drawPixel(rx[i], 63 - ry[i]);
-//      u8g2.drawLine(rx[i-1], 63 - ry[i-1], rx[i], 63 - ry[i]);
-        int y=integerFromPC[2]/6;
-        //tft.drawLine(63 - ry[i-1],240-rx[i-1], 63 - ry[i], 240-rx[i], color);
-        //tft.drawLine(260-ry2[i-1],240-rx[i-1], 260-ry2[i], 240-rx[i], ILI9341_BLUE);
-  } 
 
-  tft.drawLine(63 - ry[valsreaded-1], 240-rx[valsreaded-1], 63 - ry[valsreaded], 240-rx[valsreaded], color);
-  tft.drawLine(180-yflux[0],          240-rx[valsreaded-1], 180-yflux[1], 240-rx[valsreaded], ILI9341_RED);
-  tft.drawLine(310-yvt[0], 240-rx[valsreaded-1], 310-yvt[1], 240-rx[valsreaded], ILI9341_BLUE);
-  //tft.drawLine(310-ry2[valsreaded-1], 240-rx[valsreaded-1], 310-ry2[valsreaded], 240-rx[valsreaded], ILI9341_BLUE);
-        
+  tft.drawLine(axispos[0] - ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded], 240-rx[valsreaded], color);
+  tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_RED);
+  tft.drawLine(axispos[2]-yvt[0],             240-rx[valsreaded-1], axispos[2]-yvt[1],            240-rx[valsreaded], ILI9341_BLUE);
+
+       
   //yield();
 }
 
@@ -270,25 +237,18 @@ void parseData() {
   strtokIndx = strtok(receivedChars, ","); // this continues where the previous call left off
   integerFromPC[0] = atoi(strtokIndx);     // convert this part to an integer
 
-  //for (int i=1;i<3;i++) {
-  strtokIndx = strtok(NULL, ","); // this continues where the previous call left off
-  integerFromPC[1] = atoi(strtokIndx);     // convert this part to an integer
-
-  strtokIndx = strtok(NULL,","); // this continues where the previous call left off
-  integerFromPC[2] = atoi(strtokIndx);     // convert this part to an integer
- 
-  strtokIndx = strtok(NULL,","); // this continues where the previous call left off
-  integerFromPC[3] = atoi(strtokIndx);     // convert this part to an integer
-
+  for (int i=1;i<4;i++) {
+    strtokIndx = strtok(NULL, ","); // this continues where the previous call left off
+    integerFromPC[i] = atoi(strtokIndx);     // convert this part to an integer
+  }
   strtokIndx = strtok(NULL,NULL); // this continues where the previous call left off
   integerFromPC[4] = atoi(strtokIndx);     // convert this part to an integer
 
-  if (integerFromPC[4]!=0 && !wait4statechg) {
+  //if (integerFromPC[4]!=0 && !wait4statechg) {
     state=integerFromPC[4];
     wait4statechg=true;
-  }
-  
   //}
+  
 
   if (valsreaded > 0) {
      if ( integerFromPC[0] != last_x && /*integerFromPC[0] < 127 */ integerFromPC[0] < last_x+10) {

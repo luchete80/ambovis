@@ -38,13 +38,6 @@ float _mlInsVol=0;
 float _mlExsVol=0;
 int _mllastInsVol,_mllastExsVol;
 
-#ifdef FLUX_FILTER
-float _mlInsVol2;
-float flux_sum;
-byte flux_count;
-unsigned long flux_filter_time;
-#endif
-
 int Compression_perc = 8; //80%
 
 #ifdef ACCEL_STEPPER
@@ -78,6 +71,13 @@ byte vent_mode = VENTMODE_MAN; //0
 Pressure_Sensor _dpsensor;
 float pressure_p0;
 float _flux;
+#ifdef FILTER_FLUX
+float _flux_fil[5];
+float _mlInsVol2;
+float _flux_sum;
+byte flux_count;
+#endif
+
 bool send_data=false;
 char tempstr[5],tempstr2[5];
 int curr_sel, old_curr_sel;
@@ -334,10 +334,13 @@ void loop() {
   #ifdef DEBUG_OFF
   if ( millis() > lastShowSensor + TIME_SHOW ) {
       lastShowSensor=millis(); 
-      Serial.print(byte(cycle_pos));Serial.print(",");Serial.print(pressure_p);Serial.print(",");Serial.print(int(_flux));
-      Serial.print(",");Serial.print(int(_mlInsVol-_mlExsVol));Serial.print(",");Serial.println(int(alarm_state));//
-      //Serial.print(",");Serial.println(int(alarm_state));      
-      //Serial.print(p_dpt);Serial.print(",");Serial.print(_flux);Serial.print(",");Serial.print(int(_mlInsVol));Serial.print(",");Serial.println(int(_mlExsVol));
+      Serial.print(byte(cycle_pos));Serial.print(",");Serial.print(int(pressure_p));Serial.print(",");Serial.print(int(_flux));
+      Serial.print(",");Serial.print(int(_mlInsVol-_mlExsVol));Serial.print(",");Serial.println(int(alarm_state));
+      //Serial.print(",");Serial.println(int(alarm_state));     
+//      #ifdef FILTER_FLUX 
+//      Serial.print(p_dpt);Serial.print(",");Serial.print(_flux);Serial.print(",");Serial.print(",");Serial.println(_flux_sum/5.);
+//      #endif
+      //Serial.print(int(_mlInsVol));Serial.print(",");Serial.println(int(_mlExsVol));
 
   }
   #endif
@@ -387,31 +390,32 @@ void loop() {
 //        _flux = po_flux_neg[pos] + ( po_flux_neg[pos+1] - po_flux_neg[pos] ) * ( p_dpt - dp_neg[pos] ) / ( dp_neg[pos+1] - dp_neg[pos]);      
 //      }
 
-//    #ifdef FILTER_FLUX
-//    flux_count++;    //Filter
-//    if ( adding_vol && flux_count > 4){
-//      _mlInsVol2+=flux_sum/5.*float( ( millis() - flux_filter_time ) ) * 0.001;//flux in l and time in msec, results in ml 
-//      flux_count=0;
-//    } else {
-//      flux_sum+=_flux;
-//      flux_filter_time=millis();
-//      }
-//    #endif
+    #ifdef FILTER_FLUX
+    flux_count++;    //Filter
+    for (int i=0;i<4;i++){
+      _flux_fil[i]=_flux_fil[i+1];
+    }
+    _flux_fil[4]=_flux;
+    _flux_sum=0.;
+    for (int i=0;i<5;i++)
+    _flux_sum+=_flux_fil[i];   
+    #endif
 
+    float flow_f;
+    #ifdef FILTER_FLUX
+    flow_f=_flux_sum/5.;
+    #else
+    flow_f=_flux;
+    #endif 
+        
     if (_flux>0)
         //if (state == State_Insufflation)
-          _mlInsVol+=_flux*float((millis()-lastReadSensor))*0.001;//flux in l and time in msec, results in ml 
+          _mlInsVol+=flow_f*float((millis()-lastReadSensor))*0.001;//flux in l and time in msec, results in ml 
     else {
-          _mlExsVol-=_flux*float((millis()-lastReadSensor))*0.001;//flux in l and time in msec, results in ml 
+          _mlExsVol-=flow_f*float((millis()-lastReadSensor))*0.001;//flux in l and time in msec, results in ml 
     }
-        
-    #ifdef DEBUG_OFF
-//      char buffer[50];
-//      sprintf(buffer, "%d,%d,%d,%d\n", int(cycle_pos),int(pressure_p), int(_flux), int(_mlInsVol));
-//      Serial.print(buffer);
-//       Serial.print(cycle_pos);Serial.print(" ");Serial.print(int(pressure_p));Serial.print(" ");Serial.print(int(_flux));Serial.print(" ");Serial.println(int(_mlInsVol));
-    #endif
-//    
+  
+
     lastReadSensor = millis();
 
       //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
@@ -425,13 +429,13 @@ void loop() {
 
     //enum _state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
     if ( last_pressure_max > alarm_max_pressure) {
-        if ( last_pressure_min > alarm_peep_pressure ) { 
+        if ( last_pressure_min < alarm_peep_pressure ) { 
             alarm_state = 3;
         } else {
             alarm_state = 2;
         }
     } else {
-        if ( last_pressure_min > alarm_peep_pressure ) { 
+        if ( last_pressure_min < alarm_peep_pressure ) { 
             alarm_state = 1;
         } else {
             alarm_state = 0;
@@ -464,10 +468,10 @@ void loop() {
 
         #ifdef DEBUG_FLUX
         ciclo++;
-          if (ciclo>2) { //First cycles measure bady
+          if (ciclo>4) { //First cycles measure bady
           if (_mllastInsVol<ins_min)ins_min=_mllastInsVol;
           ins_sum+=_mllastInsVol;
-          ins_prom=ins_sum/(ciclo-2);
+          ins_prom=ins_sum/(ciclo-4);
           ins_error=(ins_max-ins_min)/ins_prom;
           float err=fabs(_mllastInsVol-ins_prom)/ins_prom;
           //Serial.print("Error actual: ");Serial.println(err*100);

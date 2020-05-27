@@ -8,7 +8,7 @@
 //#define DEBUG_PID 1
 //#define DEBUG_UPDATE 1
 #define DEBUG_FLUX 1
-//#define FILTER_FLUX
+//#define FILTER_FLUX 1
 #define USE_ADC 1
 #define DEBUG_OFF 1 //Release version
 #define P_HONEYWELL 1
@@ -21,7 +21,7 @@
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE   25                 // msec
 #define TIME_SENSOR 10                // msec
-#define TIME_SHOW 80                  //IF OLED DISPLAY IS USED FASTER THAN 50ms GIVES ERRORS IN THE PLOTS 
+#define TIME_SHOW 100                  //IF OLED DISPLAY IS USED FASTER THAN 50ms GIVES ERRORS IN THE PLOTS 
 #define TIME_SAVE 5000
 #define TIME_SEND_CONFIGURATION 2000 // msec
 #define V_HONEY_P0 0.49874F //Analog/1023
