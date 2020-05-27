@@ -1,0 +1,14 @@
+// PID values for auto-tuned for PG188
+const unsigned long QPPS = 2000;
+const float VKP = 6.38650;
+const float VKI = 0.0;
+const float VKD = 0.0;
+const float PKP = 70.0;
+const float PKI = 0.2;
+const float PKD = 200.0;
+const unsigned long KI_MAX = 10;
+const unsigned long DEADZONE = 0;
+const unsigned long MIN_POS = -100;
+const unsigned long MAX_POS = 700;
+const unsigned long VEL_MAX = 1800;     // Maximum velocity (clicks/s) to command
+const unsigned long ACC_MAX = 200000;   // Maximum acceleration (clicks/s^2) to command

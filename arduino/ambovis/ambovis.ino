@@ -11,7 +11,6 @@
 #endif
 
 #include "src/Pressure_Sensor/Pressure_Sensor.h"  //LUCIANO: MPX5050DP
-
 #include <EEPROM.h>
 
 #ifdef DEBUG_FLUX
@@ -115,16 +114,16 @@ byte alarm_peep_pressure=5;
 unsigned long lastButtonPress;
 float verror;
 
-//float dp_neg[]={-0.877207832,-0.606462279,-0.491216024,-0.377891785,-0.295221736,-0.216332764,-0.151339196,-0.096530072,-0.052868293,-0.047781395,-0.039664506,-0.03312327,-0.028644966,-0.023566372,-0.020045692,-0.014830113,-0.011688636,-0.008176254,-0.006117271,-0.003937171,-0.001999305,-0.00090924,-0.00030358,0};
-//float dp_pos[]={0.,0.000242233,0.000837976,0.002664566,0.004602432,0.007024765,0.009325981,0.012111664,0.01441288,0.017561913,0.023012161,0.029794693,0.037061691,0.043771552,0.051474571,0.05874157,0.109004974,0.176879848,0.260808033,0.365700986,0.504544509,0.630753349,0.795599072,1.216013465,1.60054669,2.087678384,2.547210457,3.074176245,3.676588011,4.385391541,5.220403813,5.947168311,6.794489065,7.662011691,8.642594913,9.810447693,10.7793808,11.95257389};
-//byte po_flux_neg[]={200,190,180,170,160,150,140,130,120,110,100,90,80,70,60,50,45,40,35,30,25,20,15,14,13,12,11,10,9,8,7,6,5,4,3,0,0};  //Negative values!
-//byte po_flux_pos[]={0,0,0,3,4,5,6,7,8,9,10,11,12,13,14,15,20,25,30,35,40,45,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200};
-//byte po_flux_neg[]={-1000,-833.3333333,-750,-666.6666667,-583.3333333,-500,-416.6666667,-333.3333333,-250,-233.3333333,-216.6666667,-200,-183.3333333,-166.6666667,-150,-133.3333333,-116.6666667,-100,-83.33333333,-66.66666667,-50,0,0,0};
-//byte po_flux_pos[]={0,0,0,50,66.66666667,83.33333333,100,116.6666667,133.3333333,150,166.6666667,183.3333333,200,216.6666667,233.3333333,250,333.3333333,416.6666667,500,583.3333333,666.6666667,750,833.3333333,1000};
-
-float dp[]={-2.444452733,-2.030351958,-1.563385753,-1.207061607,-0.877207832,-0.606462279,-0.491216024,-0.377891785,-0.295221736,-0.216332764,-0.151339196,-0.096530072,-0.052868293,-0.047781395,-0.039664506,-0.03312327,-0.028644966,-0.023566372,-0.020045692,-0.014830113,-0.011688636,-0.008176254,-0.006117271,-0.003937171,-0.001999305,-0.00090924,-0.00030358,0,0.000242233,0.000837976,0.002664566,0.004602432,0.007024765,0.009325981,0.012111664,0.01441288,0.017561913,0.023012161,0.029794693,0.037061691,0.043771552,0.051474571,0.05874157,0.109004974,0.176879848,0.260808033,0.365700986,0.504544509,0.630753349,0.795599072,1.216013465,1.60054669,2.087678384,2.547210457,3.074176245};
 //FLUX IS -100 to +100, has to be added 100 
+//ASSIMETRY IN MAX FLOW IS IN NEGATIVE (ORIGINAL CURVE)
+//float dp[]={-2.444452733,-2.030351958,-1.563385753,-1.207061607,-0.877207832,-0.606462279,-0.491216024,-0.377891785,-0.295221736,-0.216332764,-0.151339196,-0.096530072,-0.052868293,-0.047781395,-0.039664506,-0.03312327,-0.028644966,-0.023566372,-0.020045692,-0.014830113,-0.011688636,-0.008176254,-0.006117271,-0.003937171,-0.001999305,-0.00090924,-0.00030358,0,0.000242233,0.000837976,0.002664566,0.004602432,0.007024765,0.009325981,0.012111664,0.01441288,0.017561913,0.023012161,0.029794693,0.037061691,0.043771552,0.051474571,0.05874157,0.109004974,0.176879848,0.260808033,0.365700986,0.504544509,0.630753349,0.795599072,1.216013465,1.60054669,2.087678384,2.547210457,3.074176245};
+//byte po_flux[]={0,10,20,30,40,50,55,60,65,70,75,80,85,86,87,88,89,90,91,92,93,94,95,96,97,100,100,100,100,100,103,104,105,106,107,108,109,110,111,112,113,114,115,120,125,130,135,140,145,150,160,170,180,190,200};
+
+//MAX FLUX IS IN ISPIRING POSITIVE (1st quad)
+float dp[]={-3.074176245,-2.547210457,-2.087678384,-1.60054669,-1.216013465,-0.795599072,-0.630753349,-0.504544509,-0.365700986,-0.260808033,-0.176879848,-0.109004974,-0.05874157,-0.051474571,-0.043771552,-0.037061691,-0.029794693,-0.023012161,-0.017561913,-0.01441288,-0.012111664,-0.009325981,-0.007024765,-0.004602432,-0.002664566,0.00090924,0.00030358,0,-0.000242233,-0.000837976,0.001999305,0.003937171,0.006117271,0.008176254,0.011688636,0.014830113,0.020045692,0.023566372,0.028644966,0.03312327,0.039664506,0.047781395,0.052868293,0.096530072,0.151339196,0.216332764,0.295221736,0.377891785,0.491216024,0.606462279,0.877207832,1.207061607,1.563385753,2.030351958,2.444452733};
 byte po_flux[]={0,10,20,30,40,50,55,60,65,70,75,80,85,86,87,88,89,90,91,92,93,94,95,96,97,100,100,100,100,100,103,104,105,106,107,108,109,110,111,112,113,114,115,120,125,130,135,140,145,150,160,170,180,190,200};
+
+
 
 int max_speed=2000;
 int max_accel=2000;
@@ -335,12 +334,11 @@ void loop() {
   #ifdef DEBUG_OFF
   if ( millis() > lastShowSensor + TIME_SHOW ) {
       lastShowSensor=millis(); 
-      Serial.print(byte(cycle_pos));Serial.print(",");Serial.print(byte(pressure_p));Serial.print(",");Serial.print(int(alarm_state));Serial.print(",");Serial.println(int(_flux));//
-      //Serial.print(byte(cycle_pos));Serial.print(",");Serial.print(byte(pressure_p));Serial.print(",");Serial.print(int(_flux));Serial.print(",");Serial.println(int(alarm_state));//
+      Serial.print(byte(cycle_pos));Serial.print(",");Serial.print(pressure_p);Serial.print(",");Serial.print(int(_flux));
+      Serial.print(",");Serial.print(int(_mlInsVol-_mlExsVol));Serial.print(",");Serial.println(int(alarm_state));//
+      //Serial.print(",");Serial.println(int(alarm_state));      
       //Serial.print(p_dpt);Serial.print(",");Serial.print(_flux);Serial.print(",");Serial.print(int(_mlInsVol));Serial.print(",");Serial.println(int(_mlExsVol));
-      //Serial.print(byte(cycle_pos));Serial.print(",");Serial.print(byte(pressure_p));Serial.print(",");Serial.print(int(alarm_state));Serial.print(",");Serial.println(int(_flux));//
-      //Serial.print(p_dpt);Serial.print(",");Serial.print(_flux);Serial.print(",");Serial.print(int(_mlInsVol));Serial.print(",");Serial.println(int(_mlExsVol));
-      //;Serial.print(",");Serial.println(int(ventilation->getInsVol()));
+
   }
   #endif
   
@@ -348,19 +346,19 @@ void loop() {
 
     //A0: PRESSURE (HOEYWELL) A1: Volume (DPT) A2: Test Mode pressure (DPT)
     //0.1 is from the 0.5 readed initially by the honeywell
-    p_dpt    =f_dpt*float(analogRead(A1)); //ONE DIRECTION
+    //p_dpt    =f_dpt*float(analogRead(A1)); //ONE DIRECTION
     //From datasheet:
     //vout/vs = 0.8/(PMax-pmin)*(p-pmin) + 0.1 + fs --->>> ESTE FS SE LO AGREGO POR EL CERO
     //FS=(vout/vs)+pmin*0.8/(PMax-pmin)-0.1 //Donde vout/vs es V_HONEY_P0
     //p_dpt      = f_dpt*float(analogRead(A1)) - corr_dpt;
     //p= (vo/vs - 0.1)*(Pmax-pmin)/0.8+pmin --> SIN CORRECCION
-    pressure_p = (( float ( analogRead(A0) )/1023.) /* 5.0/V_SUPPLY_HONEY */ - 0.1 /* - corr_fs */)/0.8*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20; //Data sheet figure 2 analog pressure, calibration from 10% to 90%
+    //pressure_p = (( float ( analogRead(A0) )/1023.) /* 5.0/V_SUPPLY_HONEY */ - 0.1 /* - corr_fs */)/0.8*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20; //Data sheet figure 2 analog pressure, calibration from 10% to 90%
    
-	//pressure_p=( analogRead(A0) - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20;
+	  pressure_p=( analogRead(A0)/(1023.) - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20;
     //pos=findClosest(dp_pos,38,p_dpt);
 //    if ( p_dpt > 0 ) {
 
-    #ifdef USE_ADC
+   // #ifdef USE_ADC
     adc0 = ads.readADC_SingleEnded(0);
     Voltage = (adc0 * 0.1875)/1000.;//Volts
     //Vout = VS*(0.018*P+0.04) ± ERROR
@@ -371,8 +369,8 @@ void loop() {
     //Serial.print("error: ");Serial.println(verror*1000);
     //p_dpt=( Voltage/5. - verror -0.04)/0.09*1000*DEFAULT_PA_TO_CM_H20;
     
-    p_dpt=( ( Voltage - verror+0.001)*0.2 - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20;
-  #endif
+    p_dpt=( ( Voltage - verror)*0.2  - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20;
+  // #endif
 
     
 //     p_dpt-=p_dpt0;
@@ -400,11 +398,11 @@ void loop() {
 //      }
 //    #endif
 
-    if (_flux<0)
+    if (_flux>0)
         //if (state == State_Insufflation)
-          _mlInsVol-=_flux*float((millis()-lastReadSensor))*0.001;//flux in l and time in msec, results in ml 
+          _mlInsVol+=_flux*float((millis()-lastReadSensor))*0.001;//flux in l and time in msec, results in ml 
     else {
-          _mlExsVol+=_flux*float((millis()-lastReadSensor))*0.001;//flux in l and time in msec, results in ml 
+          _mlExsVol-=_flux*float((millis()-lastReadSensor))*0.001;//flux in l and time in msec, results in ml 
     }
         
     #ifdef DEBUG_OFF

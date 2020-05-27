@@ -227,15 +227,15 @@ void MechVentilation :: update ( void )
           _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
         else { //MANUAL MODE
           _stepper->setTargetPositionInSteps(int (STEPPER_HIGHEST_POSITION*(float)_percVol/100.));
-          _stepperSpeed=STEPPER_HIGHEST_POSITION*(float(_percVol)/100.)/( (float)(_timeoutIns/1000) * DEFAULT_FRAC_CYCLE_VCL_INSUFF);//En [ml/s]
+          _stepperSpeed=STEPPER_HIGHEST_POSITION*(float(_percVol)*0.01)/( (float)(_timeoutIns*0.001) * DEFAULT_FRAC_CYCLE_VCL_INSUFF);//En [ml/s]
+        #ifdef DEBUG_UPDATE
+          Serial.print("Manual mode Timeout ins , speed: ");Serial.print(_timeoutIns);Serial.print(" ");Serial.println(_stepperSpeed);
+        #endif
           _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCEL_MAX);
           if (_stepperSpeed>STEPPER_SPEED_MAX)
             _stepperSpeed=STEPPER_SPEED_MAX;
             _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
         } 
-        #endif
-        #ifdef DEBUG_UPDATE
-          Serial.print(pressure_p);Serial.print(" ");Serial.print(_stepperSpeed);
         #endif
         
         _pid->reset();
@@ -299,7 +299,7 @@ void MechVentilation :: update ( void )
                } else if (vent_mode==VENTMODE_PCL) {
 
                   _pid->run(pressure_p, (float)_pip, &_stepperSpeed);
-                  _stepperAccel=0.75*( _stepperSpeed - _stepper -> getCurrentVelocityInStepsPerSecond() ) / PID_TS * 1000.;
+                  _stepperAccel=1.*( _stepperSpeed - _stepper -> getCurrentVelocityInStepsPerSecond() ) / PID_TS * 1000.;
                   if (_stepperSpeed > STEPPER_SPEED_MAX)
                     _stepperSpeed=STEPPER_SPEED_MAX;
                   if (_stepperAccel > STEPPER_ACCEL_MAX)
