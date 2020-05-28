@@ -21,7 +21,7 @@
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE   25                 // msec
 #define TIME_SENSOR 10                // msec
-#define TIME_SHOW 100                  //IF OLED DISPLAY IS USED FASTER THAN 50ms GIVES ERRORS IN THE PLOTS 
+#define TIME_SHOW 80                  //IF OLED DISPLAY IS USED FASTER THAN 50ms GIVES ERRORS IN THE PLOTS 
 #define TIME_SAVE 5000
 #define TIME_SEND_CONFIGURATION 2000 // msec
 #define V_HONEY_P0 0.49874F //Analog/1023
@@ -90,7 +90,7 @@
 #define PID_MIN -20000 // TODO: check direction implementation
 #define PID_MAX 20000
 
-#define PID_KP 500.01
+#define PID_KP 200.01
 #define PID_KI 10.01
 #define PID_KD 20.01
 

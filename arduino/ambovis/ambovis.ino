@@ -18,6 +18,7 @@ float ins_prom, ins_error;
 float ins_max,ins_min,err_sum;
 unsigned long ciclo,ins_sum;
 #endif
+bool init_verror;
 
 // FOR ADS
 #ifdef USE_ADC
@@ -61,6 +62,7 @@ LiquidCrystal_I2C lcd(0x3F, 20, 4);
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
 #endif
 
+byte vcorr_count;
 
 float pressure_p;   //EXTERN!!
 float last_pressure_max,last_pressure_min,last_pressure_peep;
@@ -70,7 +72,7 @@ byte vent_mode = VENTMODE_MAN; //0
 //Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
 float pressure_p0;
-float _flux;
+float _flux,    flow_f;;
 #ifdef FILTER_FLUX
 float _flux_fil[5];
 float _mlInsVol2;
@@ -112,7 +114,7 @@ byte alarm_peep_pressure=5;
 
 //MENU
 unsigned long lastButtonPress;
-float verror;
+float verror,verror_sum;
 
 //FLUX IS -100 to +100, has to be added 100 
 //ASSIMETRY IN MAX FLOW IS IN NEGATIVE (ORIGINAL CURVE)
@@ -185,7 +187,7 @@ VentilationOptions_t options;
 float p_dpt0;
 void setup() {
 
-  Serial.begin(115200);
+  Serial.begin(250000);
   init_display();
 
   pinMode(PIN_BUZZ, OUTPUT);
@@ -244,9 +246,9 @@ void setup() {
   verror=0;
   for (int i=0;i<10;i++) {
   adc0 = ads.readADC_SingleEnded(0);
-  Voltage = (adc0 * 0.1875)*0.001; //miliVOLT!
+  Voltage = (adc0 * 0.1875)*0.001; //VOLT!
   Serial.print("Voltage: ");Serial.println(Voltage,3);
-  verror += ( Voltage - 5.0*0.04 );
+  verror += ( Voltage - 5.0*0.04 ); //IF VOUT IS: Vo=VS(0.09*P0.04) +/- ERR
   //vo=vs(0.09 dp +0.04)+/-verr
   p_dpt0 += 0.5*(( Voltage /* 5.0/V_SUPPLY_HONEY */ - 0.1 *4.8/* - corr_fs */)/(0.8*4.8)*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20);
   delay(10);
@@ -334,12 +336,19 @@ void loop() {
   #ifdef DEBUG_OFF
   if ( millis() > lastShowSensor + TIME_SHOW ) {
       lastShowSensor=millis(); 
-      Serial.print(int(alarm_state));Serial.print(",");Serial.print(byte(cycle_pos));Serial.print(",");
-	  Serial.print(int(pressure_p));Serial.print(",");Serial.print(int(_flux));
-      Serial.print(",");Serial.println(int(_mlInsVol-_mlExsVol));
+      Serial.print(int(cycle_pos));Serial.print(",");
+	    Serial.print(int(pressure_p));Serial.print(",");
+	    #ifdef FILTER_FLUX
+	    Serial.print(int(flow_f));Serial.print(",");
+      #else
+      Serial.print(int(_flux));Serial.print(",");
+      #endif      
+      Serial.print(int(alarm_state));Serial.print(",");
+      Serial.println(int(_mlInsVol-_mlExsVol));
+//      
       //Serial.print(",");Serial.println(int(alarm_state));     
 //      #ifdef FILTER_FLUX 
-//      Serial.print(p_dpt);Serial.print(",");Serial.print(_flux);Serial.print(",");Serial.print(",");Serial.println(_flux_sum/5.);
+//      Serial.print(Voltage*1000);Serial.print(",");Serial.print(p_dpt);Serial.print(",");Serial.println(_flux);/*Serial.print(",");/*Serial.print(",");Serial.println(_flux_sum/5.);*/
 //      #endif
       //Serial.print(int(_mlInsVol));Serial.print(",");Serial.println(int(_mlExsVol));
 
@@ -376,7 +385,23 @@ void loop() {
     p_dpt=( ( Voltage - verror)*0.2  - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20;
   // #endif
 
-    
+    //UPDATING VERROR
+    if (cycle_pos>115) {
+        if (vcorr_count<20) {
+            vcorr_count+=1;
+            verror_sum+=( Voltage - 5.0*0.04 );
+            //verror+=Voltage;
+            init_verror=true;
+        } 
+        Serial.print("Verror (mV) and count: ");Serial.print(verror_sum*1000);Serial.print(",  ");Serial.println(vcorr_count);
+    }
+    if (cycle_pos<10 && init_verror) {
+        verror=verror_sum/((float)vcorr_count+1);
+        Serial.print("Verror (mV) and count: ");Serial.print(verror*1000);Serial.print(",  ");Serial.println(vcorr_count);
+        verror_sum=0.;
+        vcorr_count=0;
+        init_verror=false;
+    }
 //     p_dpt-=p_dpt0;
 //     pos=findClosest(dp_pos,38,p_dpt);
 //      _flux = po_flux_pos[pos] + ( float (po_flux_pos[pos+1]) - float (po_flux_pos[pos]) ) * ( p_dpt - float(dp_pos[pos]) ) / (float)( dp_pos[pos+1] - dp_pos[pos]);
@@ -385,6 +410,8 @@ void loop() {
       //flux should be shifted up (byte storage issue)
       _flux = po_flux[pos] - 100 + ( float (po_flux[pos+1]-100) - float (po_flux[pos]-100) ) * ( p_dpt - float(dp[pos]) ) / (float)( dp[pos+1] - dp[pos]);      
       _flux *=16.6667; 
+      if (abs(_flux)<200.)
+          _flux=0.;
       
 //    } else {
 //        pos=findClosest(dp_neg,24,p_dpt);
@@ -402,7 +429,6 @@ void loop() {
     _flux_sum+=_flux_fil[i];   
     #endif
 
-    float flow_f;
     #ifdef FILTER_FLUX
     flow_f=_flux_sum/5.;
     #else
@@ -411,9 +437,9 @@ void loop() {
         
     if (_flux>0)
         //if (state == State_Insufflation)
-          _mlInsVol+=flow_f*float((millis()-lastReadSensor))*0.001;//flux in l and time in msec, results in ml 
+          _mlInsVol+=_flux*float((millis()-lastReadSensor))*0.001;//flux in l and time in msec, results in ml 
     else {
-          _mlExsVol-=flow_f*float((millis()-lastReadSensor))*0.001;//flux in l and time in msec, results in ml 
+          _mlExsVol-=_flux*float((millis()-lastReadSensor))*0.001;//flux in l and time in msec, results in ml 
     }
   
 

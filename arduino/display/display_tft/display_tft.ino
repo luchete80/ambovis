@@ -5,6 +5,16 @@
 #define ILI9341_LIGHTGREY 0xC618 /* 192, 192, 192 */
 #define ILI9341_DARKGREY 0x7BEF /* 128, 128, 128 */
 
+#define DEBUG 1
+//enum serialpos={ALARM_=0,TIME_,PRESSURE_,FLUX_,VT_};
+//enum serialpos {TIME_=0,PRESSURE_,FLUX_,VT_,ALARM_};//ORIGINAL
+#define TIME_     0
+#define PRESSURE_ 1
+#define FLUX_     2
+#define VT_       4
+#define ALARM_    3
+
+
 
 #define TFT_CLK 13
 #define TFT_MISO 12
@@ -20,11 +30,12 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 
 bool lcd_cleaned=false;
 
+unsigned long time_last_show=0;
+
 char a[10],b[10];
 
 const byte numChars = 32;
 char receivedChars[numChars]; // an array to store the received data
-char messageFromPC[32] = {0};
 int last_t;
 int integerFromPC [5];
 float floatFromPC = 0.0;
@@ -64,9 +75,15 @@ int yvt[2];
 char buffer[10];
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(250000);
   Serial.println("ILI9341 Test!"); 
- 
+
+  pinMode(buzzer, OUTPUT); //Set buzzerPin as output
+  pinMode(GREEN_LED, OUTPUT); //Set buzzerPin as output
+  pinMode(YELLOW_LED, OUTPUT); //Set buzzerPin as output
+  pinMode(RED_LED, OUTPUT); //Set buzzerPin as output
+
+  
   tft.begin();
   tft.fillScreen(ILI9341_BLACK);
 
@@ -90,62 +107,86 @@ void loop(void) {
         valsreaded=0;
         for (int i=0;i<3;i++) 
           valsreaded_[i]=0;
-        wait4statechg=false;
         state=0;
+        wait4statechg=false;
         //tft.fillRect(0,240-last_x, 320,240-last_x+10, ILI9341_BLACK);
         tft.fillScreen(ILI9341_BLACK);
         //AXIS
         for (int i=0;i<3;i++)
           tft.drawLine(axispos[i],0, axispos[i], 240, ILI9341_DARKGREY);
       }
-      if (last_x>10 && lcd_cleaned){
-        lcd_cleaned=false;
-        }
-  //}
+    if (last_x>10 && lcd_cleaned){
+      lcd_cleaned=false;
+    }
+  
   parseData();
 
-	tft.setRotation(0);
-	tft.setCursor(0, 0);
-	tft.setTextColor(ILI9341_YELLOW);  tft.setTextSize(2);
-	itoa(state, buffer, 10);
-	tft.println(buffer);
-	//  //tft.println("Hello World!");
-	//  tft.setTextColor(ILI9341_YELLOW); tft.setTextSize(3);
-	//  tft.println(1234.56);
-	//  tft.setTextColor(ILI9341_RED);    tft.setTextSize(3);
-	//    
-		//state = integerFromPC[2];
+  #ifdef DEBUG
+  if (millis()-time_last_show>200) {
+      tft.setRotation(0);
+      tft.fillRect(150,310,240,320, ILI9341_BLACK);
+      tft.setCursor(150, 310);
+      tft.setTextColor(ILI9341_RED);  tft.setTextSize(1);
+      //for (int i=0;i<5;i++) {
+        //tft.setCursor(150+20*i, 310);
+        itoa(integerFromPC[4], buffer, 10);
+        tft.println(buffer);//tft.println(",");
+      //}
+      //tft.println(receivedChars);
+      time_last_show=millis();
+      
+//      tft.setRotation(0);
+//      tft.setCursor(150, 100);
+//      tft.setTextColor(ILI9341_RED);  tft.setTextSize(2);
+//      itoa(integerFromPC[4], buffer, 10);
+//      tft.println(buffer);
 
+  }
+  #endif
+  
     switch (state){
         case NO_ALARM:
           digitalWrite(GREEN_LED,HIGH); digitalWrite(YELLOW_LED,LOW); digitalWrite(RED_LED,LOW);      
         break;
         case PEEP_ALARM:
           digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,HIGH); digitalWrite(RED_LED,LOW);  
-          tft.setTextColor(ILI9341_YELLOW); tft.setTextSize(2); 
+          tft.setRotation(0);
+          tft.setTextColor(ILI9341_YELLOW); tft.setTextSize(1.5); 
           tft.setCursor(160, 0);   
           tft.println("PEEP AL");
         break;
         case PIP_ALARM:
           digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,LOW); digitalWrite(RED_LED,HIGH);      
+          tft.setRotation(0);
           tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
           tft.setCursor(160, 0);   
           tft.println("PIP AL");
 		  break;  
         case PEEP_PIP_ALARM:
           digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,HIGH); digitalWrite(RED_LED,HIGH);      
-          tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
+          tft.setRotation(0);
+          tft.setTextColor(ILI9341_RED); tft.setTextSize(1.5); 
           tft.setCursor(160, 0);   
           tft.println("PIP AL");
+          tft.setTextColor(ILI9341_YELLOW); tft.setTextSize(1.5); 
+          tft.setCursor(160, 10);   
+          tft.println("PEEP AL");
 		  break;
       }
-    
+
+    //tone( pin number, frequency in hertz, duration in milliseconds);
+    tone(buzzer,1500,200);
     //Check buzzer
     if (int(state) > 0) {
         if (millis() > timebuzz + TIME_BUZZER) {
             timebuzz=millis();
-            digitalWrite(buzzer,isbuzzeron);
+            //digitalWrite(buzzer,isbuzzeron);
             isbuzzeron=!isbuzzeron;
+            if (isbuzzeron)
+              //tone(buzzer,500,TIME_BUZZER);
+              tone(buzzer,200);
+            else 
+              noTone(buzzer);
         }
     } else {
       digitalWrite(buzzer,1); //Inverted logic
@@ -212,33 +253,33 @@ void parseData() {
 	strtokIndx = strtok(NULL, ","); // this continues where the previous call left off
 	integerFromPC[i] = atoi(strtokIndx);     // convert this part to an integer
 	}
-	strtokIndx = strtok(NULL,NULL); // this continues where the previous call left off
+	strtokIndx = strtok(NULL,","); // this continues where the previous call left off
 	integerFromPC[4] = atoi(strtokIndx);     // convert this part to an integer
 
-	if (integerFromPC[0]!=0 && !wait4statechg) {
-	state=integerFromPC[0];
-	wait4statechg=true;
+	if (integerFromPC[ALARM_]!=0 && !wait4statechg) {
+  	state=integerFromPC[ALARM_];
+  	wait4statechg=true;
 	}
 
-
+//
 	if (valsreaded > 0) {
-	 if ( integerFromPC[1] != last_x && /*integerFromPC[0] < 127 */ integerFromPC[0] < last_x+10) {
+	 if ( integerFromPC[TIME_] != last_x && /*integerFromPC[0] < 127 */ integerFromPC[TIME_] < last_x+10) {
 		 valsreaded+=1;
-		 last_x=integerFromPC[1];
-		 rx[valsreaded]=integerFromPC[1];
-		 ry[valsreaded]=integerFromPC[2];     
+		 last_x=integerFromPC[TIME_];
+		 rx[valsreaded]=integerFromPC[TIME_];
+		 ry[valsreaded]=integerFromPC[PRESSURE_];     
 		 //ry2[valsreaded]=int(float(integerFromPC[3])*0.15); 
-		 yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[3])*0.05);    
-		 yvt[0]	=yvt[1];yvt[1]=		int(float(integerFromPC[4])*0.15);   
-	 }
+		 yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_])*0.05);    
+		 yvt[0]	=yvt[1];yvt[1]=		int(float(integerFromPC[VT_])*0.15);   
+   }
 	} else {
 		 valsreaded+=1;
-		 last_x=integerFromPC[1];
-		 rx[valsreaded]=integerFromPC[1];
-		 ry[valsreaded]=integerFromPC[2];       
+		 last_x=integerFromPC[TIME_];
+		 rx[valsreaded]=integerFromPC[TIME_];
+		 ry[valsreaded]=integerFromPC[PRESSURE_];       
 		 //ry2[valsreaded]=int(float(integerFromPC[3])*0.15); 
-		 yflux[0]=yflux[1];yflux[1]=integerFromPC[3]; 
-		 yvt[0]=yvt[1];yvt[1]=int(float(integerFromPC[4])*0.15);   
+		 yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_])*0.05);
+		 yvt[0]=yvt[1];yvt[1]=int(float(integerFromPC[VT_])*0.15);   
 		 }
-    Serial.print(integerFromPC[1]);Serial.print(",");Serial.print(integerFromPC[2]);Serial.print(",");Serial.println(integerFromPC[3]);
+    //Serial.print(integerFromPC[1]);Serial.print(",");Serial.print(integerFromPC[2]);Serial.print(",");Serial.println(integerFromPC[3]);
 }
