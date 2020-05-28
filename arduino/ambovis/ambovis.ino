@@ -235,7 +235,7 @@ void setup() {
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
-  writeLine(1, "AMBOVIS R0_5",4);
+  writeLine(1, "AMBOVIS 0528_1",4);
 
 
   #ifdef USE_ADC
@@ -334,8 +334,9 @@ void loop() {
   #ifdef DEBUG_OFF
   if ( millis() > lastShowSensor + TIME_SHOW ) {
       lastShowSensor=millis(); 
-      Serial.print(byte(cycle_pos));Serial.print(",");Serial.print(int(pressure_p));Serial.print(",");Serial.print(int(_flux));
-      Serial.print(",");Serial.print(int(_mlInsVol-_mlExsVol));Serial.print(",");Serial.println(int(alarm_state));
+      Serial.print(int(alarm_state));Serial.print(",");Serial.print(byte(cycle_pos));Serial.print(",");
+	  Serial.print(int(pressure_p));Serial.print(",");Serial.print(int(_flux));
+      Serial.print(",");Serial.println(int(_mlInsVol-_mlExsVol));
       //Serial.print(",");Serial.println(int(alarm_state));     
 //      #ifdef FILTER_FLUX 
 //      Serial.print(p_dpt);Serial.print(",");Serial.print(_flux);Serial.print(",");Serial.print(",");Serial.println(_flux_sum/5.);

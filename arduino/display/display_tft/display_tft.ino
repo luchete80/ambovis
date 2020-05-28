@@ -76,21 +76,13 @@ void setup() {
 
 
 void loop(void) {
-//  for(uint8_t rotation=0; rotation<4; rotation++) {
-//    tft.setRotation(rotation);
-//    testText();
 
-//  }
-//  Serial.println(testLines(ILI9341_CYAN));
-  //tft.setTextColor(ILI9341_YELLOW); tft.setTextSize(2);
-  //tft.println(1234.56);
-  //tft.setRotation(1); 
-  recvWithEndMarker();
-  //recvWithStartEndMarkers();
-  showNewData();
+	recvWithEndMarker();
+	  //recvWithStartEndMarkers();
+	showNewData();
 
-          tft.setRotation(1);
-          drawY2(ILI9341_GREEN);
+	  tft.setRotation(1);
+	  drawY2(ILI9341_GREEN);
 //          newData = false;
 
       if (last_x<10 && !lcd_cleaned){
@@ -112,17 +104,17 @@ void loop(void) {
   //}
   parseData();
 
-  tft.setRotation(0);
-  tft.setCursor(0, 0);
-  tft.setTextColor(ILI9341_YELLOW);  tft.setTextSize(2);
-  itoa(state, buffer, 10);
-  tft.println(buffer);
-//  //tft.println("Hello World!");
-//  tft.setTextColor(ILI9341_YELLOW); tft.setTextSize(3);
-//  tft.println(1234.56);
-//  tft.setTextColor(ILI9341_RED);    tft.setTextSize(3);
-//    
-    //state = integerFromPC[2];
+	tft.setRotation(0);
+	tft.setCursor(0, 0);
+	tft.setTextColor(ILI9341_YELLOW);  tft.setTextSize(2);
+	itoa(state, buffer, 10);
+	tft.println(buffer);
+	//  //tft.println("Hello World!");
+	//  tft.setTextColor(ILI9341_YELLOW); tft.setTextSize(3);
+	//  tft.println(1234.56);
+	//  tft.setTextColor(ILI9341_RED);    tft.setTextSize(3);
+	//    
+		//state = integerFromPC[2];
 
     switch (state){
         case NO_ALARM:
@@ -132,14 +124,20 @@ void loop(void) {
           digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,HIGH); digitalWrite(RED_LED,LOW);  
           tft.setTextColor(ILI9341_YELLOW); tft.setTextSize(2); 
           tft.setCursor(160, 0);   
-          tft.println("pip AL");
+          tft.println("PEEP AL");
         break;
         case PIP_ALARM:
           digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,LOW); digitalWrite(RED_LED,HIGH);      
-        break;  
+          tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
+          tft.setCursor(160, 0);   
+          tft.println("PIP AL");
+		  break;  
         case PEEP_PIP_ALARM:
           digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,HIGH); digitalWrite(RED_LED,HIGH);      
-        break;
+          tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
+          tft.setCursor(160, 0);   
+          tft.println("PIP AL");
+		  break;
       }
     
     //Check buzzer
@@ -157,33 +155,6 @@ void loop(void) {
 
 }
 
-
-unsigned long testText() {
-  tft.fillScreen(ILI9341_BLACK);
-  unsigned long start = micros();
-  tft.setCursor(0, 0);
-  tft.setTextColor(ILI9341_WHITE);  tft.setTextSize(1);
-  tft.println("Hello World!");
-  tft.setTextColor(ILI9341_YELLOW); tft.setTextSize(2);
-  tft.println(1234.56);
-  tft.setTextColor(ILI9341_RED);    tft.setTextSize(3);
-  tft.println(0xDEADBEEF, HEX);
-  tft.println();
-  tft.setTextColor(ILI9341_GREEN);
-  tft.setTextSize(5);
-  tft.println("Groop");
-  tft.setTextSize(2);
-  tft.println("I implore thee,");
-  tft.setTextSize(1);
-  tft.println("my foonting turlingdromes.");
-  tft.println("And hooptiously drangle me");
-  tft.println("with crinkly bindlewurdles,");
-  tft.println("Or I will rend thee");
-  tft.println("in the gobberwarts");
-  tft.println("with my blurglecruncheon,");
-  tft.println("see if I don't!");
-  return micros() - start;
-}
 
 void recvWithEndMarker() {
   static byte ndx = 0;
@@ -230,44 +201,44 @@ void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WIT
 
 void parseData() {
 
-    // split the data into its parts
-    
-  char * strtokIndx; // this is used by strtok() as an index
+	// split the data into its parts
 
-  strtokIndx = strtok(receivedChars, ","); // this continues where the previous call left off
-  integerFromPC[0] = atoi(strtokIndx);     // convert this part to an integer
+	char * strtokIndx; // this is used by strtok() as an index
 
-  for (int i=1;i<4;i++) {
-    strtokIndx = strtok(NULL, ","); // this continues where the previous call left off
-    integerFromPC[i] = atoi(strtokIndx);     // convert this part to an integer
-  }
-  strtokIndx = strtok(NULL,NULL); // this continues where the previous call left off
-  integerFromPC[4] = atoi(strtokIndx);     // convert this part to an integer
+	strtokIndx = strtok(receivedChars, ","); // this continues where the previous call left off
+	integerFromPC[0] = atoi(strtokIndx);     // convert this part to an integer
 
-  //if (integerFromPC[4]!=0 && !wait4statechg) {
-    state=integerFromPC[4];
-    wait4statechg=true;
-  //}
-  
+	for (int i=1;i<4;i++) {
+	strtokIndx = strtok(NULL, ","); // this continues where the previous call left off
+	integerFromPC[i] = atoi(strtokIndx);     // convert this part to an integer
+	}
+	strtokIndx = strtok(NULL,NULL); // this continues where the previous call left off
+	integerFromPC[4] = atoi(strtokIndx);     // convert this part to an integer
 
-  if (valsreaded > 0) {
-     if ( integerFromPC[0] != last_x && /*integerFromPC[0] < 127 */ integerFromPC[0] < last_x+10) {
-         valsreaded+=1;
-         last_x=integerFromPC[0];
-         rx[valsreaded]=integerFromPC[0];
-         ry[valsreaded]=integerFromPC[1];     
-         //ry2[valsreaded]=int(float(integerFromPC[3])*0.15); 
-         yvt[0]=yvt[1];yvt[1]=int(float(integerFromPC[3])*0.15);   
-         yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[2])*0.05);     
-     }
-  } else {
-         valsreaded+=1;
-         last_x=integerFromPC[0];
-         rx[valsreaded]=integerFromPC[0];
-         ry[valsreaded]=integerFromPC[1];       
-         //ry2[valsreaded]=int(float(integerFromPC[3])*0.15); 
-         yvt[0]=yvt[1];yvt[1]=int(float(integerFromPC[3])*0.15);   
-         yflux[0]=yflux[1];yflux[1]=integerFromPC[2]; 
-    }
+	if (integerFromPC[0]!=0 && !wait4statechg) {
+	state=integerFromPC[0];
+	wait4statechg=true;
+	}
+
+
+	if (valsreaded > 0) {
+	 if ( integerFromPC[1] != last_x && /*integerFromPC[0] < 127 */ integerFromPC[0] < last_x+10) {
+		 valsreaded+=1;
+		 last_x=integerFromPC[1];
+		 rx[valsreaded]=integerFromPC[1];
+		 ry[valsreaded]=integerFromPC[2];     
+		 //ry2[valsreaded]=int(float(integerFromPC[3])*0.15); 
+		 yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[3])*0.05);    
+		 yvt[0]	=yvt[1];yvt[1]=		int(float(integerFromPC[4])*0.15);   
+	 }
+	} else {
+		 valsreaded+=1;
+		 last_x=integerFromPC[1];
+		 rx[valsreaded]=integerFromPC[1];
+		 ry[valsreaded]=integerFromPC[2];       
+		 //ry2[valsreaded]=int(float(integerFromPC[3])*0.15); 
+		 yflux[0]=yflux[1];yflux[1]=integerFromPC[3]; 
+		 yvt[0]=yvt[1];yvt[1]=int(float(integerFromPC[4])*0.15);   
+		 }
     Serial.print(integerFromPC[1]);Serial.print(",");Serial.print(integerFromPC[2]);Serial.print(",");Serial.println(integerFromPC[3]);
 }
