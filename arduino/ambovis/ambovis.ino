@@ -410,8 +410,8 @@ void loop() {
       //flux should be shifted up (byte storage issue)
       _flux = po_flux[pos] - 100 + ( float (po_flux[pos+1]-100) - float (po_flux[pos]-100) ) * ( p_dpt - float(dp[pos]) ) / (float)( dp[pos+1] - dp[pos]);      
       _flux *=16.6667; 
-      if (abs(_flux)<200.)
-          _flux=0.;
+//      if (abs(_flux)<200.)
+//          _flux=0.;
       
 //    } else {
 //        pos=findClosest(dp_neg,24,p_dpt);
