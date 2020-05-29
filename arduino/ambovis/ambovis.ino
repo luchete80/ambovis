@@ -237,7 +237,7 @@ void setup() {
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
-  writeLine(1, "AMBOVIS 0528_1",4);
+  writeLine(1, "AMBOVIS 0529_1",4);
 
 
   #ifdef USE_ADC
