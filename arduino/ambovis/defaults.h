@@ -50,7 +50,7 @@
 #define STEPPER_SPEED_MAX_VCL       (1200)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_SPEED_EXSUFF        (4000)
 #define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  2000)   // Steps/s2
-#define STEPPER_ACC_INSUFFLATION    (STEPPER_MICROSTEPS *  200)   // Steps/s2
+#define STEPPER_ACC_INSUFFLATION    (STEPPER_MICROSTEPS *  400)   // Steps/s2
 
 // Valores por defecto
 #define DEFAULT_HEIGHT 170 // cm

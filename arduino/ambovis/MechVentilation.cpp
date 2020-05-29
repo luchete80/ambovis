@@ -299,7 +299,7 @@ void MechVentilation :: update ( void )
                } else if (vent_mode==VENTMODE_PCL) {
 
                   _pid->run(pressure_p, (float)_pip, &_stepperSpeed);
-                  _stepperAccel=0.75*abs( _stepperSpeed - _stepper -> getCurrentVelocityInStepsPerSecond() ) / PID_TS * 1000.;
+                  //_stepperAccel=0.75*abs( _stepperSpeed - _stepper -> getCurrentVelocityInStepsPerSecond() ) / PID_TS * 1000.;
                   if (_stepperSpeed > STEPPER_SPEED_MAX)
                     _stepperSpeed=STEPPER_SPEED_MAX;
                   if (_stepperAccel > STEPPER_ACCEL_MAX)
@@ -318,7 +318,7 @@ void MechVentilation :: update ( void )
                   _stepper->moveTo(STEPPER_HIGHEST_POSITION);
                 #else
                 _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
-                _stepper->setAccelerationInStepsPerSecondPerSecond(abs(_stepperAccel));
+                //_stepper->setAccelerationInStepsPerSecondPerSecond(abs(_stepperAccel));
                 
                 if (_stepperSpeed == 0){
                   _stepper->setTargetPositionToStop();
