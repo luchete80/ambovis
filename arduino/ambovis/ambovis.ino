@@ -382,7 +382,7 @@ void loop() {
     //Serial.print("error: ");Serial.println(verror*1000);
     //p_dpt=( Voltage/5. - verror -0.04)/0.09*1000*DEFAULT_PA_TO_CM_H20;
     
-    p_dpt=( ( Voltage - verror)*0.2  - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20;
+    p_dpt=( ( Voltage - verror)*0.2 -0.00001 - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20;
   // #endif
 
     //UPDATING VERROR

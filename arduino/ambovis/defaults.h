@@ -90,9 +90,9 @@
 #define PID_MIN -20000 // TODO: check direction implementation
 #define PID_MAX 20000
 
-#define PID_KP 200.01
-#define PID_KI 10.01
-#define PID_KD 20.01
+#define PID_KP 700.01
+#define PID_KI 20.01
+#define PID_KD 80.01
 
 #define PID_TS TIME_BASE
 #define PID_BANGBANG 8
