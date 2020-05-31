@@ -2,7 +2,7 @@
 #define _DEFAULTS_H
 
 #include "Arduino.h"
-//#define LCD_I2C 1 //IT DOES NOT WORK WITH ENCODER
+#define LCD_I2C 1 //IT DOES NOT WORK WITH ENCODER
 //Connections and Debug Defs
 //#define ACCEL_STEPPER 1
 //#define DEBUG_PID 1

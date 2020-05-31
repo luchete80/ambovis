@@ -174,16 +174,6 @@ AutoPID * pid;
 MechVentilation * ventilation;
 VentilationOptions_t options;
 
-//#ifdef LCD_I2C
-//LiquidCrystal_I2C lcd;
-//lcd = LiquidCrystal_I2C(0x3F, 20, 4);
-//extern LiquidCrystal_I2C lcd;
-//#else
-////extern LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
-//lcd=LiquidCrystal(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
-////extern LiquidCrystal lcd;
-//#endif
-
 float p_dpt0;
 void setup() {
 
