@@ -1,6 +1,8 @@
 #ifndef _MENU_H_
 #define _MENU_H_
 
+#include "defaults.h"
+
 #ifdef LCD_I2C
 #include "src/LiquidCrystal_I2C/LiquidCrystal_I2C.h"
 #else
