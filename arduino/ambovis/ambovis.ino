@@ -213,7 +213,7 @@ void setup() {
   options.respiratoryRate = DEFAULT_RPM;
   options.percInspEsp=2;//1:1 to 1:4, is denom
   //options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
-  options.peakInspiratoryPressure = 30.;
+  options.peakInspiratoryPressure = 20.;
   options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
   options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
   options.hasTrigger = false;

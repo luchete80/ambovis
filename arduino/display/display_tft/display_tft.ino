@@ -14,7 +14,7 @@
 #define VT_       4
 #define ALARM_    3
 
-#define DIFF_FLUX 150
+#define DIFF_FLUX 600
 
 #define TFT_CLK 13
 #define TFT_MISO 12
@@ -261,21 +261,16 @@ void parseData() {
 		 last_x=integerFromPC[TIME_];
 		 rx[valsreaded]=integerFromPC[TIME_];
 		 ry[valsreaded]=integerFromPC[PRESSURE_];     
-		 //ry2[valsreaded]=int(float(integerFromPC[3])*0.15); 
-		 //yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_])*0.05);    
-		 //yvt[0]	=yvt[1];yvt[1]=		int(float(integerFromPC[VT_])*0.15);   
    }
 	} else {
 		 valsreaded+=1;
 		 last_x=integerFromPC[TIME_];
 		 rx[valsreaded]=integerFromPC[TIME_];
 		 ry[valsreaded]=integerFromPC[PRESSURE_];       
-		 //ry2[valsreaded]=int(float(integerFromPC[3])*0.15); 
-		 //yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_])*0.05);
-		 //yvt[0]=yvt[1];yvt[1]=int(float(integerFromPC[VT_])*0.15);   
+
 		 }
 
-  if ( integerFromPC[FLUX_] != 0 /*&& abs(integerFromPC[FLUX_]) < last_vals[FLUX_][1]+DIFF_FLUX*/) {
+  if ( integerFromPC[FLUX_] != 0 && abs(integerFromPC[FLUX_]) < abs(last_vals[FLUX_][1])+DIFF_FLUX ) {
     yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_])*0.05);
     last_vals[FLUX_][0]=last_vals[FLUX_][1];last_vals[FLUX_][1]=integerFromPC[FLUX_];
   }

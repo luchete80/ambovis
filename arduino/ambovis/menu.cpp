@@ -93,11 +93,7 @@ void check_encoder ( ) {
           } break;
         case 5: 
           encoderPos=oldEncPos=options.peakInspiratoryPressure;
-          min_sel=10;max_sel=40;
-        break;
-        case 6: 
-          encoderPos=oldEncPos=options.peakEspiratoryPressure;
-          min_sel=5;max_sel=20;
+          min_sel=15;max_sel=25;
         break;
       }
 
