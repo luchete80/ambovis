@@ -43,7 +43,7 @@
 //#define STEPPER_LOWEST_POSITION     (STEPPER_MICROSTEPS *  -100)   // Steps
 //#define STEPPER_HIGHEST_POSITION    (STEPPER_MICROSTEPS *   100)   // Steps
 #define STEPPER_LOWEST_POSITION     (-10)   // Steps
-#define STEPPER_HIGHEST_POSITION    ( 2800)   //270º
+#define STEPPER_HIGHEST_POSITION    ( 2500)   //270º
 #define STEPPER_SPEED_DEFAULT       (400)   // Steps/s
 #define STEPPER_SPEED_MAX           (12000)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_ACCEL_MAX           (12000)
