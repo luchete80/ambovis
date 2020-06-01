@@ -14,7 +14,7 @@
 #define VT_       4
 #define ALARM_    3
 
-
+#define DIFF_FLUX 150
 
 #define TFT_CLK 13
 #define TFT_MISO 12
@@ -39,6 +39,7 @@ char receivedChars[numChars]; // an array to store the received data
 int last_t;
 int integerFromPC [5];
 float floatFromPC = 0.0;
+int last_vals[5][2];
 
 int axispos[3]; //from each graph
 
@@ -131,15 +132,7 @@ void loop(void) {
         //tft.setCursor(150+20*i, 310);
         itoa(integerFromPC[4], buffer, 10);
         tft.println(buffer);//tft.println(",");
-      //}
-      //tft.println(receivedChars);
-      time_last_show=millis();
-      
-//      tft.setRotation(0);
-//      tft.setCursor(150, 100);
-//      tft.setTextColor(ILI9341_RED);  tft.setTextSize(2);
-//      itoa(integerFromPC[4], buffer, 10);
-//      tft.println(buffer);
+        time_last_show=millis();
 
   }
   #endif
@@ -232,7 +225,7 @@ void showNewData() {
 
 void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
 
-  tft.drawLine(axispos[0] - ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded], 240-rx[valsreaded], color);
+  tft.drawLine(axispos[0] - ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],  240-rx[valsreaded], color);
   tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_RED);
   tft.drawLine(axispos[2]-yvt[0],             240-rx[valsreaded-1], axispos[2]-yvt[1],            240-rx[valsreaded], ILI9341_BLUE);
 
@@ -269,8 +262,8 @@ void parseData() {
 		 rx[valsreaded]=integerFromPC[TIME_];
 		 ry[valsreaded]=integerFromPC[PRESSURE_];     
 		 //ry2[valsreaded]=int(float(integerFromPC[3])*0.15); 
-		 yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_])*0.05);    
-		 yvt[0]	=yvt[1];yvt[1]=		int(float(integerFromPC[VT_])*0.15);   
+		 //yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_])*0.05);    
+		 //yvt[0]	=yvt[1];yvt[1]=		int(float(integerFromPC[VT_])*0.15);   
    }
 	} else {
 		 valsreaded+=1;
@@ -278,8 +271,18 @@ void parseData() {
 		 rx[valsreaded]=integerFromPC[TIME_];
 		 ry[valsreaded]=integerFromPC[PRESSURE_];       
 		 //ry2[valsreaded]=int(float(integerFromPC[3])*0.15); 
-		 yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_])*0.05);
-		 yvt[0]=yvt[1];yvt[1]=int(float(integerFromPC[VT_])*0.15);   
+		 //yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_])*0.05);
+		 //yvt[0]=yvt[1];yvt[1]=int(float(integerFromPC[VT_])*0.15);   
 		 }
+
+  if ( integerFromPC[FLUX_] != 0 /*&& abs(integerFromPC[FLUX_]) < last_vals[FLUX_][1]+DIFF_FLUX*/) {
+    yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_])*0.05);
+    last_vals[FLUX_][0]=last_vals[FLUX_][1];last_vals[FLUX_][1]=integerFromPC[FLUX_];
+  }
+   if ( integerFromPC[VT_] != 0 /*&& abs(integerFromPC[FLUX_]) < yflux[1]+DIFF_FLUX*/) {
+    yvt[0]=yvt[1];yvt[1]=int(float(integerFromPC[VT_])*0.15);
+    last_vals[VT_][0]=last_vals[VT_][1];last_vals[VT_][1]=integerFromPC[VT_];
+  }
+    
     //Serial.print(integerFromPC[1]);Serial.print(",");Serial.print(integerFromPC[2]);Serial.print(",");Serial.println(integerFromPC[3]);
 }
