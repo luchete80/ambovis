@@ -382,7 +382,7 @@ void loop() {
     //Serial.print("error: ");Serial.println(verror*1000);
     //p_dpt=( Voltage/5. - verror -0.04)/0.09*1000*DEFAULT_PA_TO_CM_H20;
     
-    p_dpt=( ( Voltage - verror)*0.2 -0.00001 - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20;
+    p_dpt=( ( Voltage - verror)*0.2 /*-0.00001*/ - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20;
   // #endif
 
     //UPDATING VERROR
@@ -402,21 +402,11 @@ void loop() {
         vcorr_count=0;
         init_verror=false;
     }
-//     p_dpt-=p_dpt0;
-//     pos=findClosest(dp_pos,38,p_dpt);
-//      _flux = po_flux_pos[pos] + ( float (po_flux_pos[pos+1]) - float (po_flux_pos[pos]) ) * ( p_dpt - float(dp_pos[pos]) ) / (float)( dp_pos[pos+1] - dp_pos[pos]);
-      //IF POSITIVE AND NEGATIVE
-      pos=findClosest(dp,55,p_dpt);
-      //flux should be shifted up (byte storage issue)
-      _flux = po_flux[pos] - 100 + ( float (po_flux[pos+1]-100) - float (po_flux[pos]-100) ) * ( p_dpt - float(dp[pos]) ) / (float)( dp[pos+1] - dp[pos]);      
-      _flux *=16.6667; 
-//      if (abs(_flux)<200.)
-//          _flux=0.;
-      
-//    } else {
-//        pos=findClosest(dp_neg,24,p_dpt);
-//        _flux = po_flux_neg[pos] + ( po_flux_neg[pos+1] - po_flux_neg[pos] ) * ( p_dpt - dp_neg[pos] ) / ( dp_neg[pos+1] - dp_neg[pos]);      
-//      }
+    
+    pos=findClosest(dp,55,p_dpt);
+    //flux should be shifted up (byte storage issue)
+    _flux = po_flux[pos] - 100 + ( float (po_flux[pos+1]-100) - float (po_flux[pos]-100) ) * ( p_dpt - float(dp[pos]) ) / (float)( dp[pos+1] - dp[pos]);      
+    _flux *=16.6667; 
 
     #ifdef FILTER_FLUX
     flux_count++;    //Filter
@@ -435,10 +425,9 @@ void loop() {
     flow_f=_flux;
     #endif 
         
-    if (_flux>0)
-        //if (state == State_Insufflation)
+    if (_flux>0) {
           _mlInsVol+=_flux*float((millis()-lastReadSensor))*0.001;//flux in l and time in msec, results in ml 
-    else {
+    } else {
           _mlExsVol-=_flux*float((millis()-lastReadSensor))*0.001;//flux in l and time in msec, results in ml 
     }
   
