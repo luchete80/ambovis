@@ -236,15 +236,20 @@ void display_lcd ( ) {
     dtostrf(last_pressure_min, 2, 1, tempstr);
     writeLine(3, String(tempstr), 16);  
     
-    writeLine(3, "C: -", 1);
-    writeLine(3, String(last_cycle), 3);
-  
+    dtostrf(Cdyn*1.01972, 2, 1, tempstr);
+    writeLine(3, "CD: " + String(tempstr), 0); 
+      
   } else if (menu_number ==1 ){//OTHER SETTINGS
     writeLine(0, "PIP  AL:" + String(alarm_max_pressure), 1); 
+    dtostrf(Cdyn*1.01972, 2, 1, tempstr);
+    writeLine(0, "CD: " + String(tempstr), 12); 
     writeLine(1, "PEEP AL:" + String(alarm_peep_pressure), 1); 
         dtostrf((float(p_trim-100)), 2, 0, tempstr);
     writeLine(2, "TRIM:" + String(tempstr) + "e-3", 1); 
-        
+    
+    writeLine(0, "C: ", 12);
+    writeLine(0, String(last_cycle), 15);
+         
     #ifdef DEBUG_FLUX
     writeLine(3, "F: " + String(ciclo) + " " + String(ins_prom,0) + "ml " + String(err_sum/((float)ciclo-2.)*100) + "%", 0);
     #endif    

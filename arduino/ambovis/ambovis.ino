@@ -19,7 +19,7 @@ float ins_max,ins_min,err_sum;
 unsigned long ciclo,ins_sum;
 #endif
 bool init_verror;
-//float compl;
+float Cdyn;
 
 // FOR ADS
 #ifdef USE_ADC
@@ -307,6 +307,7 @@ void setup() {
       Serial.print("Honey Volt at p0: ");Serial.println(analogRead(A0)/1023.);
     #endif
     EEPROM.get(0,last_cycle);
+    Serial.print("LAST CYCLE: ");Serial.println(last_cycle);
     ventilation->setCycleNum(last_cycle);
   
     #ifdef DEBUG_FLUX
@@ -357,17 +358,7 @@ void loop() {
   #endif
   
   if (time > lastReadSensor + TIME_SENSOR){
-
-    //A0: PRESSURE (HOEYWELL) A1: Volume (DPT) A2: Test Mode pressure (DPT)
-    //0.1 is from the 0.5 readed initially by the honeywell
-    //p_dpt    =f_dpt*float(analogRead(A1)); //ONE DIRECTION
-    //From datasheet:
-    //vout/vs = 0.8/(PMax-pmin)*(p-pmin) + 0.1 + fs --->>> ESTE FS SE LO AGREGO POR EL CERO
-    //FS=(vout/vs)+pmin*0.8/(PMax-pmin)-0.1 //Donde vout/vs es V_HONEY_P0
-    //p_dpt      = f_dpt*float(analogRead(A1)) - corr_dpt;
-    //p= (vo/vs - 0.1)*(Pmax-pmin)/0.8+pmin --> SIN CORRECCION
-    //pressure_p = (( float ( analogRead(A0) )/1023.) /* 5.0/V_SUPPLY_HONEY */ - 0.1 /* - corr_fs */)/0.8*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20; //Data sheet figure 2 analog pressure, calibration from 10% to 90%
-   
+ 
 	  pressure_p=( analogRead(A0)/(1023.) - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20;
     //pos=findClosest(dp_pos,38,p_dpt);
 //    if ( p_dpt > 0 ) {
@@ -436,7 +427,7 @@ void loop() {
     lastReadSensor = millis();
 
       //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
-      if (pressure_p>pressure_max) {
+      if (pressure_p > pressure_max) {
             pressure_max=pressure_p;
        }
       if (pressure_p < pressure_min){
@@ -445,14 +436,14 @@ void loop() {
   }//Read Sensor
 
     //enum _state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
-    if ( last_pressure_max > alarm_max_pressure) {
-        if ( last_pressure_min < alarm_peep_pressure ) { 
+    if ( last_pressure_max > alarm_max_pressure + 1 ) {
+        if ( last_pressure_min < alarm_peep_pressure - 1) { 
             alarm_state = 3;
         } else {
             alarm_state = 2;
         }
     } else {
-        if ( last_pressure_min < alarm_peep_pressure ) { 
+        if ( last_pressure_min < alarm_peep_pressure - 1 ) { 
             alarm_state = 1;
         } else {
             alarm_state = 0;

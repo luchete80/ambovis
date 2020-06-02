@@ -207,6 +207,6 @@ extern MechVentilation * ventilation;
 extern unsigned long last_cycle;
 extern byte alarm_max_pressure,alarm_peep_pressure;
 extern byte cycle_pos; //0 to 127
-
+extern float Cdyn;
 
 #endif /* INC_MECHANICAL_VENTILATION_H */
