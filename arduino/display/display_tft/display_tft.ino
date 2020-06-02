@@ -116,19 +116,19 @@ void loop(void) {
         tft.fillScreen(ILI9341_BLACK);
         //AXIS
         for (int i=0;i<3;i++)
-          tft.drawLine(axispos[i],0, axispos[i], 240, ILI9341_DARKGREY);
+          tft.drawLine(axispos[i],0, axispos[i], 240, ILI9341_LIGHTGREY);
 
 
         tft.setRotation(0);
         //itoa(integerFromPC[5], buffer, 10);
         itoa(vi, buffer, 10);
         tft.setCursor(160, 200);
-        tft.setTextColor(ILI9341_CYAN);  tft.setTextSize(2);
+        tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
         tft.println("Vi: ");tft.setCursor(200, 200);tft.println(buffer);
 
         itoa(ve, buffer, 10);
         tft.setCursor(160, 220);
-        tft.setTextColor(ILI9341_CYAN);  tft.setTextSize(2);
+        tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
         tft.println("Ve: ");tft.setCursor(200, 220);tft.println(buffer);
 
 //        itoa((ve+vi)/2., buffer, 10);
@@ -279,21 +279,12 @@ void parseData() {
   	wait4statechg=true;
 	}
 
-//
-	if (valsreaded > 0) {
 	 if ( integerFromPC[TIME_] != last_x && /*integerFromPC[0] < 127 */ integerFromPC[TIME_] < last_x+10) {
 		 valsreaded+=1;
 		 last_x=integerFromPC[TIME_];
 		 rx[valsreaded]=integerFromPC[TIME_];
 		 ry[valsreaded]=integerFromPC[PRESSURE_];     
    }
-	} else {
-		 valsreaded+=1;
-		 last_x=integerFromPC[TIME_];
-		 rx[valsreaded]=integerFromPC[TIME_];
-		 ry[valsreaded]=integerFromPC[PRESSURE_];       
-		 }
-
   if (integerFromPC[5]>last_vals[5][1]){
       vi=last_vals[5][1]=integerFromPC[5];
   }
