@@ -346,7 +346,8 @@ void loop() {
       Serial.print(int(_flux));Serial.print(",");
       #endif      
       Serial.print(int(alarm_state));Serial.print(",");
-      Serial.println(int(_mlInsVol-_mlExsVol));
+      Serial.print(int(_mlInsVol-_mlExsVol));Serial.print(",");
+      Serial.println(int(_mlInsVol));
 //      
       //Serial.print(",");Serial.println(int(alarm_state));     
 //      #ifdef FILTER_FLUX 

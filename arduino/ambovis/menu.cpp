@@ -81,6 +81,7 @@ void check_encoder ( ) {
         case 3:
           if ( menu_number == 0 ) {
               encoderPos=oldEncPos=options.percInspEsp;
+              curr_sel+=1;  //NOT SELECTABLE FOR NOW
               min_sel=1;max_sel=4;   
           } else if ( menu_number == 1 ) {
               encoderPos=oldEncPos=p_trim;

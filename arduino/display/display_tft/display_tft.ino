@@ -15,6 +15,7 @@
 #define ALARM_    3
 
 float diff_var[]={10., 10., 600.,50.,0.}; 
+int vi,ve,vt;
 
 #define TFT_CLK 13
 #define TFT_MISO 12
@@ -37,9 +38,9 @@ char a[10],b[10];
 const byte numChars = 32;
 char receivedChars[numChars]; // an array to store the received data
 int last_t;
-int integerFromPC [5];
+int integerFromPC [6];
 float floatFromPC = 0.0;
-int last_vals[5][2];
+int last_vals[6][2];
 
 int axispos[3]; //from each graph
 
@@ -104,6 +105,7 @@ void loop(void) {
 //          newData = false;
 
       if (last_x<10 && !lcd_cleaned){
+        last_vals[5][0]=last_vals[5][1]=0;
         lcd_cleaned=true;
         valsreaded=0;
         for (int i=0;i<3;i++) 
@@ -115,9 +117,29 @@ void loop(void) {
         //AXIS
         for (int i=0;i<3;i++)
           tft.drawLine(axispos[i],0, axispos[i], 240, ILI9341_DARKGREY);
+
+
+        tft.setRotation(0);
+        //itoa(integerFromPC[5], buffer, 10);
+        itoa(vi, buffer, 10);
+        tft.setCursor(160, 200);
+        tft.setTextColor(ILI9341_CYAN);  tft.setTextSize(2);
+        tft.println("Vi: ");tft.setCursor(200, 200);tft.println(buffer);
+
+        itoa(ve, buffer, 10);
+        tft.setCursor(160, 220);
+        tft.setTextColor(ILI9341_CYAN);  tft.setTextSize(2);
+        tft.println("Ve: ");tft.setCursor(200, 220);tft.println(buffer);
+
+//        itoa((ve+vi)/2., buffer, 10);
+//        tft.setCursor(160, 240);
+//        tft.setTextColor(ILI9341_CYAN);  tft.setTextSize(2);
+//        tft.println("Vi: ");tft.setCursor(200, 240);tft.println(buffer);
+        
       }
     if (last_x>10 && lcd_cleaned){
       lcd_cleaned=false;
+ 
     }
   
   parseData();
@@ -227,7 +249,7 @@ void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WIT
 
   tft.drawLine(axispos[0] - ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],  240-rx[valsreaded], color);
   tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_RED);
-  tft.drawLine(axispos[2]-yvt[0],             240-rx[valsreaded-1], axispos[2]-yvt[1],            240-rx[valsreaded], ILI9341_BLUE);
+  tft.drawLine(axispos[2]-yvt[0],             240-rx[valsreaded-1], axispos[2]-yvt[1],            240-rx[valsreaded], ILI9341_CYAN);
 
        
   //yield();
@@ -249,6 +271,9 @@ void parseData() {
 	strtokIndx = strtok(NULL,","); // this continues where the previous call left off
 	integerFromPC[4] = atoi(strtokIndx);     // convert this part to an integer
 
+  strtokIndx = strtok(NULL,","); // this continues where the previous call left off
+  integerFromPC[5] = atoi(strtokIndx);     // convert this part to an integer
+  
 	if (integerFromPC[ALARM_]!=0 && !wait4statechg) {
   	state=integerFromPC[ALARM_];
   	wait4statechg=true;
@@ -267,9 +292,17 @@ void parseData() {
 		 last_x=integerFromPC[TIME_];
 		 rx[valsreaded]=integerFromPC[TIME_];
 		 ry[valsreaded]=integerFromPC[PRESSURE_];       
-
 		 }
 
+  if (integerFromPC[5]>last_vals[5][1]){
+      vi=last_vals[5][1]=integerFromPC[5];
+  }
+
+  //if (last_x > integerFromPC[TIME_]) {//CYCLE CHANGE!
+  if (integerFromPC[VT_] < last_vals[VT_][1] ) {
+      ve=vi-last_vals[VT_][1];
+  }
+  
   if ( integerFromPC[FLUX_] != 0 && abs(integerFromPC[FLUX_]) < abs(last_vals[FLUX_][1])+diff_var[FLUX_]) {
     yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_])*0.05);
     last_vals[FLUX_][0]=last_vals[FLUX_][1];last_vals[FLUX_][1]=integerFromPC[FLUX_];
