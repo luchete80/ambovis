@@ -43,6 +43,20 @@
 #define PIN_ENC_CL  2
 #define PIN_ENC_DIR 3
 
+#define TFT_CLK 	13
+#define TFT_MISO 	12
+#define TFT_MOSI 	11
+#define TFT_CS 		10
+#define TFT_DC 		9
+#define TFT_RST 	8
+
+
+#define GREEN_LED   4
+#define YELLOW_LED  5
+#define RED_LED     6
+
+#define PIN_BUZZER  3
+
 // IF ARDUINO UNO
 //#define PIN_ENC_CL  2
 //#define PIN_ENC_DIR 3

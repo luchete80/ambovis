@@ -2,6 +2,7 @@
 #include "MechVentilation.h"
 #include "src/TimerOne/TimerOne.h"
 #include "menu.h"
+#include "display.h"
 
 #include "src/AutoPID/AutoPID.h"
 #ifdef ACCEL_STEPPER
@@ -61,6 +62,8 @@ LiquidCrystal_I2C lcd(0x3F, 20, 4);
 #else
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
 #endif
+
+Adafruit_ILI9341 tft=Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 
 byte vcorr_count;
 
@@ -305,6 +308,12 @@ void setup() {
     err_sum=0;
     #endif
 
+    pinMode(PIN_BUZZER, OUTPUT); //Set buzzerPin as output
+    pinMode(GREEN_LED, OUTPUT); //Set buzzerPin as output
+    pinMode(YELLOW_LED, OUTPUT); //Set buzzerPin as output
+    pinMode(RED_LED, OUTPUT); //Set buzzerPin as output
+    tft.begin();
+    tft.fillScreen(ILI9341_BLACK);
 }
 
 
@@ -341,7 +350,7 @@ void loop() {
 //      Serial.print(Voltage*1000);Serial.print(",");Serial.print(p_dpt);Serial.print(",");Serial.println(_flux);/*Serial.print(",");/*Serial.print(",");Serial.println(_flux_sum/5.);*/
 //      #endif
       //Serial.print(int(_mlInsVol));Serial.print(",");Serial.println(int(_mlExsVol));
-
+      tft_draw();
   }
   #endif
   
