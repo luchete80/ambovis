@@ -51,7 +51,7 @@ void check_encoder ( ) {
           display_lcd();
         } 
       } else if (menu_number == 1) {
-         if (curr_sel > 2) {
+         if (curr_sel > 3) {
           curr_sel=0;
           menu_number=0; 
           clear_all_display=true;
@@ -79,8 +79,13 @@ void check_encoder ( ) {
                 }
         break;
         case 3:
-          encoderPos=oldEncPos=options.percInspEsp;
-          min_sel=1;max_sel=4;        
+          if ( menu_number == 0 ) {
+              encoderPos=oldEncPos=options.percInspEsp;
+              min_sel=1;max_sel=4;   
+          } else if ( menu_number == 1 ) {
+              encoderPos=oldEncPos=p_trim;
+              min_sel=0;max_sel=200;  
+          }     
         break;
         case 4: 
           if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
@@ -129,7 +134,8 @@ void check_encoder ( ) {
             else                    alarm_peep_pressure     = encoderPos;
             break;
           case 3:
-            options.percInspEsp=encoderPos;
+            if ( menu_number == 0 ) options.percInspEsp=encoderPos;
+            else                    p_trim=encoderPos;
             //pressure_max = 0;
             break;
           case 4:
@@ -229,15 +235,16 @@ void display_lcd ( ) {
     writeLine(3, "PEEP: -", 11);
     dtostrf(last_pressure_min, 2, 1, tempstr);
     writeLine(3, String(tempstr), 16);  
-  
-  
+    
     writeLine(3, "C: -", 1);
     writeLine(3, String(last_cycle), 3);
   
   } else if (menu_number ==1 ){//OTHER SETTINGS
     writeLine(0, "PIP  AL:" + String(alarm_max_pressure), 1); 
     writeLine(1, "PEEP AL:" + String(alarm_peep_pressure), 1); 
-    
+        dtostrf((float(p_trim-100)), 2, 0, tempstr);
+    writeLine(2, "TRIM:" + String(tempstr) + "e-3", 1); 
+        
     #ifdef DEBUG_FLUX
     writeLine(3, "F: " + String(ciclo) + " " + String(ins_prom,0) + "ml " + String(err_sum/((float)ciclo-2.)*100) + "%", 0);
     #endif    

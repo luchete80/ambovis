@@ -180,6 +180,7 @@ void MechVentilation :: update ( void )
     {
     case Init_Insufflation:
     {
+      _cyclenum=0;
       //Filter vars
       #ifdef FLUX_FILTER
       flux_filter_time=millis();

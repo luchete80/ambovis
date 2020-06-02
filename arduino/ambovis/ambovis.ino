@@ -19,6 +19,7 @@ float ins_max,ins_min,err_sum;
 unsigned long ciclo,ins_sum;
 #endif
 bool init_verror;
+//float compl;
 
 // FOR ADS
 #ifdef USE_ADC
@@ -63,7 +64,7 @@ LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PI
 #endif
 
 byte vcorr_count;
-
+byte p_trim=100;
 float pressure_p;   //EXTERN!!
 float last_pressure_max,last_pressure_min,last_pressure_peep;
 float pressure_peep;
@@ -382,7 +383,7 @@ void loop() {
     //Serial.print("error: ");Serial.println(verror*1000);
     //p_dpt=( Voltage/5. - verror -0.04)/0.09*1000*DEFAULT_PA_TO_CM_H20;
     
-    p_dpt=( ( Voltage - verror)*0.2 /*-0.00001*/ - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20;
+    p_dpt=( ( Voltage - verror)*0.2 /*-0.00001*/ - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20+(float(p_trim)-100.0)*1e-3;
   // #endif
 
     //UPDATING VERROR
