@@ -163,19 +163,19 @@ void loop(void) {
               tft.setRotation(0);
             //itoa(integerFromPC[5], buffer, 10);
             itoa(vi, buffer, 10);
-            tft.setCursor(160, 180);
+            tft.setCursor(150, 180);
             tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
-            tft.println("Vi: ");tft.setCursor(200, 180);tft.println(buffer);
+            tft.println("Vi: ");tft.setCursor(190, 180);tft.println(buffer);
     
                     itoa(ve, buffer, 10);
-            tft.setCursor(160, 200);
+            tft.setCursor(150, 200);
             tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
-            tft.println("Ve: ");tft.setCursor(200, 200);tft.println(buffer);
+            tft.println("Ve: ");tft.setCursor(190, 200);tft.println(buffer);
     
             itoa((vi+ve)/2, buffer, 10);
-            tft.setCursor(160, 220);
+            tft.setCursor(150, 220);
             tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
-            tft.println("VT: ");tft.setCursor(200, 220);tft.println(buffer);
+            tft.println("VT: ");tft.setCursor(190, 220);tft.println(buffer);
             vols_drawn=true;
         }
         
@@ -203,25 +203,25 @@ void loop(void) {
         case PEEP_ALARM:
           digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,HIGH); digitalWrite(RED_LED,LOW);  
           tft.setRotation(0);
-          tft.setTextColor(ILI9341_YELLOW); tft.setTextSize(1.5); 
-          tft.setCursor(160, 0);   
+          tft.setTextColor(ILI9341_YELLOW); tft.setTextSize(2); 
+          tft.setCursor(150, 0);   
           tft.println("PEEP AL");
         break;
         case PIP_ALARM:
           digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,LOW); digitalWrite(RED_LED,HIGH);      
           tft.setRotation(0);
           tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
-          tft.setCursor(160, 0);   
+          tft.setCursor(150, 0);   
           tft.println("PIP AL");
 		  break;  
         case PEEP_PIP_ALARM:
           digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,HIGH); digitalWrite(RED_LED,HIGH);      
           tft.setRotation(0);
-          tft.setTextColor(ILI9341_RED); tft.setTextSize(1.5); 
-          tft.setCursor(160, 0);   
+          tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
+          tft.setCursor(150, 0);   
           tft.println("PIP AL");
-          tft.setTextColor(ILI9341_YELLOW); tft.setTextSize(1.5); 
-          tft.setCursor(160, 10);   
+          tft.setTextColor(ILI9341_YELLOW); tft.setTextSize(2); 
+          tft.setCursor(150, 10);   
           tft.println("PEEP AL");
 		  break;
       }
