@@ -20,6 +20,7 @@ extern float _flux;
 extern float err_sum;
 extern unsigned long ciclo;
 extern float ins_prom;
+extern float verror;
 #endif
 
 #endif

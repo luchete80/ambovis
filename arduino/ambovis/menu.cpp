@@ -41,7 +41,7 @@ void check_encoder ( ) {
       curr_sel++; //NOT +=1, is a byte
 
       //if ((vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_MAN) && curr_sel==5) curr_sel++; //Not selecting pip in VCL
-      if (vent_mode==VENTMODE_PCL && curr_sel==4) curr_sel++; //Not selecting pip in VCL 
+      if (vent_mode==VENTMODE_PCL && curr_sel==4 && menu_number == 0) curr_sel++; //Not selecting pip in VCL 
             
       if ( menu_number == 0 ) {
         if (curr_sel > 5) {
@@ -81,8 +81,7 @@ void check_encoder ( ) {
         case 3:
           if ( menu_number == 0 ) {
               encoderPos=oldEncPos=options.percInspEsp;
-              curr_sel+=1;  //NOT SELECTABLE FOR NOW
-              min_sel=1;max_sel=4;   
+              min_sel=2;max_sel=3;   
           } else if ( menu_number == 1 ) {
               encoderPos=oldEncPos=p_trim;
               min_sel=0;max_sel=200;  
@@ -216,7 +215,7 @@ void display_lcd ( ) {
     writeLine(2, "IE:1:", 1);
   
     //dtostrf(ventilation->getInsVol(), 4, 0, tempstr);
-    dtostrf(_mllastInsVol, 4, 0, tempstr);
+    dtostrf((_mllastInsVol+_mllastExsVol)/2, 4, 0, tempstr);
     writeLine(1, String(tempstr), 16);
     //writeLine(1, "---", 16);
   
@@ -247,7 +246,9 @@ void display_lcd ( ) {
     writeLine(1, "PEEP AL:" + String(alarm_peep_pressure), 1); 
         dtostrf((float(p_trim-100)), 2, 0, tempstr);
     writeLine(2, "TRIM:" + String(tempstr) + "e-3", 1); 
-    
+    dtostrf((float(verror*1000)), 2, 0, tempstr);
+    writeLine(2, " ve:" + String(tempstr) + "mV", 11); 
+        
     writeLine(0, "C: ", 12);
     writeLine(0, String(last_cycle), 15);
          

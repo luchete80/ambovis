@@ -8,8 +8,7 @@
 //#define DEBUG_PID 1
 //#define DEBUG_UPDATE 1
 #define DEBUG_FLUX 1
-//#define FILTER_FLUX 1
-#define USE_ADC 1
+#define FILTER_FLUX 1
 #define DEBUG_OFF 1 //Release version
 #define P_HONEYWELL 1
 #define RANGE_DPT 100.0F

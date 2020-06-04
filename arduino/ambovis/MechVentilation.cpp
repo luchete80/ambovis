@@ -10,8 +10,6 @@ float pressure_min;
 static int highest_man_pos;
 unsigned long _msecTimerStartCycle;
 
-//bool adding_vol;
-
 MechVentilation::MechVentilation(
         #ifdef ACCEL_STEPPER
         AccelStepper *stepper,

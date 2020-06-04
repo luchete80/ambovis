@@ -22,12 +22,10 @@ bool init_verror;
 float Cdyn;
 
 // FOR ADS
-#ifdef USE_ADC
 #include <Wire.h>
 #include <Adafruit_ADS1015.h>
 Adafruit_ADS1115 ads(0x48);
 float Voltage = 0.0;
-#endif
 
 #ifdef DEBUG_PID
 float errpid_prom=0;
@@ -72,7 +70,7 @@ float pressure_peep;
 byte vent_mode = VENTMODE_MAN; //0
 //Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
-float pressure_p0;
+float verrp;
 float _flux,    flow_f;;
 #ifdef FILTER_FLUX
 float _flux_fil[5];
@@ -119,12 +117,12 @@ float verror,verror_sum;
 
 //FLUX IS -100 to +100, has to be added 100 
 //ASSIMETRY IN MAX FLOW IS IN NEGATIVE (ORIGINAL CURVE)
-float dp[]={-2.444452733,-2.030351958,-1.563385753,-1.207061607,-0.877207832,-0.606462279,-0.491216024,-0.377891785,-0.295221736,-0.216332764,-0.151339196,-0.096530072,-0.052868293,-0.047781395,-0.039664506,-0.03312327,-0.028644966,-0.023566372,-0.020045692,-0.014830113,-0.011688636,-0.008176254,-0.006117271,-0.003937171,-0.001999305,-0.00090924,-0.00030358,0,0.000242233,0.000837976,0.002664566,0.004602432,0.007024765,0.009325981,0.012111664,0.01441288,0.017561913,0.023012161,0.029794693,0.037061691,0.043771552,0.051474571,0.05874157,0.109004974,0.176879848,0.260808033,0.365700986,0.504544509,0.630753349,0.795599072,1.216013465,1.60054669,2.087678384,2.547210457,3.074176245};
-byte po_flux[]={0,10,20,30,40,50,55,60,65,70,75,80,85,86,87,88,89,90,91,92,93,94,95,96,97,100,100,100,100,100,103,104,105,106,107,108,109,110,111,112,113,114,115,120,125,130,135,140,145,150,160,170,180,190,200};
+//float dp[]={-2.444452733,-2.030351958,-1.563385753,-1.207061607,-0.877207832,-0.606462279,-0.491216024,-0.377891785,-0.295221736,-0.216332764,-0.151339196,-0.096530072,-0.052868293,-0.047781395,-0.039664506,-0.03312327,-0.028644966,-0.023566372,-0.020045692,-0.014830113,-0.011688636,-0.008176254,-0.006117271,-0.003937171,-0.001999305,-0.00090924,-0.00030358,0,0.000242233,0.000837976,0.002664566,0.004602432,0.007024765,0.009325981,0.012111664,0.01441288,0.017561913,0.023012161,0.029794693,0.037061691,0.043771552,0.051474571,0.05874157,0.109004974,0.176879848,0.260808033,0.365700986,0.504544509,0.630753349,0.795599072,1.216013465,1.60054669,2.087678384,2.547210457,3.074176245};
+//byte po_flux[]={0,10,20,30,40,50,55,60,65,70,75,80,85,86,87,88,89,90,91,92,93,94,95,96,97,100,100,100,100,100,103,104,105,106,107,108,109,110,111,112,113,114,115,120,125,130,135,140,145,150,160,170,180,190,200};
 
 //MAX FLUX IS IN ISPIRING POSITIVE (1st quad)
-//float dp[]={-3.074176245,-2.547210457,-2.087678384,-1.60054669,-1.216013465,-0.795599072,-0.630753349,-0.504544509,-0.365700986,-0.260808033,-0.176879848,-0.109004974,-0.05874157,-0.051474571,-0.043771552,-0.037061691,-0.029794693,-0.023012161,-0.017561913,-0.01441288,-0.012111664,-0.009325981,-0.007024765,-0.004602432,-0.002664566,0.00090924,0.00030358,0,-0.000242233,-0.000837976,0.001999305,0.003937171,0.006117271,0.008176254,0.011688636,0.014830113,0.020045692,0.023566372,0.028644966,0.03312327,0.039664506,0.047781395,0.052868293,0.096530072,0.151339196,0.216332764,0.295221736,0.377891785,0.491216024,0.606462279,0.877207832,1.207061607,1.563385753,2.030351958,2.444452733};
-//byte po_flux[]={0,10,20,30,40,50,55,60,65,70,75,80,85,86,87,88,89,90,91,92,93,94,95,96,97,100,100,100,100,100,103,104,105,106,107,108,109,110,111,112,113,114,115,120,125,130,135,140,145,150,160,170,180,190,200};
+float dp[]={-3.074176245,-2.547210457,-2.087678384,-1.60054669,-1.216013465,-0.795599072,-0.630753349,-0.504544509,-0.365700986,-0.260808033,-0.176879848,-0.109004974,-0.05874157,-0.051474571,-0.043771552,-0.037061691,-0.029794693,-0.023012161,-0.017561913,-0.01441288,-0.012111664,-0.009325981,-0.007024765,-0.004602432,-0.002664566,0.00090924,0.00030358,0,-0.000242233,-0.000837976,0.001999305,0.003937171,0.006117271,0.008176254,0.011688636,0.014830113,0.020045692,0.023566372,0.028644966,0.03312327,0.039664506,0.047781395,0.052868293,0.096530072,0.151339196,0.216332764,0.295221736,0.377891785,0.491216024,0.606462279,0.877207832,1.207061607,1.563385753,2.030351958,2.444452733};
+byte po_flux[]={0,10,20,30,40,50,55,60,65,70,75,80,85,86,87,88,89,90,91,92,93,94,95,96,97,100,100,100,100,100,103,104,105,106,107,108,109,110,111,112,113,114,115,120,125,130,135,140,145,150,160,170,180,190,200};
 
 
 
@@ -240,29 +238,36 @@ void setup() {
 
   writeLine(1, "AMBOVIS 0529_1",4);
 
-
-  #ifdef USE_ADC
-  p_dpt0=0;
-  ads.begin();
-  verror=0;
-  for (int i=0;i<10;i++) {
-  adc0 = ads.readADC_SingleEnded(0);
-  Voltage = (adc0 * 0.1875)*0.001; //VOLT!
-  Serial.print("Voltage: ");Serial.println(Voltage,3);
-  verror += ( Voltage - 5.0*0.04 ); //IF VOUT IS: Vo=VS(0.09*P0.04) +/- ERR
-  //vo=vs(0.09 dp +0.04)+/-verr
-  p_dpt0 += 0.5*(( Voltage /* 5.0/V_SUPPLY_HONEY */ - 0.1 *4.8/* - corr_fs */)/(0.8*4.8)*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20);
-  delay(10);
-  }
+    p_dpt0=0;
+    ads.begin();
+    verror=0;
+    float verrp=0.;
+    for (int i=0;i<10;i++) {
+        adc0 = ads.readADC_SingleEnded(0);
+        Voltage = (adc0 * 0.1875)*0.001; //VOLT!
+        Serial.print("Voltage dp: ");Serial.println(Voltage,3);
+        verror += ( Voltage - 5.0*0.04 ); //IF VOUT IS: Vo=VS(0.09*P0.04) +/- ERR
+        //vo=vs(0.09 dp +0.04)+/-verr
+        p_dpt0 += 0.5*(( Voltage /* 5.0/V_SUPPLY_HONEY */ - 0.1 *4.8/* - corr_fs */)/(0.8*4.8)*DEFAULT_PSI_TO_CM_H20*2.-DEFAULT_PSI_TO_CM_H20);
+        verrp += (analogRead(A0)*5./1024. -5.*0.04);
+        Serial.print("Voltage p: ");Serial.println(analogRead(A0));
+        delay(10);
+    }
+  
     verror/=10.;//
+    verrp/=10.;
     p_dpt0/=10.0;
-  Serial.print("MPX Volt (mV) at p0: ");Serial.println(verror*1000,3);
-  p_dpt0=0.20;
-  #endif
+    Serial.print("dp (Flux) MPX Volt (mV) at p0: ");Serial.println(verror*1000,3);
+    Serial.print("pressure  MPX Volt (mV) at p0: ");Serial.println(verrp*1000,3);
+    float pressure_p0 = - verrp/(5.*0.09);
+    Serial.print("pressure  error p0: ");Serial.println(pressure_p0);
+    Serial.print("dp  error : ");Serial.println(-verror/(5.*0.09));
+    p_dpt0=0.20;
 
-  // configura la ventilación
-  ventilation -> start();
-  ventilation -> update();
+
+    // configura la ventilación
+    ventilation -> start();
+    ventilation -> update();
 
   //sensors -> readPressure();
 
@@ -282,9 +287,6 @@ void setup() {
   lastReadSensor =   lastShowSensor = millis();
   lastState = ventilation->getState();
   last_update_display = millis();
-
-  //_pres1Sensor.begin();
-  //pressure_p0 = _pres1Sensor.readPressure() * DEFAULT_PA_TO_CM_H20;
 
   #ifdef DEBUG_UPDATE
     Serial.print("Pressure_p0");Serial.print(pressure_p0);
@@ -347,11 +349,13 @@ void loop() {
       #endif      
       Serial.print(int(alarm_state));Serial.print(",");
       Serial.print(int(_mlInsVol-_mlExsVol));Serial.print(",");
-      Serial.println(int(_mlInsVol));
-//      
+      Serial.print(int(_mllastInsVol));Serial.print(",");
+      Serial.println(int(_mllastExsVol));
+      
       //Serial.print(",");Serial.println(int(alarm_state));     
 //      #ifdef FILTER_FLUX 
-//      Serial.print(Voltage*1000);Serial.print(",");Serial.print(p_dpt);Serial.print(",");Serial.println(_flux);/*Serial.print(",");/*Serial.print(",");Serial.println(_flux_sum/5.);*/
+      Serial.print(Voltage*1000);Serial.print(",");Serial.print(p_dpt,4);Serial.print(",");Serial.println(_flux);/*Serial.print(",");/*Serial.print(",");Serial.println(_flux_sum/5.);*/
+//      Serial.print("Vcorr");Serial.print(",");Serial.println((Voltage-verror));
 //      #endif
       //Serial.print(int(_mlInsVol));Serial.print(",");Serial.println(int(_mlExsVol));
 
@@ -359,43 +363,20 @@ void loop() {
   #endif
   
   if (time > lastReadSensor + TIME_SENSOR){
- 
-	  pressure_p=( analogRead(A0)/(1023.) - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20;
+
+    //pressure_p=( analogRead(A0)/(1023.) - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20*1.05;
+	  pressure_p=( analogRead(A0)/(1023.) - verrp*0.2 - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20*0.75;
     //pos=findClosest(dp_pos,38,p_dpt);
 //    if ( p_dpt > 0 ) {
 
-   // #ifdef USE_ADC
     adc0 = ads.readADC_SingleEnded(0);
     Voltage = (adc0 * 0.1875)/1000.;//Volts
-    //Vout = VS*(0.018*P+0.04) ± ERROR
-    //VS = 5.0 Vdc
-    //EL 0.04 es el 48que aparece en 0
-    //Por eso como yaesta restado no se tiene en cuenta 
-    //0.04=48*/1024
-    //Serial.print("error: ");Serial.println(verror*1000);
-    //p_dpt=( Voltage/5. - verror -0.04)/0.09*1000*DEFAULT_PA_TO_CM_H20;
     
-    p_dpt=( ( Voltage - verror)*0.2 /*-0.00001*/ - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20+(float(p_trim)-100.0)*1e-3;
-  // #endif
+   // p_dpt=( ( Voltage - verror)*0.2 /*-0.00001*/ - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20+(float(p_trim)-100.0)*1e-3;
+    p_dpt=( Voltage - verror  - 0.20 )/0.45*1000*DEFAULT_PA_TO_CM_H20+0.0075/*(float(p_trim)-100.0)*1e-3*/;
 
-    //UPDATING VERROR
-    if (cycle_pos>115) {
-        if (vcorr_count<20) {
-            vcorr_count+=1;
-            verror_sum+=( Voltage - 5.0*0.04 );
-            //verror+=Voltage;
-            init_verror=true;
-        } 
-        Serial.print("Verror (mV) and count: ");Serial.print(verror_sum*1000);Serial.print(",  ");Serial.println(vcorr_count);
-    }
-    if (cycle_pos<10 && init_verror) {
-        verror=verror_sum/((float)vcorr_count+1);
-        Serial.print("Verror (mV) and count: ");Serial.print(verror*1000);Serial.print(",  ");Serial.println(vcorr_count);
-        verror_sum=0.;
-        vcorr_count=0;
-        init_verror=false;
-    }
-    
+    //update_error();
+      
     pos=findClosest(dp,55,p_dpt);
     //flux should be shifted up (byte storage issue)
     _flux = po_flux[pos] - 100 + ( float (po_flux[pos+1]-100) - float (po_flux[pos]-100) ) * ( p_dpt - float(dp[pos]) ) / (float)( dp[pos+1] - dp[pos]);      
@@ -419,12 +400,11 @@ void loop() {
     #endif 
         
     if (_flux>0) {
-          _mlInsVol+=_flux*float((millis()-lastReadSensor))*0.001;//flux in l and time in msec, results in ml 
+          _mlInsVol+=flow_f*float((millis()-lastReadSensor))*0.001;//flux in l and time in msec, results in ml 
     } else {
-          _mlExsVol-=_flux*float((millis()-lastReadSensor))*0.001;//flux in l and time in msec, results in ml 
+          _mlExsVol-=flow_f*float((millis()-lastReadSensor))*0.001;//flux in l and time in msec, results in ml 
     }
   
-
     lastReadSensor = millis();
 
       //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
@@ -477,16 +457,19 @@ void loop() {
 
         #ifdef DEBUG_FLUX
         ciclo++;
-          if (ciclo>4) { //First cycles measure bady
-          if (_mllastInsVol<ins_min)ins_min=_mllastInsVol;
-          ins_sum+=_mllastInsVol;
-          ins_prom=ins_sum/(ciclo-4);
-          ins_error=(ins_max-ins_min)/ins_prom;
-          float err=fabs(_mllastInsVol-ins_prom)/ins_prom;
-          //Serial.print("Error actual: ");Serial.println(err*100);
-          err_sum+=err;
-          //Serial.print("Count Flujo prom, max,min, error max, eerr prom: ");Serial.print(ciclo);Serial.print(",");Serial.print(ins_prom);Serial.print(",");  
-          //Serial.print(ins_min);Serial.print(",");Serial.print(ins_max);Serial.print(",");Serial.print(ins_error*100);Serial.print(",");Serial.println(err_sum/((float)ciclo-2.)*100);
+          int vt;
+          if (ciclo>5) { //First cycles measure bady
+              vt=(_mllastInsVol+_mllastExsVol)/2.;
+              if (vt < ins_min)ins_min=vt;
+              if (vt > ins_max)ins_min=vt;
+              ins_sum+=vt;
+              ins_prom=ins_sum/(ciclo-5);
+              ins_error=(ins_max-ins_min)/ins_prom;
+              float err=fabs(vt-ins_prom)/ins_prom;
+              //Serial.print("Error actual: ");Serial.println(err*100);
+              err_sum+=err;
+              //Serial.print("Count Flujo prom, max,min, error max, eerr prom: ");Serial.print(ciclo);Serial.print(",");Serial.print(ins_prom);Serial.print(",");  
+              //Serial.print(ins_min);Serial.print(",");Serial.print(ins_max);Serial.print(",");Serial.print(ins_error*100);Serial.print(",");Serial.println(err_sum/((float)ciclo-2.)*100);
           }
         #endif
     }
@@ -525,6 +508,26 @@ void timer1Isr(void)
     //Serial.print("Speed");Serial.println(_stepperSpeed);
     #endif
 }
+
+void update_error() {
+      //UPDATING VERROR
+    if (cycle_pos>115) {
+        if (vcorr_count<20) {
+            vcorr_count+=1;
+            verror_sum+=( Voltage - 5.0*0.04 );
+            //verror+=Voltage;
+            init_verror=true;
+        } 
+        //Serial.print("Verror (mV) and count: ");Serial.print(verror_sum*1000);Serial.print(",  ");Serial.println(vcorr_count);
+    }
+    if (cycle_pos<10 && init_verror) {
+        verror=verror_sum/((float)vcorr_count+1);
+        //Serial.print("Verror (mV) and count: ");Serial.print(verror*1000);Serial.print(",  ");Serial.println(vcorr_count);
+        verror_sum=0.;
+        vcorr_count=0;
+        init_verror=false;
+}
+  }
 
 void timer2Isr(void)
 {
