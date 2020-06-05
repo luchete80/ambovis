@@ -5,6 +5,7 @@
 #define ILI9341_LIGHTGREY 0xC618 /* 192, 192, 192 */
 #define ILI9341_DARKGREY 0x7BEF /* 128, 128, 128 */
 
+#define TIME_MUTE 30000
 #define DEBUG 1
 //enum serialpos={ALARM_=0,TIME_,PRESSURE_,FLUX_,VT_};
 //enum serialpos {TIME_=0,PRESSURE_,FLUX_,VT_,ALARM_};//ORIGINAL
@@ -59,6 +60,8 @@ bool isbuzzeron=false;
 #define YELLOW_LED  5
 #define RED_LED     6
 
+#define PIN_MUTE    2
+
 enum _state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
 bool wait4statechg=false;
 
@@ -83,34 +86,60 @@ int yvt[2];
 int xgra[3][2];
 char buffer[10];
 
-void setup() {
-  Serial.begin(250000);
-  Serial.println("ILI9341 Test!"); 
+//MUTE
+boolean last_mute,curr_mute;
+unsigned long time_mute;
+boolean buzzmuted;
 
-  pinMode(buzzer, OUTPUT); //Set buzzerPin as output
-  pinMode(GREEN_LED, OUTPUT); //Set buzzerPin as output
-  pinMode(YELLOW_LED, OUTPUT); //Set buzzerPin as output
-  pinMode(RED_LED, OUTPUT); //Set buzzerPin as output
-
-  
-  tft.begin();
-  tft.fillScreen(ILI9341_BLACK);
-
-  axispos[0]=63;  axispos[1]=160;  axispos[2]=260;
-  cyclenum=0;
-
+boolean debounce(boolean last, int pin) {
+    boolean current = digitalRead(pin);
+    if (last != current) {
+        delay(50);
+        current = digitalRead(pin);
+    }
+    return current;
 }
 
+void setup() {
+    Serial.begin(250000);
+    Serial.println("ILI9341 Test!"); 
+  
+    pinMode(PIN_MUTE, INPUT);
+    pinMode(buzzer, OUTPUT); //Set buzzerPin as output
+    pinMode(GREEN_LED, OUTPUT); //Set buzzerPin as output
+    pinMode(YELLOW_LED, OUTPUT); //Set buzzerPin as output
+    pinMode(RED_LED, OUTPUT); //Set buzzerPin as output
+  
+    
+    tft.begin();
+    tft.fillScreen(ILI9341_BLACK);
+  
+    axispos[0]=63;  axispos[1]=160;  axispos[2]=260;
+    cyclenum=0;
+    buzzmuted=false;
+    last_mute=LOW;
+}
 
 void loop(void) {
 
-	recvWithEndMarker();
-	  //recvWithStartEndMarkers();
-	showNewData();
+  	recvWithEndMarker();
+  	  //recvWithStartEndMarkers();
+  	showNewData();
 
+    curr_mute = debounce ( last_mute, PIN_MUTE );         //Debounce for Up button
+    if (last_mute== LOW && curr_mute == HIGH && !buzzmuted){
+        time_mute=millis();
+        buzzmuted=true;
+    }
+    last_mute = curr_mute;
+
+    if(buzzmuted) {
+        if (millis() > time_mute + TIME_MUTE )  
+        buzzmuted=false;
+    }
+    
 	  tft.setRotation(1);
 	  drawY2(ILI9341_GREEN);
-//          newData = false;
 
     if (last_x<10 && !lcd_cleaned){
         for (int i=0;i<3;i++)
@@ -226,22 +255,24 @@ void loop(void) {
 		  break;
       }
 
-    //tone( pin number, frequency in hertz, duration in milliseconds);
-    tone(buzzer,1500,200);
-    //Check buzzer
     if (int(state) > 0) {
-        if (millis() > timebuzz + TIME_BUZZER) {
-            timebuzz=millis();
-            //digitalWrite(buzzer,isbuzzeron);
-            isbuzzeron=!isbuzzeron;
-            if (isbuzzeron)
-              //tone(buzzer,500,TIME_BUZZER);
-              tone(buzzer,200);
-            else 
+          if (!buzzmuted) {
+              if (millis() > timebuzz + TIME_BUZZER) {
+                  timebuzz=millis();
+                  isbuzzeron=!isbuzzeron;
+                  if (isbuzzeron){
+                      tone(buzzer,440);
+                  }   
+                  else {
+                      noTone(buzzer);
+                  }
+              }
+          }//buzz muted
+          else {
               noTone(buzzer);
-        }
+          }
     } else {
-      digitalWrite(buzzer,1); //Inverted logic
+      noTone(buzzer);
       isbuzzeron=true;        //Inverted logic
     }
     
@@ -285,8 +316,8 @@ void showNewData() {
 void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
 
   if (abs(ry[valsreaded]-ry[valsreaded-1])<20) {tft.drawLine(axispos[0] - ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],  240-rx[valsreaded], color);}
-  tft.drawLine(axispos[1]-yflux[0],             240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_RED);
-  tft.drawLine(axispos[2]-yvt[0],               240-rx[valsreaded-1], axispos[2]-yvt[1],            240-rx[valsreaded], ILI9341_CYAN);
+  tft.drawLine(axispos[1]-yflux[0],             240-rx[valsreaded-1], axispos[1]-yflux[1],  240-rx[valsreaded], ILI9341_MAGENTA);
+  tft.drawLine(axispos[2]-yvt[0],               240-rx[valsreaded-1], axispos[2]-yvt[1],    240-rx[valsreaded], ILI9341_CYAN);
   //tft.drawLine(axispos[1]-yflux[0],           240-xgra[FLUX_][0], axispos[1]-yflux[1],          240-xgra[FLUX_][1], ILI9341_RED);
   //tft.drawLine(axispos[2]-yvt[0],             240-xgra[VT_][0],   axispos[2]-yvt[1],            240-xgra[VT_][1],   ILI9341_CYAN);
 
