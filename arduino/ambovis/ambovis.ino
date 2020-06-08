@@ -354,7 +354,7 @@ void loop() {
       
       //Serial.print(",");Serial.println(int(alarm_state));     
 //      #ifdef FILTER_FLUX 
-      Serial.print(Voltage*1000);Serial.print(",");Serial.print(p_dpt,4);Serial.print(",");Serial.println(_flux);/*Serial.print(",");/*Serial.print(",");Serial.println(_flux_sum/5.);*/
+//      Serial.print(Voltage*1000);Serial.print(",");Serial.print(p_dpt,4);Serial.print(",");Serial.println(_flux);/*Serial.print(",");/*Serial.print(",");Serial.println(_flux_sum/5.);*/
 //      Serial.print("Vcorr");Serial.print(",");Serial.println((Voltage-verror));
 //      #endif
       //Serial.print(int(_mlInsVol));Serial.print(",");Serial.println(int(_mlExsVol));
@@ -365,15 +365,13 @@ void loop() {
   if (time > lastReadSensor + TIME_SENSOR){
 
     //pressure_p=( analogRead(A0)/(1023.) - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20*1.05;
-	  pressure_p=( analogRead(A0)/(1023.) - verrp*0.2 - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20*0.75;
-    //pos=findClosest(dp_pos,38,p_dpt);
-//    if ( p_dpt > 0 ) {
+	  pressure_p=( analogRead(A0)/(1023.) - verrp*0.2 - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20*0.75-2.0;
 
     adc0 = ads.readADC_SingleEnded(0);
     Voltage = (adc0 * 0.1875)/1000.;//Volts
     
    // p_dpt=( ( Voltage - verror)*0.2 /*-0.00001*/ - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20+(float(p_trim)-100.0)*1e-3;
-    p_dpt=( Voltage - verror  - 0.20 )/0.45*1000*DEFAULT_PA_TO_CM_H20+0.0075/*(float(p_trim)-100.0)*1e-3*/;
+    p_dpt=( Voltage - verror  - 0.20 )/0.45*1000*DEFAULT_PA_TO_CM_H20/*+0.0075(float(p_trim)-100.0)*1e-3*/;
 
     //update_error();
       

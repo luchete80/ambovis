@@ -187,36 +187,34 @@ void display_lcd ( ) {
       }
       
   if (menu_number==0) {  
-    lcd_clearxy(5,1,3); lcd_clearxy(12,1,4);
-    lcd_clearxy(5,2,2); lcd_clearxy(13,2,2);
-    lcd_clearxy(13,3,2);
+    lcd_clearxy(5,1,3); lcd_clearxy(12,0,4);
+    lcd_clearxy(5,2,2); lcd_clearxy(13,1,2);
+                        lcd_clearxy(13,2,2);
   
     switch (vent_mode){
       case VENTMODE_VCL:
-        writeLine(0, "MOD:VCV", 1); 
-        writeLine(1, "V:" + String(options.tidalVolume), 10);    
-        writeLine(2, "PIP : - ", 8);
+        writeLine(0, "MOD:VCV", 1); writeLine(0, "V:" + String(options.tidalVolume), 10);    
+        writeLine(1, "PIP : - ", 8);
       break;
       case VENTMODE_PCL:
         writeLine(0, "MOD:PCV", 1); 
         writeLine(2, "PIP :" + String(options.peakInspiratoryPressure), 8);
-        writeLine(1, "V: - ", 10);
+        writeLine(0, "V: ", 10);
       break;    
       case VENTMODE_MAN:
         writeLine(0, "MOD:MAN", 1); 
-        writeLine(2, "PIP : -", 8);
         writeLine(1, "V:" + String(options.percVolume)+"%", 10);    
+        writeLine(2, "PIP : -", 8);
       break;
     }
      
       
-    writeLine(0, "SET | ME", 11);
     writeLine(1, "BPM:" + String(options.respiratoryRate), 1);
     writeLine(2, "IE:1:", 1);
   
     //dtostrf(ventilation->getInsVol(), 4, 0, tempstr);
     dtostrf((_mllastInsVol+_mllastExsVol)/2, 4, 0, tempstr);
-    writeLine(1, String(tempstr), 16);
+    writeLine(0, String(tempstr), 16);
     //writeLine(1, "---", 16);
   
     writeLine(2, String(options.percInspEsp), 6);
@@ -225,16 +223,16 @@ void display_lcd ( ) {
       Serial.print("Presion mostrada: ");Serial.println(pressure_max);
     #endif
     dtostrf(last_pressure_max, 2, 1, tempstr);
-    writeLine(2, String(tempstr), 16);  
+    writeLine(1, String(tempstr), 16);  
     
     #ifdef DEBUG_UPDATE
       Serial.print("Max press conv: ");Serial.println(tempstr);
       Serial.print("Min Max press");  Serial.print(pressure_min);Serial.print(" ");Serial.println(pressure_max);
     #endif
       
-    writeLine(3, "PEEP: -", 11);
+    writeLine(2, "PEEP: -", 11);
     dtostrf(last_pressure_min, 2, 1, tempstr);
-    writeLine(3, String(tempstr), 16);  
+    writeLine(2, String(tempstr), 16);  
     
     dtostrf(Cdyn*1.01972, 2, 1, tempstr);
     writeLine(3, "CD: " + String(tempstr), 0); 
