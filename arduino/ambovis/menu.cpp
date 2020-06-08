@@ -181,30 +181,30 @@ void display_lcd ( ) {
           case 3:
             lcd_selxy(0,2);break;
           case 4: 
-            lcd_selxy(9,1);break;
+            lcd_selxy(9,0);break;
           case 5: 
-            lcd_selxy(7,2);break;
+            lcd_selxy(8,1);break;
       }
       
   if (menu_number==0) {  
     lcd_clearxy(5,1,3); lcd_clearxy(12,0,4);
-    lcd_clearxy(5,2,2); lcd_clearxy(13,1,2);
+    lcd_clearxy(5,2,2); lcd_clearxy(14,1,2);
                         lcd_clearxy(13,2,2);
   
     switch (vent_mode){
       case VENTMODE_VCL:
         writeLine(0, "MOD:VCV", 1); writeLine(0, "V:" + String(options.tidalVolume), 10);    
-        writeLine(1, "PIP : - ", 8);
+        writeLine(1, "PIP : ", 10);
       break;
       case VENTMODE_PCL:
         writeLine(0, "MOD:PCV", 1); 
-        writeLine(2, "PIP :" + String(options.peakInspiratoryPressure), 8);
-        writeLine(0, "V: ", 10);
+        writeLine(1, "PIP:" + String(options.peakInspiratoryPressure), 9);
+        writeLine(0, "V: -", 10);
       break;    
       case VENTMODE_MAN:
         writeLine(0, "MOD:MAN", 1); 
-        writeLine(1, "V:" + String(options.percVolume)+"%", 10);    
-        writeLine(2, "PIP : -", 8);
+        writeLine(0, "V:" + String(options.percVolume)+"%", 10);    
+        writeLine(1, "PIP : ", 10);
       break;
     }
      
@@ -238,8 +238,10 @@ void display_lcd ( ) {
     writeLine(3, "CD: " + String(tempstr), 0); 
       
   } else if (menu_number ==1 ){//OTHER SETTINGS
+    lcd_clearxy(9,1,3);
+    
     writeLine(0, "PIP  AL:" + String(alarm_max_pressure), 1); 
-    dtostrf(Cdyn*1.01972, 2, 1, tempstr);
+    dtostrf(Cdyn*1.01972, 2, 1, tempstr);//Units change
     writeLine(0, "CD: " + String(tempstr), 12); 
     writeLine(1, "PEEP AL:" + String(alarm_peep_pressure), 1); 
         dtostrf((float(p_trim-100)), 2, 0, tempstr);
