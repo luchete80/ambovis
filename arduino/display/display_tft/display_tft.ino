@@ -1,12 +1,12 @@
-#include "SPI.h"
 #include "Adafruit_GFX.h"
 #include "Adafruit_ILI9341.h"
+#include "src/TimerOne/TimerOne.h"
 
 #define ILI9341_LIGHTGREY 0xC618 /* 192, 192, 192 */
 #define ILI9341_DARKGREY 0x7BEF /* 128, 128, 128 */
 
-#define TIME_MUTE 30000
-#define DEBUG 1
+#define TIME_MUTE 30 //seconds
+//#define DEBUG 1
 //enum serialpos={ALARM_=0,TIME_,PRESSURE_,FLUX_,VT_};
 //enum serialpos {TIME_=0,PRESSURE_,FLUX_,VT_,ALARM_};//ORIGINAL
 #define TIME_     0
@@ -17,12 +17,16 @@
 #define VI_       5
 #define VE_       6
 
+//READ THIS FOR TONE FLREQ
+//https://electronics.stackexchange.com/questions/47114/tone-and-reading-data-from-serial-are-colliding
+
 bool ve_readed,vi_readed;
 
-float diff_var[]={10., 10., 800.,0.,200.}; 
+float diff_var[]={10., 10., 800.,0.,300.}; 
 int vi,ve,vt;
 unsigned long cyclenum;
 bool vols_drawn;
+int mute_count;
 
 #define TFT_CLK 13
 #define TFT_MISO 12
@@ -65,7 +69,7 @@ bool isbuzzeron=false;
 enum _state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
 bool wait4statechg=false;
 
-_state state;
+int state,pre_state;//pre_state is to verification
 
 char recvChar;
 char endMarker = '>';
@@ -88,7 +92,6 @@ char buffer[10];
 
 //MUTE
 boolean last_mute,curr_mute;
-unsigned long time_mute;
 boolean buzzmuted;
 
 boolean debounce(boolean last, int pin) {
@@ -118,6 +121,10 @@ void setup() {
     cyclenum=0;
     buzzmuted=false;
     last_mute=LOW;
+
+    Timer1.initialize(500000); //MILLIS CANNOT BE USED
+    Timer1.attachInterrupt(timer1Isr);
+    mute_count=0;
 }
 
 void loop(void) {
@@ -128,13 +135,12 @@ void loop(void) {
 
     curr_mute = debounce ( last_mute, PIN_MUTE );         //Debounce for Up button
     if (last_mute== LOW && curr_mute == HIGH && !buzzmuted){
-        time_mute=millis();
+        mute_count=0;
         buzzmuted=true;
     }
     last_mute = curr_mute;
-
     if(buzzmuted) {
-        if (millis() > time_mute + TIME_MUTE )  
+        if (mute_count > 2*TIME_MUTE)  //each count is every 500 ms
         buzzmuted=false;
     }
     
@@ -147,7 +153,7 @@ void loop(void) {
         cyclenum++;
         for (int i=0;i<6;i++)
           last_vals[i][0]=last_vals[i][1]=0;
-
+        pre_state=0;
         //rx[0]=rx[1]=240;
         lcd_cleaned=true;
         vi_readed=false;
@@ -155,6 +161,7 @@ void loop(void) {
         vols_drawn=false;
         vi=ve=0;
         valsreaded=0;
+        //Serial.print("buzzmutd: ");Serial.println(buzzmuted);
         for (int i=0;i<3;i++) 
           valsreaded_[i]=0;
         state=0;
@@ -255,31 +262,51 @@ void loop(void) {
 		  break;
       }
 
-    if (int(state) > 0) {
-          if (!buzzmuted) {
-              if (millis() > timebuzz + TIME_BUZZER) {
-                  timebuzz=millis();
-                  isbuzzeron=!isbuzzeron;
-                  if (isbuzzeron){
-                      tone(buzzer,440);
-                  }   
-                  else {
-                      noTone(buzzer);
-                  }
-              }
-          }//buzz muted
-          else {
-              noTone(buzzer);
-          }
-    } else {
-      noTone(buzzer);
-      isbuzzeron=true;        //Inverted logic
-    }
+      if (buzzmuted)
+        analogWrite(buzzer, 0);
+//
+//    if (state > 0) {
+//          if (!buzzmuted) {
+////              if (millis() > timebuzz + TIME_BUZZER) {
+////                  timebuzz=millis();
+////                  isbuzzeron=!isbuzzeron;
+////                  if (isbuzzeron){
+//                      tone(buzzer,488.28125);
+////                  }   
+////                  else {
+////                      noTone(buzzer);
+////                  }
+////              }
+//          } else {  //buzz muted
+//              noTone(buzzer);
+//          }
+//    } else {//state > 0
+//      noTone(buzzer);
+//      isbuzzeron=true;        //Inverted logic
+//    }
     
 
 }
 
-
+void timer1Isr(void)
+{
+    if (state > 0) {
+        if (!buzzmuted) {
+            isbuzzeron=!isbuzzeron;
+            if (isbuzzeron){
+                analogWrite(buzzer, 127);
+            } else {
+                analogWrite(buzzer, 0);
+                //noTone(buzzer);
+            }
+        } 
+    } else {
+          analogWrite(buzzer, 0);
+      }
+    if (buzzmuted) {
+      mute_count+=1;  
+    }
+}
 void recvWithEndMarker() {
   static byte ndx = 0;
   char endMarker = '\n';
@@ -334,23 +361,19 @@ void parseData() {
 	strtokIndx = strtok(receivedChars, ","); // this continues where the previous call left off
 	integerFromPC[0] = atoi(strtokIndx);     // convert this part to an integer
 
-	for (int i=1;i<4;i++) {
+	for (int i=1;i<7;i++) {
 	strtokIndx = strtok(NULL, ","); // this continues where the previous call left off
 	integerFromPC[i] = atoi(strtokIndx);     // convert this part to an integer
 	}
-	strtokIndx = strtok(NULL,","); // this continues where the previous call left off
-	integerFromPC[4] = atoi(strtokIndx);     // convert this part to an integer
-
-  strtokIndx = strtok(NULL,","); // this continues where the previous call left off
-  integerFromPC[5] = atoi(strtokIndx);     // convert this part to an integer
-
-  strtokIndx = strtok(NULL,","); // this continues where the previous call left off
-  integerFromPC[6] = atoi(strtokIndx);     // convert this part to an integer
   
 	if (integerFromPC[ALARM_]!=0 && !wait4statechg) {
-  	state=integerFromPC[ALARM_];
-  	wait4statechg=true;
+  	pre_state++;
 	}
+
+ if (pre_state > 4 && !wait4statechg) {
+      state=integerFromPC[ALARM_];
+      wait4statechg=true;
+  }
 
 	 if ( integerFromPC[TIME_] != last_x /*&& abs(integerFromPC[P_])<ry[valsreaded]+10 */&& /*/*integerFromPC[0] < 127 */ integerFromPC[TIME_] < last_x+20) {
 		 valsreaded+=1;
