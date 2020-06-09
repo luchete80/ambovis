@@ -256,39 +256,41 @@ void MechVentilation :: update ( void )
         display_needs_update=true;
 
 
-      if (last_pressure_max > _pip + 2.5 ){
+      //if (last_pressure_max > _pip + 2.5 ){
             //if (Cdyn < 20 ) {//HARD Cv or resistance
             if (Cdyn<10) {
-              STEPPER_SPEED_MAX=5000;
+              STEPPER_SPEED_MAX=3000;	//Originally 5000
+			  STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  200;
             } else if (Cdyn>40) {
-              STEPPER_SPEED_MAX=20000;
+              STEPPER_SPEED_MAX=12000;
+			  STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  1000;
             }
-            else STEPPER_SPEED_MAX=Cdyn*250;
-            PID_KP=700.01;
-            PID_KI=20.01;
-            PID_KD=80.01;
+            else {
+				STEPPER_SPEED_MAX=Cdyn*300;	//Originally was 250
+				STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS*(25.*Cdyn);//((1000-200)*0.033+;
+			}
             _pid->setGains(PID_KP,PID_KI, PID_KD);
             _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);
-      }
-      else if (last_pressure_max + 2.5 < _pip ){//HARD Cv or resistance
-        //if (Cdyn > 25){
-          PID_KP=700.01;
-          PID_KI=20.01;
-          PID_KD=80.01;
-          _pid->setGains(PID_KP,PID_KI, PID_KD);
-          _pid->setOutputRange(-20000,20000);
-          STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  1000;
-          STEPPER_SPEED_MAX=20000;
-        //}
-      }
-      else {  //diff between pip & max < 2.5
+      //}
+      // else if (last_pressure_max + 2.5 < _pip ){//HARD Cv or resistance
+        // //if (Cdyn > 25){
+          // PID_KP=700.01;
+          // PID_KI=20.01;
+          // PID_KD=80.01;
+          // _pid->setGains(PID_KP,PID_KI, PID_KD);
+          // _pid->setOutputRange(-20000,20000);
+          // STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  1000;
+          // STEPPER_SPEED_MAX=20000;
+        // //}
+      // }
+      // else {  //diff between pip & max < 2.5
 //            PID_KP=700;
 //            PID_KI=20;
 //            PID_KD=80;
 //            _pid->setGains(PID_KP,PID_KI, PID_KD);
 //            _pid->setOutputRange(-PID_MIN,PID_MAX);
 //            STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  600;
-        }
+      //  }
       //if ( last_pressure_max > alarm_max_pressure + 1 ) {
       //if ( last_pressure_min < alarm_peep_pressure - 1) {
       
