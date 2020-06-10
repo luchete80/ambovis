@@ -51,7 +51,7 @@ void check_encoder ( ) {
           display_lcd();
         } 
       } else if (menu_number == 1) {
-         if (curr_sel > 3) {
+         if (curr_sel > 4) {
           curr_sel=0;
           menu_number=0; 
           clear_all_display=true;
@@ -88,17 +88,21 @@ void check_encoder ( ) {
           }     
         break;
         case 4: 
-          if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
-            encoderPos=oldEncPos=options.tidalVolume;
-            min_sel=200;max_sel=800;
-          } else {//Manual
-            encoderPos=oldEncPos=options.percVolume;
-//            Serial.print("Encoder pos: ");Serial.println(encoderPos);
-            min_sel=40;max_sel=100;            
-          } break;
-        case 5: 
-          encoderPos=oldEncPos=options.peakInspiratoryPressure;
-          min_sel=15;max_sel=25;
+            if ( menu_number == 0 ) {
+                if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
+                  encoderPos=oldEncPos=options.tidalVolume;
+                  min_sel=200;max_sel=800;
+                } else {//Manual
+                  encoderPos=oldEncPos=options.percVolume;
+      //            Serial.print("Encoder pos: ");Serial.println(encoderPos);
+                  min_sel=40;max_sel=100;            
+                } break;
+              case 5: 
+                encoderPos=oldEncPos=options.peakInspiratoryPressure;
+                min_sel=15;max_sel=25;
+            } else {//menu 0
+                  min_sel=0;max_sel=1; 
+            }
         break;
       }
 
@@ -139,15 +143,19 @@ void check_encoder ( ) {
             //pressure_max = 0;
             break;
           case 4:
-            if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
-              options.tidalVolume = encoderPos;
-              #ifdef DEBUG_UPDATE
-              Serial.print("tidal ");Serial.print(options.tidalVolume);Serial.print("encoder pos");Serial.print(encoderPos);
-              #endif
-              } else { //manual
-              options.percVolume =encoderPos;
-             // Serial.print("Encoder pos: ");Serial.println(encoderPos);
-             // Serial.print("Perc vol: ");Serial.println(options.percVolume);
+            if ( menu_number == 0 ) {
+                if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
+                  options.tidalVolume = encoderPos;
+                  #ifdef DEBUG_UPDATE
+                  Serial.print("tidal ");Serial.print(options.tidalVolume);Serial.print("encoder pos");Serial.print(encoderPos);
+                  #endif
+                  } else { //manual
+                  options.percVolume =encoderPos;
+                 // Serial.print("Encoder pos: ");Serial.println(encoderPos);
+                 // Serial.print("Perc vol: ");Serial.println(options.percVolume);
+                }
+            } else {//menu number = 1
+                autopid=encoderPos;
             }
             break;
           case 5:
@@ -245,11 +253,15 @@ void display_lcd ( ) {
     writeLine(0, "CD: " + String(tempstr), 12); 
     writeLine(1, "PEEP AL:" + String(alarm_peep_pressure), 1); 
         dtostrf((float(p_trim-100)), 2, 0, tempstr);
+
+    writeLine(1, "AUTO: ", 11);
+    if (autopid)    writeLine(1, "ON", 16);
+    else            writeLine(1, "OFF", 16);
     writeLine(2, "TRIM:" + String(tempstr) + "e-3", 1); 
     dtostrf((float(verror*1000)), 2, 0, tempstr);
     writeLine(2, " ve:" + String(tempstr) + "mV", 11); 
         
-    writeLine(0, "C: ", 12);
+    writeLine(0, "C: ", 13);
     writeLine(0, String(last_cycle), 15);
          
     #ifdef DEBUG_FLUX

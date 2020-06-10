@@ -19,6 +19,7 @@ unsigned long ciclo, ins_sum;
 #endif
 bool init_verror;
 byte Cdyn;
+bool autopid;
 
 // FOR ADS
 #include <Wire.h>
@@ -299,6 +300,7 @@ void setup() {
 #endif
   EEPROM.get(0, last_cycle);
   EEPROM.get(1, p_trim);
+  EEPROM.get(2,autopid);
   Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
   ventilation->setCycleNum(last_cycle);
 
@@ -325,6 +327,7 @@ void loop() {
   if (millis() > lastSave + TIME_SAVE) {
     EEPROM.put(0, last_cycle);
     EEPROM.put(1, p_trim);
+    EEPROM.put(2,autopid);
     lastSave = millis();
   }
 
