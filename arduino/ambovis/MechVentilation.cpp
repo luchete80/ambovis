@@ -10,9 +10,11 @@ float pressure_min;
 static int highest_man_pos;
 unsigned long _msecTimerStartCycle;
 
-int PID_KP=700.01;
+byte Cdyn_pass[3];
+
+int PID_KP=400.01;
 int PID_KI=20.01;
-int PID_KD=80.01;
+int PID_KD=50.01;
 int STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  600;
 int STEPPER_SPEED_MAX=14000;
 MechVentilation::MechVentilation(
@@ -207,8 +209,12 @@ void MechVentilation :: update ( void )
 
         _msecTimerStartCycle=millis();  //Luciano
 
-
-        Cdyn=_mllastInsVol/(last_pressure_max-last_pressure_min);
+        Serial.print("cdyn pass: ");
+        for (int i=0;i<3;i++)Serial.print(Cdyn_pass[i]);Serial.print(",");
+        Serial.println("..");
+        for (int i=0;i<2;i++) Cdyn_pass[i]=Cdyn_pass[i+1];
+        Cdyn_pass[2]=_mllastInsVol/(last_pressure_max-last_pressure_min);
+        Cdyn=(Cdyn_pass[0]+Cdyn_pass[1]+Cdyn_pass[2])/3.;
         _mllastInsVol=int(_mlInsVol);
         _mllastExsVol=int(fabs(_mlExsVol));
         
@@ -256,21 +262,29 @@ void MechVentilation :: update ( void )
         display_needs_update=true;
 
 
-      //if (last_pressure_max > _pip + 2.5 ){
-            //if (Cdyn < 20 ) {//HARD Cv or resistance
-            if (Cdyn<10) {
-              STEPPER_SPEED_MAX=3000;	//Originally 5000
-			  STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  200;
-            } else if (Cdyn>40) {
-              STEPPER_SPEED_MAX=12000;
-			  STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  1000;
-            }
-            else {
-				STEPPER_SPEED_MAX=Cdyn*300;	//Originally was 250
-				STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS*(25.*Cdyn);//((1000-200)*0.033+;
-			}
-            _pid->setGains(PID_KP,PID_KI, PID_KD);
-            _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);
+      if (abs(last_pressure_max - _pip) >  1.5 ){
+              //if (Cdyn < 20 ) {//HARD Cv or resistance
+              float peep_fac=-0.05*last_pressure_min+1.25;
+              
+              if (Cdyn<10) {
+                 PID_KP=250*peep_fac;
+                 STEPPER_SPEED_MAX=4000;	//Originally 5000
+  			         STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  200;
+              } else if (Cdyn>40) {
+                STEPPER_SPEED_MAX=12000;
+  			        STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  1000;//But the limit is calculated with range from 200 to 700
+                PID_KP=1000*peep_fac;
+              }
+              else {
+              PID_KP=(25*(float)Cdyn)*peep_fac;
+      				STEPPER_SPEED_MAX=float(Cdyn)*266.+1660.;	//Originally was 250
+      				STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS*(16.66*(float)Cdyn-133.);//((1000-200)*0.033+;
+  			  }
+          _pid->setGains(PID_KP,PID_KI, PID_KD);
+          _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);
+      }
+            //_pid->setGains(PID_KP,PID_KI, PID_KD);
+            //_pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);
       //}
       // else if (last_pressure_max + 2.5 < _pip ){//HARD Cv or resistance
         // //if (Cdyn > 25){

@@ -18,7 +18,7 @@ float ins_max, ins_min, err_sum;
 unsigned long ciclo, ins_sum;
 #endif
 bool init_verror;
-float Cdyn;
+byte Cdyn;
 
 // FOR ADS
 #include <Wire.h>
@@ -356,7 +356,7 @@ void loop() {
   if (time > lastReadSensor + TIME_SENSOR) {
 
     //pressure_p=( analogRead(A0)/(1023.) - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20*1.05;
-    pressure_p = ( analogRead(A0) / (1023.) - verrp * 0.2 - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20 * 0.75 - 2.0;
+    pressure_p = ( analogRead(A0) / (1023.) - verrp * 0.2 - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20 * 0.75 - 1.0;
 
     adc0 = ads.readADC_SingleEnded(0);
     Voltage = (adc0 * 0.1875) / 1000.; //Volts
@@ -364,7 +364,7 @@ void loop() {
     // p_dpt=( ( Voltage - verror)*0.2 /*-0.00001*/ - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20+(float(p_trim)-100.0)*1e-3;
     p_dpt = ( Voltage - verror  - 0.20 ) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20 + (float(p_trim) - 100.0) * 1e-3;
 
-    //update_error();
+    update_error();
 
     pos = findClosest(dp, 55, p_dpt);
     //flux should be shifted up (byte storage issue)
