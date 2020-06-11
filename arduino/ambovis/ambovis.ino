@@ -131,8 +131,6 @@ byte reading = 0; //somewhere to store the direct values we read from our interr
 
 byte max_sel, min_sel; //According to current selection
 
-float f_dpt, corr_dpt;
-float f1_honey, f2_honey;
 
 //
 void PinA() {
@@ -290,10 +288,6 @@ void setup() {
 
   Timer1.initialize(50);
   Timer1.attachInterrupt(timer1Isr);
-
-  f_dpt = (float)RANGE_DPT * DEFAULT_PA_TO_CM_H20 / 1023.;
-  //corr_dpt=RANGE_DPT*DEFAULT_PA_TO_CM_H20/2.;
-  f1_honey = 5.0 * DEFAULT_PSI_TO_CM_H20 * 2 / (1023 * 0.8 * V_SUPPLY_HONEY);
 
 #ifdef DEBUG_UPDATE
   Serial.print("Honey Volt at p0: "); Serial.println(analogRead(A0) / 1023.);
