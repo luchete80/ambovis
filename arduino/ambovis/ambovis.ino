@@ -298,13 +298,6 @@ void setup() {
   Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
   ventilation->setCycleNum(last_cycle);
 
-#ifdef DEBUG_FLUX
-  ins_prom = ins_sum = 0;
-  ins_max = 0.; ins_min = 10000.0;
-  ciclo = 0;
-  err_sum = 0;
-#endif
-
 }
 
 
@@ -441,23 +434,6 @@ void loop() {
     }
 #endif
 
-#ifdef DEBUG_FLUX
-    ciclo++;
-    int vt;
-    if (ciclo > 5) { //First cycles measure bady
-      vt = (_mllastInsVol + _mllastExsVol) / 2.;
-      if (vt < ins_min)ins_min = vt;
-      if (vt > ins_max)ins_min = vt;
-      ins_sum += vt;
-      ins_prom = ins_sum / (ciclo - 5);
-      ins_error = (ins_max - ins_min) / ins_prom;
-      float err = fabs(vt - ins_prom) / ins_prom;
-      //Serial.print("Error actual: ");Serial.println(err*100);
-      err_sum += err;
-      //Serial.print("Count Flujo prom, max,min, error max, eerr prom: ");Serial.print(ciclo);Serial.print(",");Serial.print(ins_prom);Serial.print(",");
-      //Serial.print(ins_min);Serial.print(",");Serial.print(ins_max);Serial.print(",");Serial.print(ins_error*100);Serial.print(",");Serial.println(err_sum/((float)ciclo-2.)*100);
-    }
-#endif
   }
 
   if (display_needs_update) {

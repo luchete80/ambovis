@@ -254,9 +254,6 @@ void display_lcd ( ) {
     writeLine(1, "PEEP AL:" + String(alarm_peep_pressure), 1); 
         dtostrf((float(p_trim-100)), 2, 0, tempstr);
 
-    writeLine(1, "AUTO: ", 11);
-    if (autopid)    writeLine(1, "ON", 16);
-    else            writeLine(1, "OFF", 16);
     writeLine(2, "TRIM:" + String(tempstr) + "e-3", 1); 
     dtostrf((float(verror*1000)), 2, 0, tempstr);
     writeLine(2, " ve:" + String(tempstr) + "mV", 11); 
@@ -264,9 +261,10 @@ void display_lcd ( ) {
     writeLine(0, "C: ", 13);
     writeLine(0, String(last_cycle), 15);
          
-    #ifdef DEBUG_FLUX
-    writeLine(3, "F: " + String(ciclo) + " " + String(ins_prom,0) + "ml " + String(err_sum/((float)ciclo-2.)*100) + "%", 0);
-    #endif    
+    writeLine(3, "AUTO: ", 1);
+    if (autopid)    writeLine(3, "ON", 6);
+    else            writeLine(3, "OFF", 6);    
+
   }//menu_number
       
   clear_all_display=false;
