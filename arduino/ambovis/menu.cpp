@@ -51,7 +51,7 @@ void check_encoder ( ) {
           display_lcd();
         } 
       } else if (menu_number == 1) {
-         if (curr_sel > 4) {
+         if (curr_sel > 5) {
           curr_sel=0;
           menu_number=0; 
           clear_all_display=true;
@@ -62,11 +62,11 @@ void check_encoder ( ) {
       switch (curr_sel){
         case 1: 
          if ( menu_number == 0 ) {
-            min_sel=0;max_sel=2;
-            encoderPos=oldEncPos=vent_mode;
+                min_sel=1;max_sel=2;
+                encoderPos=oldEncPos=vent_mode;
             } else if ( menu_number == 1 ) {
-            min_sel=20;max_sel=50;
-            encoderPos=oldEncPos=alarm_max_pressure;            
+                min_sel=20;max_sel=50;
+                encoderPos=oldEncPos=alarm_max_pressure;            
          } 
         break;
         case 2: 
@@ -83,8 +83,8 @@ void check_encoder ( ) {
               encoderPos=oldEncPos=options.percInspEsp;
               min_sel=2;max_sel=3;   
           } else if ( menu_number == 1 ) {
-              encoderPos=oldEncPos=p_trim;
-              min_sel=0;max_sel=200;  
+                encoderPos=byte(0.5*float(alarm_vt));
+                min_sel=50;max_sel=250;//vt
           }     
         break;
         case 4: 
@@ -94,10 +94,15 @@ void check_encoder ( ) {
                   min_sel=200;max_sel=800;
                 } else {//Manual
                   encoderPos=oldEncPos=options.percVolume;
-      //            Serial.print("Encoder pos: ");Serial.println(encoderPos);
                   min_sel=40;max_sel=100;            
-                } break;
+                } 
+            } else {//menu 0
+                encoderPos=oldEncPos=p_trim;
+                min_sel=0;max_sel=200;   
+            }
+            break;
               case 5: 
+            if ( menu_number == 0 ) {
                 encoderPos=oldEncPos=options.peakInspiratoryPressure;
                 min_sel=15;max_sel=25;
             } else {//menu 0
@@ -139,7 +144,7 @@ void check_encoder ( ) {
             break;
           case 3:
             if ( menu_number == 0 ) options.percInspEsp=encoderPos;
-            else                    p_trim=encoderPos;
+            else                    alarm_vt=int(2.*(float)encoderPos);
             //pressure_max = 0;
             break;
           case 4:
@@ -155,11 +160,15 @@ void check_encoder ( ) {
                  // Serial.print("Perc vol: ");Serial.println(options.percVolume);
                 }
             } else {//menu number = 1
-                autopid=encoderPos;
+                p_trim=encoderPos;
             }
             break;
           case 5:
-            options.peakInspiratoryPressure = encoderPos;
+            if ( menu_number == 0 ) {
+                options.peakInspiratoryPressure = encoderPos;
+            } else {
+                autopid=encoderPos;
+            }
             break;
           case 6:
             options.peakEspiratoryPressure = encoderPos;
@@ -177,11 +186,12 @@ void check_encoder ( ) {
 void display_lcd ( ) {
     if (clear_all_display)
         lcd.clear();
-    
+  
+     if (menu_number==0) {  
     lcd_clearxy(0,0);
-    lcd_clearxy(0,1);lcd_clearxy(9,1);
-    lcd_clearxy(0,2);lcd_clearxy(7,2);
-    switch(curr_sel){
+    lcd_clearxy(0,1);lcd_clearxy(9,0);
+    lcd_clearxy(0,2);lcd_clearxy(8,1);
+     switch(curr_sel){
           case 1: 
             lcd_selxy(0,0);break;
           case 2: 
@@ -192,8 +202,24 @@ void display_lcd ( ) {
             lcd_selxy(9,0);break;
           case 5: 
             lcd_selxy(8,1);break;
+        }
+     } else {  
+      lcd_clearxy(0,0);
+      lcd_clearxy(0,1);lcd_clearxy(10,2);
+      lcd_clearxy(0,2);lcd_clearxy(0,3);
+      switch(curr_sel){
+          case 1: 
+            lcd_selxy(0,0);break;//PIP
+          case 2: 
+            lcd_selxy(0,1);break;//PEEP
+          case 3:
+            lcd_selxy(10,1);break;
+          case 4: 
+            lcd_selxy(0,2);break;
+          case 5: 
+            lcd_selxy(0,3);break;
       }
-      
+    }//menu number 
   if (menu_number==0) {  
     lcd_clearxy(5,1,3); lcd_clearxy(12,0,4);
     lcd_clearxy(5,2,2); lcd_clearxy(14,1,2);
@@ -223,14 +249,13 @@ void display_lcd ( ) {
     //dtostrf(ventilation->getInsVol(), 4, 0, tempstr);
     dtostrf((_mllastInsVol+_mllastExsVol)/2, 4, 0, tempstr);
     writeLine(0, String(tempstr), 16);
-    //writeLine(1, "---", 16);
   
     writeLine(2, String(options.percInspEsp), 6);
   
     #ifdef DEBUG_UPDATE
       Serial.print("Presion mostrada: ");Serial.println(pressure_max);
     #endif
-    dtostrf(last_pressure_max, 2, 1, tempstr);
+    dtostrf(last_pressure_max, 2, 0, tempstr);
     writeLine(1, String(tempstr), 16);  
     
     #ifdef DEBUG_UPDATE
@@ -238,33 +263,34 @@ void display_lcd ( ) {
       Serial.print("Min Max press");  Serial.print(pressure_min);Serial.print(" ");Serial.println(pressure_max);
     #endif
       
-    writeLine(2, "PEEP: -", 11);
-    dtostrf(last_pressure_min, 2, 1, tempstr);
+    writeLine(2, "PEEP: ", 11);
+    dtostrf(last_pressure_min, 2, 0, tempstr);
     writeLine(2, String(tempstr), 16);  
     
     dtostrf(Cdyn*1.01972, 2, 1, tempstr);
     writeLine(3, "CD: " + String(tempstr), 0); 
       
   } else if (menu_number ==1 ){//OTHER SETTINGS
-    lcd_clearxy(9,1,3);
-    
-    writeLine(0, "PIP  AL:" + String(alarm_max_pressure), 1); 
-    dtostrf(Cdyn*1.01972, 2, 1, tempstr);//Units change
-    writeLine(0, "CD: " + String(tempstr), 12); 
-    writeLine(1, "PEEP AL:" + String(alarm_peep_pressure), 1); 
-        dtostrf((float(p_trim-100)), 2, 0, tempstr);
+                        lcd_clearxy(12,0,8);
+    lcd_clearxy(8,1,2); lcd_clearxy(16,1,3);
+                        lcd_clearxy(13,6,3);
+        
+    writeLine(0, "PIPAL:" + String(alarm_max_pressure), 1); 
 
+    writeLine(1, "PEEPAL:" + String(alarm_peep_pressure), 1); 
+    writeLine(1, "VTAL:" + String(alarm_vt), 11);
+    
+    dtostrf((float(p_trim-100)), 2, 0, tempstr);
     writeLine(2, "TRIM:" + String(tempstr) + "e-3", 1); 
     dtostrf((float(verror*1000)), 2, 0, tempstr);
     writeLine(2, " ve:" + String(tempstr) + "mV", 11); 
-        
-    writeLine(0, "C: ", 13);
-    writeLine(0, String(last_cycle), 15);
          
     writeLine(3, "AUTO: ", 1);
     if (autopid)    writeLine(3, "ON", 6);
     else            writeLine(3, "OFF", 6);    
 
+    writeLine(3, "C:", 10);
+    writeLine(3, String(last_cycle), 12);
   }//menu_number
       
   clear_all_display=false;

@@ -12,11 +12,6 @@
 #include "src/Pressure_Sensor/Pressure_Sensor.h"  //LUCIANO: MPX5050DP
 #include <EEPROM.h>
 
-#ifdef DEBUG_FLUX
-float ins_prom, ins_error;
-float ins_max, ins_min, err_sum;
-unsigned long ciclo, ins_sum;
-#endif
 bool init_verror;
 byte Cdyn;
 bool autopid;
@@ -26,7 +21,7 @@ bool autopid;
 #include <Adafruit_ADS1015.h>
 Adafruit_ADS1115 ads(0x48);
 float Voltage = 0.0;
-
+int vt;
 float _mlInsVol = 0;
 float _mlExsVol = 0;
 int _mllastInsVol, _mllastExsVol;
@@ -42,7 +37,7 @@ AccelStepper *stepper = new AccelStepper(
 FlexyStepper * stepper = new FlexyStepper();
 #endif
 
-static byte alarm_state = 0; //0: No alarm 1: peep 2: pip 3:both
+byte alarm_state = 0; //0: No alarm 1: peep 2: pip 3:both
 //////////////////////////
 // - EXTERNAL VARIABLES //
 //////////////////////////
@@ -80,7 +75,6 @@ unsigned long lastShowSensor = 0;
 unsigned long lastSave = 0;
 bool display_needs_update = false;
 
-
 State static lastState;
 bool show_changed_options = false; //Only for display
 bool update_options = false;
@@ -99,8 +93,11 @@ int16_t adc0;
 unsigned long last_cycle;
 
 byte menu_number = 0;
+//TODO: READ FROM EEPROM
 byte alarm_max_pressure = 35;
 byte alarm_peep_pressure = 5;
+byte isalarmvt_on;
+int alarm_vt = 400;
 
 //MENU
 unsigned long lastButtonPress;
@@ -292,9 +289,13 @@ void setup() {
 #ifdef DEBUG_UPDATE
   Serial.print("Honey Volt at p0: "); Serial.println(analogRead(A0) / 1023.);
 #endif
+  int eeAddress=0;
   EEPROM.get(0, last_cycle);
-  EEPROM.get(1, p_trim);
-  EEPROM.get(2,autopid);
+  eeAddress+= sizeof(unsigned long);
+  EEPROM.get(eeAddress, p_trim);
+  eeAddress+= sizeof(p_trim);
+  EEPROM.get(eeAddress, autopid);
+  eeAddress+= sizeof(autopid);
   Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
   ventilation->setCycleNum(last_cycle);
 
@@ -312,9 +313,13 @@ void loop() {
   time = millis();
 
   if (millis() > lastSave + TIME_SAVE) {
+    int eeAddress=0;
     EEPROM.put(0, last_cycle);
-    EEPROM.put(1, p_trim);
-    EEPROM.put(2,autopid);
+    eeAddress+= sizeof(unsigned long);
+    EEPROM.put(eeAddress, p_trim);
+    eeAddress+= sizeof(p_trim);
+    EEPROM.put(eeAddress, autopid);
+    eeAddress+= sizeof(autopid);
     lastSave = millis();
   }
 
@@ -328,7 +333,7 @@ void loop() {
 #else
     Serial.print(int(_flux)); Serial.print(",");
 #endif
-    Serial.print(int(alarm_state)); Serial.print(",");
+    Serial.print(alarm_state); Serial.print(",");
     Serial.print(int(_mlInsVol - _mlExsVol)); Serial.print(",");
     Serial.print(int(_mllastInsVol)); Serial.print(",");
     Serial.println(int(_mllastExsVol));
@@ -395,22 +400,31 @@ void loop() {
     }
   }//Read Sensor
 
-  //enum _state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
-  if ( last_pressure_max > alarm_max_pressure + 1 ) {
-    if ( last_pressure_min < alarm_peep_pressure - 1) {
-      alarm_state = 3;
-    } else {
-      alarm_state = 2;
-    }
-  } else {
-    if ( last_pressure_min < alarm_peep_pressure - 1 ) {
-      alarm_state = 1;
-    } else {
-      alarm_state = 0;
-    }
+  if (alarm_vt) {
+    
   }
-
   if ( ventilation -> getCycleNum () != last_cycle ) {
+    vt=(_mllastInsVol + _mllastInsVol)/2;
+    if (vt<alarm_vt)  isalarmvt_on=1;
+    else              isalarmvt_on=0;
+    if ( last_pressure_max > alarm_max_pressure + 1 ) {
+    if ( last_pressure_min < alarm_peep_pressure - 1) {
+        if (!isalarmvt_on)  alarm_state = 3;
+        else                alarm_state = 13;
+      } else {
+        if (!isalarmvt_on)  alarm_state = 2;
+        else                alarm_state = 12;
+      }
+    } else {
+      if ( last_pressure_min < alarm_peep_pressure - 1 ) {
+        if (!isalarmvt_on) alarm_state = 1;
+        else               alarm_state = 11;
+      } else {
+        if (!isalarmvt_on)  alarm_state = 0;
+        else                alarm_state = 10;
+      }
+    }
+    
     last_cycle = ventilation->getCycleNum();
     //lcd.clear();  //display_lcd do not clear screnn in order to not blink
     display_lcd();
