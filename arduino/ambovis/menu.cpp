@@ -37,7 +37,7 @@ void lcd_selxy(int x, int y) {
 void check_encoder ( ) {
   byte btnState = digitalRead(PIN_ENC_SW);
   if (btnState == LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
-    if (millis() - lastButtonPress > 200) {
+    if (millis() - lastButtonPress > 150) {
       curr_sel++; //NOT +=1, is a byte
 
       //if ((vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_MAN) && curr_sel==5) curr_sel++; //Not selecting pip in VCL

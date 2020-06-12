@@ -3,14 +3,13 @@
 
 #include "pinout.h"
 #include "defaults.h"
-#include "SPI.h"
 #include "Adafruit_GFX.h"
 #include "Adafruit_ILI9341.h"
 
 #define ILI9341_LIGHTGREY 0xC618 /* 192, 192, 192 */
 #define ILI9341_DARKGREY 0x7BEF /* 128, 128, 128 */
 
-#define DEBUG 1
+//#define DEBUG 1
 //enum serialpos={ALARM_=0,TIME_,PRESSURE_,FLUX_,VT_};
 //enum serialpos {TIME_=0,PRESSURE_,FLUX_,VT_,ALARM_};//ORIGINAL
 #define TIME_     0
