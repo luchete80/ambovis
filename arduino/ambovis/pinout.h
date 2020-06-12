@@ -24,33 +24,22 @@
 #define PIN_LCD_D7 13
 #endif
 
-// BME280 SPI for Arduino Nano or Mega 128
-#ifdef BMP_I2C
-
-#else //SPI
-#define PIN_BME_SCK  3 //SCL
-#define PIN_BME_MISO 2 //SDO
-#define PIN_BME_MOSI 1 //SDA-SDI
-#define PIN_BME_CS1  0 // sensor de presion 1
-#define PIN_BME_CS2  99 // sensor de presion 1
-#endif
-
 // #define PIN_BME_CS2  4  // sensor de presion 2
+#define PIN_ENC_CL  18
+#define PIN_ENC_DIR 19
 #define PIN_ENC_SW  4
-#define PIN_ENC_CL  2
-#define PIN_ENC_DIR 3
 
-#define TFT_CLK 	13
-#define TFT_MISO 	12
-#define TFT_MOSI 	11
-#define TFT_CS 		10
-#define TFT_DC 		9
-#define TFT_RST 	8
+//#define TFT_CLK 	13 FIXED (HW)
+//#define TFT_MISO 	12 FIXED (HW)
+//#define TFT_MOSI 	11
+#define TFT_CS 		53
+#define TFT_DC 		49
+#define TFT_RST 	48
 
 
-#define GREEN_LED   4
-#define YELLOW_LED  5
-#define RED_LED     6
+#define GREEN_LED   22
+#define YELLOW_LED  23
+#define RED_LED     24
 
 #define PIN_BUZZER  3
 
