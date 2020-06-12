@@ -12,7 +12,6 @@ char receivedChars[numChars]; // an array to store the received data
 int last_t;
 int integerFromPC [5];
 float floatFromPC = 0.0;
-
 int axispos[]={63,160,260}; //from each graph
 
 int buzzer=3; //pin
@@ -41,7 +40,7 @@ int  ry2[128];
 int yflux[2];
 int yvt[2];
 char buffer[10];
-
+void print_vols();
 //void setup() {
 //  Serial.begin(250000);
 //  Serial.println("ILI9341 Test!"); 
@@ -67,8 +66,8 @@ void tft_draw(void) {
     rx[valsreaded]=cycle_pos;
     ry[valsreaded]=pressure_p;     
 
-    yflux[0]=yflux[1];yflux[1]=int(_flux*0.05);
-    yvt[0]=yvt[1];yvt[1]=int(_mllastInsVol*0.15);
+    yflux[0]=yflux[1];yflux[1]=int(_flux*0.04);
+    yvt[0]=yvt[1];yvt[1]=int((_mlInsVol - _mlExsVol)*0.07);
 
   
   	tft.setRotation(1);
@@ -79,8 +78,9 @@ void tft_draw(void) {
   		valsreaded=0;
   		for (int i=0;i<3;i++) 
   		  valsreaded_[i]=0;
-  		state=0;
   		wait4statechg=false;
+      print_vols();
+      tft.setRotation(1);
   		//tft.fillRect(0,240-last_x, 320,240-last_x+10, ILI9341_BLACK);
   		//tft.fillScreen(ILI9341_BLACK);
   		//AXIS
@@ -92,21 +92,6 @@ void tft_draw(void) {
 	}
   
 
-  #ifdef DEBUG
-  if (millis()-time_last_show>200) {
-      tft.setRotation(0);
-      tft.fillRect(150,310,240,320, ILI9341_BLACK);
-      tft.setCursor(150, 310);
-      tft.setTextColor(ILI9341_RED);  tft.setTextSize(1);
-      //for (int i=0;i<5;i++) {
-        //tft.setCursor(150+20*i, 310);
-        itoa(integerFromPC[4], buffer, 10);
-        tft.println(buffer);//tft.println(",");
-      //}
-      //tft.println(receivedChars);
-      time_last_show=millis();
-  }
-  #endif
   
     switch (state){
         case NO_ALARM:
@@ -160,6 +145,26 @@ void tft_draw(void) {
 
 }
 
+void print_vols(){
+    tft.setRotation(0);
+    tft.fillRect(150,200,100,40, ILI9341_BLACK);
+    //itoa(integerFromPC[5], buffer, 10);
+    itoa(_mllastInsVol, buffer, 10);
+    tft.setCursor(150, 180);
+    tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
+    tft.println("Vi: ");tft.setCursor(190, 180);tft.println(buffer);
+    
+    itoa(_mllastExsVol, buffer, 10);
+    tft.setCursor(150, 200);
+    tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
+    tft.println("Ve: ");tft.setCursor(190, 200);tft.println(buffer);
+    
+    itoa((_mllastInsVol + _mllastExsVol)/2, buffer, 10);
+    tft.setCursor(150, 220);
+    tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
+    tft.println("VT: ");tft.setCursor(190, 220);tft.println(buffer);
+ 
+  }
 void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
 
   tft.fillRect(0,240-rx[valsreaded]-5, 320,5, ILI9341_BLACK);

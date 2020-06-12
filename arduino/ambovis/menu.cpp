@@ -83,8 +83,8 @@ void check_encoder ( ) {
               encoderPos=oldEncPos=options.percInspEsp;
               min_sel=2;max_sel=3;   
           } else if ( menu_number == 1 ) {
-                encoderPos=byte(0.5*float(alarm_vt));
-                min_sel=50;max_sel=250;//vt
+                encoderPos=byte(0.1*float(alarm_vt));
+                min_sel=10;max_sel=50;//vt
           }     
         break;
         case 4: 
@@ -144,7 +144,7 @@ void check_encoder ( ) {
             break;
           case 3:
             if ( menu_number == 0 ) options.percInspEsp=encoderPos;
-            else                    alarm_vt=int(2.*(float)encoderPos);
+            else                    alarm_vt=int(10.*(float)encoderPos);
             //pressure_max = 0;
             break;
           case 4:

@@ -100,7 +100,7 @@ byte menu_number = 0;
 byte alarm_max_pressure = 35;
 byte alarm_peep_pressure = 5;
 byte isalarmvt_on;
-int alarm_vt = 400;
+int alarm_vt = 200;
 
 //MENU
 unsigned long lastButtonPress;
