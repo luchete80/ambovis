@@ -1,0 +1,35 @@
+https://electronics.stackexchange.com/questions/47114/tone-and-reading-data-from-serial-are-colliding
+
+8
+
+If you can settle for a tone of frequency 976.5625 Hz instead of the 1000 Hz in your code, here is the solution (assumption: Arduino Uno or Duemilanove, not sure about the Mega):
+
+Connect your output to Pin 5 or 6 (the PWM pins) instead of pin 8. Create a volatile global variable:
+
+volatile int_8 tone_tracker = 0;
+
+Change your Timer1 ISR to be called every 200 ms.
+
+In the ISR code, count up to 4 saving the value in tone_tracker, then:
+
+analogWrite(SPKR_PIN, 127);
+
+Next time the ISR is invoked, set tone_tracker to 0 and:
+
+analogWrite(SPKR_PIN, 0);
+
+The issue should be resolved.
+
+Why this works:
+
+The Timer0 ISR code now just switches on and off the tone at set times, leaving the actual tone generation to the microcontroller hardware.
+
+The Arduino default PWM frequency on pins 5 and 6 is 976.5625 Hz unless you are modifying Timer0 somewhere else in your code (or doing something else with PWM where libraries make some "invisible" changes).
+
+Writing analog 127 to the PWM pin generates a 50% duty cycle square wave at the default PWM frequency. That generates the tone required.
+
+In this approach, the actual tone generation is by the PWM output of the microcontroller, not through interrupt driven variable-frequency code as used in the tone library.
+
+The jugglery with tone_tracker gives you 200 x 4 = 800 mS silence, then 200 x 1 = 200 mS of tone output. The timer ISR and the serial ISR might well conflict, but that doesn't affect the PWM generation. Thus, at worst the tone might play on for a few microseconds longer, or may start a few microseconds later, if the MCU is busy dealing with serial comms at the time - but this would not be discernible by human ears.
+
+Of course, this won't work as easily if you need any tone frequency except 976.5625 Hz (on pins 5 and 6) or 488.28125 Hz (on pins 3, 9, 10 and 11).

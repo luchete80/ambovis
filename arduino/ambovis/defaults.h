@@ -7,12 +7,8 @@
 //#define ACCEL_STEPPER 1
 //#define DEBUG_PID 1
 //#define DEBUG_UPDATE 1
-#define DEBUG_FLUX 1
-//#define FILTER_FLUX 1
-#define USE_ADC 1
+#define FILTER_FLUX 1
 #define DEBUG_OFF 1 //Release version
-#define P_HONEYWELL 1
-#define RANGE_DPT 100.0F
 
 #define BMP_I2C 1  //Pressure Sensor
 
@@ -47,12 +43,12 @@
 #define STEPPER_LOWEST_POSITION     (-10)   // Steps
 #define STEPPER_HIGHEST_POSITION    ( 2500)   //270º
 #define STEPPER_SPEED_DEFAULT       (400)   // Steps/s
-#define STEPPER_SPEED_MAX           (12000)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
+extern int STEPPER_SPEED_MAX;       //(14000)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_ACCEL_MAX           (12000)
 #define STEPPER_SPEED_MAX_VCL       (1200)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_SPEED_EXSUFF        (4000)
 #define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  2000)   // Steps/s2
-#define STEPPER_ACC_INSUFFLATION    (STEPPER_MICROSTEPS *  400)   // Steps/s2
+extern int STEPPER_ACC_INSUFFLATION;    //(STEPPER_MICROSTEPS *  600)   // Steps/s2
 
 // Valores por defecto
 #define DEFAULT_HEIGHT 170 // cm
@@ -63,8 +59,8 @@
 #define DEFAULT_FRAC_CYCLE_VCL_INSUFF 0.75
 #define DEFAULT_TRIGGER_THRESHOLD 3.0
 #define DEFAULT_RPM 14
-#define DEFAULT_MAX_RPM 30
-#define DEFAULT_MIN_RPM 3
+#define DEFAULT_MAX_RPM 22
+#define DEFAULT_MIN_RPM 12
 #define DEFAULT_POR_INSPIRATORIO 33.3333F // %
 #define DEFAULT_PEAK_INSPIRATORY_PRESSURE 25
 #define DEFAULT_PEAK_ESPIRATORY_PRESSURE 5
@@ -92,9 +88,7 @@
 #define PID_MIN -20000 // TODO: check direction implementation
 #define PID_MAX 20000
 
-#define PID_KP 700.01
-#define PID_KI 20.01
-#define PID_KD 80.01
+extern int PID_KP,PID_KI,PID_KD;
 
 #define PID_TS TIME_BASE
 #define PID_BANGBANG 8

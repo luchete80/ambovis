@@ -26,6 +26,7 @@ extern bool show_changed_options; //Only for display
 extern bool update_options;
 extern char tempstr[5],tempstr2[5];
 extern byte menu_number;
+extern byte p_trim;
 
 void writeLine(int line, String message = "", int offsetLeft = 0);
 void lcd_clearxy(int x, int y,int pos=1);

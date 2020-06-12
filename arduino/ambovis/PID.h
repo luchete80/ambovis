@@ -38,6 +38,7 @@ class PID
 
         // Returns the manipulated variable given a setpoint and current process value
         double calculate( double setpoint, double pv );
+        void change_kpid_minmax( double p, double d, double i, double min, double max);
         double get_dt();
         ~PID();
 

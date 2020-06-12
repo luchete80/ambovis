@@ -11,9 +11,6 @@
 // Stepper homing
 #define PIN_ENDSTOP 5
 
-// Solenoid pine
-#define PIN_SOLENOID 39
-
 // Display
 
 #ifdef LCD_I2C

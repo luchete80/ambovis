@@ -36,7 +36,7 @@ class PIDImpl
         ~PIDImpl();
         double calculate( double setpoint, double pv );
         double get_dt(){return _dt;}
-    private:
+
         double _dt;
         double _max;
         double _min;
@@ -78,6 +78,14 @@ PIDImpl::PIDImpl( double dt, double max, double min, double Kp, double Kd, doubl
     _pre_error(0),
     _integral(0)
 {
+}
+
+void PID::change_kpid_minmax( double p, double d, double i, double min, double max){
+    pimpl->_max=max;
+    pimpl->_min=min;
+    pimpl->_Kp=p;
+    pimpl->_Kd=d;
+    pimpl->_Ki=i;       
 }
 
 double PIDImpl::calculate( double setpoint, double pv )

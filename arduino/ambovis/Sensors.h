@@ -9,17 +9,12 @@
 
 extern float pressure_max,pressure_min,pressure_peep;
 extern float pressure_p;  //DIFFERENTIALS!
-extern float pressure_p0;
 extern float last_pressure_max,last_pressure_min,last_pressure_peep;
 
           
 extern float _flux;
 //extern Adafruit_BMP280 _pres1Sensor;
 
-#ifdef DEBUG_FLUX
-extern float err_sum;
-extern unsigned long ciclo;
-extern float ins_prom;
-#endif
+extern float verror;
 
 #endif

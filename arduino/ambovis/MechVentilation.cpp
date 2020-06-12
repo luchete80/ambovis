@@ -10,8 +10,13 @@ float pressure_min;
 static int highest_man_pos;
 unsigned long _msecTimerStartCycle;
 
-//bool adding_vol;
+byte Cdyn_pass[3];
 
+int PID_KP=400.01;
+int PID_KI=20.01;
+int PID_KD=50.01;
+int STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  600;
+int STEPPER_SPEED_MAX=14000;
 MechVentilation::MechVentilation(
         #ifdef ACCEL_STEPPER
         AccelStepper *stepper,
@@ -198,12 +203,14 @@ void MechVentilation :: update ( void )
       pressure_min=60;
 
         // Close Solenoid Valve
-        digitalWrite(PIN_SOLENOID, SOLENOID_CLOSED);
 
         totalCyclesInThisState = (_timeoutIns) / TIME_BASE;
 
         _msecTimerStartCycle=millis();  //Luciano
         
+        for (int i=0;i<2;i++) Cdyn_pass[i]=Cdyn_pass[i+1];
+        Cdyn_pass[2]=_mllastInsVol/(last_pressure_max-last_pressure_min);
+        Cdyn=(Cdyn_pass[0]+Cdyn_pass[1]+Cdyn_pass[2])/3.;
         _mllastInsVol=int(_mlInsVol);
         _mllastExsVol=int(fabs(_mlExsVol));
         
@@ -249,7 +256,40 @@ void MechVentilation :: update ( void )
 
         currentTime = millis();
         display_needs_update=true;
-    }
+
+      if (autopid) {
+          if (abs(last_pressure_max - _pip) >  1.5 ){
+                  //if (Cdyn < 20 ) {//HARD Cv or resistance
+                  float peep_fac=-0.05*last_pressure_min+1.25;
+                  
+                  if (Cdyn<10) {
+                     PID_KP=250*peep_fac;
+                     STEPPER_SPEED_MAX=4000;	//Originally 5000
+      			         STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  200;
+                  } else if (Cdyn>40) {
+                    STEPPER_SPEED_MAX=12000;
+      			        if (_pip>22) STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  800;//But the limit is calculated with range from 200 to 700
+                    else         STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  600;
+                    PID_KP=1000*peep_fac;
+                  }
+                  else {
+                  PID_KP=(25*(float)Cdyn)*peep_fac;
+          				STEPPER_SPEED_MAX=float(Cdyn)*266.+1660.;	//Originally was 250
+          				STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS*(13.33*(float)Cdyn+66.6);//((1000-200)*0.033+;
+      			  }
+              _pid->setGains(PID_KP,PID_KI, PID_KD);
+              _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);
+          }
+      } else {//autopid
+              PID_KP=700.01;
+              PID_KI=20.01;
+              PID_KD=100.01;
+              STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  600;
+              STEPPER_SPEED_MAX=14000;              
+              _pid->setGains(PID_KP,PID_KI, PID_KD);
+              _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);     
+      }
+    }// INIT INSUFFLATION
     break;
     case State_Insufflation:
     {
@@ -355,8 +395,6 @@ void MechVentilation :: update ( void )
 //#if DEBUG_UPDATE
 //        Serial.println("Starting exsuflation");
 //#endif
-        // Open Solenoid Valve
-        digitalWrite(PIN_SOLENOID, SOLENOID_OPEN);
 
         totalCyclesInThisState = _timeoutEsp / TIME_BASE;
 
@@ -460,7 +498,7 @@ void MechVentilation :: update ( void )
     case State_Homing:
     {
         // Open Solenoid Valve
-        //digitalWrite(PIN_SOLENOID, SOLENOID_OPEN);
+
 
         if (_sensor_error_detected)
         {
