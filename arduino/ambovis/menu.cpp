@@ -53,6 +53,14 @@ void check_encoder ( ) {
       } else if (menu_number == 1) {
          if (curr_sel > 5) {
           curr_sel=0;
+          menu_number=2; 
+          clear_all_display=true;
+          display_lcd();         
+         }
+      }
+        else if (menu_number == 2) {
+         if (curr_sel > 3) {
+          curr_sel=0;
           menu_number=0; 
           clear_all_display=true;
           display_lcd();         
@@ -182,28 +190,24 @@ void check_encoder ( ) {
   }
 }
 
-
-void display_lcd ( ) {
-    if (clear_all_display)
-        lcd.clear();
-  
-     if (menu_number==0) {  
-    lcd_clearxy(0,0);
-    lcd_clearxy(0,1);lcd_clearxy(9,0);
-    lcd_clearxy(0,2);lcd_clearxy(8,1);
-     switch(curr_sel){
-          case 1: 
-            lcd_selxy(0,0);break;
-          case 2: 
-            lcd_selxy(0,1);break;
-          case 3:
-            lcd_selxy(0,2);break;
-          case 4: 
-            lcd_selxy(9,0);break;
-          case 5: 
-            lcd_selxy(8,1);break;
-        }
-     } else {  
+void clear_n_sel(int menu){
+    if (menu==0) {  
+        lcd_clearxy(0,0);
+        lcd_clearxy(0,1);lcd_clearxy(9,0);
+        lcd_clearxy(0,2);lcd_clearxy(8,1);
+         switch(curr_sel){
+              case 1: 
+                lcd_selxy(0,0);break;
+              case 2: 
+                lcd_selxy(0,1);break;
+              case 3:
+                lcd_selxy(0,2);break;
+              case 4: 
+                lcd_selxy(9,0);break;
+              case 5: 
+                lcd_selxy(8,1);break;
+            }
+     } else if (menu==1){  
       lcd_clearxy(0,0);
       lcd_clearxy(0,1);lcd_clearxy(10,2);
       lcd_clearxy(0,2);lcd_clearxy(0,3);
@@ -219,7 +223,31 @@ void display_lcd ( ) {
           case 5: 
             lcd_selxy(0,3);break;
       }
+    } else if (menu==2) {  
+      lcd_clearxy(0,0);
+      lcd_clearxy(0,1);lcd_clearxy(10,2);
+      lcd_clearxy(0,2);lcd_clearxy(0,3);
+      switch(curr_sel){
+          case 1: 
+            lcd_selxy(0,0);break;//PIP
+          case 2: 
+            lcd_selxy(6,1);break;//PEEP
+          case 3:
+            lcd_selxy(12,1);break;
+          case 4: 
+            lcd_selxy(0,2);break;
+          case 5: 
+            lcd_selxy(0,3);break;
+      }
     }//menu number 
+
+
+}
+
+void display_lcd ( ) {
+    if (clear_all_display)
+        lcd.clear();        
+  clear_n_sel(menu_number);
   if (menu_number==0) {  
     lcd_clearxy(5,1,3); lcd_clearxy(12,0,4);
     lcd_clearxy(5,2,2); lcd_clearxy(14,1,2);
@@ -292,7 +320,32 @@ void display_lcd ( ) {
     writeLine(3, "C:", 10);
     writeLine(3, String(last_cycle), 12);
   }//menu_number
-      
+
+    else if (menu_number ==2 ){//PID
+                        lcd_clearxy(12,0,8);
+    lcd_clearxy(8,1,2); lcd_clearxy(16,1,3);
+                        lcd_clearxy(13,6,3);
+        
+    writeLine(0, "P:" + String(PID_KP), 1); 
+    writeLine(0, "I:" + String(PID_KI), 7); 
+    writeLine(0, "D:" + String(PID_KD), 13);
+        
+    writeLine(1, "PEEPAL:" + String(alarm_peep_pressure), 1); 
+    writeLine(1, "VTAL:" + String(alarm_vt), 11);
+    
+    dtostrf((float(p_trim-100)), 2, 0, tempstr);
+    writeLine(2, "TRIM:" + String(tempstr) + "e-3", 1); 
+    dtostrf((float(verror*1000)), 2, 0, tempstr);
+    writeLine(2, " ve:" + String(tempstr) + "mV", 11); 
+         
+    writeLine(3, "AUTO: ", 1);
+    if (autopid)    writeLine(3, "ON", 6);
+    else            writeLine(3, "OFF", 6);    
+
+    writeLine(3, "C:", 10);
+    writeLine(3, String(last_cycle), 12);
+  }//menu_number
+  
   clear_all_display=false;
 
 }

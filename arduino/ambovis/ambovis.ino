@@ -169,6 +169,7 @@ void setup() {
   init_display();
 
   pinMode(PIN_BUZZ, OUTPUT);
+  pinMode(PIN_POWEROFF, INPUT);
   digitalWrite(PIN_BUZZ, LOW); // test zumbador
   delay(500);
   digitalWrite(PIN_BUZZ, HIGH);
@@ -445,8 +446,10 @@ void loop() {
       }
     }
 #endif
-
-  }
+    if (digitalRead(PIN_POWEROFF)) {
+    
+    }
+  }//change cycle
 
   if (display_needs_update) {
     //lcd.clear();  //display_lcd do not clear screnn in order to not blink

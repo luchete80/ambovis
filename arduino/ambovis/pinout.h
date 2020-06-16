@@ -37,11 +37,21 @@
 #define TFT_RST 	48
 
 
-#define GREEN_LED   22
-#define YELLOW_LED  23
-#define RED_LED     24
+#define GREEN_LED       22
+#define YELLOW_LED      23
+#define RED_LED         24
 
-#define PIN_BUZZER  99
+#define PIN_BUZZER      3
+
+//4 leds de alarmas en los pines 44, 45, 46, y 47 
+//pin 43 recibiría una señal de cuando se corte la luz
+#define PIN_POWEROFF    43
+#define PIN_NO_ALARM    44
+#define PIN_PIP_ALARM   45
+#define PIN_PEEP_ALARM  46
+#define PIN_PIP_ALARM   47
+
+
 
 // IF ARDUINO UNO
 //#define PIN_ENC_CL  2

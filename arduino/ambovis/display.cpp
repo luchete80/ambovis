@@ -147,7 +147,7 @@ void tft_draw(void) {
 
 void print_vols(){
     tft.setRotation(0);
-    tft.fillRect(150,200,100,40, ILI9341_BLACK);
+    tft.fillRect(180,160,50,80, ILI9341_BLACK);
     //itoa(integerFromPC[5], buffer, 10);
     itoa(_mllastInsVol, buffer, 10);
     tft.setCursor(150, 180);
@@ -168,7 +168,7 @@ void print_vols(){
 void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
 
   tft.fillRect(0,240-rx[valsreaded]-5, 320,5, ILI9341_BLACK);
-  tft.drawLine(axispos[0] - ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded], 240-rx[valsreaded], color);
+  tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
   tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_RED);
   tft.drawLine(axispos[2]-yvt[0],             240-rx[valsreaded-1], axispos[2]-yvt[1],            240-rx[valsreaded], ILI9341_BLUE);
 
