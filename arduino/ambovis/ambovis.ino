@@ -1,6 +1,7 @@
 #include "pinout.h"
 #include "MechVentilation.h"
 #include "src/TimerOne/TimerOne.h"
+#include "src/TimerTwo/TimerTwo.h"
 #include "menu.h"
 #include "display.h"
 
@@ -26,6 +27,7 @@ int vt;
 float _mlInsVol = 0;
 float _mlExsVol = 0;
 int _mllastInsVol, _mllastExsVol;
+int mute_count;
 
 int Compression_perc = 8; //80%
 
@@ -47,6 +49,15 @@ LiquidCrystal_I2C lcd(0x3F, 20, 4);
 #else
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
 #endif
+
+//MUTE
+boolean last_mute,curr_mute;
+unsigned long time_mute;
+
+boolean buzzmuted;
+unsigned long timebuzz=0;
+bool isbuzzeron=false;
+
 
 Adafruit_ILI9341 tft=Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 
@@ -131,7 +142,7 @@ byte reading = 0; //somewhere to store the direct values we read from our interr
 
 byte max_sel, min_sel; //According to current selection
 
-
+void check_buzzer();
 //
 void PinA() {
   cli(); //stop interrupts happening before we read pin values
@@ -168,13 +179,7 @@ void setup() {
   Serial.begin(250000);
   init_display();
 
-  pinMode(PIN_BUZZ, OUTPUT);
   pinMode(PIN_POWEROFF, INPUT);
-  digitalWrite(PIN_BUZZ, LOW); // test zumbador
-  delay(500);
-  digitalWrite(PIN_BUZZ, HIGH);
-  //beep(100); //Beep
-  //tone(PIN_BUZZ, 1000, 500);
 
   // PID
   pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
@@ -279,6 +284,8 @@ void setup() {
 
   Timer1.initialize(50);
   Timer1.attachInterrupt(timer1Isr);
+  Timer2.setPeriod(500000);
+  Timer2.attachInterrupt(timer2Isr);
 
 #ifdef DEBUG_UPDATE
   Serial.print("Honey Volt at p0: "); Serial.println(analogRead(A0) / 1023.);
@@ -293,12 +300,16 @@ void setup() {
   Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
   ventilation->setCycleNum(last_cycle);
 
-    pinMode(PIN_BUZZER, OUTPUT); //Set buzzerPin as output
+  pinMode(PIN_BUZZER, OUTPUT); //Set buzzerPin as output
     pinMode(GREEN_LED, OUTPUT); //Set buzzerPin as output
     pinMode(YELLOW_LED, OUTPUT); //Set buzzerPin as output
     pinMode(RED_LED, OUTPUT); //Set buzzerPin as output
     tft.begin();
     tft.fillScreen(ILI9341_BLACK);
+
+    buzzmuted=false;
+    last_mute=LOW;
+    mute_count=0;
 }
 
 
@@ -311,6 +322,7 @@ void loop() {
   check_encoder();
 
   time = millis();
+  check_buzzer();
 
   if (millis() > lastSave + TIME_SAVE) {
     int eeAddress=0;
@@ -329,6 +341,7 @@ void loop() {
       lastShowSensor=millis(); 
       // Serial.print(int(cycle_pos));Serial.print(",");
 	    // Serial.print(int(pressure_p));Serial.print(",");
+     //Serial.println(analogRead(A0));
 	    // #ifdef FILTER_FLUX
 	    // Serial.print(int(flow_f));Serial.print(",");
       // #else
@@ -350,8 +363,10 @@ void loop() {
   if (time > lastReadSensor + TIME_SENSOR) {
 
     //pressure_p=( analogRead(A0)/(1023.) - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20*1.05;
-    pressure_p = ( analogRead(A0) / (1023.) - verrp * 0.2 - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20 * 0.75 - 1.0;
-
+    // pressure_p = ( analogRead(A0) / (1023.) - verrp * 0.2 - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20 * 0.75 - 1.0;//MPX5010
+    pressure_p = (( float(analogRead(A0))/1023.*V_SUPPLY_HONEY - 0.1 * V_SUPPLY_HONEY/* - corr_fs */) / (0.8 * V_SUPPLY_HONEY) * DEFAULT_PSI_TO_CM_H20 * 2. - DEFAULT_PSI_TO_CM_H20);//HONEYWELL
+    
+    
     adc0 = ads.readADC_SingleEnded(0);
     Voltage = (adc0 * 0.1875) / 1000.; //Volts
 
@@ -506,10 +521,10 @@ void update_error() {
   }
 }
 
-void timer2Isr(void)
-{
-  ventilation -> update();
-}
+//void timer2Isr(void)
+//{
+//  ventilation -> update();
+//}
 
 //
 
@@ -526,4 +541,46 @@ int findClosest(float arr[], int n, float target) {
     //Serial.print("i,j: ");Serial.print(i);Serial.print(",");Serial.println(j);
   }
   return i;
+}
+
+boolean debounce(boolean last, int pin) {
+    boolean current = digitalRead(pin);
+    if (last != current) {
+        delay(50);
+        current = digitalRead(pin);
+    }
+    return current;
+}
+
+void check_buzzer() {
+    curr_mute = debounce ( last_mute, PIN_MUTE );         //Debounce for Up button
+    if (last_mute== LOW && curr_mute == HIGH && !buzzmuted){
+        mute_count=0;
+        buzzmuted=true;
+    }
+    last_mute = curr_mute;
+    if(buzzmuted) {
+        if (mute_count > 2*TIME_MUTE)  //each count is every 500 ms
+        buzzmuted=false;
+    }
+}
+
+
+  void timer2Isr(void)
+{
+    if (alarm_state > 0) {
+        if (!buzzmuted) {
+            isbuzzeron=!isbuzzeron;
+            if (isbuzzeron){
+                analogWrite(PIN_BUZZER, 127);
+            } else {
+                analogWrite(PIN_BUZZER, 0);
+            }
+        } 
+    } else {
+          analogWrite(PIN_BUZZER, 0);
+      }
+    if (buzzmuted) {
+      mute_count+=1;  
+    }
 }

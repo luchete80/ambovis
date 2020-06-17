@@ -42,6 +42,7 @@
 #define RED_LED         24
 
 #define PIN_BUZZER      3
+#define PIN_MUTE        2
 
 //4 leds de alarmas en los pines 44, 45, 46, y 47 
 //pin 43 recibiría una señal de cuando se corte la luz

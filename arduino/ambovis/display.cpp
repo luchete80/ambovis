@@ -13,10 +13,8 @@ int last_t;
 int integerFromPC [5];
 float floatFromPC = 0.0;
 int axispos[]={63,160,260}; //from each graph
-
+byte state_r;
 int buzzer=3; //pin
-unsigned long timebuzz=0;
-bool isbuzzeron=false;
 
 enum _state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
 bool wait4statechg=false;
@@ -64,7 +62,7 @@ void tft_draw(void) {
     valsreaded+=1;
     last_x=cycle_pos;
     rx[valsreaded]=cycle_pos;
-    ry[valsreaded]=pressure_p;     
+    ry[valsreaded]=pressure_p*2.;     
 
     yflux[0]=yflux[1];yflux[1]=int(_flux*0.04);
     yvt[0]=yvt[1];yvt[1]=int((_mlInsVol - _mlExsVol)*0.07);
@@ -93,7 +91,7 @@ void tft_draw(void) {
   
 
   
-    switch (state){
+    switch (alarm_state){
         case NO_ALARM:
           digitalWrite(GREEN_LED,HIGH); digitalWrite(YELLOW_LED,LOW); digitalWrite(RED_LED,LOW);      
         break;
@@ -123,27 +121,52 @@ void tft_draw(void) {
 		  break;
       }
 
-    //tone( pin number, frequency in hertz, duration in milliseconds);
-    tone(buzzer,1500,200);
-    //Check buzzer
-    if (int(state) > 0) {
-        if (millis() > timebuzz + TIME_BUZZER) {
-            timebuzz=millis();
-            //digitalWrite(buzzer,isbuzzeron);
-            isbuzzeron=!isbuzzeron;
-            if (isbuzzeron)
-              //tone(buzzer,500,TIME_BUZZER);
-              tone(buzzer,200);
-            else 
-              noTone(buzzer);
-        }
+    if (alarm_state>9) {
+        digitalWrite(RED_LED,HIGH);
+        digitalWrite(RED_LED,LOW);
+        tft.setRotation(0);
+        tft.setTextColor(ILI9341_ORANGE); tft.setTextSize(2); 
+        tft.setCursor(150, 40);   
+        tft.println("VT AL");
+        state_r=alarm_state-10;
     } else {
-      digitalWrite(buzzer,1); //Inverted logic
-      isbuzzeron=true;        //Inverted logic
+        digitalWrite(RED_LED,LOW);
+        digitalWrite(RED_LED,LOW);
+        state_r=alarm_state;
     }
+    switch (state_r){
+        case NO_ALARM:
+            if (state==0) //state_r!=10
+            digitalWrite(GREEN_LED,HIGH); digitalWrite(YELLOW_LED,LOW); digitalWrite(RED_LED,LOW);   
+          break;
+        case PEEP_ALARM:
+          digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,HIGH); digitalWrite(RED_LED,LOW);  
+          tft.setRotation(0);
+          tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
+          tft.setCursor(150, 20);   
+          tft.println("PEEP AL");
+        break;
+        case PIP_ALARM:
+          digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,LOW); digitalWrite(RED_LED,HIGH);      
+          tft.setRotation(0);
+          tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
+          tft.setCursor(150, 0);   
+          tft.println("PIP AL");
+      break;  
+        case PEEP_PIP_ALARM:
+          digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,HIGH); digitalWrite(RED_LED,HIGH);      
+          tft.setRotation(0);
+          tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
+          tft.setCursor(150, 0);   
+          tft.println("PIP AL");
+          tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
+          tft.setCursor(150, 20);   
+          tft.println("PEEP AL");
+      break;
+      }
 
 
-}
+}//loop
 
 void print_vols(){
     tft.setRotation(0);

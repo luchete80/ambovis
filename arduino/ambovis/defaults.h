@@ -19,6 +19,9 @@
 #define TIME_SENSOR 10                // msec
 #define TIME_SHOW 	80                  //IF OLED DISPLAY IS USED FASTER THAN 50ms GIVES ERRORS IN THE PLOTS 
 #define TIME_SAVE 	5000
+#define TIME_BUZZER 500
+#define TIME_MUTE   30
+
 #define TIME_SEND_CONFIGURATION 2000 // msec
 #define V_HONEY_P0 	0.49874F //Analog/1023
 
@@ -65,7 +68,7 @@ extern int STEPPER_ACC_INSUFFLATION;    //(STEPPER_MICROSTEPS *  600)   // Steps
 #define DEFAULT_PEAK_INSPIRATORY_PRESSURE 25
 #define DEFAULT_PEAK_ESPIRATORY_PRESSURE 5
 
-#define V_SUPPLY_HONEY 4.8F
+#define V_SUPPLY_HONEY 5.0F
 // #define DEFAULT_PEAK_ESPIRATORY_PRESSURE 6
 
 #define DEFAULT_PRESSURE_V_FLUX_K1 1.
@@ -125,5 +128,7 @@ class VentilationOptions_t {
 //general variables
 extern byte vent_mode;
 extern bool send_data;
+
+extern byte alarm_state;
 
 #endif // DEFAULTS_H

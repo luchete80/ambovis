@@ -319,9 +319,7 @@ void display_lcd ( ) {
 
     writeLine(3, "C:", 10);
     writeLine(3, String(last_cycle), 12);
-  }//menu_number
-
-    else if (menu_number ==2 ){//PID
+  } else if (menu_number ==2 ){//PID
                         lcd_clearxy(12,0,8);
     lcd_clearxy(8,1,2); lcd_clearxy(16,1,3);
                         lcd_clearxy(13,6,3);
@@ -329,21 +327,17 @@ void display_lcd ( ) {
     writeLine(0, "P:" + String(PID_KP), 1); 
     writeLine(0, "I:" + String(PID_KI), 7); 
     writeLine(0, "D:" + String(PID_KD), 13);
-        
-    writeLine(1, "PEEPAL:" + String(alarm_peep_pressure), 1); 
-    writeLine(1, "VTAL:" + String(alarm_vt), 11);
-    
-    dtostrf((float(p_trim-100)), 2, 0, tempstr);
-    writeLine(2, "TRIM:" + String(tempstr) + "e-3", 1); 
-    dtostrf((float(verror*1000)), 2, 0, tempstr);
-    writeLine(2, " ve:" + String(tempstr) + "mV", 11); 
-         
-    writeLine(3, "AUTO: ", 1);
-    if (autopid)    writeLine(3, "ON", 6);
-    else            writeLine(3, "OFF", 6);    
 
-    writeLine(3, "C:", 10);
-    writeLine(3, String(last_cycle), 12);
+    writeLine(1, "c:" + String(PID_KP), 1); 
+    writeLine(2, "C:" + String(PID_KI), 1); 
+    
+    writeLine(1, "v:" + String(PID_KP), 7); 
+    writeLine(2, "V:" + String(PID_KI), 7);
+
+    writeLine(1, "a:" + String(PID_KP), 13); 
+    writeLine(2, "A:" + String(PID_KI), 13);
+    
+
   }//menu_number
   
   clear_all_display=false;
