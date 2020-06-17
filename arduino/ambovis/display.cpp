@@ -82,6 +82,7 @@ void tft_draw(void) {
   		//tft.fillRect(0,240-last_x, 320,240-last_x+10, ILI9341_BLACK);
   		//tft.fillScreen(ILI9341_BLACK);
   		//AXIS
+      tft.fillRect(0,0,60,100, ILI9341_BLACK);
   		for (int i=0;i<3;i++)
   		  tft.drawLine(axispos[i],0, axispos[i], 240, ILI9341_DARKGREY);
   		}
@@ -89,38 +90,7 @@ void tft_draw(void) {
   		lcd_cleaned=false;
 	}
   
-
-  
-    switch (alarm_state){
-        case NO_ALARM:
-          digitalWrite(GREEN_LED,HIGH); digitalWrite(YELLOW_LED,LOW); digitalWrite(RED_LED,LOW);      
-        break;
-        case PEEP_ALARM:
-          digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,HIGH); digitalWrite(RED_LED,LOW);  
-          tft.setRotation(0);
-          tft.setTextColor(ILI9341_YELLOW); tft.setTextSize(1.5); 
-          tft.setCursor(160, 0);   
-          tft.println("PEEP AL");
-        break;
-        case PIP_ALARM:
-          digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,LOW); digitalWrite(RED_LED,HIGH);      
-          tft.setRotation(0);
-          tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
-          tft.setCursor(160, 0);   
-          tft.println("PIP AL");
-		  break;  
-        case PEEP_PIP_ALARM:
-          digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,HIGH); digitalWrite(RED_LED,HIGH);      
-          tft.setRotation(0);
-          tft.setTextColor(ILI9341_RED); tft.setTextSize(1.5); 
-          tft.setCursor(160, 0);   
-          tft.println("PIP AL");
-          tft.setTextColor(ILI9341_YELLOW); tft.setTextSize(1.5); 
-          tft.setCursor(160, 10);   
-          tft.println("PEEP AL");
-		  break;
-      }
-
+    Serial.println(state_r);
     if (alarm_state>9) {
         digitalWrite(RED_LED,HIGH);
         digitalWrite(RED_LED,LOW);
