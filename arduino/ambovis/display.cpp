@@ -12,7 +12,7 @@ char receivedChars[numChars]; // an array to store the received data
 int last_t;
 int integerFromPC [5];
 float floatFromPC = 0.0;
-int axispos[]={63,160,260}; //from each graph
+int axispos[]={100,170,300}; //from each graph
 byte state_r;
 int buzzer=3; //pin
 
@@ -64,8 +64,8 @@ void tft_draw(void) {
     rx[valsreaded]=cycle_pos;
     ry[valsreaded]=pressure_p*2.;     
 
-    yflux[0]=yflux[1];yflux[1]=int(_flux*0.04);
-    yvt[0]=yvt[1];yvt[1]=int((_mlInsVol - _mlExsVol)*0.07);
+    yflux[0]=yflux[1];yflux[1]=int(_flux*0.035);
+    yvt[0]=yvt[1];yvt[1]=int((_mlInsVol - _mlExsVol)*0.1);
 
   
   	tft.setRotation(1);
@@ -162,7 +162,7 @@ void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WIT
   if (rx[valsreaded]>rx[valsreaded-1]) {//to avoid draw entire line to the begining at the end of the cycle
   tft.fillRect(0,240-rx[valsreaded]-5, 320,5, ILI9341_BLACK);
   tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
-  tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_RED);
+  tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_MAGENTA);
   tft.drawLine(axispos[2]-yvt[0],             240-rx[valsreaded-1], axispos[2]-yvt[1],            240-rx[valsreaded], ILI9341_BLUE);
   }
 }
