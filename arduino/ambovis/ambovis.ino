@@ -1,7 +1,8 @@
 #include "pinout.h"
 #include "MechVentilation.h"
 #include "src/TimerOne/TimerOne.h"
-#include "src/TimerTwo/TimerTwo.h"
+//#include "src/TimerTwo/TimerTwo.h"
+
 #include "menu.h"
 #include "display.h"
 
@@ -104,6 +105,12 @@ unsigned long time;
 byte cycle_pos;
 int16_t adc0;
 
+int max_accel,min_accel;
+int max_speed, min_speed;
+int max_pidk , min_pidk;
+int max_cd=40;
+int min_cd=10;
+
 unsigned long last_cycle;
 
 byte menu_number = 0;
@@ -126,10 +133,7 @@ float verror, verror_sum;
 float dp[] = { -3.074176245, -2.547210457, -2.087678384, -1.60054669, -1.216013465, -0.795599072, -0.630753349, -0.504544509, -0.365700986, -0.260808033, -0.176879848, -0.109004974, -0.05874157, -0.051474571, -0.043771552, -0.037061691, -0.029794693, -0.023012161, -0.017561913, -0.01441288, -0.012111664, -0.009325981, -0.007024765, -0.004602432, -0.002664566, 0.00090924, 0.00030358, 0, -0.000242233, -0.000837976, 0.001999305, 0.003937171, 0.006117271, 0.008176254, 0.011688636, 0.014830113, 0.020045692, 0.023566372, 0.028644966, 0.03312327, 0.039664506, 0.047781395, 0.052868293, 0.096530072, 0.151339196, 0.216332764, 0.295221736, 0.377891785, 0.491216024, 0.606462279, 0.877207832, 1.207061607, 1.563385753, 2.030351958, 2.444452733};
 byte po_flux[] = {0, 10, 20, 30, 40, 50, 55, 60, 65, 70, 75, 80, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 100, 100, 100, 100, 100, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 120, 125, 130, 135, 140, 145, 150, 160, 170, 180, 190, 200};
 
-
-
-int max_speed = 2000;
-int max_accel = 2000;
+bool change_pid_params=false;
 
 //Encoder from https://www.instructables.com/id/Improved-Arduino-Rotary-Encoder-Reading/
 int pinA = PIN_ENC_CL; // Our first hardware interrupt pin is digital pin 2
@@ -142,7 +146,7 @@ byte reading = 0; //somewhere to store the direct values we read from our interr
 
 byte max_sel, min_sel; //According to current selection
 
-void check_buzzer();
+void check_buzzer_mute();
 //
 void PinA() {
   cli(); //stop interrupts happening before we read pin values
@@ -175,7 +179,7 @@ VentilationOptions_t options;
 
 float p_dpt0;
 void setup() {
-
+  
   Serial.begin(250000);
   init_display();
 
@@ -284,8 +288,8 @@ void setup() {
 
   Timer1.initialize(50);
   Timer1.attachInterrupt(timer1Isr);
-  Timer2.setPeriod(500000);
-  Timer2.attachInterrupt(timer2Isr);
+  //Timer2.setPeriod(500000);
+  //Timer2.attachInterrupt(timer2Isr);
 
 #ifdef DEBUG_UPDATE
   Serial.print("Honey Volt at p0: "); Serial.println(analogRead(A0) / 1023.);
@@ -307,6 +311,7 @@ void setup() {
     tft.begin();
     tft.fillScreen(ILI9341_BLACK);
 
+    digitalWrite(PIN_BUZZER,1);
     buzzmuted=false;
     last_mute=LOW;
     mute_count=0;
@@ -322,7 +327,7 @@ void loop() {
   check_encoder();
 
   time = millis();
-  check_buzzer();
+  //check_buzzer_mute();
 
   if (millis() > lastSave + TIME_SAVE) {
     int eeAddress=0;
@@ -490,6 +495,32 @@ void loop() {
     show_changed_options = false;
   }
 
+    if (alarm_state > 0) {
+
+          if (!buzzmuted) {
+              if (millis() > timebuzz + TIME_BUZZER) {
+                  timebuzz=millis();
+                  isbuzzeron=!isbuzzeron;
+                  if (isbuzzeron){
+                      //tone(PIN_BUZZER,440);
+                      digitalWrite(PIN_BUZZER,0);
+                  }   
+                  else {
+                      //noTone(PIN_BUZZER);
+                      digitalWrite(PIN_BUZZER,1);
+                  }
+              }
+          } else {  //buzz muted
+              digitalWrite(PIN_BUZZER,1);
+              //noTone(PIN_BUZZER);
+          }
+    } else {//state > 0
+      //noTone(PIN_BUZZER);
+      digitalWrite(PIN_BUZZER,1);
+      isbuzzeron=true;        //Inverted logic
+    }
+
+
 }//LOOP
 
 void timer1Isr(void)
@@ -553,7 +584,7 @@ boolean debounce(boolean last, int pin) {
     return current;
 }
 
-void check_buzzer() {
+void check_buzzer_mute() {
     curr_mute = debounce ( last_mute, PIN_MUTE );         //Debounce for Up button
     if (last_mute== LOW && curr_mute == HIGH && !buzzmuted){
         mute_count=0;
@@ -563,25 +594,5 @@ void check_buzzer() {
     if(buzzmuted) {
         if (mute_count > 2*TIME_MUTE)  //each count is every 500 ms
         buzzmuted=false;
-    }
-}
-
-
-  void timer2Isr(void)
-{
-    if (alarm_state > 0) {
-        if (!buzzmuted) {
-            isbuzzeron=!isbuzzeron;
-            if (isbuzzeron){
-                analogWrite(PIN_BUZZER, 127);
-            } else {
-                analogWrite(PIN_BUZZER, 0);
-            }
-        } 
-    } else {
-          analogWrite(PIN_BUZZER, 0);
-      }
-    if (buzzmuted) {
-      mute_count+=1;  
     }
 }

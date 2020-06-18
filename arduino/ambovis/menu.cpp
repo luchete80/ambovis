@@ -34,6 +34,7 @@ void lcd_selxy(int x, int y) {
   lcd.setCursor(x, y);
   lcd.print(">");
 }
+
 void check_encoder ( ) {
   byte btnState = digitalRead(PIN_ENC_SW);
   if (btnState == LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
@@ -133,6 +134,10 @@ void check_encoder ( ) {
 
   if (oldEncPos != encoderPos) {
     show_changed_options = true;
+    
+    if (menu_number==2)
+      change_pid_params=true;
+      
     if (curr_sel != 0) {
       if ( encoderPos > max_sel ) {
          encoderPos=oldEncPos=max_sel; 
@@ -324,19 +329,19 @@ void display_lcd ( ) {
     lcd_clearxy(8,1,2); lcd_clearxy(16,1,3);
                         lcd_clearxy(13,6,3);
         
-    writeLine(0, "P:" + String(PID_KP), 1); 
-    writeLine(0, "I:" + String(PID_KI), 7); 
-    writeLine(0, "D:" + String(PID_KD), 13);
-
-    writeLine(1, "c:" + String(PID_KP), 1); 
-    writeLine(2, "C:" + String(PID_KI), 1); 
+    writeLine(0, "c:" + String(PID_KP), 1); 
+    writeLine(1, "C:" + String(PID_KI), 1); 
     
-    writeLine(1, "v:" + String(PID_KP), 7); 
-    writeLine(2, "V:" + String(PID_KI), 7);
+    writeLine(0, "v:" + String(PID_KP), 7); 
+    writeLine(1, "V:" + String(PID_KI), 7);
 
-    writeLine(1, "a:" + String(PID_KP), 13); 
-    writeLine(2, "A:" + String(PID_KI), 13);
-    
+    writeLine(0, "a:" + String(PID_KP), 13); 
+    writeLine(1, "A:" + String(PID_KI), 13);
+
+    writeLine(2, "p:" + String(PID_KP), 1); 
+    writeLine(2, "I:" + String(PID_KI), 7); 
+    writeLine(2, "D:" + String(PID_KD), 13);
+    writeLine(3, "P:" + String(PID_KP), 1); 
 
   }//menu_number
   

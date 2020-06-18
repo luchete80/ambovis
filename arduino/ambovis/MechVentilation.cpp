@@ -17,6 +17,11 @@ int PID_KI=20.01;
 int PID_KD=50.01;
 int STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  600;
 int STEPPER_SPEED_MAX=14000;
+
+//static
+float speed_m,accel_m,pidk_m;
+int speed_b,accel_b,pidk_b;
+
 MechVentilation::MechVentilation(
         #ifdef ACCEL_STEPPER
         AccelStepper *stepper,
@@ -256,17 +261,27 @@ void MechVentilation :: update ( void )
 
         currentTime = millis();
         display_needs_update=true;
-
+      
       if (autopid) {
+          if (change_pid_params) {
+                //float cdyn_m,speed_m,accel_m,pidk_m;
+                //int cdyn_b,speed_m,accel_m,pidk_m;
+                speed_m =STEPPER_MICROSTEPS*(max_speed-min_speed)/(max_cd-min_cd);
+                accel_m =STEPPER_MICROSTEPS*(max_accel-min_accel)/(max_cd-min_cd);
+                pidk_m  =                   (max_accel-min_accel)/(max_cd-min_cd);
+                //cdyn_m=
+                // max_acc,min_acc,max_speed,min_speed,max_cd,min_cd
+                change_pid_params=false;
+          }
           if (abs(last_pressure_max - _pip) >  1.5 ){
                   //if (Cdyn < 20 ) {//HARD Cv or resistance
                   float peep_fac=-0.05*last_pressure_min+1.25;
                   
-                  if (Cdyn<10) {
+                  if ( Cdyn < min_cd ) {
                      PID_KP=250*peep_fac;
                      STEPPER_SPEED_MAX=4000;	//Originally 5000
       			         STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  200;
-                  } else if (Cdyn>40) {
+                  } else if ( Cdyn > max_cd ) {
                     STEPPER_SPEED_MAX=12000;
       			        if (_pip>22) STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  800;//But the limit is calculated with range from 200 to 700
                     else         STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  600;
@@ -289,6 +304,7 @@ void MechVentilation :: update ( void )
               _pid->setGains(PID_KP,PID_KI, PID_KD);
               _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);     
       }
+
     }// INIT INSUFFLATION
     break;
     case State_Insufflation:
