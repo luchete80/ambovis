@@ -329,14 +329,14 @@ void display_lcd ( ) {
     lcd_clearxy(8,1,2); lcd_clearxy(16,1,3);
                         lcd_clearxy(13,6,3);
         
-    writeLine(0, "c:" + String(PID_KP), 1); 
-    writeLine(1, "C:" + String(PID_KI), 1); 
+    writeLine(0, "c:" + String(min_cd), 1); 
+    writeLine(1, "C:" + String(max_cd), 1); 
     
-    writeLine(0, "v:" + String(PID_KP), 7); 
-    writeLine(1, "V:" + String(PID_KI), 7);
+    writeLine(0, "v:" + String(min_speed), 7); 
+    writeLine(1, "V:" + String(max_speed), 7);
 
-    writeLine(0, "a:" + String(PID_KP), 13); 
-    writeLine(1, "A:" + String(PID_KI), 13);
+    writeLine(0, "a:" + String(min_accel), 13); 
+    writeLine(1, "A:" + String(max_accel), 13);
 
     writeLine(2, "p:" + String(PID_KP), 1); 
     writeLine(2, "I:" + String(PID_KI), 7); 
