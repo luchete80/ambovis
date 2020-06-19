@@ -262,7 +262,9 @@ void MechVentilation :: update ( void )
         currentTime = millis();
         display_needs_update=true;
       
+      if (vent_mode==VENTMODE_PCL){
       if (autopid) {
+      
           if (change_pid_params) {
                 speed_m =STEPPER_MICROSTEPS*(max_speed-min_speed)/(max_cd-min_cd);
                 speed_b=max_speed-speed_m*max_cd;
@@ -311,6 +313,7 @@ void MechVentilation :: update ( void )
               _pid->setGains(PID_KP,PID_KI, PID_KD);
               _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);     
       }
+      }//if pcl
 
     }// INIT INSUFFLATION
     break;

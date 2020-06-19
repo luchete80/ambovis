@@ -232,7 +232,7 @@ void setup() {
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
-  writeLine(1, "AMBOVIS 0529_1", 4);
+  writeLine(1, "AMBOVIS 0619", 4);
 
   p_dpt0 = 0;
   ads.begin();
