@@ -19,8 +19,7 @@ int STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  600;
 int STEPPER_SPEED_MAX=14000;
 
 //static
-float speed_m,accel_m,pidk_m;
-float speed_b,accel_b,pidk_b;
+float speed_m,accel_m,pidk_m,speed_b,accel_b,pidk_b;
 
 MechVentilation::MechVentilation(
         #ifdef ACCEL_STEPPER
@@ -298,10 +297,10 @@ void MechVentilation :: update ( void )
                   else {
                   PID_KP=(25*(float)Cdyn)*peep_fac;
                   //PID_KP=(pidk_m*(float)Cdyn)*peep_fac;
-          				//STEPPER_SPEED_MAX=float(Cdyn)*266.+1660.;	//Originally was 250
-                  STEPPER_SPEED_MAX=float(Cdyn) * speed_m + speed_b;  //Originally was 250
-          				//STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS*(13.33*(float)Cdyn+66.6);
-                  STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS*(accel_m*(float)Cdyn+accel_b);
+          				STEPPER_SPEED_MAX=float(Cdyn)*266.+1660.;	//Originally was 250
+                  //STEPPER_SPEED_MAX=float(Cdyn) * speed_m + speed_b;  //Originally was 250
+          				STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS*(13.33*(float)Cdyn+66.6);
+                  //STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS*(accel_m*(float)Cdyn+accel_b);
       			  }
               _pid->setGains(PID_KP,PID_KI, PID_KD);
               _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);
