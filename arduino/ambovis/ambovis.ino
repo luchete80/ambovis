@@ -199,6 +199,7 @@ void setup() {
   max_speed = 750;  // x Microsteps, originally 16000 (with 16 ms = 750)
   max_accel = 600;
   min_accel = 200;
+  change_pid_params=true; //To calculate at first time
   
   // Parte motor
   pinMode(PIN_EN, OUTPUT);
