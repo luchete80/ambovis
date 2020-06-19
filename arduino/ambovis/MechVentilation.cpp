@@ -20,7 +20,7 @@ int STEPPER_SPEED_MAX=14000;
 
 //static
 float speed_m,accel_m,pidk_m;
-int speed_b,accel_b,pidk_b;
+float speed_b,accel_b,pidk_b;
 
 MechVentilation::MechVentilation(
         #ifdef ACCEL_STEPPER
@@ -190,22 +190,22 @@ void MechVentilation :: update ( void )
     {
     case Init_Insufflation:
     {
-      //Filter vars
-      #ifdef FLUX_FILTER
-      flux_filter_time=millis();
-      flux_count=0;
-      //flux_sum=0;
-      #endif
-      
-      //adding_vol=true;
-      #ifdef DEBUG_UPDATE
-        Serial.println("INSUFLACION ");        
-      #endif
-
-      last_pressure_max=pressure_max;
-      last_pressure_min=pressure_min;
-      pressure_max=0;
-      pressure_min=60;
+        //Filter vars
+        #ifdef FLUX_FILTER
+        flux_filter_time=millis();
+        flux_count=0;
+        //flux_sum=0;
+        #endif
+        
+        //adding_vol=true;
+        #ifdef DEBUG_UPDATE
+          Serial.println("INSUFLACION ");        
+        #endif
+  
+        last_pressure_max=pressure_max;
+        last_pressure_min=pressure_min;
+        pressure_max=0;
+        pressure_min=60;
 
         // Close Solenoid Valve
 
@@ -264,38 +264,42 @@ void MechVentilation :: update ( void )
       
       if (autopid) {
           if (change_pid_params) {
-                //float cdyn_m,speed_m,accel_m,pidk_m;
-                //int cdyn_b,speed_m,accel_m,pidk_m;
                 speed_m =STEPPER_MICROSTEPS*(max_speed-min_speed)/(max_cd-min_cd);
+                speed_b=max_speed-speed_m*max_cd;
                 accel_m =STEPPER_MICROSTEPS*(max_accel-min_accel)/(max_cd-min_cd);
+                accel_b=max_accel-accel_m*max_cd;
                 pidk_m  =                   (max_accel-min_accel)/(max_cd-min_cd);
+                
                 //cdyn_m=
                 // max_acc,min_acc,max_speed,min_speed,max_cd,min_cd
                 change_pid_params=false;
           }
-          if (abs(last_pressure_max - _pip) >  1.5 ){
+          if ( abs ( last_pressure_max - _pip) >  1.5 ){
                   //if (Cdyn < 20 ) {//HARD Cv or resistance
                   float peep_fac=-0.05*last_pressure_min+1.25;
                   
                   if ( Cdyn < min_cd ) {
-                     PID_KP=250*peep_fac;
-                     STEPPER_SPEED_MAX=4000;	//Originally 5000
-      			         STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  200;
+                       PID_KP=250*peep_fac;
+                       STEPPER_SPEED_MAX=4000;	//Originally 5000
+        			         STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  200;
                   } else if ( Cdyn > max_cd ) {
-                    STEPPER_SPEED_MAX=12000;
-      			        if (_pip>22) STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  800;//But the limit is calculated with range from 200 to 700
-                    else         STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  600;
+                       STEPPER_SPEED_MAX=12000;
+        			         if (_pip>22) STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  800;//But the limit is calculated with range from 200 to 700
+                       else         STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  600;
                     PID_KP=1000*peep_fac;
                   }
                   else {
-                  PID_KP=(25*(float)Cdyn)*peep_fac;
-          				STEPPER_SPEED_MAX=float(Cdyn)*266.+1660.;	//Originally was 250
-          				STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS*(13.33*(float)Cdyn+66.6);//((1000-200)*0.033+;
+                  //PID_KP=(25*(float)Cdyn)*peep_fac;
+                  PID_KP=(pidk_m*(float)Cdyn)*peep_fac;
+          				//STEPPER_SPEED_MAX=float(Cdyn)*266.+1660.;	//Originally was 250
+                  STEPPER_SPEED_MAX=float(Cdyn) * speed_m + speed_b;  //Originally was 250
+          				//STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS*(13.33*(float)Cdyn+66.6);
+                 STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS*(accel_m*(float)Cdyn+accel_b);
       			  }
               _pid->setGains(PID_KP,PID_KI, PID_KD);
               _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);
           }
-      } else {//autopid
+      } else {//no autopid
               PID_KP=700.01;
               PID_KI=20.01;
               PID_KD=100.01;

@@ -182,7 +182,7 @@ void setup() {
   
   Serial.begin(250000);
   init_display();
-
+  menu_sel=0;
   pinMode(PIN_POWEROFF, INPUT);
 
   // PID

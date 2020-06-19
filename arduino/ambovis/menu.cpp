@@ -5,8 +5,11 @@
 
 static bool clear_all_display;
 
-void init_display()
-{
+static byte max_pidk_byte,min_pidk_byte;
+byte menu_sel; //0 nothing, 1 navigate, 2 option
+
+
+void init_display() {
   #ifdef LCD_I2C
   lcd.begin(20, 4);  //I2C
 #else
@@ -76,7 +79,8 @@ void check_encoder ( ) {
             } else if ( menu_number == 1 ) {
                 min_sel=20;max_sel=50;
                 encoderPos=oldEncPos=alarm_max_pressure;            
-         } 
+         } else
+            min_cd  = encoderPos;
         break;
         case 2: 
             if ( menu_number == 0 ) {
@@ -86,6 +90,7 @@ void check_encoder ( ) {
                     min_sel=5;max_sel=15;
                     encoderPos=oldEncPos=alarm_peep_pressure;                          
                 }
+                else min_speed  = encoderPos;                  
         break;
         case 3:
           if ( menu_number == 0 ) {
@@ -94,7 +99,8 @@ void check_encoder ( ) {
           } else if ( menu_number == 1 ) {
                 encoderPos=byte(0.1*float(alarm_vt));
                 min_sel=10;max_sel=50;//vt
-          }     
+          }   else
+              min_accel  = encoderPos;  
         break;
         case 4: 
             if ( menu_number == 0 ) {
@@ -105,19 +111,25 @@ void check_encoder ( ) {
                   encoderPos=oldEncPos=options.percVolume;
                   min_sel=40;max_sel=100;            
                 } 
-            } else {//menu 0
+            } else if ( menu_number == 1 ) {//menu 0
                 encoderPos=oldEncPos=p_trim;
                 min_sel=0;max_sel=200;   
-            }
+            } else
+                max_cd  = encoderPos;
             break;
               case 5: 
             if ( menu_number == 0 ) {
                 encoderPos=oldEncPos=options.peakInspiratoryPressure;
                 min_sel=15;max_sel=25;
-            } else {//menu 0
+            } else if ( menu_number == 1 ) {//menu 0
                   min_sel=0;max_sel=1; 
-            }
-        break;
+            } else
+                max_speed  = encoderPos;
+            break;
+            case 6:
+                if ( menu_number == 2 )
+                max_accel  = encoderPos;
+            break;
       }
 
       old_curr_sel = curr_sel;
@@ -144,52 +156,61 @@ void check_encoder ( ) {
       } else if ( encoderPos < min_sel ) {
           encoderPos=oldEncPos=min_sel;
         } else {
-       
+    
         oldEncPos = encoderPos;
-        switch (curr_sel) {
-          case 1:
-            if ( menu_number == 0 ) vent_mode           = encoderPos;
-            else                    alarm_max_pressure  = encoderPos;
-            break;
-          case 2:
-            if ( menu_number == 0 ) options.respiratoryRate = encoderPos;
-            else                    alarm_peep_pressure     = encoderPos;
-            break;
-          case 3:
-            if ( menu_number == 0 ) options.percInspEsp=encoderPos;
-            else                    alarm_vt=int(10.*(float)encoderPos);
-            //pressure_max = 0;
-            break;
-          case 4:
-            if ( menu_number == 0 ) {
-                if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
-                  options.tidalVolume = encoderPos;
-                  #ifdef DEBUG_UPDATE
-                  Serial.print("tidal ");Serial.print(options.tidalVolume);Serial.print("encoder pos");Serial.print(encoderPos);
-                  #endif
-                  } else { //manual
-                  options.percVolume =encoderPos;
-                 // Serial.print("Encoder pos: ");Serial.println(encoderPos);
-                 // Serial.print("Perc vol: ");Serial.println(options.percVolume);
-                }
-            } else {//menu number = 1
-                p_trim=encoderPos;
+        //switch (menu_number) {
+            switch (curr_sel) {
+              case 1:
+                if ( menu_number == 0 )     vent_mode           = encoderPos;
+                else if (menu_number == 1)  alarm_max_pressure  = encoderPos;
+                else                        min_cd  = encoderPos;
+                break;
+              case 2:
+                if ( menu_number == 0 )       options.respiratoryRate = encoderPos;
+                else  if (menu_number == 1)   alarm_peep_pressure     = encoderPos;
+                else                          min_speed  = encoderPos;
+                break;
+              case 3:
+                if ( menu_number == 0 ) options.percInspEsp=encoderPos;
+                else    if (menu_number == 1) alarm_vt=int(10.*(float)encoderPos);
+                else                          min_accel  = encoderPos;
+                //pressure_max = 0;
+                break;
+              case 4:
+                if ( menu_number == 0 ) {
+                    if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
+                      options.tidalVolume = encoderPos;
+                      #ifdef DEBUG_UPDATE
+                      Serial.print("tidal ");Serial.print(options.tidalVolume);Serial.print("encoder pos");Serial.print(encoderPos);
+                      #endif
+                      } else { //manual
+                      options.percVolume =encoderPos;
+                     // Serial.print("Encoder pos: ");Serial.println(encoderPos);
+                     // Serial.print("Perc vol: ");Serial.println(options.percVolume);
+                    }
+                } else if (menu_number == 1) {
+                    p_trim=encoderPos;
+                } else max_cd  = encoderPos;
+                    
+                break;
+              case 5:
+                if ( menu_number == 0 ) {
+                    options.peakInspiratoryPressure = encoderPos;
+                } else if (menu_number == 1) {
+                    autopid=encoderPos;
+                } else
+                    max_speed  = encoderPos;
+                break;
+              case 6:
+                if ( menu_number == 0 )
+                  options.peakEspiratoryPressure = encoderPos;
+                else if ( menu_number == 2 )  //There is not 6 in menu 1
+                    max_accel  = encoderPos;
+                break;
             }
-            break;
-          case 5:
-            if ( menu_number == 0 ) {
-                options.peakInspiratoryPressure = encoderPos;
-            } else {
-                autopid=encoderPos;
-            }
-            break;
-          case 6:
-            options.peakEspiratoryPressure = encoderPos;
-            break;
-        }
-        show_changed_options = true;
-        update_options=true;
-      }//Valid range
+            show_changed_options = true;
+            update_options=true;
+          }//Valid range
   
     }//oldEncPos != encoderPos and valid between range
   }
@@ -338,10 +359,10 @@ void display_lcd ( ) {
     writeLine(0, "a:" + String(min_accel), 13); 
     writeLine(1, "A:" + String(max_accel), 13);
 
-    writeLine(2, "p:" + String(PID_KP), 1); 
+    writeLine(2, "p:" + String(min_pidk), 1); 
     writeLine(2, "I:" + String(PID_KI), 7); 
     writeLine(2, "D:" + String(PID_KD), 13);
-    writeLine(3, "P:" + String(PID_KP), 1); 
+    writeLine(3, "P:" + String(max_pidk), 1); 
 
   }//menu_number
   
