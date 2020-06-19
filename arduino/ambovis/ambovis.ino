@@ -108,9 +108,9 @@ int16_t adc0;
 int max_accel,min_accel;
 int max_speed, min_speed;
 int max_pidk , min_pidk;
-int max_cd=40;
-int min_cd=10;
-
+  int max_cd=40;  //T MODIFY: READ FROM MEM
+  int min_cd=10;
+  
 unsigned long last_cycle;
 
 byte menu_number = 0;
@@ -193,6 +193,13 @@ void setup() {
   // set PID update interval
   pid -> setTimeStep(PID_TS);
 
+  max_cd=40;  //T MODIFY: READ FROM MEM
+  min_cd=10;
+  min_speed = 250;  // x microsteps
+  max_speed = 750;  // x Microsteps, originally 16000 (with 16 ms = 750)
+  max_accel = 600;
+  min_accel = 200;
+  
   // Parte motor
   pinMode(PIN_EN, OUTPUT);
   digitalWrite(PIN_EN, HIGH);

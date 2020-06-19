@@ -279,14 +279,17 @@ void MechVentilation :: update ( void )
                   float peep_fac=-0.05*last_pressure_min+1.25;
                   
                   if ( Cdyn < min_cd ) {
-                       PID_KP=250*peep_fac;
-                       STEPPER_SPEED_MAX=4000;	//Originally 5000
-        			         STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  200;
+                       PID_KP                   = 250 * peep_fac;
+                       STEPPER_SPEED_MAX =        STEPPER_MICROSTEPS * min_speed;	//Originally 4000
+        			         STEPPER_ACC_INSUFFLATION = STEPPER_MICROSTEPS *  min_accel;
                   } else if ( Cdyn > max_cd ) {
-                       STEPPER_SPEED_MAX=12000;
-        			         if (_pip>22) STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  800;//But the limit is calculated with range from 200 to 700
-                       else         STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  600;
-                    PID_KP=1000*peep_fac;
+                       PID_KP                   = 1000*peep_fac;
+                       STEPPER_SPEED_MAX        = STEPPER_MICROSTEPS * max_speed; //Originally 12000
+        			         if (_pip>22) 
+        			          STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  max_accel * 1.3;//But the limit is calculated with range from 200 to 700
+                       else         
+                        STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  max_accel;
+                       
                   }
                   else {
                   //PID_KP=(25*(float)Cdyn)*peep_fac;

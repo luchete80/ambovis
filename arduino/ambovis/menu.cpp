@@ -63,7 +63,7 @@ void check_encoder ( ) {
          }
       }
         else if (menu_number == 2) {
-         if (curr_sel > 3) {
+         if (curr_sel > 8) {
           curr_sel=0;
           menu_number=0; 
           clear_all_display=true;
