@@ -274,9 +274,9 @@ void MechVentilation :: update ( void )
                 //cdyn_m=
                 // max_acc,min_acc,max_speed,min_speed,max_cd,min_cd
                 change_pid_params=false;
-                Serial.print("Speed m b:"); Serial.print(speed_m);Serial.print(" ");Serial.println(speed_b);
-                Serial.print("Accel m b:"); Serial.print(accel_m);Serial.print(" ");Serial.println(accel_b);
-                Serial.print("pidk m b:"); Serial.print(pidk_m);Serial.print(" ");Serial.println(pidk_b);
+                //Serial.print("Speed m b:"); Serial.print(speed_m);Serial.print(" ");Serial.println(speed_b);
+                //Serial.print("Accel m b:"); Serial.print(accel_m);Serial.print(" ");Serial.println(accel_b);
+                //Serial.print("pidk m b:"); Serial.print(pidk_m);Serial.print(" ");Serial.println(pidk_b);
           }
           if ( abs ( last_pressure_max - _pip) >  1.5 ){
                   //if (Cdyn < 20 ) {//HARD Cv or resistance

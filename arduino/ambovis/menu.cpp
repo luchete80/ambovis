@@ -79,8 +79,10 @@ void check_encoder ( ) {
             } else if ( menu_number == 1 ) {
                 min_sel=20;max_sel=50;
                 encoderPos=oldEncPos=alarm_max_pressure;            
-         } else
+         } else {
             encoderPos=min_cd;
+            min_sel=0;max_sel=max_cd;
+         }
         break;
         case 2: 
             if ( menu_number == 0 ) {
@@ -90,7 +92,10 @@ void check_encoder ( ) {
                     min_sel=5;max_sel=15;
                     encoderPos=oldEncPos=alarm_peep_pressure;                          
                 }
-                else encoderPos=min_speed;                  
+                else{
+                    encoderPos=min_speed/10;     
+                    min_sel=10;max_sel=100;             
+                }
         break;
         case 3:
           if ( menu_number == 0 ) {
@@ -117,7 +122,7 @@ void check_encoder ( ) {
                 min_sel=0;max_sel=200;   
             } else {
                 encoderPos=max_cd;
-                min_sel=5;max_sel=80;
+                min_sel=10;max_sel=80;
             }
             break;
               case 5: 
@@ -187,12 +192,12 @@ void check_encoder ( ) {
               case 2:
                 if ( menu_number == 0 )       options.respiratoryRate = encoderPos;
                 else  if (menu_number == 1)   alarm_peep_pressure     = encoderPos;
-                else                          min_speed  = encoderPos;
+                else                          min_speed  = int((float)encoderPos*10.);
                 break;
               case 3:
                 if ( menu_number == 0 ) options.percInspEsp=encoderPos;
                 else    if (menu_number == 1) alarm_vt=int(10.*(float)encoderPos);
-                else                          min_accel  = encoderPos;
+                else                          min_accel  = int((float)encoderPos*10.);
                 //pressure_max = 0;
                 break;
               case 4:
@@ -218,14 +223,14 @@ void check_encoder ( ) {
                 } else if (menu_number == 1) {
                     autopid=encoderPos;
                 } else {
-                    max_speed  = encoderPos*10;
+                    max_speed  = int((float)encoderPos*10.);
                 }
                 break;
               case 6:
                 if ( menu_number == 0 )
                   options.peakEspiratoryPressure = encoderPos;
                 else if ( menu_number == 2 )  //There is not 6 in menu 1
-                    max_accel  = encoderPos*10;
+                    max_accel  = int((float)encoderPos*10.);
                 break;
             
             case 7:
