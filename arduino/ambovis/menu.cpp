@@ -80,7 +80,7 @@ void check_encoder ( ) {
                 min_sel=20;max_sel=50;
                 encoderPos=oldEncPos=alarm_max_pressure;            
          } else
-            min_cd  = encoderPos;
+            encoderPos=min_cd;
         break;
         case 2: 
             if ( menu_number == 0 ) {
@@ -90,7 +90,7 @@ void check_encoder ( ) {
                     min_sel=5;max_sel=15;
                     encoderPos=oldEncPos=alarm_peep_pressure;                          
                 }
-                else min_speed  = encoderPos;                  
+                else encoderPos=min_speed;                  
         break;
         case 3:
           if ( menu_number == 0 ) {
@@ -99,8 +99,9 @@ void check_encoder ( ) {
           } else if ( menu_number == 1 ) {
                 encoderPos=byte(0.1*float(alarm_vt));
                 min_sel=10;max_sel=50;//vt
-          }   else
-              min_accel  = encoderPos;  
+          }   else {
+                encoderPos=min_accel/10; 
+                min_sel=10;max_sel=100; }
         break;
         case 4: 
             if ( menu_number == 0 ) {
@@ -114,8 +115,10 @@ void check_encoder ( ) {
             } else if ( menu_number == 1 ) {//menu 0
                 encoderPos=oldEncPos=p_trim;
                 min_sel=0;max_sel=200;   
-            } else
-                max_cd  = encoderPos;
+            } else {
+                encoderPos=max_cd;
+                min_sel=5;max_sel=80;
+            }
             break;
               case 5: 
             if ( menu_number == 0 ) {
@@ -123,12 +126,28 @@ void check_encoder ( ) {
                 min_sel=15;max_sel=25;
             } else if ( menu_number == 1 ) {//menu 0
                   min_sel=0;max_sel=1; 
-            } else
-                max_speed  = encoderPos;
+            } else {
+                encoderPos=max_speed/10;
+                min_sel=10;max_sel=100;
+            }
             break;
             case 6:
-                if ( menu_number == 2 )
-                max_accel  = encoderPos;
+                if ( menu_number == 2 ){
+                    encoderPos=max_accel/10;
+                    min_sel=10;max_sel=100;
+                }
+                break;
+            case 7:
+                if ( menu_number == 2 ){
+                    encoderPos=min_pidk/10;
+                    min_sel=10;max_sel=100;
+                }
+                break;
+            case 8:
+                if ( menu_number == 2 ){
+                    encoderPos=max_pidk/10;
+                    min_sel=10;max_sel=100;
+                }                
             break;
       }
 
@@ -190,7 +209,7 @@ void check_encoder ( ) {
                     }
                 } else if (menu_number == 1) {
                     p_trim=encoderPos;
-                } else max_cd  = encoderPos;
+                } else max_cd  = int(encoderPos);
                     
                 break;
               case 5:
@@ -198,16 +217,28 @@ void check_encoder ( ) {
                     options.peakInspiratoryPressure = encoderPos;
                 } else if (menu_number == 1) {
                     autopid=encoderPos;
-                } else
-                    max_speed  = encoderPos;
+                } else {
+                    max_speed  = encoderPos*10;
+                }
                 break;
               case 6:
                 if ( menu_number == 0 )
                   options.peakEspiratoryPressure = encoderPos;
                 else if ( menu_number == 2 )  //There is not 6 in menu 1
-                    max_accel  = encoderPos;
+                    max_accel  = encoderPos*10;
                 break;
-            }
+            
+            case 7:
+                if ( menu_number == 2 ){
+                    min_pidk=encoderPos*10;
+                }
+                break;
+            case 8:
+                if ( menu_number == 2 ){
+                    max_pidk=encoderPos*10;
+                }
+                break;
+            }//switch
             show_changed_options = true;
             update_options=true;
           }//Valid range
@@ -250,20 +281,27 @@ void clear_n_sel(int menu){
             lcd_selxy(0,3);break;
       }
     } else if (menu==2) {  
-      lcd_clearxy(0,0);
-      lcd_clearxy(0,1);lcd_clearxy(10,2);
-      lcd_clearxy(0,2);lcd_clearxy(0,3);
+      lcd_clearxy(0,0);lcd_clearxy(6,0);lcd_clearxy(12,0);
+      lcd_clearxy(0,1);lcd_clearxy(6,1);lcd_clearxy(12,1);
+      lcd_clearxy(0,2);
+      lcd_clearxy(0,3);
       switch(curr_sel){
           case 1: 
             lcd_selxy(0,0);break;//PIP
           case 2: 
-            lcd_selxy(6,1);break;//PEEP
+            lcd_selxy(6,0);break;//PEEP
           case 3:
-            lcd_selxy(12,1);break;
+            lcd_selxy(12,0);break;
           case 4: 
-            lcd_selxy(0,2);break;
+            lcd_selxy(0,1);break;//PIP
           case 5: 
-            lcd_selxy(0,3);break;
+            lcd_selxy(6,1);break;
+          case 6: 
+            lcd_selxy(12,1);break;  
+          case 7: 
+            lcd_selxy(0,2);break;
+          case 8: 
+            lcd_selxy(0,3);break;  
       }
     }//menu number 
 
@@ -346,9 +384,10 @@ void display_lcd ( ) {
     writeLine(3, "C:", 10);
     writeLine(3, String(last_cycle), 12);
   } else if (menu_number ==2 ){//PID
-                        lcd_clearxy(12,0,8);
-    lcd_clearxy(8,1,2); lcd_clearxy(16,1,3);
-                        lcd_clearxy(13,6,3);
+    lcd_clearxy(3,0,2); lcd_clearxy(9,0,3);lcd_clearxy(15,0,3);
+    lcd_clearxy(3,1,2); lcd_clearxy(9,1,3);lcd_clearxy(15,1,3);
+    lcd_clearxy(3,2,3); 
+    lcd_clearxy(3,3,3);
         
     writeLine(0, "c:" + String(min_cd), 1); 
     writeLine(1, "C:" + String(max_cd), 1); 

@@ -265,42 +265,45 @@ void MechVentilation :: update ( void )
       if (autopid) {
       
           if (change_pid_params) {
-                speed_m =STEPPER_MICROSTEPS*(max_speed-min_speed)/(max_cd-min_cd);
-                speed_b=max_speed-speed_m*max_cd;
-                accel_m =STEPPER_MICROSTEPS*(max_accel-min_accel)/(max_cd-min_cd);
-                accel_b=max_accel-accel_m*max_cd;
-                pidk_m  =                   (max_accel-min_accel)/(max_cd-min_cd);
-                
+                speed_m =(float)STEPPER_MICROSTEPS*float(max_speed-min_speed)/float(max_cd-min_cd);
+                speed_b=(float)STEPPER_MICROSTEPS*(float)max_speed-speed_m*(float)max_cd;
+                accel_m =(float)STEPPER_MICROSTEPS*float(max_accel-min_accel)/float(max_cd-min_cd);
+                accel_b=(float)STEPPER_MICROSTEPS*(float)max_accel-accel_m*(float)max_cd;
+                pidk_m  =                   float(max_pidk-min_pidk)/float(max_cd-min_cd);
+                pidk_b=(float)max_pidk-pidk_m*(float)max_cd;
                 //cdyn_m=
                 // max_acc,min_acc,max_speed,min_speed,max_cd,min_cd
                 change_pid_params=false;
+                Serial.print("Speed m b:"); Serial.print(speed_m);Serial.print(" ");Serial.println(speed_b);
+                Serial.print("Accel m b:"); Serial.print(accel_m);Serial.print(" ");Serial.println(accel_b);
+                Serial.print("pidk m b:"); Serial.print(pidk_m);Serial.print(" ");Serial.println(pidk_b);
           }
           if ( abs ( last_pressure_max - _pip) >  1.5 ){
                   //if (Cdyn < 20 ) {//HARD Cv or resistance
                   float peep_fac=-0.05*last_pressure_min+1.25;
                   
                   if ( Cdyn < min_cd ) {
-                       PID_KP                   = 250 * peep_fac;
+                       PID_KP                   = min_pidk * peep_fac; //Orig 250
                        STEPPER_SPEED_MAX =        STEPPER_MICROSTEPS * min_speed;	//Originally 4000
         			         STEPPER_ACC_INSUFFLATION = STEPPER_MICROSTEPS *  min_accel;            
                   } else if ( Cdyn > max_cd ) {
-                       PID_KP                   = 1000*peep_fac;
+                       PID_KP                   = max_pidk*peep_fac; //orig 1000
 
                        STEPPER_SPEED_MAX        = STEPPER_MICROSTEPS * max_speed; //Originally 12000
         			         if (_pip>22) 
         			          STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  max_accel * 1.3;//But the limit is calculated with range from 200 to 700
                        else         
-                        //STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  max_accel;
-                        STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  600;
+                        STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  max_accel;
+                        //STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  600;
                        
                   }
                   else {
-                  PID_KP=(25*(float)Cdyn)*peep_fac;
-                  //PID_KP=(pidk_m*(float)Cdyn)*peep_fac;
-          				STEPPER_SPEED_MAX=float(Cdyn)*266.+1660.;	//Originally was 250
-                  //STEPPER_SPEED_MAX=float(Cdyn) * speed_m + speed_b;  //Originally was 250
-          				STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS*(13.33*(float)Cdyn+66.6);
-                  //STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS*(accel_m*(float)Cdyn+accel_b);
+                  //PID_KP=(25*(float)Cdyn)*peep_fac;
+                  PID_KP=(pidk_m*(float)Cdyn)*peep_fac;
+          				//STEPPER_SPEED_MAX=float(Cdyn)*266.+1660.;	//Originally was 250
+                  STEPPER_SPEED_MAX=float(Cdyn) * speed_m + speed_b;  //Originally was 250
+          				//STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS*(13.33*(float)Cdyn+66.6);
+                  STEPPER_ACC_INSUFFLATION=(accel_m*(float)Cdyn+accel_b); //WITHOUT MICROSTEPS (ALREADY DONE IN CALC)
       			  }
               _pid->setGains(PID_KP,PID_KI, PID_KD);
               _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);
