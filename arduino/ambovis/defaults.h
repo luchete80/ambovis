@@ -17,10 +17,15 @@
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE   25                 // msec
 #define TIME_SENSOR 10                // msec
-#define TIME_SHOW 80                  //IF OLED DISPLAY IS USED FASTER THAN 50ms GIVES ERRORS IN THE PLOTS 
-#define TIME_SAVE 5000
+#define TIME_SHOW 	80                  //IF OLED DISPLAY IS USED FASTER THAN 50ms GIVES ERRORS IN THE PLOTS 
+#define TIME_SAVE 	5000
+#define TIME_BUZZER 500
+#define TIME_MUTE   30
+
 #define TIME_SEND_CONFIGURATION 2000 // msec
-#define V_HONEY_P0 0.49874F //Analog/1023
+#define V_HONEY_P0 	0.49874F //Analog/1023
+
+#define TIME_BUZZER 500
 
 // Sensores
 #define ENABLED_SENSOR_VOLUME 1
@@ -39,7 +44,7 @@
 //#define STEPPER_LOWEST_POSITION     (STEPPER_MICROSTEPS *  -100)   // Steps
 //#define STEPPER_HIGHEST_POSITION    (STEPPER_MICROSTEPS *   100)   // Steps
 #define STEPPER_LOWEST_POSITION     (-10)   // Steps
-#define STEPPER_HIGHEST_POSITION    ( 2800)   //270º
+#define STEPPER_HIGHEST_POSITION    ( 2500)   //270º
 #define STEPPER_SPEED_DEFAULT       (400)   // Steps/s
 extern int STEPPER_SPEED_MAX;       //(14000)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_ACCEL_MAX           (12000)
@@ -63,7 +68,7 @@ extern int STEPPER_ACC_INSUFFLATION;    //(STEPPER_MICROSTEPS *  600)   // Steps
 #define DEFAULT_PEAK_INSPIRATORY_PRESSURE 25
 #define DEFAULT_PEAK_ESPIRATORY_PRESSURE 5
 
-#define V_SUPPLY_HONEY 4.8F
+#define V_SUPPLY_HONEY 5.0F
 // #define DEFAULT_PEAK_ESPIRATORY_PRESSURE 6
 
 #define DEFAULT_PRESSURE_V_FLUX_K1 1.
@@ -123,5 +128,12 @@ class VentilationOptions_t {
 //general variables
 extern byte vent_mode;
 extern bool send_data;
+
+extern byte alarm_state;
+
+//PID LIMITS
+extern int max_accel,min_accel,max_speed,min_speed,max_cd,min_cd,max_pidk,min_pidk;
+extern bool change_pid_params;
+extern byte menu_sel;
 
 #endif // DEFAULTS_H

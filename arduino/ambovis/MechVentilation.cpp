@@ -17,6 +17,10 @@ int PID_KI=20.01;
 int PID_KD=50.01;
 int STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  600;
 int STEPPER_SPEED_MAX=14000;
+
+//static
+float speed_m,accel_m,pidk_m,speed_b,accel_b,pidk_b;
+
 MechVentilation::MechVentilation(
         #ifdef ACCEL_STEPPER
         AccelStepper *stepper,
@@ -185,22 +189,22 @@ void MechVentilation :: update ( void )
     {
     case Init_Insufflation:
     {
-      //Filter vars
-      #ifdef FLUX_FILTER
-      flux_filter_time=millis();
-      flux_count=0;
-      //flux_sum=0;
-      #endif
-      
-      //adding_vol=true;
-      #ifdef DEBUG_UPDATE
-        Serial.println("INSUFLACION ");        
-      #endif
-
-      last_pressure_max=pressure_max;
-      last_pressure_min=pressure_min;
-      pressure_max=0;
-      pressure_min=60;
+        //Filter vars
+        #ifdef FLUX_FILTER
+        flux_filter_time=millis();
+        flux_count=0;
+        //flux_sum=0;
+        #endif
+        
+        //adding_vol=true;
+        #ifdef DEBUG_UPDATE
+          Serial.println("INSUFLACION ");        
+        #endif
+  
+        last_pressure_max=pressure_max;
+        last_pressure_min=pressure_min;
+        pressure_max=0;
+        pressure_min=60;
 
         // Close Solenoid Valve
 
@@ -256,31 +260,55 @@ void MechVentilation :: update ( void )
 
         currentTime = millis();
         display_needs_update=true;
-
+      
+      if (vent_mode==VENTMODE_PCL){
       if (autopid) {
-          if (abs(last_pressure_max - _pip) >  1.5 ){
+      
+          if (change_pid_params) {
+                speed_m =(float)STEPPER_MICROSTEPS*float(max_speed-min_speed)/float(max_cd-min_cd);
+                speed_b=(float)STEPPER_MICROSTEPS*(float)max_speed-speed_m*(float)max_cd;
+                accel_m =(float)STEPPER_MICROSTEPS*float(max_accel-min_accel)/float(max_cd-min_cd);
+                accel_b=(float)STEPPER_MICROSTEPS*(float)max_accel-accel_m*(float)max_cd;
+                pidk_m  =                   float(max_pidk-min_pidk)/float(max_cd-min_cd);
+                pidk_b=(float)max_pidk-pidk_m*(float)max_cd;
+                //cdyn_m=
+                // max_acc,min_acc,max_speed,min_speed,max_cd,min_cd
+                change_pid_params=false;
+                //Serial.print("Speed m b:"); Serial.print(speed_m);Serial.print(" ");Serial.println(speed_b);
+                //Serial.print("Accel m b:"); Serial.print(accel_m);Serial.print(" ");Serial.println(accel_b);
+                //Serial.print("pidk m b:"); Serial.print(pidk_m);Serial.print(" ");Serial.println(pidk_b);
+          }
+          if ( abs ( last_pressure_max - _pip) >  1.5 ){
                   //if (Cdyn < 20 ) {//HARD Cv or resistance
                   float peep_fac=-0.05*last_pressure_min+1.25;
                   
-                  if (Cdyn<10) {
-                     PID_KP=250*peep_fac;
-                     STEPPER_SPEED_MAX=4000;	//Originally 5000
-      			         STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  200;
-                  } else if (Cdyn>40) {
-                    STEPPER_SPEED_MAX=12000;
-      			        if (_pip>22) STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  800;//But the limit is calculated with range from 200 to 700
-                    else         STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  600;
-                    PID_KP=1000*peep_fac;
+                  if ( Cdyn < min_cd ) {
+                       PID_KP                   = min_pidk * peep_fac; //Orig 250
+                       STEPPER_SPEED_MAX =        STEPPER_MICROSTEPS * min_speed;	//Originally 4000
+        			         STEPPER_ACC_INSUFFLATION = STEPPER_MICROSTEPS *  min_accel;            
+                  } else if ( Cdyn > max_cd ) {
+                       PID_KP                   = max_pidk*peep_fac; //orig 1000
+
+                       STEPPER_SPEED_MAX        = STEPPER_MICROSTEPS * max_speed; //Originally 12000
+        			         if (_pip>22) 
+        			          STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  max_accel * 1.3;//But the limit is calculated with range from 200 to 700
+                       else         
+                        STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  max_accel;
+                        //STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  600;
+                       
                   }
                   else {
-                  PID_KP=(25*(float)Cdyn)*peep_fac;
-          				STEPPER_SPEED_MAX=float(Cdyn)*266.+1660.;	//Originally was 250
-          				STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS*(13.33*(float)Cdyn+66.6);//((1000-200)*0.033+;
+                  //PID_KP=(25*(float)Cdyn)*peep_fac;
+                  PID_KP=(pidk_m*(float)Cdyn)*peep_fac;
+          				//STEPPER_SPEED_MAX=float(Cdyn)*266.+1660.;	//Originally was 250
+                  STEPPER_SPEED_MAX=float(Cdyn) * speed_m + speed_b;  //Originally was 250
+          				//STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS*(13.33*(float)Cdyn+66.6);
+                  STEPPER_ACC_INSUFFLATION=(accel_m*(float)Cdyn+accel_b); //WITHOUT MICROSTEPS (ALREADY DONE IN CALC)
       			  }
               _pid->setGains(PID_KP,PID_KI, PID_KD);
               _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);
           }
-      } else {//autopid
+      } else {//no autopid
               PID_KP=700.01;
               PID_KI=20.01;
               PID_KD=100.01;
@@ -289,6 +317,8 @@ void MechVentilation :: update ( void )
               _pid->setGains(PID_KP,PID_KI, PID_KD);
               _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);     
       }
+      }//if pcl
+
     }// INIT INSUFFLATION
     break;
     case State_Insufflation:

@@ -14,6 +14,7 @@
 #include "src/AutoPID/AutoPID.h"
 #include "Sensors.h"
 
+
 #ifdef ACCEL_STEPPER
 #include "src/AccelStepper/AccelStepper.h"
 #else
@@ -130,6 +131,7 @@ private:
     void _decreaseInsuflation (byte factor);
 #endif
     void _setInspiratoryCycle(void);
+
 
     /* Configuration parameters */
     #ifdef ACCEL_STEPPER

@@ -1,0 +1,2069 @@
+diff --git a/arduino/ambovis/DEFAULTS_PID.txt b/arduino/ambovis/DEFAULTS_PID.txt
+new file mode 100644
+index 0000000..62d460f
+--- /dev/null
++++ b/arduino/ambovis/DEFAULTS_PID.txt
+@@ -0,0 +1,21 @@
++Cd
++Min: 10 Max: 40
++
++Speed (hay que multiplicar x microsteps)
++Min: 250 Max: 750 (Para 16ms son 4000 y 12000)
++Speed_B 1660
++Speed_m 266.67
++
++
++Acc (hay que multiplicar x microsteps)
++Min: 200 (3200)
++Max: 600 (9600)
++m: 13.33
++b= 66.67
++STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS*(13.33*(float)Cdyn+66.6);
++
++
++Log de lo calculado
++Speed m b:266.67 1333.33
++Accel m b:213.33 1066.67
++pidk m b:25.00 0.00
+diff --git a/arduino/ambovis/MechVentilation.cpp b/arduino/ambovis/MechVentilation.cpp
+index ff1474b..bc1c9d0 100644
+--- a/arduino/ambovis/MechVentilation.cpp
++++ b/arduino/ambovis/MechVentilation.cpp
+@@ -17,6 +17,10 @@ int PID_KI=20.01;
+ int PID_KD=50.01;
+ int STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  600;
+ int STEPPER_SPEED_MAX=14000;
++
++//static
++float speed_m,accel_m,pidk_m,speed_b,accel_b,pidk_b;
++
+ MechVentilation::MechVentilation(
+         #ifdef ACCEL_STEPPER
+         AccelStepper *stepper,
+@@ -185,22 +189,22 @@ void MechVentilation :: update ( void )
+     {
+     case Init_Insufflation:
+     {
+-      //Filter vars
+-      #ifdef FLUX_FILTER
+-      flux_filter_time=millis();
+-      flux_count=0;
+-      //flux_sum=0;
+-      #endif
+-      
+-      //adding_vol=true;
+-      #ifdef DEBUG_UPDATE
+-        Serial.println("INSUFLACION ");        
+-      #endif
+-
+-      last_pressure_max=pressure_max;
+-      last_pressure_min=pressure_min;
+-      pressure_max=0;
+-      pressure_min=60;
++        //Filter vars
++        #ifdef FLUX_FILTER
++        flux_filter_time=millis();
++        flux_count=0;
++        //flux_sum=0;
++        #endif
++        
++        //adding_vol=true;
++        #ifdef DEBUG_UPDATE
++          Serial.println("INSUFLACION ");        
++        #endif
++  
++        last_pressure_max=pressure_max;
++        last_pressure_min=pressure_min;
++        pressure_max=0;
++        pressure_min=60;
+ 
+         // Close Solenoid Valve
+ 
+@@ -256,31 +260,55 @@ void MechVentilation :: update ( void )
+ 
+         currentTime = millis();
+         display_needs_update=true;
+-
++      
++      if (vent_mode==VENTMODE_PCL){
+       if (autopid) {
+-          if (abs(last_pressure_max - _pip) >  1.5 ){
++      
++          if (change_pid_params) {
++                speed_m =(float)STEPPER_MICROSTEPS*float(max_speed-min_speed)/float(max_cd-min_cd);
++                speed_b=(float)STEPPER_MICROSTEPS*(float)max_speed-speed_m*(float)max_cd;
++                accel_m =(float)STEPPER_MICROSTEPS*float(max_accel-min_accel)/float(max_cd-min_cd);
++                accel_b=(float)STEPPER_MICROSTEPS*(float)max_accel-accel_m*(float)max_cd;
++                pidk_m  =                   float(max_pidk-min_pidk)/float(max_cd-min_cd);
++                pidk_b=(float)max_pidk-pidk_m*(float)max_cd;
++                //cdyn_m=
++                // max_acc,min_acc,max_speed,min_speed,max_cd,min_cd
++                change_pid_params=false;
++                //Serial.print("Speed m b:"); Serial.print(speed_m);Serial.print(" ");Serial.println(speed_b);
++                //Serial.print("Accel m b:"); Serial.print(accel_m);Serial.print(" ");Serial.println(accel_b);
++                //Serial.print("pidk m b:"); Serial.print(pidk_m);Serial.print(" ");Serial.println(pidk_b);
++          }
++          if ( abs ( last_pressure_max - _pip) >  1.5 ){
+                   //if (Cdyn < 20 ) {//HARD Cv or resistance
+                   float peep_fac=-0.05*last_pressure_min+1.25;
+                   
+-                  if (Cdyn<10) {
+-                     PID_KP=250*peep_fac;
+-                     STEPPER_SPEED_MAX=4000;	//Originally 5000
+-      			         STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  200;
+-                  } else if (Cdyn>40) {
+-                    STEPPER_SPEED_MAX=12000;
+-      			        if (_pip>22) STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  800;//But the limit is calculated with range from 200 to 700
+-                    else         STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  600;
+-                    PID_KP=1000*peep_fac;
++                  if ( Cdyn < min_cd ) {
++                       PID_KP                   = min_pidk * peep_fac; //Orig 250
++                       STEPPER_SPEED_MAX =        STEPPER_MICROSTEPS * min_speed;	//Originally 4000
++        			         STEPPER_ACC_INSUFFLATION = STEPPER_MICROSTEPS *  min_accel;            
++                  } else if ( Cdyn > max_cd ) {
++                       PID_KP                   = max_pidk*peep_fac; //orig 1000
++
++                       STEPPER_SPEED_MAX        = STEPPER_MICROSTEPS * max_speed; //Originally 12000
++        			         if (_pip>22) 
++        			          STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  max_accel * 1.3;//But the limit is calculated with range from 200 to 700
++                       else         
++                        STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  max_accel;
++                        //STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  600;
++                       
+                   }
+                   else {
+-                  PID_KP=(25*(float)Cdyn)*peep_fac;
+-          				STEPPER_SPEED_MAX=float(Cdyn)*266.+1660.;	//Originally was 250
+-          				STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS*(13.33*(float)Cdyn+66.6);//((1000-200)*0.033+;
++                  //PID_KP=(25*(float)Cdyn)*peep_fac;
++                  PID_KP=(pidk_m*(float)Cdyn)*peep_fac;
++          				//STEPPER_SPEED_MAX=float(Cdyn)*266.+1660.;	//Originally was 250
++                  STEPPER_SPEED_MAX=float(Cdyn) * speed_m + speed_b;  //Originally was 250
++          				//STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS*(13.33*(float)Cdyn+66.6);
++                  STEPPER_ACC_INSUFFLATION=(accel_m*(float)Cdyn+accel_b); //WITHOUT MICROSTEPS (ALREADY DONE IN CALC)
+       			  }
+               _pid->setGains(PID_KP,PID_KI, PID_KD);
+               _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);
+           }
+-      } else {//autopid
++      } else {//no autopid
+               PID_KP=700.01;
+               PID_KI=20.01;
+               PID_KD=100.01;
+@@ -289,6 +317,8 @@ void MechVentilation :: update ( void )
+               _pid->setGains(PID_KP,PID_KI, PID_KD);
+               _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);     
+       }
++      }//if pcl
++
+     }// INIT INSUFFLATION
+     break;
+     case State_Insufflation:
+diff --git a/arduino/ambovis/MechVentilation.h b/arduino/ambovis/MechVentilation.h
+index 2b77697..f76d07e 100644
+--- a/arduino/ambovis/MechVentilation.h
++++ b/arduino/ambovis/MechVentilation.h
+@@ -14,6 +14,7 @@
+ #include "src/AutoPID/AutoPID.h"
+ #include "Sensors.h"
+ 
++
+ #ifdef ACCEL_STEPPER
+ #include "src/AccelStepper/AccelStepper.h"
+ #else
+@@ -131,6 +132,7 @@ private:
+ #endif
+     void _setInspiratoryCycle(void);
+ 
++
+     /* Configuration parameters */
+     #ifdef ACCEL_STEPPER
+     AccelStepper *_stepper;
+diff --git a/arduino/ambovis/README.txt b/arduino/ambovis/README.txt
+index 090da49..d5f66f0 100644
+--- a/arduino/ambovis/README.txt
++++ b/arduino/ambovis/README.txt
+@@ -155,4 +155,6 @@ Full calibrated
+  
+ Pressure Range: 300hPa to 1100hPa (+9000m to -500m)
+ 
+-30 kpaa
+\ No newline at end of file
++30 kpaa
++
++https://stackoverflow.com/questions/18705363/arduino-uno-pwm-pins-conflict
+diff --git a/arduino/ambovis/ambovis.ino b/arduino/ambovis/ambovis.ino
+index c7d544c..45bae7a 100644
+--- a/arduino/ambovis/ambovis.ino
++++ b/arduino/ambovis/ambovis.ino
+@@ -1,7 +1,10 @@
+ #include "pinout.h"
+ #include "MechVentilation.h"
+ #include "src/TimerOne/TimerOne.h"
++//#include "src/TimerTwo/TimerTwo.h"
++
+ #include "menu.h"
++#include "display.h"
+ 
+ #include "src/AutoPID/AutoPID.h"
+ #ifdef ACCEL_STEPPER
+@@ -25,6 +28,7 @@ int vt;
+ float _mlInsVol = 0;
+ float _mlExsVol = 0;
+ int _mllastInsVol, _mllastExsVol;
++int mute_count;
+ 
+ int Compression_perc = 8; //80%
+ 
+@@ -47,13 +51,24 @@ LiquidCrystal_I2C lcd(0x3F, 20, 4);
+ LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
+ #endif
+ 
++//MUTE
++boolean last_mute,curr_mute;
++unsigned long time_mute;
++
++boolean buzzmuted;
++unsigned long timebuzz=0;
++bool isbuzzeron=false;
++
++
++Adafruit_ILI9341 tft=Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
++
+ byte vcorr_count;
+ byte p_trim = 100;
+ float pressure_p;   //EXTERN!!
+ float last_pressure_max, last_pressure_min, last_pressure_peep;
+ float pressure_peep;
+ 
+-byte vent_mode = VENTMODE_PCL; //0
++byte vent_mode = VENTMODE_MAN; //0
+ //Adafruit_BMP280 _pres1Sensor;
+ Pressure_Sensor _dpsensor;
+ float verrp;
+@@ -90,6 +105,13 @@ unsigned long time;
+ byte cycle_pos;
+ int16_t adc0;
+ 
++int max_accel,min_accel;
++int max_speed, min_speed;
++int max_pidk=1000;
++int min_pidk=250;
++  int max_cd=40;  //T MODIFY: READ FROM MEM
++  int min_cd=10;
++  
+ unsigned long last_cycle;
+ 
+ byte menu_number = 0;
+@@ -97,7 +119,7 @@ byte menu_number = 0;
+ byte alarm_max_pressure = 35;
+ byte alarm_peep_pressure = 5;
+ byte isalarmvt_on;
+-int alarm_vt = 400;
++int alarm_vt = 200;
+ 
+ //MENU
+ unsigned long lastButtonPress;
+@@ -112,10 +134,7 @@ float verror, verror_sum;
+ float dp[] = { -3.074176245, -2.547210457, -2.087678384, -1.60054669, -1.216013465, -0.795599072, -0.630753349, -0.504544509, -0.365700986, -0.260808033, -0.176879848, -0.109004974, -0.05874157, -0.051474571, -0.043771552, -0.037061691, -0.029794693, -0.023012161, -0.017561913, -0.01441288, -0.012111664, -0.009325981, -0.007024765, -0.004602432, -0.002664566, 0.00090924, 0.00030358, 0, -0.000242233, -0.000837976, 0.001999305, 0.003937171, 0.006117271, 0.008176254, 0.011688636, 0.014830113, 0.020045692, 0.023566372, 0.028644966, 0.03312327, 0.039664506, 0.047781395, 0.052868293, 0.096530072, 0.151339196, 0.216332764, 0.295221736, 0.377891785, 0.491216024, 0.606462279, 0.877207832, 1.207061607, 1.563385753, 2.030351958, 2.444452733};
+ byte po_flux[] = {0, 10, 20, 30, 40, 50, 55, 60, 65, 70, 75, 80, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 100, 100, 100, 100, 100, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 120, 125, 130, 135, 140, 145, 150, 160, 170, 180, 190, 200};
+ 
+-
+-
+-int max_speed = 2000;
+-int max_accel = 2000;
++bool change_pid_params=false;
+ 
+ //Encoder from https://www.instructables.com/id/Improved-Arduino-Rotary-Encoder-Reading/
+ int pinA = PIN_ENC_CL; // Our first hardware interrupt pin is digital pin 2
+@@ -128,7 +147,7 @@ byte reading = 0; //somewhere to store the direct values we read from our interr
+ 
+ byte max_sel, min_sel; //According to current selection
+ 
+-
++void check_buzzer_mute();
+ //
+ void PinA() {
+   cli(); //stop interrupts happening before we read pin values
+@@ -159,28 +178,13 @@ AutoPID * pid;
+ MechVentilation * ventilation;
+ VentilationOptions_t options;
+ 
+-//#ifdef LCD_I2C
+-//LiquidCrystal_I2C lcd;
+-//lcd = LiquidCrystal_I2C(0x3F, 20, 4);
+-//extern LiquidCrystal_I2C lcd;
+-//#else
+-////extern LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
+-//lcd=LiquidCrystal(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
+-////extern LiquidCrystal lcd;
+-//#endif
+-
+ float p_dpt0;
+ void setup() {
+-
++  
+   Serial.begin(250000);
+   init_display();
+-
+-  pinMode(PIN_BUZZ, OUTPUT);
+-  digitalWrite(PIN_BUZZ, LOW); // test zumbador
+-  delay(500);
+-  digitalWrite(PIN_BUZZ, HIGH);
+-  //beep(100); //Beep
+-  //tone(PIN_BUZZ, 1000, 500);
++  menu_sel=0;
++  pinMode(PIN_POWEROFF, INPUT);
+ 
+   // PID
+   pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
+@@ -190,6 +194,14 @@ void setup() {
+   // set PID update interval
+   pid -> setTimeStep(PID_TS);
+ 
++  max_cd=40;  //T MODIFY: READ FROM MEM
++  min_cd=10;
++  min_speed = 250;  // x microsteps
++  max_speed = 750;  // x Microsteps, originally 16000 (with 16 ms = 750)
++  max_accel = 600;
++  min_accel = 200;
++  change_pid_params=true; //To calculate at first time
++  
+   // Parte motor
+   pinMode(PIN_EN, OUTPUT);
+   digitalWrite(PIN_EN, HIGH);
+@@ -222,7 +234,7 @@ void setup() {
+   // Habilita el motor
+   digitalWrite(PIN_EN, LOW);
+ 
+-  writeLine(1, "AMBOVIS 0529_1", 4);
++  writeLine(1, "AMBOVIS 0619", 4);
+ 
+   p_dpt0 = 0;
+   ads.begin();
+@@ -264,8 +276,8 @@ void setup() {
+ 
+   pinMode(pinA, INPUT_PULLUP); // set pinA as an input, pulled HIGH to the logic voltage (5V or 3.3V for most cases)
+   pinMode(pinB, INPUT_PULLUP); // set pinB as an input, pulled HIGH to the logic voltage (5V or 3.3V for most cases)
+-  attachInterrupt(0, PinA, RISING); // set an interrupt on PinA, looking for a rising edge signal and executing the "PinA" Interrupt Service Routine (below)
+-  attachInterrupt(1, PinB, RISING); // set an interrupt on PinB, looking for a rising edge signal and executing the "PinB" Interrupt Service Routine (below)
++  attachInterrupt(4, PinA, RISING); // set an interrupt on PinA, looking for a rising edge signal and executing the "PinA" Interrupt Service Routine (below)
++  attachInterrupt(5, PinB, RISING); // set an interrupt on PinB, looking for a rising edge signal and executing the "PinB" Interrupt Service Routine (below)
+   pinMode(PIN_ENC_SW, INPUT_PULLUP);
+   //btnState=digitalRead(9);
+ 
+@@ -285,20 +297,38 @@ void setup() {
+ 
+   Timer1.initialize(50);
+   Timer1.attachInterrupt(timer1Isr);
++  //Timer2.setPeriod(500000);
++  //Timer2.attachInterrupt(timer2Isr);
+ 
+ #ifdef DEBUG_UPDATE
+   Serial.print("Honey Volt at p0: "); Serial.println(analogRead(A0) / 1023.);
+ #endif
+   int eeAddress=0;
+-  EEPROM.get(0, last_cycle);
+-  eeAddress+= sizeof(unsigned long);
+-  EEPROM.get(eeAddress, p_trim);
+-  eeAddress+= sizeof(p_trim);
+-  EEPROM.get(eeAddress, autopid);
+-  eeAddress+= sizeof(autopid);
++  EEPROM.get(0, last_cycle); eeAddress+= sizeof(unsigned long);
++  EEPROM.get(eeAddress, p_trim); eeAddress+= sizeof(p_trim);
++//  EEPROM.get(eeAddress, min_cd); eeAddress+= sizeof(min_cd);
++//  EEPROM.get(eeAddress, max_cd); eeAddress+= sizeof(max_cd);
++//  EEPROM.get(eeAddress, min_speed); eeAddress+= sizeof(min_speed);
++//  EEPROM.get(eeAddress, max_speed); eeAddress+= sizeof(max_speed);
++//  EEPROM.get(eeAddress, min_accel); eeAddress+= sizeof(min_accel);
++//  EEPROM.get(eeAddress, max_accel); eeAddress+= sizeof(max_accel);
++//  EEPROM.get(eeAddress, min_pidk); eeAddress+= sizeof(min_pidk);
++//  EEPROM.get(eeAddress, max_pidk); eeAddress+= sizeof(max_pidk);
++        
+   Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
+   ventilation->setCycleNum(last_cycle);
+ 
++  pinMode(PIN_BUZZER, OUTPUT); //Set buzzerPin as output
++    pinMode(GREEN_LED, OUTPUT); //Set buzzerPin as output
++    pinMode(YELLOW_LED, OUTPUT); //Set buzzerPin as output
++    pinMode(RED_LED, OUTPUT); //Set buzzerPin as output
++    tft.begin();
++    tft.fillScreen(ILI9341_BLACK);
++
++    digitalWrite(PIN_BUZZER,1);
++    buzzmuted=false;
++    last_mute=LOW;
++    mute_count=0;
+ }
+ 
+ 
+@@ -311,48 +341,58 @@ void loop() {
+   check_encoder();
+ 
+   time = millis();
++  //check_buzzer_mute();
+ 
+   if (millis() > lastSave + TIME_SAVE) {
+     int eeAddress=0;
+-    EEPROM.put(0, last_cycle);
+-    eeAddress+= sizeof(unsigned long);
+-    EEPROM.put(eeAddress, p_trim);
+-    eeAddress+= sizeof(p_trim);
+-    EEPROM.put(eeAddress, autopid);
+-    eeAddress+= sizeof(autopid);
++    EEPROM.put(0, last_cycle);        eeAddress+= sizeof(unsigned long);
++    EEPROM.put(eeAddress, p_trim);    eeAddress+= sizeof(p_trim);
++    EEPROM.put(eeAddress, autopid);   eeAddress+= sizeof(autopid);
++    EEPROM.put(eeAddress, min_cd);    eeAddress+= sizeof(min_cd);
++    EEPROM.put(eeAddress, max_cd);    eeAddress+= sizeof(max_cd);
++    EEPROM.put(eeAddress, min_speed); eeAddress+= sizeof(min_speed);
++    EEPROM.put(eeAddress, max_speed); eeAddress+= sizeof(max_speed);
++    EEPROM.put(eeAddress, min_accel); eeAddress+= sizeof(min_accel);
++    EEPROM.put(eeAddress, max_accel); eeAddress+= sizeof(max_accel);
++    EEPROM.put(eeAddress, min_pidk);  eeAddress+= sizeof(min_pidk);
++    EEPROM.put(eeAddress, max_pidk);  eeAddress+= sizeof(max_pidk);
++    
+     lastSave = millis();
+   }
+ 
+-#ifdef DEBUG_OFF
++
+   if ( millis() > lastShowSensor + TIME_SHOW ) {
+-    lastShowSensor = millis();
+-    Serial.print(int(cycle_pos)); Serial.print(",");
+-    Serial.print(int(pressure_p)); Serial.print(",");
+-#ifdef FILTER_FLUX
+-    Serial.print(int(flow_f)); Serial.print(",");
+-#else
+-    Serial.print(int(_flux)); Serial.print(",");
+-#endif
+-    Serial.print(alarm_state); Serial.print(",");
+-    Serial.print(int(_mlInsVol - _mlExsVol)); Serial.print(",");
+-    Serial.print(int(_mllastInsVol)); Serial.print(",");
+-    Serial.println(int(_mllastExsVol));
+-
+-    //Serial.print(",");Serial.println(int(alarm_state));
+-    //      #ifdef FILTER_FLUX
+-    //      Serial.print(Voltage*1000);Serial.print(",");Serial.print(p_dpt,4);Serial.print(",");Serial.println(_flux);/*Serial.print(",");/*Serial.print(",");Serial.println(_flux_sum/5.);*/
+-    //      Serial.print("Vcorr");Serial.print(",");Serial.println((Voltage-verror));
+-    //      #endif
+-    //Serial.print(int(_mlInsVol));Serial.print(",");Serial.println(int(_mlExsVol));
++
++      lastShowSensor=millis(); 
++      // Serial.print(int(cycle_pos));Serial.print(",");
++	    // Serial.print(int(pressure_p));Serial.print(",");
++     //Serial.println(analogRead(A0));
++	    // #ifdef FILTER_FLUX
++	    // Serial.print(int(flow_f));Serial.print(",");
++      // #else
++      // Serial.print(int(_flux));Serial.print(",");
++      // #endif      
++      //Serial.println(int(alarm_state));
++      //Serial.print(",");
++      // Serial.println(int(_mlInsVol-_mlExsVol));
++//      
++      //Serial.print(",");Serial.println(int(alarm_state));     
++//      #ifdef FILTER_FLUX 
++//      Serial.print(Voltage*1000);Serial.print(",");Serial.print(p_dpt);Serial.print(",");Serial.println(_flux);/*Serial.print(",");/*Serial.print(",");Serial.println(_flux_sum/5.);*/
++//      #endif
++      //Serial.print(int(_mlInsVol));Serial.print(",");Serial.println(int(_mlExsVol));
++      tft_draw();
+ 
+   }
+-#endif
++
+ 
+   if (time > lastReadSensor + TIME_SENSOR) {
+ 
+     //pressure_p=( analogRead(A0)/(1023.) - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20*1.05;
+-    pressure_p = ( analogRead(A0) / (1023.) - verrp * 0.2 - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20 * 0.75 - 1.0;
+-
++    // pressure_p = ( analogRead(A0) / (1023.) - verrp * 0.2 - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20 * 0.75 - 1.0;//MPX5010
++    pressure_p = (( float(analogRead(A0))/1023.*V_SUPPLY_HONEY - 0.1 * V_SUPPLY_HONEY/* - corr_fs */) / (0.8 * V_SUPPLY_HONEY) * DEFAULT_PSI_TO_CM_H20 * 2. - DEFAULT_PSI_TO_CM_H20);//HONEYWELL
++    
++    
+     adc0 = ads.readADC_SingleEnded(0);
+     Voltage = (adc0 * 0.1875) / 1000.; //Volts
+ 
+@@ -447,8 +487,10 @@ void loop() {
+       }
+     }
+ #endif
+-
+-  }
++    if (digitalRead(PIN_POWEROFF)) {
++    
++    }
++  }//change cycle
+ 
+   if (display_needs_update) {
+     //lcd.clear();  //display_lcd do not clear screnn in order to not blink
+@@ -473,6 +515,32 @@ void loop() {
+     show_changed_options = false;
+   }
+ 
++    if (alarm_state > 0) {
++
++          if (!buzzmuted) {
++              if (millis() > timebuzz + TIME_BUZZER) {
++                  timebuzz=millis();
++                  isbuzzeron=!isbuzzeron;
++                  if (isbuzzeron){
++                      //tone(PIN_BUZZER,440);
++                      digitalWrite(PIN_BUZZER,0);
++                  }   
++                  else {
++                      //noTone(PIN_BUZZER);
++                      digitalWrite(PIN_BUZZER,1);
++                  }
++              }
++          } else {  //buzz muted
++              digitalWrite(PIN_BUZZER,1);
++              //noTone(PIN_BUZZER);
++          }
++    } else {//state > 0
++      //noTone(PIN_BUZZER);
++      digitalWrite(PIN_BUZZER,1);
++      isbuzzeron=true;        //Inverted logic
++    }
++
++
+ }//LOOP
+ 
+ void timer1Isr(void)
+@@ -505,10 +573,10 @@ void update_error() {
+   }
+ }
+ 
+-void timer2Isr(void)
+-{
+-  ventilation -> update();
+-}
++//void timer2Isr(void)
++//{
++//  ventilation -> update();
++//}
+ 
+ //
+ 
+@@ -526,3 +594,25 @@ int findClosest(float arr[], int n, float target) {
+   }
+   return i;
+ }
++
++boolean debounce(boolean last, int pin) {
++    boolean current = digitalRead(pin);
++    if (last != current) {
++        delay(50);
++        current = digitalRead(pin);
++    }
++    return current;
++}
++
++void check_buzzer_mute() {
++    curr_mute = debounce ( last_mute, PIN_MUTE );         //Debounce for Up button
++    if (last_mute== LOW && curr_mute == HIGH && !buzzmuted){
++        mute_count=0;
++        buzzmuted=true;
++    }
++    last_mute = curr_mute;
++    if(buzzmuted) {
++        if (mute_count > 2*TIME_MUTE)  //each count is every 500 ms
++        buzzmuted=false;
++    }
++}
+diff --git a/arduino/ambovis/defaults.h b/arduino/ambovis/defaults.h
+index 32de047..5975034 100644
+--- a/arduino/ambovis/defaults.h
++++ b/arduino/ambovis/defaults.h
+@@ -17,10 +17,15 @@
+ // Base de tiempos. Periodo de llamada a mechVentilation.update
+ #define TIME_BASE   25                 // msec
+ #define TIME_SENSOR 10                // msec
+-#define TIME_SHOW 80                  //IF OLED DISPLAY IS USED FASTER THAN 50ms GIVES ERRORS IN THE PLOTS 
+-#define TIME_SAVE 5000
++#define TIME_SHOW 	80                  //IF OLED DISPLAY IS USED FASTER THAN 50ms GIVES ERRORS IN THE PLOTS 
++#define TIME_SAVE 	5000
++#define TIME_BUZZER 500
++#define TIME_MUTE   30
++
+ #define TIME_SEND_CONFIGURATION 2000 // msec
+-#define V_HONEY_P0 0.49874F //Analog/1023
++#define V_HONEY_P0 	0.49874F //Analog/1023
++
++#define TIME_BUZZER 500
+ 
+ // Sensores
+ #define ENABLED_SENSOR_VOLUME 1
+@@ -39,7 +44,7 @@
+ //#define STEPPER_LOWEST_POSITION     (STEPPER_MICROSTEPS *  -100)   // Steps
+ //#define STEPPER_HIGHEST_POSITION    (STEPPER_MICROSTEPS *   100)   // Steps
+ #define STEPPER_LOWEST_POSITION     (-10)   // Steps
+-#define STEPPER_HIGHEST_POSITION    ( 2800)   //270º
++#define STEPPER_HIGHEST_POSITION    ( 2500)   //270º
+ #define STEPPER_SPEED_DEFAULT       (400)   // Steps/s
+ extern int STEPPER_SPEED_MAX;       //(14000)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
+ #define STEPPER_ACCEL_MAX           (12000)
+@@ -63,7 +68,7 @@ extern int STEPPER_ACC_INSUFFLATION;    //(STEPPER_MICROSTEPS *  600)   // Steps
+ #define DEFAULT_PEAK_INSPIRATORY_PRESSURE 25
+ #define DEFAULT_PEAK_ESPIRATORY_PRESSURE 5
+ 
+-#define V_SUPPLY_HONEY 4.8F
++#define V_SUPPLY_HONEY 5.0F
+ // #define DEFAULT_PEAK_ESPIRATORY_PRESSURE 6
+ 
+ #define DEFAULT_PRESSURE_V_FLUX_K1 1.
+@@ -124,4 +129,11 @@ class VentilationOptions_t {
+ extern byte vent_mode;
+ extern bool send_data;
+ 
++extern byte alarm_state;
++
++//PID LIMITS
++extern int max_accel,min_accel,max_speed,min_speed,max_cd,min_cd,max_pidk,min_pidk;
++extern bool change_pid_params;
++extern byte menu_sel;
++
+ #endif // DEFAULTS_H
+diff --git a/arduino/ambovis/display.cpp b/arduino/ambovis/display.cpp
+new file mode 100644
+index 0000000..9996b21
+--- /dev/null
++++ b/arduino/ambovis/display.cpp
+@@ -0,0 +1,170 @@
++#include "display.h"
++#include "MechVentilation.h"
++
++bool lcd_cleaned=false;
++
++unsigned long time_last_show=0;
++
++char a[10],b[10];
++
++const byte numChars = 32;
++char receivedChars[numChars]; // an array to store the received data
++int last_t;
++int integerFromPC [5];
++float floatFromPC = 0.0;
++int axispos[]={100,170,300}; //from each graph
++byte state_r;
++int buzzer=3; //pin
++
++enum _state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
++bool wait4statechg=false;
++
++_state state;
++
++char recvChar;
++char endMarker = '>';
++boolean newData = false;
++byte valsreaded=0;
++int valsreaded_[3];
++byte last_x=0;
++
++
++int count=0;
++byte escala=32;
++byte x[128],y[64];
++
++byte rx[128],ry[128];
++int  ry2[128];
++int yflux[2];
++int yvt[2];
++char buffer[10];
++void print_vols();
++//void setup() {
++//  Serial.begin(250000);
++//  Serial.println("ILI9341 Test!"); 
++//
++//  pinMode(buzzer, OUTPUT); //Set buzzerPin as output
++//  pinMode(GREEN_LED, OUTPUT); //Set buzzerPin as output
++//  pinMode(YELLOW_LED, OUTPUT); //Set buzzerPin as output
++//  pinMode(RED_LED, OUTPUT); //Set buzzerPin as output
++//
++//  
++//  tft.begin();
++//  tft.fillScreen(ILI9341_BLACK);
++//
++//  axispos[0]=63;  axispos[1]=160;  axispos[2]=260;
++//
++//}
++
++
++void tft_draw(void) {
++
++    valsreaded+=1;
++    last_x=cycle_pos;
++    rx[valsreaded]=cycle_pos;
++    ry[valsreaded]=pressure_p*2.;     
++
++    yflux[0]=yflux[1];yflux[1]=int(_flux*0.035);
++    yvt[0]=yvt[1];yvt[1]=int((_mlInsVol - _mlExsVol)*0.1);
++
++  
++  	tft.setRotation(1);
++  	drawY2(ILI9341_GREEN);
++  
++  	if (last_x<10 && !lcd_cleaned){
++  		lcd_cleaned=true;
++  		valsreaded=0;
++  		for (int i=0;i<3;i++) 
++  		  valsreaded_[i]=0;
++  		wait4statechg=false;
++      print_vols();
++      tft.setRotation(1);
++  		//tft.fillRect(0,240-last_x, 320,240-last_x+10, ILI9341_BLACK);
++  		//tft.fillScreen(ILI9341_BLACK);
++  		//AXIS
++      tft.fillRect(0,0,60,100, ILI9341_BLACK);
++  		for (int i=0;i<3;i++)
++  		  tft.drawLine(axispos[i],0, axispos[i], 240, ILI9341_DARKGREY);
++  		}
++  		if (last_x>10 && lcd_cleaned){
++  		lcd_cleaned=false;
++	}
++  
++    Serial.println(state_r);
++    if (alarm_state>9) {
++        digitalWrite(RED_LED,HIGH);
++        digitalWrite(RED_LED,LOW);
++        tft.setRotation(0);
++        tft.setTextColor(ILI9341_ORANGE); tft.setTextSize(2); 
++        tft.setCursor(150, 40);   
++        tft.println("VT AL");
++        state_r=alarm_state-10;
++    } else {
++        digitalWrite(RED_LED,LOW);
++        digitalWrite(RED_LED,LOW);
++        state_r=alarm_state;
++    }
++    switch (state_r){
++        case NO_ALARM:
++            if (state==0) //state_r!=10
++            digitalWrite(GREEN_LED,HIGH); digitalWrite(YELLOW_LED,LOW); digitalWrite(RED_LED,LOW);   
++          break;
++        case PEEP_ALARM:
++          digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,HIGH); digitalWrite(RED_LED,LOW);  
++          tft.setRotation(0);
++          tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
++          tft.setCursor(150, 20);   
++          tft.println("PEEP AL");
++        break;
++        case PIP_ALARM:
++          digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,LOW); digitalWrite(RED_LED,HIGH);      
++          tft.setRotation(0);
++          tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
++          tft.setCursor(150, 0);   
++          tft.println("PIP AL");
++      break;  
++        case PEEP_PIP_ALARM:
++          digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,HIGH); digitalWrite(RED_LED,HIGH);      
++          tft.setRotation(0);
++          tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
++          tft.setCursor(150, 0);   
++          tft.println("PIP AL");
++          tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
++          tft.setCursor(150, 20);   
++          tft.println("PEEP AL");
++      break;
++      }
++
++
++}//loop
++
++void print_vols(){
++    tft.setRotation(0);
++    tft.fillRect(180,160,50,80, ILI9341_BLACK);
++    //itoa(integerFromPC[5], buffer, 10);
++    itoa(_mllastInsVol, buffer, 10);
++    tft.setCursor(150, 180);
++    tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
++    tft.println("Vi: ");tft.setCursor(190, 180);tft.println(buffer);
++    
++    itoa(_mllastExsVol, buffer, 10);
++    tft.setCursor(150, 200);
++    tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
++    tft.println("Ve: ");tft.setCursor(190, 200);tft.println(buffer);
++    
++    itoa((_mllastInsVol + _mllastExsVol)/2, buffer, 10);
++    tft.setCursor(150, 220);
++    tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
++    tft.println("VT: ");tft.setCursor(190, 220);tft.println(buffer);
++ 
++  }
++void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
++  if (rx[valsreaded]>rx[valsreaded-1]) {//to avoid draw entire line to the begining at the end of the cycle
++      if (rx[valsreaded] < 120) {
++          tft.fillRect(0,240-rx[valsreaded]-5, 320,5, ILI9341_BLACK);
++          tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
++          tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_MAGENTA);
++          tft.drawLine(axispos[2]-yvt[0],             240-rx[valsreaded-1], axispos[2]-yvt[1],            240-rx[valsreaded], ILI9341_BLUE);
++      }
++  }
++}
+diff --git a/arduino/ambovis/display.h b/arduino/ambovis/display.h
+new file mode 100644
+index 0000000..5682e63
+--- /dev/null
++++ b/arduino/ambovis/display.h
+@@ -0,0 +1,27 @@
++#ifndef _DISPLAY_H_
++#define _DISPLAY_H_
++
++#include "pinout.h"
++#include "defaults.h"
++#include "Adafruit_GFX.h"
++#include "Adafruit_ILI9341.h"
++
++#define ILI9341_LIGHTGREY 0xC618 /* 192, 192, 192 */
++#define ILI9341_DARKGREY 0x7BEF /* 128, 128, 128 */
++
++//#define DEBUG 1
++//enum serialpos={ALARM_=0,TIME_,PRESSURE_,FLUX_,VT_};
++//enum serialpos {TIME_=0,PRESSURE_,FLUX_,VT_,ALARM_};//ORIGINAL
++#define TIME_     0
++#define PRESSURE_ 1
++#define FLUX_     2
++#define VT_       4
++#define ALARM_    3
++
++//SPI HARDWARE SHOULD BE PINS CLK #13 AND MISO #11, WITH THIS CONSTRUCTOR!
++extern Adafruit_ILI9341 tft; //= Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
++
++void drawY2(uint16_t color);
++void tft_draw();
++
++#endif
+diff --git a/arduino/ambovis/menu.cpp b/arduino/ambovis/menu.cpp
+index 376693a..596f8c6 100644
+--- a/arduino/ambovis/menu.cpp
++++ b/arduino/ambovis/menu.cpp
+@@ -5,10 +5,13 @@
+ 
+ static bool clear_all_display;
+ 
+-void init_display()
+-{
++static byte max_pidk_byte,min_pidk_byte;
++byte menu_sel; //0 nothing, 1 navigate, 2 option
++
++
++void init_display() {
+   #ifdef LCD_I2C
+-  lcd.begin();  //I2C
++  lcd.begin(20, 4);  //I2C
+ #else
+   lcd.begin(20, 4); //NO I2C
+ #endif
+@@ -34,10 +37,11 @@ void lcd_selxy(int x, int y) {
+   lcd.setCursor(x, y);
+   lcd.print(">");
+ }
++
+ void check_encoder ( ) {
+   byte btnState = digitalRead(PIN_ENC_SW);
+   if (btnState == LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
+-    if (millis() - lastButtonPress > 200) {
++    if (millis() - lastButtonPress > 150) {
+       curr_sel++; //NOT +=1, is a byte
+ 
+       //if ((vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_MAN) && curr_sel==5) curr_sel++; //Not selecting pip in VCL
+@@ -52,6 +56,14 @@ void check_encoder ( ) {
+         } 
+       } else if (menu_number == 1) {
+          if (curr_sel > 5) {
++          curr_sel=0;
++          menu_number=2; 
++          clear_all_display=true;
++          display_lcd();         
++         }
++      }
++        else if (menu_number == 2) {
++         if (curr_sel > 8) {
+           curr_sel=0;
+           menu_number=0; 
+           clear_all_display=true;
+@@ -67,7 +79,10 @@ void check_encoder ( ) {
+             } else if ( menu_number == 1 ) {
+                 min_sel=20;max_sel=50;
+                 encoderPos=oldEncPos=alarm_max_pressure;            
+-         } 
++         } else {
++            encoderPos=min_cd;
++            min_sel=0;max_sel=max_cd;
++         }
+         break;
+         case 2: 
+             if ( menu_number == 0 ) {
+@@ -77,15 +92,21 @@ void check_encoder ( ) {
+                     min_sel=5;max_sel=15;
+                     encoderPos=oldEncPos=alarm_peep_pressure;                          
+                 }
++                else{
++                    encoderPos=min_speed/10;     
++                    min_sel=10;max_sel=100;             
++                }
+         break;
+         case 3:
+           if ( menu_number == 0 ) {
+               encoderPos=oldEncPos=options.percInspEsp;
+               min_sel=2;max_sel=3;   
+           } else if ( menu_number == 1 ) {
+-                encoderPos=byte(0.5*float(alarm_vt));
+-                min_sel=50;max_sel=250;//vt
+-          }     
++                encoderPos=byte(0.1*float(alarm_vt));
++                min_sel=10;max_sel=50;//vt
++          }   else {
++                encoderPos=min_accel/10; 
++                min_sel=10;max_sel=100; }
+         break;
+         case 4: 
+             if ( menu_number == 0 ) {
+@@ -96,19 +117,43 @@ void check_encoder ( ) {
+                   encoderPos=oldEncPos=options.percVolume;
+                   min_sel=40;max_sel=100;            
+                 } 
+-            } else {//menu 0
++            } else if ( menu_number == 1 ) {//menu 0
+                 encoderPos=oldEncPos=p_trim;
+                 min_sel=0;max_sel=200;   
++            } else {
++                encoderPos=max_cd;
++                min_sel=10;max_sel=80;
+             }
+             break;
+               case 5: 
+             if ( menu_number == 0 ) {
+                 encoderPos=oldEncPos=options.peakInspiratoryPressure;
+                 min_sel=15;max_sel=25;
+-            } else {//menu 0
++            } else if ( menu_number == 1 ) {//menu 0
+                   min_sel=0;max_sel=1; 
++            } else {
++                encoderPos=max_speed/10;
++                min_sel=10;max_sel=100;
+             }
+-        break;
++            break;
++            case 6:
++                if ( menu_number == 2 ){
++                    encoderPos=max_accel/10;
++                    min_sel=10;max_sel=100;
++                }
++                break;
++            case 7:
++                if ( menu_number == 2 ){
++                    encoderPos=min_pidk/10;
++                    min_sel=10;max_sel=100;
++                }
++                break;
++            case 8:
++                if ( menu_number == 2 ){
++                    encoderPos=max_pidk/10;
++                    min_sel=10;max_sel=100;
++                }                
++            break;
+       }
+ 
+       old_curr_sel = curr_sel;
+@@ -125,85 +170,106 @@ void check_encoder ( ) {
+ 
+   if (oldEncPos != encoderPos) {
+     show_changed_options = true;
++    
++    if (menu_number==2)
++      change_pid_params=true;
++      
+     if (curr_sel != 0) {
+       if ( encoderPos > max_sel ) {
+          encoderPos=oldEncPos=max_sel; 
+       } else if ( encoderPos < min_sel ) {
+           encoderPos=oldEncPos=min_sel;
+         } else {
+-       
++    
+         oldEncPos = encoderPos;
+-        switch (curr_sel) {
+-          case 1:
+-            if ( menu_number == 0 ) vent_mode           = encoderPos;
+-            else                    alarm_max_pressure  = encoderPos;
+-            break;
+-          case 2:
+-            if ( menu_number == 0 ) options.respiratoryRate = encoderPos;
+-            else                    alarm_peep_pressure     = encoderPos;
+-            break;
+-          case 3:
+-            if ( menu_number == 0 ) options.percInspEsp=encoderPos;
+-            else                    alarm_vt=int(2.*(float)encoderPos);
+-            //pressure_max = 0;
+-            break;
+-          case 4:
+-            if ( menu_number == 0 ) {
+-                if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
+-                  options.tidalVolume = encoderPos;
+-                  #ifdef DEBUG_UPDATE
+-                  Serial.print("tidal ");Serial.print(options.tidalVolume);Serial.print("encoder pos");Serial.print(encoderPos);
+-                  #endif
+-                  } else { //manual
+-                  options.percVolume =encoderPos;
+-                 // Serial.print("Encoder pos: ");Serial.println(encoderPos);
+-                 // Serial.print("Perc vol: ");Serial.println(options.percVolume);
++        //switch (menu_number) {
++            switch (curr_sel) {
++              case 1:
++                if ( menu_number == 0 )     vent_mode           = encoderPos;
++                else if (menu_number == 1)  alarm_max_pressure  = encoderPos;
++                else                        min_cd  = encoderPos;
++                break;
++              case 2:
++                if ( menu_number == 0 )       options.respiratoryRate = encoderPos;
++                else  if (menu_number == 1)   alarm_peep_pressure     = encoderPos;
++                else                          min_speed  = int((float)encoderPos*10.);
++                break;
++              case 3:
++                if ( menu_number == 0 ) options.percInspEsp=encoderPos;
++                else    if (menu_number == 1) alarm_vt=int(10.*(float)encoderPos);
++                else                          min_accel  = int((float)encoderPos*10.);
++                //pressure_max = 0;
++                break;
++              case 4:
++                if ( menu_number == 0 ) {
++                    if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
++                      options.tidalVolume = encoderPos;
++                      #ifdef DEBUG_UPDATE
++                      Serial.print("tidal ");Serial.print(options.tidalVolume);Serial.print("encoder pos");Serial.print(encoderPos);
++                      #endif
++                      } else { //manual
++                      options.percVolume =encoderPos;
++                     // Serial.print("Encoder pos: ");Serial.println(encoderPos);
++                     // Serial.print("Perc vol: ");Serial.println(options.percVolume);
++                    }
++                } else if (menu_number == 1) {
++                    p_trim=encoderPos;
++                } else max_cd  = int(encoderPos);
++                    
++                break;
++              case 5:
++                if ( menu_number == 0 ) {
++                    options.peakInspiratoryPressure = encoderPos;
++                } else if (menu_number == 1) {
++                    autopid=encoderPos;
++                } else {
++                    max_speed  = int((float)encoderPos*10.);
+                 }
+-            } else {//menu number = 1
+-                p_trim=encoderPos;
+-            }
+-            break;
+-          case 5:
+-            if ( menu_number == 0 ) {
+-                options.peakInspiratoryPressure = encoderPos;
+-            } else {
+-                autopid=encoderPos;
+-            }
+-            break;
+-          case 6:
+-            options.peakEspiratoryPressure = encoderPos;
+-            break;
+-        }
+-        show_changed_options = true;
+-        update_options=true;
+-      }//Valid range
++                break;
++              case 6:
++                if ( menu_number == 0 )
++                  options.peakEspiratoryPressure = encoderPos;
++                else if ( menu_number == 2 )  //There is not 6 in menu 1
++                    max_accel  = int((float)encoderPos*10.);
++                break;
++            
++            case 7:
++                if ( menu_number == 2 ){
++                    min_pidk=encoderPos*10;
++                }
++                break;
++            case 8:
++                if ( menu_number == 2 ){
++                    max_pidk=encoderPos*10;
++                }
++                break;
++            }//switch
++            show_changed_options = true;
++            update_options=true;
++          }//Valid range
+   
+     }//oldEncPos != encoderPos and valid between range
+   }
+ }
+ 
+-
+-void display_lcd ( ) {
+-    if (clear_all_display)
+-        lcd.clear();
+-  
+-     if (menu_number==0) {  
+-    lcd_clearxy(0,0);
+-    lcd_clearxy(0,1);lcd_clearxy(9,0);
+-    lcd_clearxy(0,2);lcd_clearxy(8,1);
+-     switch(curr_sel){
+-          case 1: 
+-            lcd_selxy(0,0);break;
+-          case 2: 
+-            lcd_selxy(0,1);break;
+-          case 3:
+-            lcd_selxy(0,2);break;
+-          case 4: 
+-            lcd_selxy(9,0);break;
+-          case 5: 
+-            lcd_selxy(8,1);break;
+-        }
+-     } else {  
++void clear_n_sel(int menu){
++    if (menu==0) {  
++        lcd_clearxy(0,0);
++        lcd_clearxy(0,1);lcd_clearxy(9,0);
++        lcd_clearxy(0,2);lcd_clearxy(8,1);
++         switch(curr_sel){
++              case 1: 
++                lcd_selxy(0,0);break;
++              case 2: 
++                lcd_selxy(0,1);break;
++              case 3:
++                lcd_selxy(0,2);break;
++              case 4: 
++                lcd_selxy(9,0);break;
++              case 5: 
++                lcd_selxy(8,1);break;
++            }
++     } else if (menu==1){  
+       lcd_clearxy(0,0);
+       lcd_clearxy(0,1);lcd_clearxy(10,2);
+       lcd_clearxy(0,2);lcd_clearxy(0,3);
+@@ -219,7 +285,38 @@ void display_lcd ( ) {
+           case 5: 
+             lcd_selxy(0,3);break;
+       }
++    } else if (menu==2) {  
++      lcd_clearxy(0,0);lcd_clearxy(6,0);lcd_clearxy(12,0);
++      lcd_clearxy(0,1);lcd_clearxy(6,1);lcd_clearxy(12,1);
++      lcd_clearxy(0,2);
++      lcd_clearxy(0,3);
++      switch(curr_sel){
++          case 1: 
++            lcd_selxy(0,0);break;//PIP
++          case 2: 
++            lcd_selxy(6,0);break;//PEEP
++          case 3:
++            lcd_selxy(12,0);break;
++          case 4: 
++            lcd_selxy(0,1);break;//PIP
++          case 5: 
++            lcd_selxy(6,1);break;
++          case 6: 
++            lcd_selxy(12,1);break;  
++          case 7: 
++            lcd_selxy(0,2);break;
++          case 8: 
++            lcd_selxy(0,3);break;  
++      }
+     }//menu number 
++
++
++}
++
++void display_lcd ( ) {
++    if (clear_all_display)
++        lcd.clear();        
++  clear_n_sel(menu_number);
+   if (menu_number==0) {  
+     lcd_clearxy(5,1,3); lcd_clearxy(12,0,4);
+     lcd_clearxy(5,2,2); lcd_clearxy(14,1,2);
+@@ -291,8 +388,28 @@ void display_lcd ( ) {
+ 
+     writeLine(3, "C:", 10);
+     writeLine(3, String(last_cycle), 12);
++  } else if (menu_number ==2 ){//PID
++    lcd_clearxy(3,0,2); lcd_clearxy(9,0,3);lcd_clearxy(15,0,3);
++    lcd_clearxy(3,1,2); lcd_clearxy(9,1,3);lcd_clearxy(15,1,3);
++    lcd_clearxy(3,2,3); 
++    lcd_clearxy(3,3,3);
++        
++    writeLine(0, "c:" + String(min_cd), 1); 
++    writeLine(1, "C:" + String(max_cd), 1); 
++    
++    writeLine(0, "v:" + String(min_speed), 7); 
++    writeLine(1, "V:" + String(max_speed), 7);
++
++    writeLine(0, "a:" + String(min_accel), 13); 
++    writeLine(1, "A:" + String(max_accel), 13);
++
++    writeLine(2, "p:" + String(min_pidk), 1); 
++    writeLine(2, "I:" + String(PID_KI), 7); 
++    writeLine(2, "D:" + String(PID_KD), 13);
++    writeLine(3, "P:" + String(max_pidk), 1); 
++
+   }//menu_number
+-      
++  
+   clear_all_display=false;
+ 
+ }
+diff --git a/arduino/ambovis/menu.h b/arduino/ambovis/menu.h
+index 7fcc05e..c5e4df0 100644
+--- a/arduino/ambovis/menu.h
++++ b/arduino/ambovis/menu.h
+@@ -1,14 +1,17 @@
+ #ifndef _MENU_H_
+ #define _MENU_H_
+ 
++#include "defaults.h"
++
+ #ifdef LCD_I2C
+-#include "LiquidCrystal_I2C.h"
++#include "src/LiquidCrystal_I2C/LiquidCrystal_I2C.h"
+ #else
+ #include <LiquidCrystal.h>
+ #endif
+ 
+ #ifdef LCD_I2C
+-LiquidCrystal_I2C lcd(0x3F, 20, 4);
++extern LiquidCrystal_I2C lcd;
++//LiquidCrystal_I2C lcd(0x3F, 20, 4);
+ #else
+ //LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
+ extern LiquidCrystal lcd;
+@@ -25,6 +28,7 @@ extern char tempstr[5],tempstr2[5];
+ extern byte menu_number;
+ extern byte p_trim;
+ 
++
+ void writeLine(int line, String message = "", int offsetLeft = 0);
+ void lcd_clearxy(int x, int y,int pos=1);
+ void lcd_selxy(int x, int y);
+diff --git a/arduino/ambovis/pinout.h b/arduino/ambovis/pinout.h
+index e9b1d80..5f58004 100644
+--- a/arduino/ambovis/pinout.h
++++ b/arduino/ambovis/pinout.h
+@@ -5,9 +5,6 @@
+ #define PIN_STEPPER_STEP 6
+ #define PIN_STEPPER_DIRECTION 7
+ #define PIN_EN 99
+-// Buzzer
+-#define PIN_BUZZ 1
+-
+ // Stepper homing
+ #define PIN_ENDSTOP 5
+ 
+@@ -24,21 +21,35 @@
+ #define PIN_LCD_D7 13
+ #endif
+ 
+-// BME280 SPI for Arduino Nano or Mega 128
+-#ifdef BMP_I2C
+-
+-#else //SPI
+-#define PIN_BME_SCK  3 //SCL
+-#define PIN_BME_MISO 2 //SDO
+-#define PIN_BME_MOSI 1 //SDA-SDI
+-#define PIN_BME_CS1  0 // sensor de presion 1
+-#define PIN_BME_CS2  99 // sensor de presion 1
+-#endif
+-
+ // #define PIN_BME_CS2  4  // sensor de presion 2
++#define PIN_ENC_CL  19
++#define PIN_ENC_DIR 18
+ #define PIN_ENC_SW  4
+-#define PIN_ENC_CL  2
+-#define PIN_ENC_DIR 3
++
++//#define TFT_CLK 	13 FIXED (HW)
++//#define TFT_MISO 	12 FIXED (HW)
++//#define TFT_MOSI 	11
++#define TFT_CS 		53
++#define TFT_DC 		49
++#define TFT_RST 	48
++
++
++#define GREEN_LED       22
++#define YELLOW_LED      23
++#define RED_LED         24
++
++#define PIN_BUZZER      3
++#define PIN_MUTE        2
++
++//4 leds de alarmas en los pines 44, 45, 46, y 47 
++//pin 43 recibiría una señal de cuando se corte la luz
++#define PIN_POWEROFF    43
++#define PIN_NO_ALARM    44
++#define PIN_PIP_ALARM   45
++#define PIN_PEEP_ALARM  46
++#define PIN_PIP_ALARM   47
++
++
+ 
+ // IF ARDUINO UNO
+ //#define PIN_ENC_CL  2
+diff --git a/arduino/ambovis/src/LiquidCrystal.rar b/arduino/ambovis/src/LiquidCrystal.rar
+new file mode 100644
+index 0000000..6279072
+Binary files /dev/null and b/arduino/ambovis/src/LiquidCrystal.rar differ
+diff --git a/arduino/ambovis/src/TimerThree/README.md b/arduino/ambovis/src/TimerThree/README.md
+new file mode 100644
+index 0000000..6f329fc
+--- /dev/null
++++ b/arduino/ambovis/src/TimerThree/README.md
+@@ -0,0 +1,33 @@
++#TimerThree Library#
++
++Paul Stoffregen's modified TimerThree.  This version provides 2 main benefits:
++
++1: Optimized inline functions - much faster for the most common usage
++2: Support for more boards
++
++http://www.pjrc.com/teensy/td_libs_TimerOne.html
++
++https://github.com/PaulStoffregen/TimerThree
++
++Original code
++
++http://playground.arduino.cc/Code/Timer1
++
++Open Source License
++
++TimerThree is free software. You can redistribute it and/or modify it under
++the terms of Creative Commons Attribution 3.0 United States License.
++To view a copy of this license, visit
++
++http://creativecommons.org/licenses/by/3.0/us/
++
++Paul Stoffregen forked this version from an early copy of TimerOne/TimerThree
++which was licensed "Creative Commons Attribution 3.0" and has maintained
++the original "CC BY 3.0 US" license terms.
++
++Other, separately developed updates to TimerOne have been released by other
++authors under the GNU GPLv2 license.  Multiple copies of this library, bearing
++the same name but distributed under different license terms, is unfortunately
++confusing.  This copy, with nearly all the code redesigned as inline functions,
++is provided under the "CC BY 3.0 US" license terms.
++
+diff --git a/arduino/ambovis/src/TimerThree/TimerThree.cpp b/arduino/ambovis/src/TimerThree/TimerThree.cpp
+new file mode 100644
+index 0000000..b18e324
+--- /dev/null
++++ b/arduino/ambovis/src/TimerThree/TimerThree.cpp
+@@ -0,0 +1,45 @@
++/*
++ *  Interrupt and PWM utilities for 16 bit Timer3 on ATmega168/328
++ *  Original code by Jesse Tane for http://labs.ideo.com August 2008
++ *  Modified March 2009 by Jérôme Despatis and Jesse Tane for ATmega328 support
++ *  Modified June 2009 by Michael Polli and Jesse Tane to fix a bug in setPeriod() which caused the timer to stop
++ *  Modified Oct 2009 by Dan Clemens to work with timer3 of the ATMega1280 or Arduino Mega
++ *  Modified April 2012 by Paul Stoffregen
++ *  Modified again, June 2014 by Paul Stoffregen
++ *
++ *  This is free software. You can redistribute it and/or modify it under
++ *  the terms of Creative Commons Attribution 3.0 United States License. 
++ *  To view a copy of this license, visit http://creativecommons.org/licenses/by/3.0/us/ 
++ *  or send a letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
++ *
++ */
++
++#include "TimerThree.h"
++
++TimerThree Timer3;              // preinstatiate
++
++unsigned short TimerThree::pwmPeriod = 0;
++unsigned char TimerThree::clockSelectBits = 0;
++void (*TimerThree::isrCallback)() = NULL;
++
++// interrupt service routine that wraps a user defined function supplied by attachInterrupt
++#if defined(__AVR__)
++ISR(TIMER3_OVF_vect)
++{
++  Timer3.isrCallback();
++}
++
++#elif defined(__arm__) && defined(CORE_TEENSY)
++void ftm2_isr(void)
++{
++  uint32_t sc = FTM2_SC;
++  #ifdef KINETISL
++  if (sc & 0x80) FTM2_SC = sc;
++  #else
++  if (sc & 0x80) FTM2_SC = sc & 0x7F;
++  #endif
++  Timer3.isrCallback();
++}
++
++#endif
++
+diff --git a/arduino/ambovis/src/TimerThree/TimerThree.h b/arduino/ambovis/src/TimerThree/TimerThree.h
+new file mode 100644
+index 0000000..5b99e7b
+--- /dev/null
++++ b/arduino/ambovis/src/TimerThree/TimerThree.h
+@@ -0,0 +1,301 @@
++/*
++ *  Interrupt and PWM utilities for 16 bit Timer3 on ATmega168/328
++ *  Original code by Jesse Tane for http://labs.ideo.com August 2008
++ *  Modified March 2009 by Jérôme Despatis and Jesse Tane for ATmega328 support
++ *  Modified June 2009 by Michael Polli and Jesse Tane to fix a bug in setPeriod() which caused the timer to stop
++ *  Modified April 2012 by Paul Stoffregen - portable to other AVR chips, use inline functions
++ *  Modified again, June 2014 by Paul Stoffregen - support Teensy 3.1 & even more AVR chips
++ *
++ *
++ *  This is free software. You can redistribute it and/or modify it under
++ *  the terms of Creative Commons Attribution 3.0 United States License. 
++ *  To view a copy of this license, visit http://creativecommons.org/licenses/by/3.0/us/ 
++ *  or send a letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
++ *
++ */
++
++#ifndef TimerThree_h_
++#define TimerThree_h_
++
++#if defined(ARDUINO) && ARDUINO >= 100
++#include "Arduino.h"
++#else
++#include "WProgram.h"
++#endif
++
++#include "config/known_16bit_timers.h"
++
++#define TIMER3_RESOLUTION 65536UL  // Timer3 is 16 bit
++
++
++// Placing nearly all the code in this .h file allows the functions to be
++// inlined by the compiler.  In the very common case with constant values
++// the compiler will perform all calculations and simply write constants
++// to the hardware registers (for example, setPeriod).
++
++
++class TimerThree
++{
++
++
++#if defined(__AVR__)
++  public:
++    //****************************
++    //  Configuration
++    //****************************
++    void initialize(unsigned long microseconds=1000000) __attribute__((always_inline)) {
++	TCCR3B = _BV(WGM33);        // set mode as phase and frequency correct pwm, stop the timer
++	TCCR3A = 0;                 // clear control register A 
++	setPeriod(microseconds);
++    }
++    void setPeriod(unsigned long microseconds) __attribute__((always_inline)) {
++	const unsigned long cycles = (F_CPU / 2000000) * microseconds;
++	if (cycles < TIMER3_RESOLUTION) {
++		clockSelectBits = _BV(CS30);
++		pwmPeriod = cycles;
++	} else
++	if (cycles < TIMER3_RESOLUTION * 8) {
++		clockSelectBits = _BV(CS31);
++		pwmPeriod = cycles / 8;
++	} else
++	if (cycles < TIMER3_RESOLUTION * 64) {
++		clockSelectBits = _BV(CS31) | _BV(CS30);
++		pwmPeriod = cycles / 64;
++	} else
++	if (cycles < TIMER3_RESOLUTION * 256) {
++		clockSelectBits = _BV(CS32);
++		pwmPeriod = cycles / 256;
++	} else
++	if (cycles < TIMER3_RESOLUTION * 1024) {
++		clockSelectBits = _BV(CS32) | _BV(CS30);
++		pwmPeriod = cycles / 1024;
++	} else {
++		clockSelectBits = _BV(CS32) | _BV(CS30);
++		pwmPeriod = TIMER3_RESOLUTION - 1;
++	}
++	ICR3 = pwmPeriod;
++	TCCR3B = _BV(WGM33) | clockSelectBits;
++    }
++
++    //****************************
++    //  Run Control
++    //****************************
++    void start() __attribute__((always_inline)) {
++	TCCR3B = 0;
++	TCNT3 = 0;		// TODO: does this cause an undesired interrupt?
++	resume();
++    }
++    void stop() __attribute__((always_inline)) {
++	TCCR3B = _BV(WGM33);
++    }
++    void restart() __attribute__((always_inline)) {
++	start();
++    }
++    void resume() __attribute__((always_inline)) {
++	TCCR3B = _BV(WGM33) | clockSelectBits;
++    }
++
++    //****************************
++    //  PWM outputs
++    //****************************
++    void setPwmDuty(char pin, unsigned int duty) __attribute__((always_inline)) {
++	unsigned long dutyCycle = pwmPeriod;
++	dutyCycle *= duty;
++	dutyCycle >>= 10;
++	if (pin == TIMER3_A_PIN) OCR3A = dutyCycle;
++	#ifdef TIMER3_B_PIN
++	else if (pin == TIMER3_B_PIN) OCR3B = dutyCycle;
++	#endif
++	#ifdef TIMER3_C_PIN
++	else if (pin == TIMER3_C_PIN) OCR3C = dutyCycle;
++	#endif
++    }
++    void pwm(char pin, unsigned int duty) __attribute__((always_inline)) {
++	if (pin == TIMER3_A_PIN) { pinMode(TIMER3_A_PIN, OUTPUT); TCCR3A |= _BV(COM3A1); }
++	#ifdef TIMER3_B_PIN
++	else if (pin == TIMER3_B_PIN) { pinMode(TIMER3_B_PIN, OUTPUT); TCCR3A |= _BV(COM3B1); }
++	#endif
++	#ifdef TIMER3_C_PIN
++	else if (pin == TIMER3_C_PIN) { pinMode(TIMER3_C_PIN, OUTPUT); TCCR3A |= _BV(COM3C1); }
++	#endif
++	setPwmDuty(pin, duty);
++	TCCR3B = _BV(WGM33) | clockSelectBits;
++    }
++    void pwm(char pin, unsigned int duty, unsigned long microseconds) __attribute__((always_inline)) {
++	if (microseconds > 0) setPeriod(microseconds);
++	pwm(pin, duty);
++    }
++    void disablePwm(char pin) __attribute__((always_inline)) {
++	if (pin == TIMER3_A_PIN) TCCR3A &= ~_BV(COM3A1);
++	#ifdef TIMER3_B_PIN
++	else if (pin == TIMER3_B_PIN) TCCR3A &= ~_BV(COM3B1);
++	#endif
++	#ifdef TIMER3_C_PIN
++	else if (pin == TIMER3_C_PIN) TCCR3A &= ~_BV(COM3C1);
++	#endif
++    }
++
++    //****************************
++    //  Interrupt Function
++    //****************************
++    void attachInterrupt(void (*isr)()) __attribute__((always_inline)) {
++	isrCallback = isr;
++	TIMSK3 = _BV(TOIE3);
++    }
++    void attachInterrupt(void (*isr)(), unsigned long microseconds) __attribute__((always_inline)) {
++	if(microseconds > 0) setPeriod(microseconds);
++	attachInterrupt(isr);
++    }
++    void detachInterrupt() __attribute__((always_inline)) {
++	TIMSK3 = 0;
++    }
++    static void (*isrCallback)();
++
++  private:
++    // properties
++    static unsigned short pwmPeriod;
++    static unsigned char clockSelectBits;
++
++
++
++#elif defined(__arm__) && defined(CORE_TEENSY)
++
++#if defined(KINETISK)
++#define F_TIMER F_BUS
++#elif defined(KINETISL)
++#define F_TIMER (F_PLL/2)
++#endif
++
++  public:
++    //****************************
++    //  Configuration
++    //****************************
++    void initialize(unsigned long microseconds=1000000) __attribute__((always_inline)) {
++	setPeriod(microseconds);
++    }
++    void setPeriod(unsigned long microseconds) __attribute__((always_inline)) {
++	const unsigned long cycles = (F_TIMER / 2000000) * microseconds;
++	if (cycles < TIMER3_RESOLUTION) {
++		clockSelectBits = 0;
++		pwmPeriod = cycles;
++	} else
++	if (cycles < TIMER3_RESOLUTION * 2) {
++		clockSelectBits = 1;
++		pwmPeriod = cycles >> 1;
++	} else
++	if (cycles < TIMER3_RESOLUTION * 4) {
++		clockSelectBits = 2;
++		pwmPeriod = cycles >> 2;
++	} else
++	if (cycles < TIMER3_RESOLUTION * 8) {
++		clockSelectBits = 3;
++		pwmPeriod = cycles >> 3;
++	} else
++	if (cycles < TIMER3_RESOLUTION * 16) {
++		clockSelectBits = 4;
++		pwmPeriod = cycles >> 4;
++	} else
++	if (cycles < TIMER3_RESOLUTION * 32) {
++		clockSelectBits = 5;
++		pwmPeriod = cycles >> 5;
++	} else
++	if (cycles < TIMER3_RESOLUTION * 64) {
++		clockSelectBits = 6;
++		pwmPeriod = cycles >> 6;
++	} else
++	if (cycles < TIMER3_RESOLUTION * 128) {
++		clockSelectBits = 7;
++		pwmPeriod = cycles >> 7;
++	} else {
++		clockSelectBits = 7;
++		pwmPeriod = TIMER3_RESOLUTION - 1;
++	}
++	uint32_t sc = FTM2_SC;
++	FTM2_SC = 0;
++	FTM2_MOD = pwmPeriod;
++	FTM2_SC = FTM_SC_CLKS(1) | FTM_SC_CPWMS | clockSelectBits | (sc & FTM_SC_TOIE);
++    }
++
++    //****************************
++    //  Run Control
++    //****************************
++    void start() __attribute__((always_inline)) {
++	stop();
++	FTM2_CNT = 0;
++	resume();
++    }
++    void stop() __attribute__((always_inline)) {
++	FTM2_SC = FTM2_SC & (FTM_SC_TOIE | FTM_SC_CPWMS | FTM_SC_PS(7));
++    }
++    void restart() __attribute__((always_inline)) {
++	start();
++    }
++    void resume() __attribute__((always_inline)) {
++	FTM2_SC = (FTM1_SC & (FTM_SC_TOIE | FTM_SC_PS(7))) | FTM_SC_CPWMS | FTM_SC_CLKS(1);
++    }
++
++    //****************************
++    //  PWM outputs
++    //****************************
++    void setPwmDuty(char pin, unsigned int duty) __attribute__((always_inline)) {
++	unsigned long dutyCycle = pwmPeriod;
++	dutyCycle *= duty;
++	dutyCycle >>= 10;
++	if (pin == TIMER3_A_PIN) {
++		FTM2_C0V = dutyCycle;
++	} else if (pin == TIMER3_B_PIN) {
++		FTM2_C1V = dutyCycle;
++	}
++    }
++    void pwm(char pin, unsigned int duty) __attribute__((always_inline)) {
++	setPwmDuty(pin, duty);
++	if (pin == TIMER3_A_PIN) {
++		*portConfigRegister(TIMER3_A_PIN) = PORT_PCR_MUX(3) | PORT_PCR_DSE | PORT_PCR_SRE;
++	} else if (pin == TIMER3_B_PIN) {
++		*portConfigRegister(TIMER3_B_PIN) = PORT_PCR_MUX(3) | PORT_PCR_DSE | PORT_PCR_SRE;
++	}
++    }
++    void pwm(char pin, unsigned int duty, unsigned long microseconds) __attribute__((always_inline)) {
++	if (microseconds > 0) setPeriod(microseconds);
++	pwm(pin, duty);
++    }
++    void disablePwm(char pin) __attribute__((always_inline)) {
++	if (pin == TIMER3_A_PIN) {
++		*portConfigRegister(TIMER3_A_PIN) = 0;
++	} else if (pin == TIMER3_B_PIN) {
++		*portConfigRegister(TIMER3_B_PIN) = 0;
++	}
++    }
++
++    //****************************
++    //  Interrupt Function
++    //****************************
++    void attachInterrupt(void (*isr)()) __attribute__((always_inline)) {
++	isrCallback = isr;
++	FTM2_SC |= FTM_SC_TOIE;
++	NVIC_ENABLE_IRQ(IRQ_FTM2);
++    }
++    void attachInterrupt(void (*isr)(), unsigned long microseconds) __attribute__((always_inline)) {
++	if(microseconds > 0) setPeriod(microseconds);
++	attachInterrupt(isr);
++    }
++    void detachInterrupt() __attribute__((always_inline)) {
++	FTM2_SC &= ~FTM_SC_TOIE;
++	NVIC_DISABLE_IRQ(IRQ_FTM2);
++    }
++    static void (*isrCallback)();
++
++  private:
++    // properties
++    static unsigned short pwmPeriod;
++    static unsigned char clockSelectBits;
++
++#undef F_TIMER
++
++#endif
++};
++
++extern TimerThree Timer3;
++
++#endif
++
+diff --git a/arduino/ambovis/src/TimerThree/config/known_16bit_timers.h b/arduino/ambovis/src/TimerThree/config/known_16bit_timers.h
+new file mode 100644
+index 0000000..397381d
+--- /dev/null
++++ b/arduino/ambovis/src/TimerThree/config/known_16bit_timers.h
+@@ -0,0 +1,143 @@
++#ifndef known_16bit_timers_header_
++#define known_16bit_timers_header_
++
++// Wiring-S
++//
++#if defined(__AVR_ATmega644P__) && defined(WIRING)
++  #define TIMER1_A_PIN   5
++  #define TIMER1_B_PIN   4
++  #define TIMER1_ICP_PIN 6
++
++// Teensy 2.0
++//
++#elif defined(__AVR_ATmega32U4__) && defined(CORE_TEENSY)
++  #define TIMER1_A_PIN   14
++  #define TIMER1_B_PIN   15
++  #define TIMER1_C_PIN   4
++  #define TIMER1_ICP_PIN 22
++  #define TIMER1_CLK_PIN 11
++  #define TIMER3_A_PIN   9
++  #define TIMER3_ICP_PIN 10
++
++// Teensy++ 2.0
++#elif defined(__AVR_AT90USB1286__) && defined(CORE_TEENSY)
++  #define TIMER1_A_PIN   25
++  #define TIMER1_B_PIN   26
++  #define TIMER1_C_PIN   27
++  #define TIMER1_ICP_PIN 4
++  #define TIMER1_CLK_PIN 6
++  #define TIMER3_A_PIN   16
++  #define TIMER3_B_PIN   15
++  #define TIMER3_C_PIN   14
++  #define TIMER3_ICP_PIN 17
++  #define TIMER3_CLK_PIN 13
++
++// Teensy 3.0
++//
++#elif defined(__MK20DX128__)
++  #define TIMER1_A_PIN   3
++  #define TIMER1_B_PIN   4
++  #define TIMER1_ICP_PIN 4
++
++// Teensy 3.1
++//
++#elif defined(__MK20DX256__)
++  #define TIMER1_A_PIN   3
++  #define TIMER1_B_PIN   4
++  #define TIMER1_ICP_PIN 4
++  #define TIMER3_A_PIN   32
++  #define TIMER3_B_PIN   25
++  #define TIMER3_ICP_PIN 32
++
++// Teensy-LC
++//
++#elif defined(__MKL26Z64__)
++  #define TIMER1_A_PIN   16
++  #define TIMER1_B_PIN   17
++  #define TIMER1_ICP_PIN 17
++  #define TIMER3_A_PIN   3
++  #define TIMER3_B_PIN   4
++  #define TIMER3_ICP_PIN 4
++
++// Arduino Mega
++//
++#elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
++  #define TIMER1_A_PIN   11
++  #define TIMER1_B_PIN   12
++  #define TIMER1_C_PIN   13
++  #define TIMER3_A_PIN   5
++  #define TIMER3_B_PIN   2
++  #define TIMER3_C_PIN   3
++  #define TIMER4_A_PIN   6
++  #define TIMER4_B_PIN   7
++  #define TIMER4_C_PIN   8
++  #define TIMER4_ICP_PIN 49
++  #define TIMER5_A_PIN   46
++  #define TIMER5_B_PIN   45
++  #define TIMER5_C_PIN   44
++  #define TIMER3_ICP_PIN 48
++  #define TIMER3_CLK_PIN 47
++
++// Arduino Leonardo, Yun, etc
++//
++#elif defined(__AVR_ATmega32U4__)
++  #define TIMER1_A_PIN   9
++  #define TIMER1_B_PIN   10
++  #define TIMER1_C_PIN   11
++  #define TIMER1_ICP_PIN 4
++  #define TIMER1_CLK_PIN 12
++  #define TIMER3_A_PIN   5
++  #define TIMER3_ICP_PIN 13
++
++//  Uno, Duemilanove, LilyPad, etc
++//
++#elif defined (__AVR_ATmega168__) || defined (__AVR_ATmega328P__)
++  #define TIMER1_A_PIN   9
++  #define TIMER1_B_PIN   10
++  #define TIMER1_ICP_PIN 8
++  #define TIMER1_CLK_PIN 5
++
++// Sanguino
++//
++#elif defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644__)
++  #define TIMER1_A_PIN   13
++  #define TIMER1_B_PIN   12
++  #define TIMER1_ICP_PIN 14
++  #define TIMER1_CLK_PIN 1
++
++// Wildfire - Wicked Devices
++//
++#elif defined(__AVR_ATmega1284P__) && defined(WILDFIRE_VERSION) && WILDFIRE_VERSION >= 3
++  #define TIMER1_A_PIN   5   // PD5
++  #define TIMER1_B_PIN   8   // PD4
++  #define TIMER1_ICP_PIN 6   // PD6
++  #define TIMER1_CLK_PIN 23  // PB1
++  #define TIMER3_A_PIN   12  // PB6
++  #define TIMER3_B_PIN   13  // PB7
++  #define TIMER3_ICP_PIN 9   // PB5
++  #define TIMER3_CLK_PIN 0   // PD0
++#elif defined(__AVR_ATmega1284P__) && defined(WILDFIRE_VERSION) && WILDFIRE_VERSION < 3
++  #define TIMER1_A_PIN   5   // PD5
++  #define TIMER1_B_PIN   4   // PD4
++  #define TIMER1_ICP_PIN 6   // PD6
++  #define TIMER1_CLK_PIN 15  // PB1
++  #define TIMER3_A_PIN   12  // PB6
++  #define TIMER3_B_PIN   13  // PB7
++  #define TIMER3_ICP_PIN 11  // PB5
++  #define TIMER3_CLK_PIN 0   // PD0
++
++// Mighty-1284 - Maniacbug
++//
++#elif defined(__AVR_ATmega1284P__)
++  #define TIMER1_A_PIN   12  // PD5
++  #define TIMER1_B_PIN   13  // PD4
++  #define TIMER1_ICP_PIN 14  // PD6
++  #define TIMER1_CLK_PIN 1   // PB1
++  #define TIMER3_A_PIN   6   // PB6
++  #define TIMER3_B_PIN   7   // PB7
++  #define TIMER3_ICP_PIN 5   // PB5
++  #define TIMER3_CLK_PIN 8   // PD0
++
++#endif
++
++#endif
+diff --git a/arduino/ambovis/src/TimerThree/examples/FanSpeed/FanSpeed.pde b/arduino/ambovis/src/TimerThree/examples/FanSpeed/FanSpeed.pde
+new file mode 100644
+index 0000000..c016771
+--- /dev/null
++++ b/arduino/ambovis/src/TimerThree/examples/FanSpeed/FanSpeed.pde
+@@ -0,0 +1,37 @@
++#include <TimerThree.h>
++
++// This example creates a PWM signal with 25 kHz carrier.
++//
++// Arduino's analogWrite() gives you PWM output, but no control over the
++// carrier frequency.  The default frequency is low, typically 490 or
++// 3920 Hz.  Sometimes you may need a faster carrier frequency.
++//
++// The specification for 4-wire PWM fans recommends a 25 kHz frequency
++// and allows 21 to 28 kHz.  The default from analogWrite() might work
++// with some fans, but to follow the specification we need 25 kHz.
++//
++// http://www.formfactors.org/developer/specs/REV1_2_Public.pdf
++//
++// Connect the PWM pin to the fan's control wire (usually blue).  The
++// board's ground must be connected to the fan's ground, and the fan
++// needs +12 volt power from the computer or a separate power supply.
++
++const int fanPin = 14;
++
++void setup(void)
++{
++  Timer3.initialize(40);  // 40 us = 25 kHz
++  Serial.begin(9600);
++}
++
++void loop(void)
++{
++  // slowly increase the PWM fan speed
++  //
++  for (float dutyCycle = 30.0; dutyCycle < 100.0; dutyCycle++) {
++    Serial.print("PWM Fan, Duty Cycle = ");
++    Serial.println(dutyCycle);
++    Timer3.pwm(fanPin, (dutyCycle / 100) * 1023);
++    delay(500);
++  }
++}
+diff --git a/arduino/ambovis/src/TimerThree/examples/Interrupt/Interrupt.pde b/arduino/ambovis/src/TimerThree/examples/Interrupt/Interrupt.pde
+new file mode 100644
+index 0000000..875767b
+--- /dev/null
++++ b/arduino/ambovis/src/TimerThree/examples/Interrupt/Interrupt.pde
+@@ -0,0 +1,54 @@
++#include <TimerThree.h>
++
++// This example uses the timer interrupt to blink an LED
++// and also demonstrates how to share a variable between
++// the interrupt and the main program.
++
++
++const int led = LED_BUILTIN;  // the pin with a LED
++
++void setup(void)
++{
++  pinMode(led, OUTPUT);
++  Timer3.initialize(150000);
++  Timer3.attachInterrupt(blinkLED); // blinkLED to run every 0.15 seconds
++  Serial.begin(9600);
++}
++
++
++// The interrupt will blink the LED, and keep
++// track of how many times it has blinked.
++int ledState = LOW;
++volatile unsigned long blinkCount = 0; // use volatile for shared variables
++
++void blinkLED(void)
++{
++  if (ledState == LOW) {
++    ledState = HIGH;
++    blinkCount = blinkCount + 1;  // increase when LED turns on
++  } else {
++    ledState = LOW;
++  }
++  digitalWrite(led, ledState);
++}
++
++
++// The main program will print the blink count
++// to the Arduino Serial Monitor
++void loop(void)
++{
++  unsigned long blinkCopy;  // holds a copy of the blinkCount
++
++  // to read a variable which the interrupt code writes, we
++  // must temporarily disable interrupts, to be sure it will
++  // not change while we are reading.  To minimize the time
++  // with interrupts off, just quickly make a copy, and then
++  // use the copy while allowing the interrupt to keep working.
++  noInterrupts();
++  blinkCopy = blinkCount;
++  interrupts();
++
++  Serial.print("blinkCount = ");
++  Serial.println(blinkCopy);
++  delay(100);
++}
+diff --git a/arduino/ambovis/src/TimerThree/keywords.txt b/arduino/ambovis/src/TimerThree/keywords.txt
+new file mode 100644
+index 0000000..ecc09f0
+--- /dev/null
++++ b/arduino/ambovis/src/TimerThree/keywords.txt
+@@ -0,0 +1,14 @@
++Timer3	KEYWORD2
++TimerThree	KEYWORD1
++initialize	KEYWORD2
++start	KEYWORD2
++stop	KEYWORD2
++restart	KEYWORD2
++resume	KEYWORD2
++pwm	KEYWORD2
++disablePwm	KEYWORD2
++attachInterrupt	KEYWORD2
++detachInterrupt	KEYWORD2
++setPeriod	KEYWORD2
++setPwmDuty	KEYWORD2
++isrCallback	KEYWORD2
+diff --git a/arduino/ambovis/src/TimerThree/library.json b/arduino/ambovis/src/TimerThree/library.json
+new file mode 100644
+index 0000000..d6f3187
+--- /dev/null
++++ b/arduino/ambovis/src/TimerThree/library.json
+@@ -0,0 +1,16 @@
++{
++  "name": "TimerThree",
++  "keywords": "timer",
++  "description": "Allow to use the built-in 16 bit Timer3",
++  "repository":
++  {
++    "type": "git",
++    "url": "https://github.com/PaulStoffregen/TimerThree.git"
++  },
++  "frameworks": "arduino",
++  "platforms":
++  [
++    "atmelavr",
++    "teensy"
++  ]
++}
+diff --git a/arduino/ambovis/src/TimerThree/library.properties b/arduino/ambovis/src/TimerThree/library.properties
+new file mode 100644
+index 0000000..44c61db
+--- /dev/null
++++ b/arduino/ambovis/src/TimerThree/library.properties
+@@ -0,0 +1,10 @@
++name=TimerThree
++version=1.1
++author=Jesse Tane, Jérôme Despatis, Michael Polli, Dan Clemens, Paul Stoffregen
++maintainer=Paul Stoffregen
++sentence=Use hardware Timer3 for finer PWM control and/or running an periodic interrupt function
++paragraph=
++category=Timing
++url=http://playground.arduino.cc/Code/Timer1
++architectures=avr
++
+diff --git a/arduino/display/display_tft/display_tft.ino b/arduino/display/display_tft/display_tft.ino
+index 6037985..131baef 100644
+--- a/arduino/display/display_tft/display_tft.ino
++++ b/arduino/display/display_tft/display_tft.ino
+@@ -413,12 +413,12 @@ void parseData() {
+   }
+ 
+   if ( integerFromPC[FLUX_] != 0 && abs(integerFromPC[FLUX_]) < abs(last_vals[FLUX_][1])+diff_var[FLUX_] && integerFromPC[TIME_] > xgra[FLUX_][1]) {
+-    yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_])*0.05);
++    yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_])*0.04);
+     last_vals[FLUX_][0]=last_vals[FLUX_][1];last_vals[FLUX_][1]=integerFromPC[FLUX_];
+     xgra[FLUX_][0]=xgra[FLUX_][1];xgra[FLUX_][1]=integerFromPC[TIME_];
+   }
+    if ( integerFromPC[VT_] != 0 && abs(integerFromPC[VT_]) < abs(last_vals[VT_][1])+diff_var[VT_] && integerFromPC[TIME_] > xgra[VT_][1]) {
+-    yvt[0]=yvt[1];yvt[1]=int(float(integerFromPC[VT_])*0.075);
++    yvt[0]=yvt[1];yvt[1]=int(float(integerFromPC[VT_])*0.07);
+     last_vals[VT_][0]=last_vals[VT_][1];last_vals[VT_][1]=integerFromPC[VT_];
+     xgra[VT_][0]=xgra[VT_][1];xgra[VT_][1]=integerFromPC[TIME_];
+   }
+diff --git a/arduino/refs/display_color/adafruit/graphictest/graphictest.ino b/arduino/refs/display_color/adafruit/graphictest/graphictest.ino
+index 3031ce7..2f50760 100644
+--- a/arduino/refs/display_color/adafruit/graphictest/graphictest.ino
++++ b/arduino/refs/display_color/adafruit/graphictest/graphictest.ino
+@@ -12,7 +12,6 @@
+  ****************************************************/
+ 
+ 
+-#include "SPI.h"
+ #include "Adafruit_GFX.h"
+ #include "Adafruit_ILI9341.h"
+ 
+@@ -24,13 +23,9 @@
+ //Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
+ 
+ // For the Adafruit shield, these are the default.
+-#define TFT_CLK 13
+-#define TFT_MISO 12
+-#define TFT_MOSI 11
+-#define TFT_CS 10
+-#define TFT_DC 9
+-#define TFT_RST 8
+-
++#define TFT_CS    53
++#define TFT_DC    49
++#define TFT_RST   48
+ // If using the breakout, change pins as desired
+ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
+ //Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_MOSI, TFT_CLK, TFT_RST, TFT_MISO);
+diff --git a/CONNECTION BETWEEN 2 ARDUINOS.txt b/backups/CONNECTION BETWEEN 2 ARDUINOS.txt
+similarity index 100%
+rename from CONNECTION BETWEEN 2 ARDUINOS.txt
+rename to backups/CONNECTION BETWEEN 2 ARDUINOS.txt
