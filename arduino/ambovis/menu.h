@@ -1,14 +1,17 @@
 #ifndef _MENU_H_
 #define _MENU_H_
 
+#include "defaults.h"
+
 #ifdef LCD_I2C
-#include "LiquidCrystal_I2C.h"
+#include "src/LiquidCrystal_I2C/LiquidCrystal_I2C.h"
 #else
 #include <LiquidCrystal.h>
 #endif
 
 #ifdef LCD_I2C
-LiquidCrystal_I2C lcd(0x3F, 20, 4);
+extern LiquidCrystal_I2C lcd;
+//LiquidCrystal_I2C lcd(0x3F, 20, 4);
 #else
 //LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
 extern LiquidCrystal lcd;
@@ -24,6 +27,7 @@ extern bool update_options;
 extern char tempstr[5],tempstr2[5];
 extern byte menu_number;
 extern byte p_trim;
+
 
 void writeLine(int line, String message = "", int offsetLeft = 0);
 void lcd_clearxy(int x, int y,int pos=1);

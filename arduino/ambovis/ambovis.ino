@@ -294,12 +294,18 @@ void setup() {
   Serial.print("Honey Volt at p0: "); Serial.println(analogRead(A0) / 1023.);
 #endif
   int eeAddress=0;
-  EEPROM.get(0, last_cycle);
-  eeAddress+= sizeof(unsigned long);
-  EEPROM.get(eeAddress, p_trim);
-  eeAddress+= sizeof(p_trim);
-  EEPROM.get(eeAddress, autopid);
-  eeAddress+= sizeof(autopid);
+  EEPROM.get(0, last_cycle);      eeAddress+= sizeof(unsigned long);
+  EEPROM.get(eeAddress, p_trim);  eeAddress+= sizeof(p_trim);
+  EEPROM.get(eeAddress, autopid); eeAddress+= sizeof(autopid);
+  EEPROM.get(eeAddress, min_cd); eeAddress+= sizeof(min_cd);
+  EEPROM.get(eeAddress, max_cd); eeAddress+= sizeof(max_cd);
+  EEPROM.get(eeAddress, min_speed); eeAddress+= sizeof(min_speed);
+  EEPROM.get(eeAddress, max_speed); eeAddress+= sizeof(max_speed);
+  EEPROM.get(eeAddress, min_accel); eeAddress+= sizeof(min_accel);
+  EEPROM.get(eeAddress, max_accel); eeAddress+= sizeof(max_accel);
+  EEPROM.get(eeAddress, min_pidk); eeAddress+= sizeof(min_pidk);
+  EEPROM.get(eeAddress, max_pidk); eeAddress+= sizeof(max_pidk);
+
   Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
   ventilation->setCycleNum(last_cycle);
 
@@ -318,12 +324,18 @@ void loop() {
 
   if (millis() > lastSave + TIME_SAVE) {
     int eeAddress=0;
-    EEPROM.put(0, last_cycle);
-    eeAddress+= sizeof(unsigned long);
-    EEPROM.put(eeAddress, p_trim);
-    eeAddress+= sizeof(p_trim);
-    EEPROM.put(eeAddress, autopid);
-    eeAddress+= sizeof(autopid);
+    EEPROM.put(0, last_cycle);        eeAddress+= sizeof(unsigned long);
+    EEPROM.put(eeAddress, p_trim);    eeAddress+= sizeof(p_trim);
+    EEPROM.put(eeAddress, autopid);   eeAddress+= sizeof(autopid);
+    EEPROM.put(eeAddress, min_cd);    eeAddress+= sizeof(min_cd);
+    EEPROM.put(eeAddress, max_cd);    eeAddress+= sizeof(max_cd);
+    EEPROM.put(eeAddress, min_speed); eeAddress+= sizeof(min_speed);
+    EEPROM.put(eeAddress, max_speed); eeAddress+= sizeof(max_speed);
+    EEPROM.put(eeAddress, min_accel); eeAddress+= sizeof(min_accel);
+    EEPROM.put(eeAddress, max_accel); eeAddress+= sizeof(max_accel);
+    EEPROM.put(eeAddress, min_pidk);  eeAddress+= sizeof(min_pidk);
+    EEPROM.put(eeAddress, max_pidk);  eeAddress+= sizeof(max_pidk);
+    
     lastSave = millis();
   }
 
