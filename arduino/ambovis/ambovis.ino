@@ -107,10 +107,12 @@ int16_t adc0;
 
 int max_accel,min_accel;
 int max_speed, min_speed;
-int max_pidk=1000;
-int min_pidk=250;
-  int max_cd=40;  //T MODIFY: READ FROM MEM
-  int min_cd=10;
+int min_pidk,max_pidk;
+//min_pidk=250;
+//max_pidk=1000;
+int min_cd,max_cd;
+//max_cd=40;  //T MODIFY: READ FROM MEM
+//min_cd=10;
   
 unsigned long last_cycle;
 
