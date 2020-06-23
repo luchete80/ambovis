@@ -198,6 +198,16 @@ void setup() {
   pinMode(PIN_EN, OUTPUT);
   digitalWrite(PIN_EN, HIGH);
 
+  max_cd=40;  //T MODIFY: READ FROM MEM
+  min_cd=10;
+  min_speed = 250;  // x microsteps
+  max_speed = 750;  // x Microsteps, originally 16000 (with 16 ms = 750)
+  max_accel = 600;
+  min_accel = 200;
+  max_pidk = 1000;
+  min_pidk = 250;
+  change_pid_params=true; //To calculate at first time
+    
   // TODO: Añadir aquí la configuarcion inicial desde puerto serie
   options.respiratoryRate = DEFAULT_RPM;
   options.percInspEsp = 2; //1:1 to 1:4, is denom
@@ -296,15 +306,15 @@ void setup() {
   int eeAddress=0;
   EEPROM.get(0, last_cycle);      eeAddress+= sizeof(unsigned long);
   EEPROM.get(eeAddress, p_trim);  eeAddress+= sizeof(p_trim);
-  EEPROM.get(eeAddress, autopid); eeAddress+= sizeof(autopid);
-  EEPROM.get(eeAddress, min_cd); eeAddress+= sizeof(min_cd);
-  EEPROM.get(eeAddress, max_cd); eeAddress+= sizeof(max_cd);
-  EEPROM.get(eeAddress, min_speed); eeAddress+= sizeof(min_speed);
-  EEPROM.get(eeAddress, max_speed); eeAddress+= sizeof(max_speed);
-  EEPROM.get(eeAddress, min_accel); eeAddress+= sizeof(min_accel);
-  EEPROM.get(eeAddress, max_accel); eeAddress+= sizeof(max_accel);
-  EEPROM.get(eeAddress, min_pidk); eeAddress+= sizeof(min_pidk);
-  EEPROM.get(eeAddress, max_pidk); eeAddress+= sizeof(max_pidk);
+//  EEPROM.get(eeAddress, autopid); eeAddress+= sizeof(autopid);
+//  EEPROM.get(eeAddress, min_cd); eeAddress+= sizeof(min_cd);
+//  EEPROM.get(eeAddress, max_cd); eeAddress+= sizeof(max_cd);
+//  EEPROM.get(eeAddress, min_speed); eeAddress+= sizeof(min_speed);
+//  EEPROM.get(eeAddress, max_speed); eeAddress+= sizeof(max_speed);
+//  EEPROM.get(eeAddress, min_accel); eeAddress+= sizeof(min_accel);
+//  EEPROM.get(eeAddress, max_accel); eeAddress+= sizeof(max_accel);
+//  EEPROM.get(eeAddress, min_pidk); eeAddress+= sizeof(min_pidk);
+//  EEPROM.get(eeAddress, max_pidk); eeAddress+= sizeof(max_pidk);
 
   Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
   ventilation->setCycleNum(last_cycle);
