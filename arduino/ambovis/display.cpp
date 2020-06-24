@@ -90,7 +90,7 @@ void tft_draw(void) {
   		lcd_cleaned=false;
 	}
   
-    Serial.println(state_r);
+    //Serial.println(state_r);
     if (alarm_state>9) {
         digitalWrite(RED_LED,HIGH);
         digitalWrite(RED_LED,LOW);

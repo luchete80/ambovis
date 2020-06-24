@@ -187,7 +187,7 @@ void check_encoder ( ) {
               case 1:
                 if ( menu_number == 0 )     vent_mode           = encoderPos;
                 else if (menu_number == 1)  alarm_max_pressure  = encoderPos;
-                else                        min_cd  = encoderPos;
+                else                        {min_cd  = int(encoderPos);Serial.print("Mincd: ");Serial.println(min_cd);}
                 break;
               case 2:
                 if ( menu_number == 0 )       options.respiratoryRate = encoderPos;
@@ -214,7 +214,7 @@ void check_encoder ( ) {
                     }
                 } else if (menu_number == 1) {
                     p_trim=encoderPos;
-                } else max_cd  = int(encoderPos);
+                } else {max_cd  = int(encoderPos);Serial.print("Maxcd: ");Serial.println(max_cd);}
                     
                 break;
               case 5:
@@ -343,7 +343,6 @@ void display_lcd ( ) {
     writeLine(1, "BPM:" + String(options.respiratoryRate), 1);
     writeLine(2, "IE:1:", 1);
   
-    //dtostrf(ventilation->getInsVol(), 4, 0, tempstr);
     dtostrf((_mllastInsVol+_mllastExsVol)/2, 4, 0, tempstr);
     writeLine(0, String(tempstr), 16);
   
