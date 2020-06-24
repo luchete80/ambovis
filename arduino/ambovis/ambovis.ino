@@ -174,6 +174,9 @@ void PinB() {
   else if (reading == B00001000) aFlag = 1; //signal that we're expecting pinA to signal the transition to detent from free rotation
   sei(); //restart interrupts
 }
+bool isitem_sel;
+byte old_menu_pos=0;
+byte old_menu_num=0;
 
 AutoPID * pid;
 
@@ -185,7 +188,7 @@ void setup() {
   
   Serial.begin(250000);
   init_display();
-  menu_sel=0;
+  isitem_sel=false;
   pinMode(PIN_POWEROFF, INPUT);
 
   // PID

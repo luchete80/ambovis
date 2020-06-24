@@ -42,25 +42,29 @@ void check_encoder ( ) {
   byte btnState = digitalRead(PIN_ENC_SW);
   if (btnState == LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
     if (millis() - lastButtonPress > 150) {
-      curr_sel++; //NOT +=1, is a byte
+      isitem_sel=!isitem_sel;
+      if (!isitem_sel)
+          encoderPos=oldEncPos=old_menu_pos;
+          
+      lastButtonPress = millis();
+    }
 
-      //if ((vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_MAN) && curr_sel==5) curr_sel++; //Not selecting pip in VCL
       if (vent_mode==VENTMODE_PCL && curr_sel==4 && menu_number == 0) curr_sel++; //Not selecting pip in VCL 
             
       if ( menu_number == 0 ) {
-        if (curr_sel > 5) {
-          curr_sel=1;
-          menu_number+=1;
-          clear_all_display=true;
-          display_lcd();
-        } 
+          if (curr_sel > 5) {
+              curr_sel=1;
+              menu_number+=1;
+              clear_all_display=true;
+              display_lcd();
+          } 
       } else if (menu_number == 1) {
-         if (curr_sel > 5) {
-          curr_sel=0;
-          menu_number=2; 
-          clear_all_display=true;
-          display_lcd();         
-         }
+           if (curr_sel > 5) {
+              curr_sel=0;
+              menu_number=2; 
+              clear_all_display=true;
+              display_lcd();         
+           }
       }
         else if (menu_number == 2) {
          if (curr_sel > 8) {
@@ -160,20 +164,20 @@ void check_encoder ( ) {
       show_changed_options = true;
       update_options = true;
     }
-    lastButtonPress = millis();
 
     #ifdef DEBUG_UPDATE
       Serial.print("Modo: ");Serial.println(vent_mode);
     #endif
-  }
+  
 
 
   if (oldEncPos != encoderPos) {
     show_changed_options = true;
-    
-    if (menu_number==2)
-      change_pid_params=true;
-      
+
+    if (!isitem_sel) { //Selecting position
+        curr_sel=old_menu_pos=encoderPos;
+    } else {//inside a particular selection
+     
     if (curr_sel != 0) {
       if ( encoderPos > max_sel ) {
          encoderPos=oldEncPos=max_sel; 
@@ -247,7 +251,10 @@ void check_encoder ( ) {
             show_changed_options = true;
             update_options=true;
           }//Valid range
-  
+
+    }//is item selected
+    if (menu_number==2)
+      change_pid_params=true;
     }//oldEncPos != encoderPos and valid between range
   }
 }
