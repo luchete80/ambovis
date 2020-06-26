@@ -291,7 +291,7 @@ void MechVentilation :: update ( void )
 
                        STEPPER_SPEED_MAX        = STEPPER_MICROSTEPS * max_speed; //Originally 12000
         			         if (_pip>22) 
-        			          STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  max_accel * 1.3;//But the limit is calculated with range from 200 to 700
+        			          STEPPER_ACC_INSUFFLATION= int(float(STEPPER_MICROSTEPS) *  max_accel * 1.4);//But the limit is calculated with range from 200 to 700
                        else         
                         STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  max_accel;
                         //STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  600;
