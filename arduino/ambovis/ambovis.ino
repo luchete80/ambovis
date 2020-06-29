@@ -276,7 +276,7 @@ void setup() {
   display_lcd();
 
   //ENCODER
-  curr_sel = old_curr_sel = 0; //COMPRESSION
+  curr_sel = old_curr_sel = 1; //COMPRESSION
   encoderPos = oldEncPos = options.tidalVolume;
 
   pinMode(pinA, INPUT_PULLUP); // set pinA as an input, pulled HIGH to the logic voltage (5V or 3.3V for most cases)

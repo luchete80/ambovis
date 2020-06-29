@@ -6,8 +6,6 @@
 static bool clear_all_display;
 
 static byte max_pidk_byte,min_pidk_byte;
-byte menu_sel; //0 nothing, 1 navigate, 2 option
-
 
 void init_display() {
   #ifdef LCD_I2C
@@ -39,41 +37,20 @@ void lcd_selxy(int x, int y) {
 }
 
 void check_encoder ( ) {
+  
   byte btnState = digitalRead(PIN_ENC_SW);
   if (btnState == LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
     if (millis() - lastButtonPress > 150) {
+      Serial.println("Boton presionado");
       isitem_sel=!isitem_sel;
       if (!isitem_sel)
           encoderPos=oldEncPos=old_menu_pos;
           
       lastButtonPress = millis();
-    }
+    }// if time > last button press
 
       if (vent_mode==VENTMODE_PCL && curr_sel==4 && menu_number == 0) curr_sel++; //Not selecting pip in VCL 
             
-      if ( menu_number == 0 ) {
-          if (curr_sel > 5) {
-              curr_sel=1;
-              menu_number+=1;
-              clear_all_display=true;
-              display_lcd();
-          } 
-      } else if (menu_number == 1) {
-           if (curr_sel > 5) {
-              curr_sel=0;
-              menu_number=2; 
-              clear_all_display=true;
-              display_lcd();         
-           }
-      }
-        else if (menu_number == 2) {
-         if (curr_sel > 8) {
-          curr_sel=0;
-          menu_number=0; 
-          clear_all_display=true;
-          display_lcd();         
-         }
-      }
       
       switch (curr_sel){
         case 1: 
@@ -163,28 +140,52 @@ void check_encoder ( ) {
       old_curr_sel = curr_sel;
       show_changed_options = true;
       update_options = true;
-    }
-
-    #ifdef DEBUG_UPDATE
-      Serial.print("Modo: ");Serial.println(vent_mode);
-    #endif
-  
-
+    }//if switch select
 
   if (oldEncPos != encoderPos) {
     show_changed_options = true;
 
     if (!isitem_sel) { //Selecting position
-        curr_sel=old_menu_pos=encoderPos;
+          curr_sel=encoderPos;
+          encoderPos=oldEncPos=curr_sel;
+          Serial.print("curr sel: ");Serial.println(curr_sel);
+          if ( menu_number == 0 ) {
+              if (encoderPos > 5) {
+                  encoderPos=1;
+                  menu_number+=1;
+              } else if ( encoderPos < 1) {
+                  encoderPos=1;
+                  menu_number=2;
+              }
+          } else if (menu_number == 1) {
+               if (encoderPos > 5) {
+                  encoderPos=1;
+                  menu_number=2;         
+               } else if ( encoderPos < 1) {
+                  encoderPos=1;
+                  menu_number=0;
+              }
+          }
+            else if (menu_number == 2) {
+             if (curr_sel > 8) {
+              curr_sel=1;
+              menu_number=0; 
+             } else if ( encoderPos < 1) {
+                  encoderPos=1;
+                  menu_number=1;
+              }
+          }
+          clear_all_display=true;
+          display_lcd();
     } else {//inside a particular selection
      
-    if (curr_sel != 0) {
-      if ( encoderPos > max_sel ) {
-         encoderPos=oldEncPos=max_sel; 
-      } else if ( encoderPos < min_sel ) {
-          encoderPos=oldEncPos=min_sel;
-        } else {
-    
+      //if (curr_sel != 0) {
+        if ( encoderPos > max_sel ) {
+           encoderPos=oldEncPos=max_sel; 
+        } else if ( encoderPos < min_sel ) {
+            encoderPos=oldEncPos=min_sel;
+          } else {
+      
         oldEncPos = encoderPos;
         //switch (menu_number) {
             switch (curr_sel) {
@@ -252,7 +253,7 @@ void check_encoder ( ) {
             update_options=true;
           }//Valid range
 
-    }//is item selected
+
     if (menu_number==2)
       change_pid_params=true;
     }//oldEncPos != encoderPos and valid between range
