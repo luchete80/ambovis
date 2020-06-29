@@ -154,7 +154,7 @@ void check_encoder ( ) {
                   encoderPos=1;
                   menu_number+=1;
               } else if ( encoderPos < 1) {
-                  encoderPos=1;
+                  encoderPos=8;
                   menu_number=2;
               }
           } else if (menu_number == 1) {
@@ -162,7 +162,7 @@ void check_encoder ( ) {
                   encoderPos=1;
                   menu_number=2;         
                } else if ( encoderPos < 1) {
-                  encoderPos=1;
+                  encoderPos=5;
                   menu_number=0;
               }
           }
@@ -171,7 +171,7 @@ void check_encoder ( ) {
               curr_sel=1;
               menu_number=0; 
              } else if ( encoderPos < 1) {
-                  encoderPos=1;
+                  encoderPos=5;
                   menu_number=1;
               }
           }
