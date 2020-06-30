@@ -149,6 +149,7 @@ void check_encoder ( ) {
           curr_sel=encoderPos;
           encoderPos=oldEncPos=curr_sel;
           Serial.print("curr sel: ");Serial.println(curr_sel);
+          Serial.print("Encoder pos: ");Serial.println(encoderPos);
           if ( menu_number == 0 ) {
               if (encoderPos > 5) {
                   encoderPos=1;
