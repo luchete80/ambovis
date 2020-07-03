@@ -169,7 +169,7 @@ void check_encoder ( ) {
           }
             else if (menu_number == 2) {
              if (curr_sel > 8) {
-              curr_sel=1;
+              encoderPos=1;
               menu_number=0; 
              } else if ( encoderPos < 1) {
                   encoderPos=5;
