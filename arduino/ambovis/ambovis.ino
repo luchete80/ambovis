@@ -116,7 +116,7 @@ int min_cd,max_cd;
   
 unsigned long last_cycle;
 
-extern unsigned int _timeoutIns,_timeoutEsp; //In ms
+unsigned int _timeoutIns,_timeoutEsp; //In ms
 
 byte menu_number = 0;
 //TODO: READ FROM EEPROM
@@ -191,7 +191,6 @@ void setup() {
   Serial.begin(250000);
   init_display();
   isitem_sel=false;
-  pinMode(PIN_POWEROFF, INPUT);
 
   // PID
   pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
@@ -210,6 +209,8 @@ void setup() {
   change_pid_params=true; //To calculate at first time
   
   // Parte motor
+  pinMode(PIN_MUTE, INPUT_PULLUP);
+  pinMode(PIN_POWEROFF, INPUT);
   pinMode(PIN_EN, OUTPUT);
   digitalWrite(PIN_EN, HIGH);
 
@@ -498,8 +499,10 @@ void loop() {
     }
 #endif
     if (digitalRead(PIN_POWEROFF)) {
-    
-    }
+          digitalWrite(YELLOW_LED,HIGH);
+    } else {
+          digitalWrite(YELLOW_LED,LOW);
+      }
   }//change cycle
 
   if (display_needs_update) {
@@ -533,20 +536,20 @@ void loop() {
                   isbuzzeron=!isbuzzeron;
                   if (isbuzzeron){
                       //tone(PIN_BUZZER,440);
-                      digitalWrite(PIN_BUZZER,0);
+                      digitalWrite(PIN_BUZZER,1);
                   }   
                   else {
                       //noTone(PIN_BUZZER);
-                      digitalWrite(PIN_BUZZER,1);
+                      digitalWrite(PIN_BUZZER,0);
                   }
               }
           } else {  //buzz muted
-              digitalWrite(PIN_BUZZER,1);
+              digitalWrite(PIN_BUZZER,0);
               //noTone(PIN_BUZZER);
           }
     } else {//state > 0
       //noTone(PIN_BUZZER);
-      digitalWrite(PIN_BUZZER,1);
+      digitalWrite(PIN_BUZZER,0);
       isbuzzeron=true;        //Inverted logic
     }
 
@@ -616,7 +619,7 @@ boolean debounce(boolean last, int pin) {
 
 void check_buzzer_mute() {
     curr_mute = debounce ( last_mute, PIN_MUTE );         //Debounce for Up button
-    if (last_mute== LOW && curr_mute == HIGH && !buzzmuted){
+    if (last_mute== HIGH && curr_mute == LOW && !buzzmuted){
         mute_count=0;
         buzzmuted=true;
     }

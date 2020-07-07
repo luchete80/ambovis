@@ -109,11 +109,11 @@ void MechVentilation::setPeakEspiratoryPressure(float peep) {
     _peep = peep;
 }
 
-void MechVentilation::_setInspiratoryCycle(void)} {
+void MechVentilation::_setInspiratoryCycle(void) {
     timeoutCycle = ((float)60) * 1000.0f / ((float)_rpm); // Tiempo de ciclo en msegundos
     //_timeoutIns = timeoutCycle * DEFAULT_POR_INSPIRATORIO / 100;
     _timeoutIns = timeoutCycle / (float(_percIE+1));
-	_timeoutEsp = (timeoutCycle) - _timeoutIns;    
+	  _timeoutEsp = (timeoutCycle) - _timeoutIns;    
 	#ifdef DEBUG_UPDATE
       Serial.print("Timeout Cycle");Serial.println(timeoutCycle);
       Serial.print("_timeoutIns");Serial.println(_timeoutIns);

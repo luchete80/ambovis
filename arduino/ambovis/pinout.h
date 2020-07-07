@@ -33,7 +33,7 @@
 #define TFT_DC 		49
 #define TFT_RST 	48
 
-
+#define PIN_POWEROFF    43
 #define GREEN_LED       45
 #define YELLOW_LED      46
 #define RED_LED         47
@@ -41,13 +41,6 @@
 #define PIN_BUZZER      3
 #define PIN_MUTE        2
 
-//4 leds de alarmas en los pines 44, 45, 46, y 47 
-//pin 43 recibiría una señal de cuando se corte la luz
-#define PIN_POWEROFF    43
-#define PIN_NO_ALARM    44
-#define PIN_PIP_ALARM   45
-#define PIN_PEEP_ALARM  46
-#define PIN_PIP_ALARM   47
 
 
 

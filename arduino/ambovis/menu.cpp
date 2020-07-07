@@ -373,9 +373,9 @@ void display_lcd ( ) {
     writeLine(2, String(tempstr), 16);  
     
     dtostrf(Cdyn*1.01972, 2, 1, tempstr);
-    writeLine(3, "CD: " + String(tempstr), 0); 
+    writeLine(3, "CD:" + String(tempstr), 0); 
       
-  } else if (menu_number ==1 ){//OTHER SETTINGS
+  } else if (menu_number ==1 ) {//OTHER SETTINGS
                         lcd_clearxy(12,0,8);
     lcd_clearxy(8,1,2); lcd_clearxy(16,1,3);
                         lcd_clearxy(13,6,3);

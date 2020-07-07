@@ -107,24 +107,24 @@ void tft_draw(void) {
     switch (state_r){
         case NO_ALARM:
             if (state==0) //state_r!=10
-            digitalWrite(GREEN_LED,HIGH); digitalWrite(YELLOW_LED,LOW); digitalWrite(RED_LED,LOW);   
+            digitalWrite(GREEN_LED,HIGH); digitalWrite(RED_LED,LOW);   
           break;
         case PEEP_ALARM:
-          digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,HIGH); digitalWrite(RED_LED,LOW);  
+          digitalWrite(GREEN_LED,LOW); digitalWrite(RED_LED,LOW);  
           tft.setRotation(0);
           tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
           tft.setCursor(150, 20);   
           tft.println("PEEP AL");
         break;
         case PIP_ALARM:
-          digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,LOW); digitalWrite(RED_LED,HIGH);      
+          digitalWrite(GREEN_LED,LOW); digitalWrite(RED_LED,HIGH);      
           tft.setRotation(0);
           tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
           tft.setCursor(150, 0);   
           tft.println("PIP AL");
       break;  
         case PEEP_PIP_ALARM:
-          digitalWrite(GREEN_LED,LOW); digitalWrite(YELLOW_LED,HIGH); digitalWrite(RED_LED,HIGH);      
+          digitalWrite(GREEN_LED,LOW); digitalWrite(RED_LED,HIGH);      
           tft.setRotation(0);
           tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
           tft.setCursor(150, 0);   
