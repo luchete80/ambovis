@@ -34,9 +34,9 @@
 #define TFT_RST 	48
 
 
-#define GREEN_LED       22
-#define YELLOW_LED      23
-#define RED_LED         24
+#define GREEN_LED       45
+#define YELLOW_LED      46
+#define RED_LED         47
 
 #define PIN_BUZZER      3
 #define PIN_MUTE        2

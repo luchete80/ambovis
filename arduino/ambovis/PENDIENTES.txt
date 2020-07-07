@@ -6,3 +6,7 @@ Tiempos inspiratorios y expiratorios
 Ampliar ventana de BMP hasta 30
 Ampliar PIP a 30
 Modo manual llamarlo VCV
+
+
+- PONER EL MUTEADOR EN PULL UP
+- 
