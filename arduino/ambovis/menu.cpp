@@ -109,7 +109,7 @@ void check_encoder ( ) {
               case 5: 
             if ( menu_number == 0 ) {
                 encoderPos=oldEncPos=options.peakInspiratoryPressure;
-                min_sel=15;max_sel=25;
+                min_sel=15;max_sel=30;
             } else if ( menu_number == 1 ) {//menu 0
                   min_sel=0;max_sel=1; 
             } else {

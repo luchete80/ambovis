@@ -145,9 +145,6 @@ private:
     /** Flow trigger value in litres per minute. */
     float _triggerThreshold;
     /**  Insufflation timeout in seconds. */
-    unsigned int _timeoutIns;
-    /** Exsufflation timeout in seconds. */
-    unsigned int _timeoutEsp;
     /** Breaths per minute */
     uint8_t _rpm;
     /** Peak inspiratory pressure */
@@ -192,6 +189,9 @@ private:
     float timeoutCycle;
 };
 
+extern unsigned int _timeoutIns;
+extern unsigned int _timeoutEsp;
+    
 extern byte stepper_time;
 extern unsigned long last_vent_time;
 extern float _mlInsVol,_mlExsVol;

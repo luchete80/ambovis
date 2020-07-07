@@ -116,6 +116,8 @@ int min_cd,max_cd;
   
 unsigned long last_cycle;
 
+extern unsigned int _timeoutIns,_timeoutEsp; //In ms
+
 byte menu_number = 0;
 //TODO: READ FROM EEPROM
 byte alarm_max_pressure = 35;
@@ -239,7 +241,7 @@ void setup() {
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
-  writeLine(1, "AMBOVIS 0629", 4);
+  writeLine(1, "AMBOVIS 0707", 4);
 
   p_dpt0 = 0;
   ads.begin();
