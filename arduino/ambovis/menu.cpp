@@ -6,8 +6,6 @@
 static bool clear_all_display;
 
 static byte max_pidk_byte,min_pidk_byte;
-byte menu_sel; //0 nothing, 1 navigate, 2 option
-
 
 void init_display() {
   #ifdef LCD_I2C
@@ -39,37 +37,20 @@ void lcd_selxy(int x, int y) {
 }
 
 void check_encoder ( ) {
+  
   byte btnState = digitalRead(PIN_ENC_SW);
   if (btnState == LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
     if (millis() - lastButtonPress > 150) {
-      curr_sel++; //NOT +=1, is a byte
+      Serial.println("Boton presionado");
+      isitem_sel=!isitem_sel;
+      if (!isitem_sel)
+          encoderPos=oldEncPos=old_menu_pos;
+          
+      lastButtonPress = millis();
+    }// if time > last button press
 
-      //if ((vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_MAN) && curr_sel==5) curr_sel++; //Not selecting pip in VCL
       if (vent_mode==VENTMODE_PCL && curr_sel==4 && menu_number == 0) curr_sel++; //Not selecting pip in VCL 
             
-      if ( menu_number == 0 ) {
-        if (curr_sel > 5) {
-          curr_sel=1;
-          menu_number+=1;
-          clear_all_display=true;
-          display_lcd();
-        } 
-      } else if (menu_number == 1) {
-         if (curr_sel > 5) {
-          curr_sel=0;
-          menu_number=2; 
-          clear_all_display=true;
-          display_lcd();         
-         }
-      }
-        else if (menu_number == 2) {
-         if (curr_sel > 8) {
-          curr_sel=0;
-          menu_number=0; 
-          clear_all_display=true;
-          display_lcd();         
-         }
-      }
       
       switch (curr_sel){
         case 1: 
@@ -89,7 +70,7 @@ void check_encoder ( ) {
                 encoderPos=oldEncPos=options.respiratoryRate;
                 min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
                 } else if ( menu_number == 1 ) {
-                    min_sel=5;max_sel=15;
+                    min_sel=5;max_sel=30;
                     encoderPos=oldEncPos=alarm_peep_pressure;                          
                 }
                 else{
@@ -128,7 +109,7 @@ void check_encoder ( ) {
               case 5: 
             if ( menu_number == 0 ) {
                 encoderPos=oldEncPos=options.peakInspiratoryPressure;
-                min_sel=15;max_sel=25;
+                min_sel=15;max_sel=30;
             } else if ( menu_number == 1 ) {//menu 0
                   min_sel=0;max_sel=1; 
             } else {
@@ -159,36 +140,60 @@ void check_encoder ( ) {
       old_curr_sel = curr_sel;
       show_changed_options = true;
       update_options = true;
-    }
-    lastButtonPress = millis();
-
-    #ifdef DEBUG_UPDATE
-      Serial.print("Modo: ");Serial.println(vent_mode);
-    #endif
-  }
-
+    }//if switch select
 
   if (oldEncPos != encoderPos) {
     show_changed_options = true;
-    
-    if (menu_number==2)
-      change_pid_params=true;
+
+    if (!isitem_sel) { //Selecting position
+          curr_sel=encoderPos;
+          encoderPos=oldEncPos=curr_sel;
+          Serial.print("curr sel: ");Serial.println(curr_sel);
+          Serial.print("Encoder pos: ");Serial.println(encoderPos);
+          if ( menu_number == 0 ) {
+              if (encoderPos > 5) {
+                  encoderPos=1;
+                  menu_number+=1;
+              } else if ( encoderPos < 1) {
+                  encoderPos=8;
+                  menu_number=2;
+              }
+          } else if (menu_number == 1) {
+               if (encoderPos > 5) {
+                  encoderPos=1;
+                  menu_number=2;         
+               } else if ( encoderPos < 1) {
+                  encoderPos=5;
+                  menu_number=0;
+              }
+          }
+            else if (menu_number == 2) {
+             if (curr_sel > 8) {
+              encoderPos=1;
+              menu_number=0; 
+             } else if ( encoderPos < 1) {
+                  encoderPos=5;
+                  menu_number=1;
+              }
+          }
+          clear_all_display=true;
+          display_lcd();
+    } else {//inside a particular selection
+     
+      //if (curr_sel != 0) {
+        if ( encoderPos > max_sel ) {
+           encoderPos=oldEncPos=max_sel; 
+        } else if ( encoderPos < min_sel ) {
+            encoderPos=oldEncPos=min_sel;
+          } else {
       
-    if (curr_sel != 0) {
-      if ( encoderPos > max_sel ) {
-         encoderPos=oldEncPos=max_sel; 
-      } else if ( encoderPos < min_sel ) {
-          encoderPos=oldEncPos=min_sel;
-        } else {
-    
         oldEncPos = encoderPos;
         //switch (menu_number) {
             switch (curr_sel) {
               case 1:
                 if ( menu_number == 0 )     vent_mode           = encoderPos;
                 else if (menu_number == 1)  alarm_max_pressure  = encoderPos;
-                else                        {min_cd  = int(encoderPos);//Serial.print("Mincd: ");Serial.println(min_cd);
-                }
+                else                        {min_cd  = int(encoderPos);Serial.print("Mincd: ");Serial.println(min_cd);}
                 break;
               case 2:
                 if ( menu_number == 0 )       options.respiratoryRate = encoderPos;
@@ -215,8 +220,7 @@ void check_encoder ( ) {
                     }
                 } else if (menu_number == 1) {
                     p_trim=encoderPos;
-                } else {max_cd  = int(encoderPos);//Serial.print("Maxcd: ");Serial.println(max_cd);
-                }
+                } else {max_cd  = int(encoderPos);Serial.print("Maxcd: ");Serial.println(max_cd);}
                     
                 break;
               case 5:
@@ -249,7 +253,10 @@ void check_encoder ( ) {
             show_changed_options = true;
             update_options=true;
           }//Valid range
-  
+
+
+    if (menu_number==2)
+      change_pid_params=true;
     }//oldEncPos != encoderPos and valid between range
   }
 }
@@ -335,7 +342,7 @@ void display_lcd ( ) {
         writeLine(0, "V: -", 10);
       break;    
       case VENTMODE_MAN:
-        writeLine(0, "MOD:MAN", 1); 
+        writeLine(0, "MOD:VCV", 1); 
         writeLine(0, "V:" + String(options.percVolume)+"%", 10);    
         writeLine(1, "PIP : ", 10);
       break;

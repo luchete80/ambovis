@@ -1,7 +1,10 @@
 #include "pinout.h"
 #include "MechVentilation.h"
 #include "src/TimerOne/TimerOne.h"
+//#include "src/TimerTwo/TimerTwo.h"
+
 #include "menu.h"
+#include "display.h"
 
 #include "src/AutoPID/AutoPID.h"
 #ifdef ACCEL_STEPPER
@@ -25,6 +28,7 @@ int vt;
 float _mlInsVol = 0;
 float _mlExsVol = 0;
 int _mllastInsVol, _mllastExsVol;
+int mute_count;
 
 int Compression_perc = 8; //80%
 
@@ -47,13 +51,24 @@ LiquidCrystal_I2C lcd(0x3F, 20, 4);
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
 #endif
 
+//MUTE
+boolean last_mute,curr_mute;
+unsigned long time_mute;
+
+boolean buzzmuted;
+unsigned long timebuzz=0;
+bool isbuzzeron=false;
+
+
+Adafruit_ILI9341 tft=Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
+
 byte vcorr_count;
 byte p_trim = 100;
 float pressure_p;   //EXTERN!!
 float last_pressure_max, last_pressure_min, last_pressure_peep;
 float pressure_peep;
 
-byte vent_mode = VENTMODE_PCL; //0
+byte vent_mode = VENTMODE_MAN; //0
 //Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
 float verrp;
@@ -92,19 +107,23 @@ int16_t adc0;
 
 int max_accel,min_accel;
 int max_speed, min_speed;
-int max_pidk=1000;
-int min_pidk=250;
-  int max_cd=40;  //T MODIFY: READ FROM MEM
-  int min_cd=10;
-
+int min_pidk,max_pidk;
+//min_pidk=250;
+//max_pidk=1000;
+int min_cd,max_cd;
+//max_cd=40;  //T MODIFY: READ FROM MEM
+//min_cd=10;
+  
 unsigned long last_cycle;
+
+extern unsigned int _timeoutIns,_timeoutEsp; //In ms
 
 byte menu_number = 0;
 //TODO: READ FROM EEPROM
 byte alarm_max_pressure = 35;
 byte alarm_peep_pressure = 5;
 byte isalarmvt_on;
-int alarm_vt = 400;
+int alarm_vt = 200;
 
 //MENU
 unsigned long lastButtonPress;
@@ -126,13 +145,13 @@ int pinA = PIN_ENC_CL; // Our first hardware interrupt pin is digital pin 2
 int pinB = PIN_ENC_DIR; // Our second hardware interrupt pin is digital pin 3
 byte aFlag = 0; // let's us know when we're expecting a rising edge on pinA to signal that the encoder has arrived at a detent
 byte bFlag = 0; // let's us know when we're expecting a rising edge on pinB to signal that the encoder has arrived at a detent (opposite direction to when aFlag is set)
-byte encoderPos = 0; //this variable stores our current value of encoder position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
-byte oldEncPos = 0; //stores the last encoder position value so we can compare to the current reading and see if it has changed (so we know when to print to the serial monitor)
+byte encoderPos = 1; //this variable stores our current value of encoder position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
+byte oldEncPos = 1; //stores the last encoder position value so we can compare to the current reading and see if it has changed (so we know when to print to the serial monitor)
 byte reading = 0; //somewhere to store the direct values we read from our interrupt pins before checking to see if we have moved a whole detent
 
 byte max_sel, min_sel; //According to current selection
 
-
+void check_buzzer_mute();
 //
 void PinA() {
   cli(); //stop interrupts happening before we read pin values
@@ -157,34 +176,22 @@ void PinB() {
   else if (reading == B00001000) aFlag = 1; //signal that we're expecting pinA to signal the transition to detent from free rotation
   sei(); //restart interrupts
 }
+bool isitem_sel;
+byte old_menu_pos=0;
+byte old_menu_num=0;
 
 AutoPID * pid;
 
 MechVentilation * ventilation;
 VentilationOptions_t options;
 
-//#ifdef LCD_I2C
-//LiquidCrystal_I2C lcd;
-//lcd = LiquidCrystal_I2C(0x3F, 20, 4);
-//extern LiquidCrystal_I2C lcd;
-//#else
-////extern LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
-//lcd=LiquidCrystal(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
-////extern LiquidCrystal lcd;
-//#endif
-
 float p_dpt0;
 void setup() {
-
+  
   Serial.begin(250000);
   init_display();
-
-  pinMode(PIN_BUZZ, OUTPUT);
-  digitalWrite(PIN_BUZZ, LOW); // test zumbador
-  delay(500);
-  digitalWrite(PIN_BUZZ, HIGH);
-  //beep(100); //Beep
-  //tone(PIN_BUZZ, 1000, 500);
+  isitem_sel=false;
+  pinMode(PIN_POWEROFF, INPUT);
 
   // PID
   pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
@@ -194,20 +201,18 @@ void setup() {
   // set PID update interval
   pid -> setTimeStep(PID_TS);
 
+  max_cd=40;  //T MODIFY: READ FROM MEM
+  min_cd=10;
+  min_speed = 250;  // x microsteps
+  max_speed = 750;  // x Microsteps, originally 16000 (with 16 ms = 750)
+  max_accel = 600;
+  min_accel = 200;
+  change_pid_params=true; //To calculate at first time
+  
   // Parte motor
   pinMode(PIN_EN, OUTPUT);
   digitalWrite(PIN_EN, HIGH);
 
-//  max_cd=40;  //T MODIFY: READ FROM MEM
-//  min_cd=10;
-//  min_speed = 250;  // x microsteps
-//  max_speed = 750;  // x Microsteps, originally 16000 (with 16 ms = 750)
-//  max_accel = 600;
-//  min_accel = 200;
-//  max_pidk = 1000;
-//  min_pidk = 250;
-  change_pid_params=true; //To calculate at first time
-    
   // TODO: Añadir aquí la configuarcion inicial desde puerto serie
   options.respiratoryRate = DEFAULT_RPM;
   options.percInspEsp = 2; //1:1 to 1:4, is denom
@@ -236,7 +241,7 @@ void setup() {
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
-  writeLine(1, "AMBOVIS 0623", 4);
+  writeLine(1, "AMBOVIS 0707", 4);
 
   p_dpt0 = 0;
   ads.begin();
@@ -273,13 +278,13 @@ void setup() {
   display_lcd();
 
   //ENCODER
-  curr_sel = old_curr_sel = 0; //COMPRESSION
-  encoderPos = oldEncPos = options.tidalVolume;
+  curr_sel = old_curr_sel = 1; //COMPRESSION
+
 
   pinMode(pinA, INPUT_PULLUP); // set pinA as an input, pulled HIGH to the logic voltage (5V or 3.3V for most cases)
   pinMode(pinB, INPUT_PULLUP); // set pinB as an input, pulled HIGH to the logic voltage (5V or 3.3V for most cases)
-  attachInterrupt(0, PinA, RISING); // set an interrupt on PinA, looking for a rising edge signal and executing the "PinA" Interrupt Service Routine (below)
-  attachInterrupt(1, PinB, RISING); // set an interrupt on PinB, looking for a rising edge signal and executing the "PinB" Interrupt Service Routine (below)
+  attachInterrupt(4, PinA, RISING); // set an interrupt on PinA, looking for a rising edge signal and executing the "PinA" Interrupt Service Routine (below)
+  attachInterrupt(5, PinB, RISING); // set an interrupt on PinB, looking for a rising edge signal and executing the "PinB" Interrupt Service Routine (below)
   pinMode(PIN_ENC_SW, INPUT_PULLUP);
   //btnState=digitalRead(9);
 
@@ -299,16 +304,18 @@ void setup() {
 
   Timer1.initialize(50);
   Timer1.attachInterrupt(timer1Isr);
+  //Timer2.setPeriod(500000);
+  //Timer2.attachInterrupt(timer2Isr);
 
 #ifdef DEBUG_UPDATE
   Serial.print("Honey Volt at p0: "); Serial.println(analogRead(A0) / 1023.);
 #endif
   int eeAddress=0;
-  EEPROM.get(0, last_cycle);      eeAddress+= sizeof(unsigned long);
-  EEPROM.get(eeAddress, p_trim);  eeAddress+= sizeof(p_trim);
-  EEPROM.get(eeAddress, autopid); eeAddress+= sizeof(autopid);
-  EEPROM.get(eeAddress, min_cd); eeAddress+= sizeof(min_cd);
-  EEPROM.get(eeAddress, max_cd); eeAddress+= sizeof(max_cd);
+  EEPROM.get(0, last_cycle); eeAddress+= sizeof(unsigned long);
+  EEPROM.get(eeAddress, p_trim);    eeAddress+= sizeof(p_trim);
+  EEPROM.get(eeAddress, autopid);   eeAddress+= sizeof(autopid);
+  EEPROM.get(eeAddress, min_cd);    eeAddress+= sizeof(min_cd);
+  EEPROM.get(eeAddress, max_cd);    eeAddress+= sizeof(max_cd);
   EEPROM.get(eeAddress, min_speed); eeAddress+= sizeof(min_speed);
   EEPROM.get(eeAddress, max_speed); eeAddress+= sizeof(max_speed);
   EEPROM.get(eeAddress, min_accel); eeAddress+= sizeof(min_accel);
@@ -316,9 +323,22 @@ void setup() {
   EEPROM.get(eeAddress, min_pidk); eeAddress+= sizeof(min_pidk);
   EEPROM.get(eeAddress, max_pidk); eeAddress+= sizeof(max_pidk);
 
+  Serial.print("Maxcd: ");Serial.println(max_cd);
+        
   Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
   ventilation->setCycleNum(last_cycle);
 
+  pinMode(PIN_BUZZER, OUTPUT); //Set buzzerPin as output
+    pinMode(GREEN_LED, OUTPUT); //Set buzzerPin as output
+    pinMode(YELLOW_LED, OUTPUT); //Set buzzerPin as output
+    pinMode(RED_LED, OUTPUT); //Set buzzerPin as output
+    tft.begin();
+    tft.fillScreen(ILI9341_BLACK);
+
+    digitalWrite(PIN_BUZZER,1);
+    buzzmuted=false;
+    last_mute=LOW;
+    mute_count=0;
 }
 
 
@@ -331,6 +351,7 @@ void loop() {
   check_encoder();
 
   time = millis();
+  //check_buzzer_mute();
 
   if (millis() > lastSave + TIME_SAVE) {
     int eeAddress=0;
@@ -349,36 +370,39 @@ void loop() {
     lastSave = millis();
   }
 
-#ifdef DEBUG_OFF
-  if ( millis() > lastShowSensor + TIME_SHOW ) {
-    lastShowSensor = millis();
-    Serial.print(int(cycle_pos)); Serial.print(",");
-    Serial.print(int(pressure_p)); Serial.print(",");
-#ifdef FILTER_FLUX
-    Serial.print(int(flow_f)); Serial.print(",");
-#else
-    Serial.print(int(_flux)); Serial.print(",");
-#endif
-    Serial.print(alarm_state); Serial.print(",");
-    Serial.print(int(_mlInsVol - _mlExsVol)); Serial.print(",");
-    Serial.print(int(_mllastInsVol)); Serial.print(",");
-    Serial.println(int(_mllastExsVol));
 
-    //Serial.print(",");Serial.println(int(alarm_state));
-    //      #ifdef FILTER_FLUX
-    //      Serial.print(Voltage*1000);Serial.print(",");Serial.print(p_dpt,4);Serial.print(",");Serial.println(_flux);/*Serial.print(",");/*Serial.print(",");Serial.println(_flux_sum/5.);*/
-    //      Serial.print("Vcorr");Serial.print(",");Serial.println((Voltage-verror));
-    //      #endif
-    //Serial.print(int(_mlInsVol));Serial.print(",");Serial.println(int(_mlExsVol));
+  if ( millis() > lastShowSensor + TIME_SHOW ) {
+
+      lastShowSensor=millis(); 
+      // Serial.print(int(cycle_pos));Serial.print(",");
+	    // Serial.print(int(pressure_p));Serial.print(",");
+     //Serial.println(analogRead(A0));
+	    // #ifdef FILTER_FLUX
+	    // Serial.print(int(flow_f));Serial.print(",");
+      // #else
+      // Serial.print(int(_flux));Serial.print(",");
+      // #endif      
+      //Serial.println(int(alarm_state));
+      //Serial.print(",");
+      // Serial.println(int(_mlInsVol-_mlExsVol));
+//      
+      //Serial.print(",");Serial.println(int(alarm_state));     
+//      #ifdef FILTER_FLUX 
+//      Serial.print(Voltage*1000);Serial.print(",");Serial.print(p_dpt);Serial.print(",");Serial.println(_flux);/*Serial.print(",");/*Serial.print(",");Serial.println(_flux_sum/5.);*/
+//      #endif
+      //Serial.print(int(_mlInsVol));Serial.print(",");Serial.println(int(_mlExsVol));
+      tft_draw();
 
   }
-#endif
+
 
   if (time > lastReadSensor + TIME_SENSOR) {
 
     //pressure_p=( analogRead(A0)/(1023.) - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20*1.05;
-    pressure_p = ( analogRead(A0) / (1023.) - verrp * 0.2 - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20 * 0.75 - 1.0;
-
+    // pressure_p = ( analogRead(A0) / (1023.) - verrp * 0.2 - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20 * 0.75 - 1.0;//MPX5010
+    pressure_p = (( float(analogRead(A0))/1023.*V_SUPPLY_HONEY - 0.1 * V_SUPPLY_HONEY/* - corr_fs */) / (0.8 * V_SUPPLY_HONEY) * DEFAULT_PSI_TO_CM_H20 * 2. - DEFAULT_PSI_TO_CM_H20);//HONEYWELL
+    
+    
     adc0 = ads.readADC_SingleEnded(0);
     Voltage = (adc0 * 0.1875) / 1000.; //Volts
 
@@ -473,8 +497,10 @@ void loop() {
       }
     }
 #endif
-
-  }
+    if (digitalRead(PIN_POWEROFF)) {
+    
+    }
+  }//change cycle
 
   if (display_needs_update) {
     //lcd.clear();  //display_lcd do not clear screnn in order to not blink
@@ -498,6 +524,32 @@ void loop() {
     last_update_display = millis();
     show_changed_options = false;
   }
+
+    if (alarm_state > 0) {
+
+          if (!buzzmuted) {
+              if (millis() > timebuzz + TIME_BUZZER) {
+                  timebuzz=millis();
+                  isbuzzeron=!isbuzzeron;
+                  if (isbuzzeron){
+                      //tone(PIN_BUZZER,440);
+                      digitalWrite(PIN_BUZZER,0);
+                  }   
+                  else {
+                      //noTone(PIN_BUZZER);
+                      digitalWrite(PIN_BUZZER,1);
+                  }
+              }
+          } else {  //buzz muted
+              digitalWrite(PIN_BUZZER,1);
+              //noTone(PIN_BUZZER);
+          }
+    } else {//state > 0
+      //noTone(PIN_BUZZER);
+      digitalWrite(PIN_BUZZER,1);
+      isbuzzeron=true;        //Inverted logic
+    }
+
 
 }//LOOP
 
@@ -531,10 +583,10 @@ void update_error() {
   }
 }
 
-void timer2Isr(void)
-{
-  ventilation -> update();
-}
+//void timer2Isr(void)
+//{
+//  ventilation -> update();
+//}
 
 //
 
@@ -551,4 +603,26 @@ int findClosest(float arr[], int n, float target) {
     //Serial.print("i,j: ");Serial.print(i);Serial.print(",");Serial.println(j);
   }
   return i;
+}
+
+boolean debounce(boolean last, int pin) {
+    boolean current = digitalRead(pin);
+    if (last != current) {
+        delay(50);
+        current = digitalRead(pin);
+    }
+    return current;
+}
+
+void check_buzzer_mute() {
+    curr_mute = debounce ( last_mute, PIN_MUTE );         //Debounce for Up button
+    if (last_mute== LOW && curr_mute == HIGH && !buzzmuted){
+        mute_count=0;
+        buzzmuted=true;
+    }
+    last_mute = curr_mute;
+    if(buzzmuted) {
+        if (mute_count > 2*TIME_MUTE)  //each count is every 500 ms
+        buzzmuted=false;
+    }
 }

@@ -156,3 +156,5 @@ Full calibrated
 Pressure Range: 300hPa to 1100hPa (+9000m to -500m)
 
 30 kpaa
+
+https://stackoverflow.com/questions/18705363/arduino-uno-pwm-pins-conflict

@@ -40,25 +40,18 @@ MechVentilation::MechVentilation(
 //TODO: use this method to play a beep in main loop, 1 second long for example.
 boolean MechVentilation::getStartWasTriggeredByPatient()
 { //returns true if last respiration cycle was started by patient trigger. It is cleared when read.
-    if (_startWasTriggeredByPatient)
-    {
+    if (_startWasTriggeredByPatient) {
         return true;
-    }
-    else
-    {
+    } else {
         return false;
     }
 }
 
 //TODO: use this method to play a beep in main loop, 2 second long for example.
-boolean MechVentilation::getSensorErrorDetected()
-{ //returns true if there was an sensor error detected. It is cleared when read.
-    if (_sensor_error_detected)
-    {
+boolean MechVentilation::getSensorErrorDetected() { //returns true if there was an sensor error detected. It is cleared when read.
+    if ( _sensor_error_detected ) {
         return true;
-    }
-    else
-    {
+    } else {
         return false;
     }
 }
@@ -112,13 +105,11 @@ void MechVentilation::setPeakInspiratoryPressure(float pip)
     _pip = pip;
 }
 
-void MechVentilation::setPeakEspiratoryPressure(float peep)
-{
+void MechVentilation::setPeakEspiratoryPressure(float peep) {
     _peep = peep;
 }
 
-void MechVentilation::_setInspiratoryCycle(void)
-{
+void MechVentilation::_setInspiratoryCycle(void)} {
     timeoutCycle = ((float)60) * 1000.0f / ((float)_rpm); // Tiempo de ciclo en msegundos
     //_timeoutIns = timeoutCycle * DEFAULT_POR_INSPIRATORIO / 100;
     _timeoutIns = timeoutCycle / (float(_percIE+1));
@@ -291,7 +282,7 @@ void MechVentilation :: update ( void )
 
                        STEPPER_SPEED_MAX        = STEPPER_MICROSTEPS * max_speed; //Originally 12000
         			         if (_pip>22) 
-        			          STEPPER_ACC_INSUFFLATION= int(float(STEPPER_MICROSTEPS) *  max_accel * 1.4);//But the limit is calculated with range from 200 to 700
+        			          STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  max_accel * 1.3;//But the limit is calculated with range from 200 to 700
                        else         
                         STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  max_accel;
                         //STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  600;

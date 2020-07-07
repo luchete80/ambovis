@@ -413,12 +413,12 @@ void parseData() {
   }
 
   if ( integerFromPC[FLUX_] != 0 && abs(integerFromPC[FLUX_]) < abs(last_vals[FLUX_][1])+diff_var[FLUX_] && integerFromPC[TIME_] > xgra[FLUX_][1]) {
-    yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_])*0.05);
+    yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_])*0.04);
     last_vals[FLUX_][0]=last_vals[FLUX_][1];last_vals[FLUX_][1]=integerFromPC[FLUX_];
     xgra[FLUX_][0]=xgra[FLUX_][1];xgra[FLUX_][1]=integerFromPC[TIME_];
   }
    if ( integerFromPC[VT_] != 0 && abs(integerFromPC[VT_]) < abs(last_vals[VT_][1])+diff_var[VT_] && integerFromPC[TIME_] > xgra[VT_][1]) {
-    yvt[0]=yvt[1];yvt[1]=int(float(integerFromPC[VT_])*0.075);
+    yvt[0]=yvt[1];yvt[1]=int(float(integerFromPC[VT_])*0.07);
     last_vals[VT_][0]=last_vals[VT_][1];last_vals[VT_][1]=integerFromPC[VT_];
     xgra[VT_][0]=xgra[VT_][1];xgra[VT_][1]=integerFromPC[TIME_];
   }
