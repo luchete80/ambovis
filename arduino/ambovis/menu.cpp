@@ -70,7 +70,7 @@ void check_encoder ( ) {
                 encoderPos=oldEncPos=options.respiratoryRate;
                 min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
                 } else if ( menu_number == 1 ) {
-                    min_sel=5;max_sel=15;
+                    min_sel=5;max_sel=30;
                     encoderPos=oldEncPos=alarm_peep_pressure;                          
                 }
                 else{
@@ -342,7 +342,7 @@ void display_lcd ( ) {
         writeLine(0, "V: -", 10);
       break;    
       case VENTMODE_MAN:
-        writeLine(0, "MOD:MAN", 1); 
+        writeLine(0, "MOD:VCV", 1); 
         writeLine(0, "V:" + String(options.percVolume)+"%", 10);    
         writeLine(1, "PIP : ", 10);
       break;
