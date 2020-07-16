@@ -22,8 +22,8 @@
 #endif
 
 // #define PIN_BME_CS2  4  // sensor de presion 2
-#define PIN_ENC_CL  19
-#define PIN_ENC_DIR 18
+#define PIN_ENC_CL  18
+#define PIN_ENC_DIR 19
 #define PIN_ENC_SW  4
 
 //#define TFT_CLK 	13 FIXED (HW)

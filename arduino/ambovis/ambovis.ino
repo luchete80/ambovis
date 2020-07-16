@@ -190,8 +190,6 @@ void setup() {
   
   Serial.begin(250000);
   init_display();
-  lcd.createChar(0, back);//Custom chars
-  
   isitem_sel=false;
 
   // PID
@@ -209,7 +207,6 @@ void setup() {
   max_accel = 600;
   min_accel = 200;
   change_pid_params=true; //To calculate at first time
-
   
   // Parte motor
   pinMode(PIN_MUTE, INPUT_PULLUP);
@@ -402,7 +399,6 @@ void loop() {
 
   if (time > lastReadSensor + TIME_SENSOR) {
 
-    //pressure_p=( analogRead(A0)/(1023.) - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20*1.05;
     pressure_p = ( analogRead(A0) / (1023.) - verrp * 0.2 - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20 * 0.75 - 1.0;//MPX5010
     //pressure_p = (( float(analogRead(A0))/1023.*V_SUPPLY_HONEY - 0.1 * V_SUPPLY_HONEY/* - corr_fs */) / (0.8 * V_SUPPLY_HONEY) * DEFAULT_PSI_TO_CM_H20 * 2. - DEFAULT_PSI_TO_CM_H20);//HONEYWELL
     
