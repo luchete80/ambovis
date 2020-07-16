@@ -399,7 +399,7 @@ void loop() {
 
   if (time > lastReadSensor + TIME_SENSOR) {
 
-    pressure_p = ( analogRead(A0) / (1023.) - verrp * 0.2 - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20 * 0.75 - 1.0;//MPX5010
+    pressure_p = ( analogRead(A0) / (1023.) - verrp * 0.2 - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20 * 0.75 - 1.0 + 3.;//MPX5010, 3 is to match analog manometer
     //pressure_p = (( float(analogRead(A0))/1023.*V_SUPPLY_HONEY - 0.1 * V_SUPPLY_HONEY/* - corr_fs */) / (0.8 * V_SUPPLY_HONEY) * DEFAULT_PSI_TO_CM_H20 * 2. - DEFAULT_PSI_TO_CM_H20);//HONEYWELL
     
     
@@ -618,7 +618,7 @@ boolean debounce(boolean last, int pin) {
 
 void check_buzzer_mute() {
     curr_mute = debounce ( last_mute, PIN_MUTE );         //Debounce for Up button
-    if (last_mute== HIGH && curr_mute == LOW && !buzzmuted){
+    if (last_mute!=curr_mute && !buzzmuted){
         mute_count=0;
         buzzmuted=true;
     }
