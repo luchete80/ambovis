@@ -338,7 +338,7 @@ void setup() {
 
     digitalWrite(PIN_BUZZER,1);
     buzzmuted=false;
-    last_mute=LOW;
+    last_mute=HIGH;
     mute_count=0;
 }
 
