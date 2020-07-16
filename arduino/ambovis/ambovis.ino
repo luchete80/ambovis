@@ -375,15 +375,15 @@ void loop() {
   if ( millis() > lastShowSensor + TIME_SHOW ) {
 
       lastShowSensor=millis(); 
-       Serial.print(int(cycle_pos));Serial.print(",");
-	     Serial.print(int(pressure_p));Serial.print(",");
-     //Serial.println(analogRead(A0));
-	     #ifdef FILTER_FLUX
-	     Serial.print(int(flow_f));Serial.print(",");
-       #else
-       Serial.print(int(_flux));Serial.print(",");
-       #endif      
-      Serial.println(int(alarm_state));
+//       Serial.print(int(cycle_pos));Serial.print(",");
+//	     Serial.print(int(pressure_p));Serial.print(",");
+//     //Serial.println(analogRead(A0));
+//	     #ifdef FILTER_FLUX
+//	     Serial.print(int(flow_f));Serial.print(",");
+//       #else
+//       Serial.print(int(_flux));Serial.print(",");
+//       #endif      
+//      Serial.println(int(alarm_state));
       //Serial.print(",");
        //Serial.println(int(_mlInsVol-_mlExsVol));
 //      
