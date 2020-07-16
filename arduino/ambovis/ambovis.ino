@@ -190,6 +190,8 @@ void setup() {
   
   Serial.begin(250000);
   init_display();
+  lcd.createChar(0, back);//Custom chars
+  
   isitem_sel=false;
 
   // PID
@@ -207,6 +209,7 @@ void setup() {
   max_accel = 600;
   min_accel = 200;
   change_pid_params=true; //To calculate at first time
+
   
   // Parte motor
   pinMode(PIN_MUTE, INPUT_PULLUP);

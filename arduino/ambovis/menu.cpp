@@ -7,6 +7,17 @@ static bool clear_all_display;
 
 static byte max_pidk_byte,min_pidk_byte;
 
+byte back[8] = {
+  0b00100,
+  0b01000,
+  0b11111,
+  0b01001,
+  0b00101,
+  0b00001,
+  0b00001,
+  0b11111
+};
+
 void init_display() {
   #ifdef LCD_I2C
   lcd.begin(20, 4);  //I2C
@@ -33,7 +44,10 @@ void lcd_clearxy(int x, int y,int pos=1) {
 }
 void lcd_selxy(int x, int y) {
   lcd.setCursor(x, y);
-  lcd.print(">");
+  if (!isitem_sel)
+      lcd.print(">");
+  else 
+      lcd.write(byte(0));
 }
 
 void check_encoder ( ) {
@@ -42,106 +56,108 @@ void check_encoder ( ) {
   if (btnState == LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
     if (millis() - lastButtonPress > 150) {
       Serial.println("Boton presionado");
-      isitem_sel=!isitem_sel;
-      if (!isitem_sel)
-          encoderPos=oldEncPos=old_menu_pos;
-          
+      isitem_sel=!isitem_sel; 
+      if (!isitem_sel) {
+          curr_sel=oldEncPos=encoderPos=old_curr_sel;
+          Serial.print("curr sel: ");Serial.println(curr_sel);
+          Serial.print("old curr sel: ");Serial.println(old_curr_sel);
+      }
       lastButtonPress = millis();
     }// if time > last button press
 
       if (vent_mode==VENTMODE_PCL && curr_sel==4 && menu_number == 0) curr_sel++; //Not selecting pip in VCL 
             
-      
-      switch (curr_sel){
-        case 1: 
-         if ( menu_number == 0 ) {
-                min_sel=1;max_sel=2;
-                encoderPos=oldEncPos=vent_mode;
-            } else if ( menu_number == 1 ) {
-                min_sel=20;max_sel=50;
-                encoderPos=oldEncPos=alarm_max_pressure;            
-         } else {
-            encoderPos=min_cd;
-            min_sel=0;max_sel=max_cd;
-         }
-        break;
-        case 2: 
-            if ( menu_number == 0 ) {
-                encoderPos=oldEncPos=options.respiratoryRate;
-                min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
+      if (isitem_sel) {
+          switch (curr_sel){
+            case 1: 
+             if ( menu_number == 0 ) {
+                    min_sel=1;max_sel=2;
+                    encoderPos=oldEncPos=vent_mode;
                 } else if ( menu_number == 1 ) {
-                    min_sel=5;max_sel=30;
-                    encoderPos=oldEncPos=alarm_peep_pressure;                          
-                }
-                else{
-                    encoderPos=min_speed/10;     
-                    min_sel=10;max_sel=100;             
-                }
-        break;
-        case 3:
-          if ( menu_number == 0 ) {
-              encoderPos=oldEncPos=options.percInspEsp;
-              min_sel=2;max_sel=3;   
-          } else if ( menu_number == 1 ) {
-                encoderPos=byte(0.1*float(alarm_vt));
-                min_sel=10;max_sel=50;//vt
-          }   else {
-                encoderPos=min_accel/10; 
-                min_sel=10;max_sel=100; }
-        break;
-        case 4: 
-            if ( menu_number == 0 ) {
-                if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
-                  encoderPos=oldEncPos=options.tidalVolume;
-                  min_sel=200;max_sel=800;
-                } else {//Manual
-                  encoderPos=oldEncPos=options.percVolume;
-                  min_sel=40;max_sel=100;            
-                } 
-            } else if ( menu_number == 1 ) {//menu 0
-                encoderPos=oldEncPos=p_trim;
-                min_sel=0;max_sel=200;   
-            } else {
-                encoderPos=max_cd;
-                min_sel=10;max_sel=80;
-            }
+                    min_sel=20;max_sel=50;
+                    encoderPos=oldEncPos=alarm_max_pressure;            
+             } else {
+                encoderPos=min_cd;
+                min_sel=0;max_sel=max_cd;
+             }
             break;
-              case 5: 
-            if ( menu_number == 0 ) {
-                encoderPos=oldEncPos=options.peakInspiratoryPressure;
-                min_sel=15;max_sel=30;
-            } else if ( menu_number == 1 ) {//menu 0
-                  min_sel=0;max_sel=1; 
-            } else {
-                encoderPos=max_speed/10;
-                min_sel=10;max_sel=100;
-            }
+            case 2: 
+                if ( menu_number == 0 ) {
+                    encoderPos=oldEncPos=options.respiratoryRate;
+                    min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
+                    } else if ( menu_number == 1 ) {
+                        min_sel=5;max_sel=30;
+                        encoderPos=oldEncPos=alarm_peep_pressure;                          
+                    }
+                    else{
+                        encoderPos=min_speed/10;     
+                        min_sel=10;max_sel=100;             
+                    }
             break;
-            case 6:
-                if ( menu_number == 2 ){
-                    encoderPos=max_accel/10;
+            case 3:
+              if ( menu_number == 0 ) {
+                  encoderPos=oldEncPos=options.percInspEsp;
+                  min_sel=2;max_sel=3;   
+              } else if ( menu_number == 1 ) {
+                    encoderPos=byte(0.1*float(alarm_vt));
+                    min_sel=10;max_sel=50;//vt
+              }   else {
+                    encoderPos=min_accel/10; 
+                    min_sel=10;max_sel=100; }
+            break;
+            case 4: 
+                if ( menu_number == 0 ) {
+                    if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
+                      encoderPos=oldEncPos=options.tidalVolume;
+                      min_sel=200;max_sel=800;
+                    } else {//Manual
+                      encoderPos=oldEncPos=options.percVolume;
+                      min_sel=40;max_sel=100;            
+                    } 
+                } else if ( menu_number == 1 ) {//menu 0
+                    encoderPos=oldEncPos=p_trim;
+                    min_sel=0;max_sel=200;   
+                } else {
+                    encoderPos=max_cd;
+                    min_sel=10;max_sel=80;
+                }
+                break;
+                  case 5: 
+                if ( menu_number == 0 ) {
+                    encoderPos=oldEncPos=options.peakInspiratoryPressure;
+                    min_sel=15;max_sel=30;
+                } else if ( menu_number == 1 ) {//menu 0
+                      min_sel=0;max_sel=1; 
+                } else {
+                    encoderPos=max_speed/10;
                     min_sel=10;max_sel=100;
                 }
                 break;
-            case 7:
-                if ( menu_number == 2 ){
-                    encoderPos=min_pidk/10;
-                    min_sel=10;max_sel=100;
-                }
+                case 6:
+                    if ( menu_number == 2 ){
+                        encoderPos=max_accel/10;
+                        min_sel=10;max_sel=100;
+                    }
+                    break;
+                case 7:
+                    if ( menu_number == 2 ){
+                        encoderPos=min_pidk/10;
+                        min_sel=10;max_sel=100;
+                    }
+                    break;
+                case 8:
+                    if ( menu_number == 2 ){
+                        encoderPos=max_pidk/10;
+                        min_sel=10;max_sel=100;
+                    }                
                 break;
-            case 8:
-                if ( menu_number == 2 ){
-                    encoderPos=max_pidk/10;
-                    min_sel=10;max_sel=100;
-                }                
-            break;
-      }
-
-      old_curr_sel = curr_sel;
-      show_changed_options = true;
-      update_options = true;
-    }//if switch select
-
+          }
+    
+        }//if switch select
+          show_changed_options = true;
+          update_options = true;
+  }//If selection
+  
   if (oldEncPos != encoderPos) {
     show_changed_options = true;
 
@@ -254,7 +270,7 @@ void check_encoder ( ) {
             update_options=true;
           }//Valid range
 
-
+    old_curr_sel = curr_sel;
     if (menu_number==2)
       change_pid_params=true;
     }//oldEncPos != encoderPos and valid between range
