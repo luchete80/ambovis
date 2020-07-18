@@ -287,10 +287,14 @@ void setup() {
   
   //pinMode(pinA, INPUT); // set pinA as an input, pulled HIGH to the logic voltage (5V or 3.3V for most cases)
   //pinMode(pinB, INPUT); // set pinB as an input, pulled HIGH to the logic voltage (5V or 3.3V for most cases)
-  
-  attachInterrupt(4, PinA, RISING); // set an interrupt on PinA, looking for a rising edge signal and executing the "PinA" Interrupt Service Routine (below)
-  attachInterrupt(5, PinB, RISING); // set an interrupt on PinB, looking for a rising edge signal and executing the "PinB" Interrupt Service Routine (below)
+  //INT 	4 INT 5
+  //PINS 	19 18
+  attachInterrupt(5, PinA, RISING); // set an interrupt on PinA, looking for a rising edge signal and executing the "PinA" Interrupt Service Routine (below)
+  attachInterrupt(4, PinB, RISING); // set an interrupt on PinB, looking for a rising edge signal and executing the "PinB" Interrupt Service Routine (below)
+  //attachInterrupt(digitalPinToInterrupt(pinA), PinA, RISING); // set an interrupt on PinA, looking for a rising edge signal and executing the "PinA" Interrupt Service Routine (below)
+  //attachInterrupt(digitalPinToInterrupt(pinB), PinB, RISING); // set an interrupt on PinA, looking for a rising edge signal and executing the "PinA" Interrupt Service Routine (below)
   pinMode(PIN_ENC_SW, INPUT_PULLUP);
+  //pinMode(PIN_ENC_SW, INPUT);
   //btnState=digitalRead(9);
 
   lastReadSensor =   lastShowSensor = millis();
@@ -344,6 +348,9 @@ void setup() {
     buzzmuted=false;
     last_mute=HIGH;
     mute_count=0;
+
+    Serial.print("Interrupt to pin A: ");Serial.println(digitalPinToInterrupt(pinA));
+    Serial.print("Interrupt to pin B: ");Serial.println(digitalPinToInterrupt(pinB));
 }
 
 
@@ -356,7 +363,7 @@ void loop() {
   check_encoder();
 
   time = millis();
-  //check_buzzer_mute();
+  check_buzzer_mute();
 
   if (millis() > lastSave + TIME_SAVE) {
     int eeAddress=0;
@@ -628,7 +635,7 @@ void check_buzzer_mute() {
     }
     last_mute = curr_mute;
     if(buzzmuted) {
-        if (mute_count > 2*TIME_MUTE)  //each count is every 500 ms
+        if (mute_count > 1000*TIME_MUTE)  //each count is every 500 ms
         buzzmuted=false;
     }
 }
