@@ -288,8 +288,8 @@ void setup() {
   //pinMode(pinA, INPUT); // set pinA as an input, pulled HIGH to the logic voltage (5V or 3.3V for most cases)
   //pinMode(pinB, INPUT); // set pinB as an input, pulled HIGH to the logic voltage (5V or 3.3V for most cases)
   
-  attachInterrupt(4, PinA, RISING); // set an interrupt on PinA, looking for a rising edge signal and executing the "PinA" Interrupt Service Routine (below)
-  attachInterrupt(5, PinB, RISING); // set an interrupt on PinB, looking for a rising edge signal and executing the "PinB" Interrupt Service Routine (below)
+  attachInterrupt(5, PinA, RISING); // set an interrupt on PinA, looking for a rising edge signal and executing the "PinA" Interrupt Service Routine (below)
+  attachInterrupt(4, PinB, RISING); // set an interrupt on PinB, looking for a rising edge signal and executing the "PinB" Interrupt Service Routine (below)
   pinMode(PIN_ENC_SW, INPUT_PULLUP);
   //btnState=digitalRead(9);
 
@@ -356,7 +356,7 @@ void loop() {
   check_encoder();
 
   time = millis();
-  //check_buzzer_mute();
+  check_buzzer_mute();
 
   if (millis() > lastSave + TIME_SAVE) {
     int eeAddress=0;
