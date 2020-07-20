@@ -20,7 +20,7 @@
 #define TIME_SHOW 	80                  //IF OLED DISPLAY IS USED FASTER THAN 50ms GIVES ERRORS IN THE PLOTS 
 #define TIME_SAVE 	5000
 #define TIME_BUZZER 500
-#define TIME_MUTE   30
+#define TIME_MUTE   30000             //msec
 
 #define TIME_SEND_CONFIGURATION 2000 // msec
 #define V_HONEY_P0 	0.49874F //Analog/1023

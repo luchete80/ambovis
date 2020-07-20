@@ -28,7 +28,7 @@ int vt;
 float _mlInsVol = 0;
 float _mlExsVol = 0;
 int _mllastInsVol, _mllastExsVol;
-int mute_count;
+unsigned long mute_count;
 
 int Compression_perc = 8; //80%
 
@@ -630,12 +630,12 @@ boolean debounce(boolean last, int pin) {
 void check_buzzer_mute() {
     curr_mute = debounce ( last_mute, PIN_MUTE );         //Debounce for Up button
     if (last_mute== HIGH && curr_mute == LOW && !buzzmuted){
-        mute_count=0;
+        mute_count=time;
         buzzmuted=true;
     }
     last_mute = curr_mute;
     if(buzzmuted) {
-        if (mute_count > 1000*TIME_MUTE)  //each count is every 500 ms
+        if (time > mute_count  + TIME_MUTE)  //each count is every 500 ms
         buzzmuted=false;
     }
 }
