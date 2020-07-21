@@ -93,22 +93,23 @@ void tft_draw(void) {
     //Serial.println(state_r);
     if (alarm_state>9) {
         digitalWrite(RED_LED,HIGH);
+        digitalWrite(GREEN_LED,LOW);
         tft.setRotation(0);
         tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
         tft.setCursor(150, 40);   
         tft.println("VT AL");
         state_r=alarm_state-10;
     } else {
-        digitalWrite(RED_LED,LOW);
+        digitalWrite(RED_LED,LOW);  
         state_r=alarm_state;
     }
     switch (state_r){
         case NO_ALARM:
-            if (state==0) //state_r!=10
-            digitalWrite(GREEN_LED,HIGH); digitalWrite(RED_LED,LOW);   
+            if (alarm_state==0){ //state_r!=10
+            digitalWrite(GREEN_LED,HIGH); digitalWrite(RED_LED,LOW);   }
           break;
         case PEEP_ALARM:
-          digitalWrite(GREEN_LED,LOW); digitalWrite(RED_LED,LOW);  
+          digitalWrite(GREEN_LED,LOW); digitalWrite(RED_LED,HIGH);  
           tft.setRotation(0);
           tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
           tft.setCursor(150, 20);   
