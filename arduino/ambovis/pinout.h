@@ -42,8 +42,6 @@
 #define PIN_MUTE        2
 
 
-
-
 // IF ARDUINO UNO
 //#define PIN_ENC_CL  2
 //#define PIN_ENC_DIR 3
