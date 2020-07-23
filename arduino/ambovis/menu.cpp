@@ -388,9 +388,9 @@ void display_lcd ( ) {
     dtostrf(last_pressure_min, 2, 0, tempstr);
     writeLine(2, String(tempstr), 16);  
     
-    dtostrf(Cdyn*1.01972, 2, 1, tempstr);
-    writeLine(3, "CD:" + String(tempstr), 0); 
-
+    dtostrf((_mllastInsVol + _mllastExsVol)*30./_timeoutIns, 2, 1, tempstr);
+    writeLine(3, "V:" + String(tempstr), 0); 
+    
     dtostrf(_timeoutIns*0.001, 1, 1, tempstr);
     writeLine(3, "I:" + String(tempstr), 9); 
     dtostrf(_timeoutEsp*0.001, 1, 1, tempstr);
@@ -402,7 +402,10 @@ void display_lcd ( ) {
                         lcd_clearxy(13,6,3);
         
     writeLine(0, "PIPAL:" + String(alarm_max_pressure), 1); 
-
+    
+    dtostrf(Cdyn*1.01972, 2, 1, tempstr);
+    writeLine(0, "CD:" + String(tempstr), 10); 
+    
     writeLine(1, "PEEPAL:" + String(alarm_peep_pressure), 1); 
     writeLine(1, "VTAL:" + String(alarm_vt), 11);
     

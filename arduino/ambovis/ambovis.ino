@@ -352,6 +352,8 @@ void setup() {
 
     Serial.print("Interrupt to pin A: ");Serial.println(digitalPinToInterrupt(pinA));
     Serial.print("Interrupt to pin B: ");Serial.println(digitalPinToInterrupt(pinB));
+
+    lcd.clear();
 }
 
 
