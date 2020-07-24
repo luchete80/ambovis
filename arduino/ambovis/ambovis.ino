@@ -20,6 +20,17 @@ byte Cdyn;
 bool autopid;
 bool filter;
 
+byte _back[8] = {
+  0b00100,
+  0b01000,
+  0b11111,
+  0b01001,
+  0b00101,
+  0b00001,
+  0b00001,
+  0b11111
+};
+
 // FOR ADS
 #include <Wire.h>
 #include <Adafruit_ADS1015.h>
@@ -277,7 +288,7 @@ void setup() {
   ventilation -> update();
 
   //sensors -> readPressure();
-
+  lcd.createChar(0, _back);//Custom chars
   display_lcd();
 
   //ENCODER
