@@ -301,7 +301,7 @@ void clear_n_sel(int menu){
             }
      } else if (menu==1){  
       lcd_clearxy(0,0);
-      lcd_clearxy(0,1);lcd_clearxy(13,2);
+      lcd_clearxy(0,1);lcd_clearxy(12,2);
       lcd_clearxy(0,2);lcd_clearxy(0,3);
       switch(curr_sel){
           case 1: 
@@ -315,7 +315,7 @@ void clear_n_sel(int menu){
           case 5: 
             lcd_selxy(0,3);break;
           case 6: 
-            lcd_selxy(13,2);break;
+            lcd_selxy(12,2);break;
       }
     } else if (menu==2) {  
       lcd_clearxy(0,0);lcd_clearxy(6,0);lcd_clearxy(12,0);
@@ -395,8 +395,8 @@ void display_lcd ( ) {
     dtostrf(last_pressure_min, 2, 0, tempstr);
     writeLine(2, String(tempstr), 16);  
     
-    dtostrf((_mllastInsVol + _mllastExsVol)*30./_timeoutIns, 2, 1, tempstr);
-    writeLine(3, "V:" + String(tempstr), 0); 
+    dtostrf((_mllastInsVol + _mllastExsVol)*respiratoryRate*0.001, 2, 1, tempstr);
+    writeLine(3, "VM:" + String(tempstr), 0); 
     
     dtostrf(_timeoutIns*0.001, 1, 1, tempstr);
     writeLine(3, "I:" + String(tempstr), 9); 
@@ -406,7 +406,7 @@ void display_lcd ( ) {
   } else if (menu_number ==1 ) {//OTHER SETTINGS
                         lcd_clearxy(12,0,8);
     lcd_clearxy(8,1,2); lcd_clearxy(16,1,3);
-                        lcd_clearxy(17,2,3);
+                        lcd_clearxy(15,2,3);
         
     writeLine(0, "PIPAL:" + String(alarm_max_pressure), 1); 
     
@@ -419,9 +419,9 @@ void display_lcd ( ) {
     dtostrf((float(p_trim-100)), 2, 0, tempstr);
     writeLine(2, "TRIM:" + String(tempstr) + "e-3", 1); 
 
-    writeLine(2, "F:" , 14);
-    if (filter)     writeLine(2, "ON", 16);
-    else            writeLine(2, "OFF", 16);    
+    writeLine(2, " F:" , 12);
+    if (filter)     writeLine(2, "ON", 15);
+    else            writeLine(2, "OFF", 15);    
          
     writeLine(3, "AUTO: ", 1);
     if (autopid)    writeLine(3, "ON", 6);

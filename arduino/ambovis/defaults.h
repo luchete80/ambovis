@@ -62,7 +62,7 @@ extern int STEPPER_ACC_INSUFFLATION;    //(STEPPER_MICROSTEPS *  600)   // Steps
 #define DEFAULT_FRAC_CYCLE_VCL_INSUFF 0.75
 #define DEFAULT_TRIGGER_THRESHOLD 3.0
 #define DEFAULT_RPM 14
-#define DEFAULT_MAX_RPM 22
+#define DEFAULT_MAX_RPM 30
 #define DEFAULT_MIN_RPM 12
 #define DEFAULT_POR_INSPIRATORIO 33.3333F // %
 #define DEFAULT_PEAK_INSPIRATORY_PRESSURE 25
@@ -134,6 +134,5 @@ extern byte alarm_state;
 //PID LIMITS
 extern int max_accel,min_accel,max_speed,min_speed,max_cd,min_cd,max_pidk,min_pidk;
 extern bool change_pid_params;
-
 
 #endif // DEFAULTS_H
