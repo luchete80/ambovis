@@ -18,6 +18,7 @@
 bool init_verror;
 byte Cdyn;
 bool autopid;
+bool filter;
 
 // FOR ADS
 #include <Wire.h>
@@ -73,12 +74,12 @@ byte vent_mode = VENTMODE_MAN; //0
 Pressure_Sensor _dpsensor;
 float verrp;
 float _flux,    flow_f;;
-#ifdef FILTER_FLUX
+//#ifdef FILTER_FLUX
 float _flux_fil[5];
 float _mlInsVol2;
 float _flux_sum;
 byte flux_count;
-#endif
+//#endif
 
 bool send_data = false;
 char tempstr[5], tempstr2[5];
@@ -332,7 +333,9 @@ void setup() {
   EEPROM.get(eeAddress, max_accel); eeAddress+= sizeof(max_accel);
   EEPROM.get(eeAddress, min_pidk); eeAddress+= sizeof(min_pidk);
   EEPROM.get(eeAddress, max_pidk); eeAddress+= sizeof(max_pidk);
-
+  EEPROM.get(eeAddress, alarm_vt); eeAddress+= sizeof(alarm_vt);
+  EEPROM.get(eeAddress, filter); eeAddress+= sizeof(filter);
+  
   Serial.print("Maxcd: ");Serial.println(max_cd);
         
   Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
@@ -381,7 +384,9 @@ void loop() {
     EEPROM.put(eeAddress, max_accel); eeAddress+= sizeof(max_accel);
     EEPROM.put(eeAddress, min_pidk);  eeAddress+= sizeof(min_pidk);
     EEPROM.put(eeAddress, max_pidk);  eeAddress+= sizeof(max_pidk);
-    
+    EEPROM.put(eeAddress, alarm_vt);  eeAddress+= sizeof(alarm_vt);
+    EEPROM.put(eeAddress, filter);    eeAddress+= sizeof(filter);   
+         
     lastSave = millis();
   }
 
@@ -430,22 +435,20 @@ void loop() {
     _flux = po_flux[pos] - 100 + ( float (po_flux[pos + 1] - 100) - float (po_flux[pos] - 100) ) * ( p_dpt - float(dp[pos]) ) / (float)( dp[pos + 1] - dp[pos]);
     _flux *= 16.6667;
 
-#ifdef FILTER_FLUX
-    flux_count++;    //Filter
-    for (int i = 0; i < 4; i++) {
-      _flux_fil[i] = _flux_fil[i + 1];
+    if (filter) {
+        flux_count++;    //Filter
+        for (int i = 0; i < 4; i++) {
+          _flux_fil[i] = _flux_fil[i + 1];
+        }
+        _flux_fil[4] = _flux;
+        _flux_sum = 0.;
+        for (int i = 0; i < 5; i++)
+            _flux_sum += _flux_fil[i];
+            
+        flow_f = _flux_sum / 5.;
+    } else {
+        flow_f = _flux;
     }
-    _flux_fil[4] = _flux;
-    _flux_sum = 0.;
-    for (int i = 0; i < 5; i++)
-      _flux_sum += _flux_fil[i];
-#endif
-
-#ifdef FILTER_FLUX
-    flow_f = _flux_sum / 5.;
-#else
-    flow_f = _flux;
-#endif
 
     if (_flux > 0) {
       _mlInsVol += flow_f * float((millis() - lastReadSensor)) * 0.001; //flux in l and time in msec, results in ml

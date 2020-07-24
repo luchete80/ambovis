@@ -134,7 +134,10 @@ void check_encoder ( ) {
                 }
                 break;
                 case 6:
-                    if ( menu_number == 2 ){
+                    if ( menu_number == 1 ){
+                        encoderPos=filter;
+                        min_sel=0;max_sel=1;
+                    } else if ( menu_number == 2 ){
                         encoderPos=max_accel/10;
                         min_sel=10;max_sel=100;
                     }
@@ -175,7 +178,7 @@ void check_encoder ( ) {
                   menu_number=2;
               }
           } else if (menu_number == 1) {
-               if (encoderPos > 5) {
+               if (encoderPos > 6) {
                   encoderPos=1;
                   menu_number=2;         
                } else if ( encoderPos < 1) {
@@ -251,6 +254,8 @@ void check_encoder ( ) {
               case 6:
                 if ( menu_number == 0 )
                   options.peakEspiratoryPressure = encoderPos;
+                else if ( menu_number == 1 )  //There is not 6 in menu 1
+                    filter  = encoderPos;
                 else if ( menu_number == 2 )  //There is not 6 in menu 1
                     max_accel  = int((float)encoderPos*10.);
                 break;
@@ -309,6 +314,8 @@ void clear_n_sel(int menu){
             lcd_selxy(0,2);break;
           case 5: 
             lcd_selxy(0,3);break;
+          case 6: 
+            lcd_selxy(12,2);break;
       }
     } else if (menu==2) {  
       lcd_clearxy(0,0);lcd_clearxy(6,0);lcd_clearxy(12,0);
@@ -411,8 +418,10 @@ void display_lcd ( ) {
     
     dtostrf((float(p_trim-100)), 2, 0, tempstr);
     writeLine(2, "TRIM:" + String(tempstr) + "e-3", 1); 
-    dtostrf((float(verror*1000)), 2, 0, tempstr);
-    writeLine(2, " ve:" + String(tempstr) + "mV", 11); 
+
+    writeLine(2, " F:" , 12);
+    if (filter)     writeLine(2, "ON", 15);
+    else            writeLine(2, "OFF", 15);    
          
     writeLine(3, "AUTO: ", 1);
     if (autopid)    writeLine(3, "ON", 6);

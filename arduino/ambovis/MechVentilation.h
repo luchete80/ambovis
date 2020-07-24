@@ -212,5 +212,5 @@ extern int alarm_vt;
 extern byte cycle_pos; //0 to 127
 extern byte Cdyn;
 extern bool autopid;
-
+extern bool filter;
 #endif /* INC_MECHANICAL_VENTILATION_H */
