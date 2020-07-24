@@ -82,7 +82,8 @@ void tft_draw(void) {
   		//tft.fillRect(0,240-last_x, 320,240-last_x+10, ILI9341_BLACK);
   		//tft.fillScreen(ILI9341_BLACK);
   		//AXIS
-      tft.fillRect(0,0,60,100, ILI9341_BLACK);
+      tft.fillRect(0,0,60,100, ILI9341_BLACK); //FOR ALARMS, UPPER RIRHT
+      tft.fillRect(0, 240 - 10, 320, 10, ILI9341_BLACK);//x,y,lengthx,lentgthy
   		for (int i=0;i<3;i++)
   		  tft.drawLine(axispos[i],0, axispos[i], 240, ILI9341_DARKGREY);
   		}
@@ -139,7 +140,7 @@ void tft_draw(void) {
 
 void print_vols(){
     tft.setRotation(0);
-    tft.fillRect(180,160,50,80, ILI9341_BLACK);
+    tft.fillRect(180,160,70,80, ILI9341_BLACK);
     //itoa(integerFromPC[5], buffer, 10);
     itoa(_mllastInsVol, buffer, 10);
     tft.setCursor(150, 180);
@@ -158,9 +159,10 @@ void print_vols(){
  
   }
 void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
-  if (rx[valsreaded]>rx[valsreaded-1]) {//to avoid draw entire line to the begining at the end of the cycle
+  if ( rx[valsreaded] > rx[valsreaded-1] ) {//to avoid draw entire line to the begining at the end of the cycle
       if (rx[valsreaded] < 120) {
-          tft.fillRect(0,240-rx[valsreaded]-5, 320,5, ILI9341_BLACK);
+          tft.fillRect(0, 240 - rx[valsreaded] - 5, 320, 5, ILI9341_BLACK);//x,y,lengthx,lentgthy
+          //
           tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
           tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_MAGENTA);
           tft.drawLine(axispos[2]-yvt[0],             240-rx[valsreaded-1], axispos[2]-yvt[1],            240-rx[valsreaded], ILI9341_BLUE);
