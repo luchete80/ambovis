@@ -255,7 +255,7 @@ void setup() {
   digitalWrite(PIN_EN, LOW);
 
   writeLine(1, "RespirAR FIUBA", 4);
-  writeLine(2, "v1.0", 8);
+  writeLine(2, "v1.0.2", 8);
   
   p_dpt0 = 0;
   ads.begin();
@@ -406,7 +406,7 @@ void loop() {
 
       lastShowSensor=millis(); 
 //       Serial.print(int(cycle_pos));Serial.print(",");
-//	     Serial.print(int(pressure_p));Serial.print(",");
+//	     Serial.println(int(pressure_p));//Serial.print(",");
 //     //Serial.println(analogRead(A0));
 //	     #ifdef FILTER_FLUX
 //	     Serial.print(int(flow_f));Serial.print(",");
@@ -527,6 +527,7 @@ void loop() {
 #endif
     if (digitalRead(PIN_POWEROFF)) {
           digitalWrite(YELLOW_LED,HIGH);
+          Serial.println("Yellow high");
     } else {
           digitalWrite(YELLOW_LED,LOW);
       }

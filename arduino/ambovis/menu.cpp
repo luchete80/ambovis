@@ -395,8 +395,8 @@ void display_lcd ( ) {
     dtostrf(last_pressure_min, 2, 0, tempstr);
     writeLine(2, String(tempstr), 16);  
     
-    dtostrf((_mllastInsVol + _mllastExsVol)*respiratoryRate*0.001, 2, 1, tempstr);
-    writeLine(3, "VM:" + String(tempstr), 0); 
+    dtostrf((_mllastInsVol + _mllastExsVol)/2.*options.respiratoryRate*0.001, 2, 1, tempstr);
+    writeLine(3, "VM:" + String(tempstr), 0);
     
     dtostrf(_timeoutIns*0.001, 1, 1, tempstr);
     writeLine(3, "I:" + String(tempstr), 9); 

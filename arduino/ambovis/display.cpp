@@ -59,7 +59,6 @@ void print_vols();
 
 void tft_draw(void) {
 
-    valsreaded+=1;
     last_x=cycle_pos;
     rx[valsreaded]=cycle_pos;
     ry[valsreaded]=pressure_p*2.;     
@@ -69,27 +68,29 @@ void tft_draw(void) {
 
   
   	tft.setRotation(1);
-  	drawY2(ILI9341_GREEN);
-  
+  	if (valsreaded > 0)
+  	    drawY2(ILI9341_GREEN);
+    valsreaded+=1;
+      
   	if (last_x<10 && !lcd_cleaned){
-  		lcd_cleaned=true;
-  		valsreaded=0;
-  		for (int i=0;i<3;i++) 
-  		  valsreaded_[i]=0;
-  		wait4statechg=false;
-      print_vols();
-      tft.setRotation(1);
-  		//tft.fillRect(0,240-last_x, 320,240-last_x+10, ILI9341_BLACK);
-  		//tft.fillScreen(ILI9341_BLACK);
-  		//AXIS
-      tft.fillRect(0,0,60,100, ILI9341_BLACK); //FOR ALARMS, UPPER RIRHT
-      tft.fillRect(0, 240 - 10, 320, 10, ILI9341_BLACK);//x,y,lengthx,lentgthy
-  		for (int i=0;i<3;i++)
-  		  tft.drawLine(axispos[i],0, axispos[i], 240, ILI9341_DARKGREY);
-  		}
-  		if (last_x>10 && lcd_cleaned){
-  		lcd_cleaned=false;
-	}
+    		lcd_cleaned=true;
+    		valsreaded=0;
+    		for (int i=0;i<3;i++) 
+    		  valsreaded_[i]=0;
+    		wait4statechg=false;
+        print_vols();
+        tft.setRotation(1);
+    		//tft.fillRect(0,240-last_x, 320,240-last_x+10, ILI9341_BLACK);
+    		//tft.fillScreen(ILI9341_BLACK);
+    		//AXIS
+        tft.fillRect(0,0,60,100, ILI9341_BLACK); //FOR ALARMS, UPPER RIRHT
+        tft.fillRect(0, 240 - 10, 320, 10, ILI9341_BLACK);//x,y,lengthx,lentgthy
+    		for (int i=0;i<3;i++)
+    		  tft.drawLine(axispos[i],0, axispos[i], 240, ILI9341_DARKGREY);
+		}
+		if (last_x>10 && lcd_cleaned){
+		    lcd_cleaned=false;
+    }
   
     //Serial.println(state_r);
     if (alarm_state>9) {
@@ -164,7 +165,9 @@ void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WIT
       if (rx[valsreaded] < 120) {
           for (int i=0;i<3;i++)
             tft.drawLine(axispos[i], 240-rx[valsreaded-1], axispos[i], 240-rx[valsreaded], ILI9341_DARKGREY);
-          
+            //Serial.print("Valsreaded:");Serial.println(valsreaded);
+          //Serial.print("x1: ");Serial.print(rx[valsreaded-1]);Serial.print(",x2: ");Serial.println(rx[valsreaded]);
+          //Serial.print("y1: ");Serial.print(ry[valsreaded-1]);Serial.print(",y2: ");Serial.println(ry[valsreaded]);
           tft.fillRect(0, 240 - rx[valsreaded] - 5, 320, 5, ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
           //
           tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
