@@ -224,6 +224,11 @@ void setup() {
   pinMode(PIN_MUTE, INPUT_PULLUP);
   pinMode(PIN_POWEROFF, INPUT);
   pinMode(PIN_EN, OUTPUT);
+
+  pinMode(PIN_MENU_UP, INPUT_PULLUP);
+  pinMode(PIN_MENU_DN, INPUT_PULLUP);
+  pinMode(PIN_MENU_EN, INPUT_PULLUP);
+  
   digitalWrite(PIN_EN, HIGH);
 
   // TODO: Añadir aquí la configuarcion inicial desde puerto serie

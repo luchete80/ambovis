@@ -39,6 +39,8 @@ void check_encoder();
 void display_lcd ();
 void init_display();
 
+void check_updn_button(int pin, byte *var, bool incr_decr);
+
 extern bool isitem_sel;
 
 #endif

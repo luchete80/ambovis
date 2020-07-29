@@ -1,0 +1,28 @@
+
+
+v1.0.1
+Caracrt. Nuevas
+- Agregado V (l/min) en menu pantalla ppal
+- Aumentados grados de la leva a 330º
+- Alarma de VT guardada en la EEPROM
+- Agregada opcion de filtro ON/OFF(se guarda en EEPROM)
+
+Bugs
+- Arreglado el texto (garbage) de tft junto a los vt 
+- Agregado el eje 0 en los graficos (antes se borraba)
+- Arregladas letras erroneas en menu ppal
+
+
+v1.0.2
+
+Bugs
+- Arreglado cálculo de VM
+- Arreglado el grafico de y=0 (No empieza de 0)
+
+Modificaciones
+- BPM Subida a 30 
+- "V:" pasado a "VM:"
+
+PENDIENTES: 
+- LED AMARILLO
+- 

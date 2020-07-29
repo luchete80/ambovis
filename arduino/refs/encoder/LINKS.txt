@@ -1,0 +1,8 @@
+https://arduino.stackexchange.com/questions/43774/arduino-mega-2560-interrupt-pins-and-port-mapping-with-rotary-encoder
+
+
+Re “pins 2 and 3 are different. I think on the Mega they are PORTH3 and PORTH4 respectively”, it's true that Arduino digital pins 2 and 3 belong to different ports on Uno vs Mega2560 boards.
+
+Mega2560's have six INTx pins, vs two such on Uno's. On the Mega, INT0...INT3 are PD0...PD3, and INT4,INT5 are PE4,PE5. On the Uno, INT0,INT1 are PD2,PD3. Note, in an answer at Can external interrupts be OR'd together on the '328 (Uno)? I show a couple of routines that will display appropriate masks for pins on different Arduinos. See the sections “Using other pins for PCIs” and “ISR-framework-generating Sketch”.
+
+

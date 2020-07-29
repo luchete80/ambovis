@@ -50,10 +50,25 @@ void lcd_selxy(int x, int y) {
       lcd.write(byte(0));
 }
 
+void check_updn_button(int pin, byte *var, bool incr_decr) {
+    if (digitalRead(pin)==LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
+      if (millis() - lastButtonPress > 150) {
+          if (incr_decr)
+              *var=*var+1;
+          else
+              *var=*var-1;
+          Serial.print("encoderPos: "); Serial.println(encoderPos);
+          lastButtonPress = millis();
+      }// if time > last button press
+    }
+}
+    
 void check_encoder ( ) {
+  check_updn_button(PIN_MENU_DN,&encoderPos,true);   //Increment
+  check_updn_button(PIN_MENU_UP,&encoderPos,false);  //Decrement
   
   byte btnState = digitalRead(PIN_ENC_SW);
-  if (btnState == LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
+  if (digitalRead(PIN_ENC_SW)==LOW || digitalRead(PIN_MENU_EN)==LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
     if (millis() - lastButtonPress > 150) {
       Serial.println("Boton presionado");
       isitem_sel=!isitem_sel; 
