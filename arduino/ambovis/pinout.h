@@ -34,6 +34,7 @@
 #define TFT_RST 	48
 
 #define PIN_POWEROFF    43
+#define BCK_LED         44
 #define GREEN_LED       45
 #define YELLOW_LED      46
 #define RED_LED         47

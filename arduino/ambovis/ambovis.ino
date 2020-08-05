@@ -358,14 +358,16 @@ void setup() {
   Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
   ventilation->setCycleNum(last_cycle);
 
-  pinMode(PIN_BUZZER, OUTPUT); //Set buzzerPin as output
-    pinMode(GREEN_LED, OUTPUT); //Set buzzerPin as output
+    pinMode(PIN_BUZZER, OUTPUT); //Set buzzerPin as output
+    pinMode(GREEN_LED,  OUTPUT); //Set buzzerPin as output
+    pinMode(BCK_LED,    OUTPUT); //Set buzzerPin as output
     pinMode(YELLOW_LED, OUTPUT); //Set buzzerPin as output
     pinMode(RED_LED, OUTPUT); //Set buzzerPin as output
     tft.begin();
     tft.fillScreen(ILI9341_BLACK);
 
     digitalWrite(PIN_BUZZER,1);
+    digitalWrite(BCK_LED,LOW);
     buzzmuted=false;
     last_mute=HIGH;
     mute_count=0;
