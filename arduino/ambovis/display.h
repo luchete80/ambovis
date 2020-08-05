@@ -25,4 +25,5 @@ void drawY2(uint16_t color);
 void print_bat();
 void tft_draw();
 void print_vols();
+void check_alarms();
 #endif

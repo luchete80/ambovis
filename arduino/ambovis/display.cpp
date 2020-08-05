@@ -17,7 +17,6 @@ byte state_r;
 int buzzer=3; //pin
 
 enum _state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
-bool wait4statechg=false;
 
 _state state;
 
@@ -39,26 +38,8 @@ int yflux[2];
 int yvt[2];
 char buffer[10];
 
-//void setup() {
-//  Serial.begin(250000);
-//  Serial.println("ILI9341 Test!"); 
-//
-//  pinMode(buzzer, OUTPUT); //Set buzzerPin as output
-//  pinMode(GREEN_LED, OUTPUT); //Set buzzerPin as output
-//  pinMode(YELLOW_LED, OUTPUT); //Set buzzerPin as output
-//  pinMode(RED_LED, OUTPUT); //Set buzzerPin as output
-//
-//  
-//  tft.begin();
-//  tft.fillScreen(ILI9341_BLACK);
-//
-//  axispos[0]=63;  axispos[1]=160;  axispos[2]=260;
-//
-//}
-
-
 void tft_draw(void) {
-
+    Serial.println(cycle_pos);Serial.println(ry[valsreaded]);
     last_x=cycle_pos;
     rx[valsreaded]=cycle_pos;
     ry[valsreaded]=pressure_p*2.;     
@@ -66,34 +47,51 @@ void tft_draw(void) {
     yflux[0]=yflux[1];yflux[1]=int(_flux*0.035);
     yvt[0]=yvt[1];yvt[1]=int((_mlInsVol - _mlExsVol)*0.1);
 
-  
-  	tft.setRotation(1);
-  	if (valsreaded > 0)
-  	    drawY2(ILI9341_GREEN);
+    
+    tft.setRotation(1);
+    if (valsreaded > 0)
+        drawY2(ILI9341_GREEN);
     valsreaded+=1;
-      
-  	if (last_x<10 && !lcd_cleaned){
+    
+  	if (last_x<5 && !lcd_cleaned){
     		lcd_cleaned=true;
     		valsreaded=0;
     		for (int i=0;i<3;i++) 
-    		  valsreaded_[i]=0;
-    		wait4statechg=false;
+    		    valsreaded_[i]=0;
         print_vols();
         print_bat();
         tft.setRotation(1);
-    		//tft.fillRect(0,240-last_x, 320,240-last_x+10, ILI9341_BLACK);
-    		//tft.fillScreen(ILI9341_BLACK);
-    		//AXIS
         tft.fillRect(0,0,60,100, ILI9341_BLACK); //FOR ALARMS, UPPER RIRHT
-        tft.fillRect(0, 240 - 10, 320, 10, ILI9341_BLACK);//x,y,lengthx,lentgthy
-    		for (int i=0;i<3;i++)
-    		  tft.drawLine(axispos[i],0, axispos[i], 240, ILI9341_DARKGREY);
-		}
-		if (last_x>10 && lcd_cleaned){
+        tft.fillRect(0, 240 , 320, 10, ILI9341_GREEN);//x,y,lengthx,lentgthy
+
+		} else {
 		    lcd_cleaned=false;
-    }
+		}
+
+
+    
+    check_alarms();
+    
+}//loop
+
+void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
+
+  if ( rx[valsreaded] > rx[valsreaded-1] ) {//to avoid draw entire line to the begining at the end of the cycle
+          for (int i=0;i<3;i++)
+            tft.drawLine(axispos[i], 240-rx[valsreaded-1], axispos[i], 240-rx[valsreaded], ILI9341_DARKGREY);
+            tft.fillRect(0, 240 - rx[valsreaded] - 10, 320, 10, ILI9341_RED);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
+            //tft.fillRect(0, 240 - rx[valsreaded-1] + 1, 320, rx[valsreaded]-rx[valsreaded-1], ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
+            
+            tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
+            tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_MAGENTA);
+            tft.drawLine(axispos[2]-yvt[0],             240-rx[valsreaded-1], axispos[2]-yvt[1],            240-rx[valsreaded], ILI9341_BLUE);
+
+  }
+}
+
+void check_alarms(){
   
-    //Serial.println(state_r);
+      //Serial.println(state_r);
     if (alarm_state>9) {
         digitalWrite(RED_LED,HIGH);
         digitalWrite(GREEN_LED,LOW);
@@ -136,13 +134,11 @@ void tft_draw(void) {
           tft.println("PEEP AL");
       break;
       }
-
-
-}//loop
+}
 
 void print_bat(){
     tft.setRotation(0);
-    tft.fillRect(180,150,70,20, ILI9341_RED);
+    tft.fillRect(180,150,70,20, ILI9341_BLACK);
     float fac=0.0279;  //5./(1024.*0.175)
     tft.setCursor(150, 150);
     dtostrf(float(analogRead(PIN_BAT_LEV))*fac, 2, 1, buffer);
@@ -170,20 +166,3 @@ void print_vols(){
     tft.println("VT: ");tft.setCursor(190, 220);tft.println(buffer);
  
   }
-void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
-
-  if ( rx[valsreaded] > rx[valsreaded-1] ) {//to avoid draw entire line to the begining at the end of the cycle
-      if (rx[valsreaded] < 120) {
-          for (int i=0;i<3;i++)
-            tft.drawLine(axispos[i], 240-rx[valsreaded-1], axispos[i], 240-rx[valsreaded], ILI9341_DARKGREY);
-            //Serial.print("Valsreaded:");Serial.println(valsreaded);
-          //Serial.print("x1: ");Serial.print(rx[valsreaded-1]);Serial.print(",x2: ");Serial.println(rx[valsreaded]);
-          //Serial.print("y1: ");Serial.print(ry[valsreaded-1]);Serial.print(",y2: ");Serial.println(ry[valsreaded]);
-          tft.fillRect(0, 240 - rx[valsreaded] - 5, 320, 5, ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
-          //
-          tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
-          tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_MAGENTA);
-          tft.drawLine(axispos[2]-yvt[0],             240-rx[valsreaded-1], axispos[2]-yvt[1],            240-rx[valsreaded], ILI9341_BLUE);
-      }
-  }
-}

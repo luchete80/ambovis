@@ -216,7 +216,7 @@ void check_encoder ( ) {
           } else {
       
         oldEncPos = encoderPos;
-        //switch (menu_number) {
+
             switch (curr_sel) {
               case 1:
                 if ( menu_number == 0 )     vent_mode           = encoderPos;

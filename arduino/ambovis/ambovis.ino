@@ -366,9 +366,9 @@ void loop() {
   }
 
 
-  if ( millis() > lastShowSensor + TIME_SHOW ) {
+  if ( time > lastShowSensor + TIME_SHOW ) {
 
-      lastShowSensor=millis(); 
+      lastShowSensor=time; 
 //       Serial.print(int(cycle_pos));Serial.print(",");
 //	     Serial.println(int(pressure_p));//Serial.print(",");
 //     //Serial.println(analogRead(A0));
@@ -468,10 +468,10 @@ void loop() {
     }
     
     last_cycle = ventilation->getCycleNum();
-    //lcd.clear();  //display_lcd do not clear screnn in order to not blink
+
     display_lcd();
     update_display = true;
-    last_update_display = millis();
+    last_update_display = time;
 
 #ifdef DEBUG_PID
     if (vent_mode = VENTMODE_PCL) {
@@ -498,7 +498,7 @@ void loop() {
   }//change cycle
 
   if (display_needs_update) {
-    //lcd.clear();  //display_lcd do not clear screnn in order to not blink
+
     display_lcd();
     display_needs_update = false;
   }
