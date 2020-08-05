@@ -4,4 +4,4 @@ git push --tags
 
 git tag -a Release_1_0 -m "Changed angle to 320 deg"
 
-git tag -a Release_1_0_1 -m "View changelog"
+git tag -a Release_1_0_3 -m "View changelog"

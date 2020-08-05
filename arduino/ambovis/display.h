@@ -22,6 +22,7 @@
 extern Adafruit_ILI9341 tft; //= Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 
 void drawY2(uint16_t color);
+void print_bat();
 void tft_draw();
-
+void print_vols();
 #endif

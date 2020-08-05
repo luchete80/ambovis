@@ -23,6 +23,10 @@ Modificaciones
 - BPM Subida a 30 
 - "V:" pasado a "VM:"
 
+v1.0.3
+- Nuevo menu en paralelo botonera + encoder
+
+
 PENDIENTES: 
 - LED AMARILLO
 - 

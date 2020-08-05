@@ -228,6 +228,7 @@ void setup() {
   pinMode(PIN_MENU_UP, INPUT_PULLUP);
   pinMode(PIN_MENU_DN, INPUT_PULLUP);
   pinMode(PIN_MENU_EN, INPUT_PULLUP);
+  pinMode(PIN_BAT_LEV, INPUT);
   
   digitalWrite(PIN_EN, HIGH);
 
@@ -386,7 +387,8 @@ void loop() {
 
   time = millis();
   check_buzzer_mute();
-
+  Serial.print("Carga: ");Serial.println(analogRead(PIN_BAT_LEV));
+  
   if (millis() > lastSave + TIME_SAVE) {
     int eeAddress=0;
     EEPROM.put(0, last_cycle);        eeAddress+= sizeof(unsigned long);

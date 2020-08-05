@@ -52,13 +52,13 @@ void lcd_selxy(int x, int y) {
 
 void check_updn_button(int pin, byte *var, bool incr_decr) {
     if (digitalRead(pin)==LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
-      if (millis() - lastButtonPress > 150) {
+      if (time - lastButtonPress > 150) {
           if (incr_decr)
               *var=*var+1;
           else
               *var=*var-1;
           Serial.print("encoderPos: "); Serial.println(encoderPos);
-          lastButtonPress = millis();
+          lastButtonPress = time;
       }// if time > last button press
     }
 }
@@ -69,7 +69,7 @@ void check_encoder ( ) {
   
   byte btnState = digitalRead(PIN_ENC_SW);
   if (digitalRead(PIN_ENC_SW)==LOW || digitalRead(PIN_MENU_EN)==LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
-    if (millis() - lastButtonPress > 150) {
+    if (time - lastButtonPress > 5) {
       Serial.println("Boton presionado");
       isitem_sel=!isitem_sel; 
       if (!isitem_sel) {
@@ -77,7 +77,7 @@ void check_encoder ( ) {
           Serial.print("curr sel: ");Serial.println(curr_sel);
           Serial.print("old curr sel: ");Serial.println(old_curr_sel);
       }
-      lastButtonPress = millis();
+      lastButtonPress = time;
     }// if time > last button press
 
       if (vent_mode==VENTMODE_PCL && curr_sel==4 && menu_number == 0) curr_sel++; //Not selecting pip in VCL 

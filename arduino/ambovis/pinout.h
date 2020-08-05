@@ -45,6 +45,8 @@
 #define PIN_MENU_DN     30
 #define PIN_MENU_EN     32
 
+#define PIN_BAT_LEV     A1
+
 
 // IF ARDUINO UNO
 //#define PIN_ENC_CL  2

@@ -38,7 +38,7 @@ int  ry2[128];
 int yflux[2];
 int yvt[2];
 char buffer[10];
-void print_vols();
+
 //void setup() {
 //  Serial.begin(250000);
 //  Serial.println("ILI9341 Test!"); 
@@ -79,6 +79,7 @@ void tft_draw(void) {
     		  valsreaded_[i]=0;
     		wait4statechg=false;
         print_vols();
+        print_bat();
         tft.setRotation(1);
     		//tft.fillRect(0,240-last_x, 320,240-last_x+10, ILI9341_BLACK);
     		//tft.fillScreen(ILI9341_BLACK);
@@ -139,6 +140,14 @@ void tft_draw(void) {
 
 }//loop
 
+void print_bat(){
+    tft.setRotation(0);
+    tft.fillRect(180,150,70,20, ILI9341_RED);
+    float fac=0.0279;  //5./(1024.*0.175)
+    tft.setCursor(150, 150);
+    dtostrf(float(analogRead(PIN_BAT_LEV))*fac, 2, 1, buffer);
+    tft.println("Bat: ");tft.setCursor(190, 150);tft.println(buffer);
+}
 void print_vols(){
     tft.setRotation(0);
     tft.fillRect(180,160,70,80, ILI9341_BLACK);
@@ -147,6 +156,8 @@ void print_vols(){
     tft.setCursor(150, 180);
     tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
     tft.println("Vi: ");tft.setCursor(190, 180);tft.println(buffer);
+
+
     
     itoa(_mllastExsVol, buffer, 10);
     tft.setCursor(150, 200);
