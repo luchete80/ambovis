@@ -210,7 +210,6 @@ void check_encoder ( ) {
                   menu_number=1;
               }
           }
-          clear_all_display=true;
           display_lcd();
     } else {//inside a particular selection
      
