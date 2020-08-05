@@ -57,7 +57,6 @@ void check_updn_button(int pin, byte *var, bool incr_decr) {
               *var=*var+1;
           else
               *var=*var-1;
-          Serial.print("encoderPos: "); Serial.println(encoderPos);
           lastButtonPress = time;
       }// if time > last button press
     }
@@ -69,13 +68,10 @@ void check_encoder ( ) {
   
   byte btnState = digitalRead(PIN_ENC_SW);
   if (digitalRead(PIN_ENC_SW)==LOW || digitalRead(PIN_MENU_EN)==LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
-    if (time - lastButtonPress > 5) {
-      Serial.println("Boton presionado");
+    if (time - lastButtonPress > 50) {
       isitem_sel=!isitem_sel; 
       if (!isitem_sel) {
           curr_sel=oldEncPos=encoderPos=old_curr_sel;
-          Serial.print("curr sel: ");Serial.println(curr_sel);
-          Serial.print("old curr sel: ");Serial.println(old_curr_sel);
       }
       lastButtonPress = time;
     }// if time > last button press
@@ -182,8 +178,7 @@ void check_encoder ( ) {
     if (!isitem_sel) { //Selecting position
           curr_sel=encoderPos;
           encoderPos=oldEncPos=curr_sel;
-          Serial.print("curr sel: ");Serial.println(curr_sel);
-          Serial.print("Encoder pos: ");Serial.println(encoderPos);
+
           if ( menu_number == 0 ) {
               if (encoderPos > 5) {
                   encoderPos=1;
@@ -226,7 +221,7 @@ void check_encoder ( ) {
               case 1:
                 if ( menu_number == 0 )     vent_mode           = encoderPos;
                 else if (menu_number == 1)  alarm_max_pressure  = encoderPos;
-                else                        {min_cd  = int(encoderPos);Serial.print("Mincd: ");Serial.println(min_cd);}
+                else                        {min_cd  = int(encoderPos);}
                 break;
               case 2:
                 if ( menu_number == 0 )       options.respiratoryRate = encoderPos;
@@ -248,12 +243,10 @@ void check_encoder ( ) {
                       #endif
                       } else { //manual
                       options.percVolume =encoderPos;
-                     // Serial.print("Encoder pos: ");Serial.println(encoderPos);
-                     // Serial.print("Perc vol: ");Serial.println(options.percVolume);
                     }
                 } else if (menu_number == 1) {
                     p_trim=encoderPos;
-                } else {max_cd  = int(encoderPos);Serial.print("Maxcd: ");Serial.println(max_cd);}
+                } else {max_cd  = int(encoderPos);}
                     
                 break;
               case 5:

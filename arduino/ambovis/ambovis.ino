@@ -152,11 +152,6 @@ byte po_flux[] = {0, 10, 20, 30, 40, 50, 55, 60, 65, 70, 75, 80, 85, 86, 87, 88,
 
 bool change_pid_params=false;
 
-//Encoder from https://www.instructables.com/id/Improved-Arduino-Rotary-Encoder-Reading/
-int pinA = PIN_ENC_CL; // Our first hardware interrupt pin is digital pin 2
-int pinB = PIN_ENC_DIR; // Our second hardware interrupt pin is digital pin 3
-byte aFlag = 0; // let's us know when we're expecting a rising edge on pinA to signal that the encoder has arrived at a detent
-byte bFlag = 0; // let's us know when we're expecting a rising edge on pinB to signal that the encoder has arrived at a detent (opposite direction to when aFlag is set)
 byte encoderPos = 1; //this variable stores our current value of encoder position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
 byte oldEncPos = 1; //stores the last encoder position value so we can compare to the current reading and see if it has changed (so we know when to print to the serial monitor)
 byte reading = 0; //somewhere to store the direct values we read from our interrupt pins before checking to see if we have moved a whole detent
@@ -164,30 +159,7 @@ byte reading = 0; //somewhere to store the direct values we read from our interr
 byte max_sel, min_sel; //According to current selection
 
 void check_buzzer_mute();
-//
-void PinA() {
-  cli(); //stop interrupts happening before we read pin values
-  reading = PIND & 0xC; // read all eight pin values then strip away all but pinA and pinB's values
-  if (reading == B00001100 && aFlag) { //check that we have both pins at detent (HIGH) and that we are expecting detent on this pin's rising edge
-    encoderPos --; //decrement the encoder's position count
-    bFlag = 0; //reset flags for the next turn
-    aFlag = 0; //reset flags for the next turn
-  }
-  else if (reading == B00000100) bFlag = 1; //signal that we're expecting pinB to signal the transition to detent from free rotation
-  sei(); //restart interrupts
-}
 
-void PinB() {
-  cli(); //stop interrupts happening before we read pin values
-  reading = PIND & 0xC; //read all eight pin values then strip away all but pinA and pinB's values
-  if (reading == B00001100 && bFlag) { //check that we have both pins at detent (HIGH) and that we are expecting detent on this pin's rising edge
-    encoderPos ++; //increment the encoder's position count
-    bFlag = 0; //reset flags for the next turn
-    aFlag = 0; //reset flags for the next turn
-  }
-  else if (reading == B00001000) aFlag = 1; //signal that we're expecting pinA to signal the transition to detent from free rotation
-  sei(); //restart interrupts
-}
 bool isitem_sel;
 byte old_menu_pos=0;
 byte old_menu_num=0;
@@ -300,21 +272,7 @@ void setup() {
   //ENCODER
   curr_sel = old_curr_sel = 1; //COMPRESSION
 
-
-  pinMode(pinA, INPUT_PULLUP); // set pinA as an input, pulled HIGH to the logic voltage (5V or 3.3V for most cases)
-  pinMode(pinB, INPUT_PULLUP); // set pinB as an input, pulled HIGH to the logic voltage (5V or 3.3V for most cases)
-  
-  //pinMode(pinA, INPUT); // set pinA as an input, pulled HIGH to the logic voltage (5V or 3.3V for most cases)
-  //pinMode(pinB, INPUT); // set pinB as an input, pulled HIGH to the logic voltage (5V or 3.3V for most cases)
-  //INT 	4 INT 5
-  //PINS 	19 18
-  attachInterrupt(5, PinA, RISING); // set an interrupt on PinA, looking for a rising edge signal and executing the "PinA" Interrupt Service Routine (below)
-  attachInterrupt(4, PinB, RISING); // set an interrupt on PinB, looking for a rising edge signal and executing the "PinB" Interrupt Service Routine (below)
-  //attachInterrupt(digitalPinToInterrupt(pinA), PinA, RISING); // set an interrupt on PinA, looking for a rising edge signal and executing the "PinA" Interrupt Service Routine (below)
-  //attachInterrupt(digitalPinToInterrupt(pinB), PinB, RISING); // set an interrupt on PinA, looking for a rising edge signal and executing the "PinA" Interrupt Service Routine (below)
   pinMode(PIN_ENC_SW, INPUT_PULLUP);
-  //pinMode(PIN_ENC_SW, INPUT);
-  //btnState=digitalRead(9);
 
   lastReadSensor =   lastShowSensor = millis();
   lastState = ventilation->getState();
@@ -372,9 +330,6 @@ void setup() {
     last_mute=HIGH;
     mute_count=0;
 
-    Serial.print("Interrupt to pin A: ");Serial.println(digitalPinToInterrupt(pinA));
-    Serial.print("Interrupt to pin B: ");Serial.println(digitalPinToInterrupt(pinB));
-
     lcd.clear();
 }
 
@@ -389,7 +344,7 @@ void loop() {
 
   time = millis();
   check_buzzer_mute();
-  Serial.print("Carga: ");Serial.println(analogRead(PIN_BAT_LEV));
+  //Serial.print("Carga: ");Serial.println(analogRead(PIN_BAT_LEV));
   
   if (millis() > lastSave + TIME_SAVE) {
     int eeAddress=0;
@@ -536,7 +491,7 @@ void loop() {
 #endif
     if (digitalRead(PIN_POWEROFF)) {
           digitalWrite(YELLOW_LED,HIGH);
-          Serial.println("Yellow high");
+          //Serial.println("Yellow high");
     } else {
           digitalWrite(YELLOW_LED,LOW);
       }
