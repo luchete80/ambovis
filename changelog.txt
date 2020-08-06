@@ -35,6 +35,10 @@ Upgrades
 - Acelerado refresh de TFT de 80 a 50 ms
 - Cambiado el refresco en x de TFT de 5 a px
 
+v1.0.5
+- Tiempos de botones de Display vueltos hacia atras
+- refresh de display vuelto a poner
+- Bateria pasado a %
 
 
 
