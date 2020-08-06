@@ -68,7 +68,7 @@ void check_encoder ( ) {
   
   byte btnState = digitalRead(PIN_ENC_SW);
   if (digitalRead(PIN_ENC_SW)==LOW || digitalRead(PIN_MENU_EN)==LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
-    if (time - lastButtonPress > 50) {
+    if (time - lastButtonPress > 150) {
       isitem_sel=!isitem_sel; 
       if (!isitem_sel) {
           curr_sel=oldEncPos=encoderPos=old_curr_sel;
@@ -205,6 +205,7 @@ void check_encoder ( ) {
                   menu_number=1;
               }
           }
+          clear_all_display=true;
           display_lcd();
     } else {//inside a particular selection
      

@@ -26,6 +26,18 @@ Modificaciones
 v1.0.3
 - Nuevo menu en paralelo botonera + encoder
 
+v1.0.4
+Upgrades
+- Removidas llamadas innecesarias a millis() (interrupciones)
+- Se quita refresh innecesario del display
+- Se pone en GND salida de pin BCK (amarillo nro 2)
+- Se quitan todos los Serial.print del menu y loop
+- Acelerado refresh de TFT de 80 a 50 ms
+- Cambiado el refresco en x de TFT de 5 a px
+
+
+
+
 
 PENDIENTES: 
 - LED AMARILLO

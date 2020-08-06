@@ -1,0 +1,4 @@
+Vt > 24V   =>   PC = 100%
+Vmin < Vt < 24V   =>   PC[%] = (Vt[V]-Vmin)/(24-Vmin)*100
+Vt < Vmin   =>   PC = 0%
+En principio Vlim es 22V, aunque podría ser 22,5 o 23V

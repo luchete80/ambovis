@@ -137,12 +137,27 @@ void check_alarms(){
 }
 
 void print_bat(){
+    float level,level_perc;
+    level=0.;
     tft.setRotation(0);
     tft.fillRect(180,150,70,20, ILI9341_BLACK);
     float fac=0.0279;  //5./(1024.*0.175)
-    tft.setCursor(150, 150);
-    dtostrf(float(analogRead(PIN_BAT_LEV))*fac, 2, 1, buffer);
-    tft.println("Bat: ");tft.setCursor(190, 150);tft.println(buffer);
+    
+    //Vt > 24V   =>   PC = 100%
+    //Vmin < Vt < 24V   =>   PC[%] = (Vt[V]-Vmin)/(24-Vmin)*100
+    //Vt < Vmin   =>   PC = 0%
+    for (int i=0;i<40;i++)
+        level+=float(analogRead(PIN_BAT_LEV))*fac;
+    level/=40.;
+    if (level > 24.0) level_perc =100.;
+    else {
+        if (level > 22.5) level_perc = (level - 22.5)/(24.-22.5) * 100.;
+        else              level_perc =0.;
+      }
+    dtostrf(level_perc, 2, 0, buffer);
+    tft.setCursor(150, 150);tft.println("Bat:");
+    tft.setCursor(200, 150);tft.println(buffer);
+    tft.setCursor(220, 150);tft.println("%");
 }
 void print_vols(){
     tft.setRotation(0);
