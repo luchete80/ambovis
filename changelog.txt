@@ -40,6 +40,36 @@ v1.0.5
 - refresh de display vuelto a poner
 - Bateria pasado a %
 
+v1.0.6
+- Porcentaje de bateria corregido (minimo a 20%)
+- Pines Botones adaptados (sin el cancel aun)
+
+PENDIENTES:
+- LED AMARILLO
+- TECLAS INVERTIDAS DENTRO DE SELECCION
+
+
+
+
+/////////////
+// botones //
+/////////////
+ORIGINAL
+
+izquierda	30
+derecha		34
+enter		28
+cancel		32
+
+#define PIN_MENU_UP     28
+#define PIN_MENU_DN     30
+#define PIN_MENU_EN     32
+
+Nuevo
+
+
+
+
 
 
 

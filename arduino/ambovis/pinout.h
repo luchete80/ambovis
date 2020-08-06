@@ -42,9 +42,10 @@
 #define PIN_BUZZER      3
 #define PIN_MUTE        2
 
-#define PIN_MENU_UP     28
-#define PIN_MENU_DN     30
-#define PIN_MENU_EN     32
+#define PIN_MENU_UP     30
+#define PIN_MENU_DN     34
+#define PIN_MENU_EN     28
+#define PIN_MENU_BCK    32
 
 #define PIN_BAT_LEV     A1
 

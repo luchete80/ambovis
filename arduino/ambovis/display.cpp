@@ -151,10 +151,11 @@ void print_bat(){
     level/=40.;
     if (level > 24.0) level_perc =100.;
     else {
-        if (level > 22.5) level_perc = (level - 22.5)/(24.-22.5) * 100.;
+        if (level > 20.0) level_perc = (level - 20.)/(24.-20.0) * 100.;
         else              level_perc =0.;
       }
     dtostrf(level_perc, 2, 0, buffer);
+    //dtostrf(level, 2, 1, buffer);
     tft.setCursor(150, 150);tft.println("Bat:");
     tft.setCursor(200, 150);tft.println(buffer);
     tft.setCursor(220, 150);tft.println("%");
