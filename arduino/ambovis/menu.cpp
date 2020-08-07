@@ -65,16 +65,26 @@ void check_updn_button(int pin, byte *var, bool incr_decr) {
 void check_encoder ( ) {
   check_updn_button(PIN_MENU_DN,&encoderPos,true);   //Increment
   check_updn_button(PIN_MENU_UP,&encoderPos,false);  //Decrement
-  
-  if (digitalRead(PIN_ENC_SW)==LOW || digitalRead(PIN_MENU_EN == LOW )) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
+  int pressed=0;  //0 nothing , 1 enter, 2 bck
+
+    if (digitalRead(PIN_MENU_EN) == LOW)  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
     if (time - lastButtonPress > 150) {
-      isitem_sel=!isitem_sel; 
-      if (!isitem_sel) {
-          curr_sel=oldEncPos=encoderPos=old_curr_sel;
-      }
+      pressed = 1;
+      isitem_sel=true; 
       lastButtonPress = time;
     }// if time > last button press
 
+    if (digitalRead(PIN_MENU_BCK) == LOW )  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
+        if (time - lastButtonPress > 150) {
+          pressed = 2;
+          isitem_sel=false; 
+          lastButtonPress = time;
+        }// if time > last button press
+                     
+    if (pressed > 0) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
+      if (!isitem_sel) {
+        curr_sel=oldEncPos=encoderPos=old_curr_sel;
+      }
       if (vent_mode==VENTMODE_PCL && curr_sel==4 && menu_number == 0) curr_sel++; //Not selecting pip in VCL 
             
       if (isitem_sel) {
