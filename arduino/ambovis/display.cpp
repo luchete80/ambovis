@@ -151,7 +151,7 @@ void print_bat(){
     level/=40.;
     if (level > 24.0) level_perc =100.;
     else {
-        if (level > 20.0) level_perc = (level - 20.)/(24.-20.0) * 100.;
+        if (level > 22.0) level_perc = (level - 22.)/(24.-22.0) * 100.;
         else              level_perc =0.;
       }
     dtostrf(level, 2, 0, buffer);
