@@ -200,6 +200,7 @@ void setup() {
   pinMode(PIN_MENU_UP, INPUT_PULLUP);
   pinMode(PIN_MENU_DN, INPUT_PULLUP);
   pinMode(PIN_MENU_EN, INPUT_PULLUP);
+  pinMode(PIN_MENU_BCK, INPUT_PULLUP);
   pinMode(PIN_BAT_LEV, INPUT);
   
   digitalWrite(PIN_EN, HIGH);

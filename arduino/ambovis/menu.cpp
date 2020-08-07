@@ -66,8 +66,7 @@ void check_encoder ( ) {
   check_updn_button(PIN_MENU_DN,&encoderPos,true);   //Increment
   check_updn_button(PIN_MENU_UP,&encoderPos,false);  //Decrement
   
-  byte btnState = digitalRead(PIN_ENC_SW);
-  if (digitalRead(PIN_MENU_EN == LOW )) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
+  if (digitalRead(PIN_ENC_SW)==LOW || digitalRead(PIN_MENU_EN == LOW )) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
     if (time - lastButtonPress > 150) {
       isitem_sel=!isitem_sel; 
       if (!isitem_sel) {

@@ -154,8 +154,9 @@ void print_bat(){
         if (level > 20.0) level_perc = (level - 20.)/(24.-20.0) * 100.;
         else              level_perc =0.;
       }
-    dtostrf(level_perc, 2, 0, buffer);
+    dtostrf(level, 2, 0, buffer);
     //dtostrf(level, 2, 1, buffer);
+    Serial.print("Bat level: ");Serial.println(level);
     tft.setCursor(150, 150);tft.println("Bat:");
     tft.setCursor(200, 150);tft.println(buffer);
     tft.setCursor(220, 150);tft.println("%");
