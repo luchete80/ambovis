@@ -174,6 +174,18 @@ void check_encoder ( ) {
                         min_sel=10;max_sel=100;
                     }                
                 break;
+                case 9:
+                    if ( menu_number == 2 ){
+                        encoderPos=pfmin=50.*pf_min;
+                        min_sel=0;max_sel=99;
+                    }                
+                break;
+                case 10:
+                    if ( menu_number == 2 ){
+                        encoderPos=pfmax=50.*pf_max;
+                        min_sel=0;max_sel=99;
+                    }                
+                break;
           }
     
         }//if switch select
@@ -193,7 +205,7 @@ void check_encoder ( ) {
                   encoderPos=1;
                   menu_number+=1;
               } else if ( encoderPos < 1) {
-                  encoderPos=8;
+                  encoderPos=10;
                   menu_number=2;
               }
           } else if (menu_number == 1) {
@@ -206,7 +218,7 @@ void check_encoder ( ) {
               }
           }
             else if (menu_number == 2) {
-             if (curr_sel > 8) {
+             if (curr_sel > 10) {
               encoderPos=1;
               menu_number=0; 
              } else if ( encoderPos < 1) {
@@ -287,6 +299,21 @@ void check_encoder ( ) {
                     max_pidk=encoderPos*10;
                 }
                 break;
+            case 9:
+                if ( menu_number == 2 ){
+                  Serial.print("encoderPos: ");Serial.println(encoderPos);
+                    pfmin=encoderPos;
+                    pf_min=(float)encoderPos/50.;
+                    peep_fac = -(pf_max-pf_min)/15.*last_pressure_min + pf_max;
+                }
+                break;
+            case 10:
+                if ( menu_number == 2 ){
+                    pfmax=encoderPos;
+                    pf_max=(float)encoderPos/50.;
+                    peep_fac = -(pf_max-pf_min)/15.*last_pressure_min + pf_max;
+                }
+                break;
             }//switch
             show_changed_options = true;
             update_options=true;
@@ -356,6 +383,10 @@ void clear_n_sel(int menu){
             lcd_selxy(0,2);break;
           case 8: 
             lcd_selxy(0,3);break;  
+          case 9: 
+            lcd_selxy(6,3);break;              
+          case 10: 
+            lcd_selxy(13,3);break;  
       }
     }//menu number 
 
@@ -466,6 +497,9 @@ void display_lcd ( ) {
     writeLine(2, "D:" + String(PID_KD), 13);
     writeLine(3, "P:" + String(max_pidk), 1); 
 
+    dtostrf(pf_min, 1, 2, tempstr);writeLine(3, "f:"   + String(tempstr), 7); 
+    dtostrf(pf_max, 1, 2, tempstr);writeLine(3, "F:"   + String(tempstr), 14); 
+    
   }//menu_number
   
   clear_all_display=false;

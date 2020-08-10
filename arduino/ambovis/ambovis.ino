@@ -120,6 +120,10 @@ int16_t adc0;
 int max_accel,min_accel;
 int max_speed, min_speed;
 int min_pidk,max_pidk;
+byte pfmin,pfmax;
+float pf_min,pf_max;
+float peep_fac;
+
 //min_pidk=250;
 //max_pidk=1000;
 int min_cd,max_cd;
@@ -234,7 +238,7 @@ void setup() {
   digitalWrite(PIN_EN, LOW);
 
   writeLine(1, "RespirAR FIUBA", 4);
-  writeLine(2, "v1.0.2", 8);
+  writeLine(2, "v1.0.8", 8);
   
   p_dpt0 = 0;
   ads.begin();
@@ -307,10 +311,12 @@ void setup() {
   EEPROM.get(eeAddress, max_speed); eeAddress+= sizeof(max_speed);
   EEPROM.get(eeAddress, min_accel); eeAddress+= sizeof(min_accel);
   EEPROM.get(eeAddress, max_accel); eeAddress+= sizeof(max_accel);
-  EEPROM.get(eeAddress, min_pidk); eeAddress+= sizeof(min_pidk);
-  EEPROM.get(eeAddress, max_pidk); eeAddress+= sizeof(max_pidk);
-  EEPROM.get(eeAddress, alarm_vt); eeAddress+= sizeof(alarm_vt);
-  EEPROM.get(eeAddress, filter); eeAddress+= sizeof(filter);
+  EEPROM.get(eeAddress, min_pidk);  eeAddress+= sizeof(min_pidk);
+  EEPROM.get(eeAddress, max_pidk);  eeAddress+= sizeof(max_pidk);
+  EEPROM.get(eeAddress, alarm_vt);  eeAddress+= sizeof(alarm_vt);
+  EEPROM.get(eeAddress, filter);    eeAddress+= sizeof(filter);
+  EEPROM.get(eeAddress, pfmin);       eeAddress+= sizeof(pfmin);
+  EEPROM.get(eeAddress, pfmax);       eeAddress+= sizeof(pfmax);
   
   Serial.print("Maxcd: ");Serial.println(max_cd);
         
@@ -332,6 +338,10 @@ void setup() {
     mute_count=0;
 
     lcd.clear();
+
+    pf_min=(float)pfmin/50.;
+    pf_max=(float)pfmax/50.;
+    peep_fac = -(pf_max-pf_min)/15.*last_pressure_min + pf_max;
 }
 
 
@@ -362,7 +372,9 @@ void loop() {
     EEPROM.put(eeAddress, max_pidk);  eeAddress+= sizeof(max_pidk);
     EEPROM.put(eeAddress, alarm_vt);  eeAddress+= sizeof(alarm_vt);
     EEPROM.put(eeAddress, filter);    eeAddress+= sizeof(filter);   
-         
+    EEPROM.put(eeAddress, pfmin);       eeAddress+= sizeof(pfmin);
+    EEPROM.put(eeAddress, pfmax);       eeAddress+= sizeof(pfmax);
+           
     lastSave = millis();
   }
 

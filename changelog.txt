@@ -44,6 +44,16 @@ v1.0.6
 - Porcentaje de bateria corregido (Vmin a 20.0V)
 - Pines Botones adaptados (sin el cancel aun)
 
+v1.0.7
+- Porcentaje de bateria corregido desde 20V (Vmin a 22.0V)
+- Pines Botones adaptados con el cancel
+
+v1.0.8
+- Se agrega seleccion de peep factor min y max (para 0 y 15 cmh2O)
+- Se calcula peep factor solo una vez
+- Se corrige error de PID K (se agrega la ordenada al origen)
+
+ 
 PENDIENTES:
 - LED AMARILLO
 - TECLAS INVERTIDAS DENTRO DE SELECCION

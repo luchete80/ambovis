@@ -213,4 +213,7 @@ extern byte cycle_pos; //0 to 127
 extern byte Cdyn;
 extern bool autopid;
 extern bool filter;
+extern byte pfmin,pfmax;
+extern float peep_fac;
+extern float pf_min,pf_max;
 #endif /* INC_MECHANICAL_VENTILATION_H */

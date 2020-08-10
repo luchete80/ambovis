@@ -39,7 +39,7 @@ int yvt[2];
 char buffer[10];
 
 void tft_draw(void) {
-    Serial.println(cycle_pos);Serial.println(ry[valsreaded]);
+    //Serial.println(cycle_pos);Serial.println(ry[valsreaded]);
     last_x=cycle_pos;
     rx[valsreaded]=cycle_pos;
     ry[valsreaded]=pressure_p*2.;     
@@ -156,7 +156,7 @@ void print_bat(){
       }
     dtostrf(level, 2, 0, buffer);
     //dtostrf(level, 2, 1, buffer);
-    Serial.print("Bat level: ");Serial.println(level);
+    //Serial.print("Bat level: ");Serial.println(level);
     tft.setCursor(150, 150);tft.println("Bat:");
     tft.setCursor(200, 150);tft.println(buffer);
     tft.setCursor(220, 150);tft.println("%");

@@ -257,11 +257,11 @@ void MechVentilation :: update ( void )
       
           if (change_pid_params) {
                 speed_m =(float)STEPPER_MICROSTEPS*float(max_speed-min_speed)/float(max_cd-min_cd);
-                speed_b=(float)STEPPER_MICROSTEPS*(float)max_speed-speed_m*(float)max_cd;
+                speed_b =(float)STEPPER_MICROSTEPS*(float)max_speed-speed_m*(float)max_cd;
                 accel_m =(float)STEPPER_MICROSTEPS*float(max_accel-min_accel)/float(max_cd-min_cd);
-                accel_b=(float)STEPPER_MICROSTEPS*(float)max_accel-accel_m*(float)max_cd;
-                pidk_m  =                   float(max_pidk-min_pidk)/float(max_cd-min_cd);
-                pidk_b=(float)max_pidk-pidk_m*(float)max_cd;
+                accel_b =(float)STEPPER_MICROSTEPS*(float)max_accel-accel_m*(float)max_cd;
+                pidk_m  =(float)(max_pidk-min_pidk)/float(max_cd-min_cd);
+                pidk_b  =(float)max_pidk - pidk_m*(float)max_cd;
                 //cdyn_m=
                 // max_acc,min_acc,max_speed,min_speed,max_cd,min_cd
                 change_pid_params=false;
@@ -271,7 +271,8 @@ void MechVentilation :: update ( void )
           }
           if ( abs ( last_pressure_max - _pip) >  1.5 ){
                   //if (Cdyn < 20 ) {//HARD Cv or resistance
-                  float peep_fac=-0.05*last_pressure_min+1.25;
+                  //float peep_fac=-0.05*last_pressure_min+1.25;
+                  
                   
                   if ( Cdyn < min_cd ) {
                        PID_KP                   = min_pidk * peep_fac; //Orig 250
@@ -289,12 +290,12 @@ void MechVentilation :: update ( void )
                        
                   }
                   else {
-                  //PID_KP=(25*(float)Cdyn)*peep_fac;
-                  PID_KP=(pidk_m*(float)Cdyn)*peep_fac;
-          				//STEPPER_SPEED_MAX=float(Cdyn)*266.+1660.;	//Originally was 250
-                  STEPPER_SPEED_MAX=float(Cdyn) * speed_m + speed_b;  //Originally was 250
-          				//STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS*(13.33*(float)Cdyn+66.6);
-                  STEPPER_ACC_INSUFFLATION=(accel_m*(float)Cdyn+accel_b); //WITHOUT MICROSTEPS (ALREADY DONE IN CALC)
+                      //PID_KP=(25*(float)Cdyn)*peep_fac;
+                      PID_KP=( pidk_m*(float)Cdyn + pidk_b)*peep_fac;
+              				//STEPPER_SPEED_MAX=float(Cdyn)*266.+1660.;	//Originally was 250
+                      STEPPER_SPEED_MAX=float(Cdyn) * speed_m + speed_b;  //Originally was 250
+              				//STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS*(13.33*(float)Cdyn+66.6);
+                      STEPPER_ACC_INSUFFLATION=(accel_m*(float)Cdyn+accel_b); //WITHOUT MICROSTEPS (ALREADY DONE IN CALC)
       			  }
               _pid->setGains(PID_KP,PID_KI, PID_KD);
               _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);
