@@ -163,6 +163,7 @@ byte reading = 0; //somewhere to store the direct values we read from our interr
 byte max_sel, min_sel; //According to current selection
 
 void check_buzzer_mute();
+void autotrim_flux();
 
 bool isitem_sel;
 byte old_menu_pos=0;
@@ -185,7 +186,9 @@ void setup() {
     pinMode(BCK_LED,    OUTPUT); //Set buzzerPin as output
     pinMode(YELLOW_LED, OUTPUT); //Set buzzerPin as output
     pinMode(RED_LED, OUTPUT); //Set buzzerPin as output
-    
+
+    digitalWrite(PIN_BUZZER,1); //LOW, INVERTED
+        
   // PID
   pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
   // if pressure is more than PID_BANGBANG below or above setpoint,
@@ -332,7 +335,7 @@ void setup() {
     tft.begin();
     tft.fillScreen(ILI9341_BLACK);
 
-    digitalWrite(PIN_BUZZER,1); //LOW, INVERTED
+
     digitalWrite(BCK_LED,LOW);
     buzzmuted=false;
     last_mute=HIGH;
@@ -412,11 +415,10 @@ void loop() {
     
     
     adc0 = ads.readADC_SingleEnded(0);
-    Voltage = (adc0 * 0.1875) / 1000.; //Volts
+    Voltage = (adc0 * 0.1875) *0.001; //Volts
 
-    // p_dpt=( ( Voltage - verror)*0.2 /*-0.00001*/ - 0.04 )/0.09*1000*DEFAULT_PA_TO_CM_H20+(float(p_trim)-100.0)*1e-3;
-    p_dpt = ( Voltage - verror  - 0.20 ) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20 + (float(p_trim) - 100.0) * 1e-3;
-
+    // p_dpt = ( Voltage - verror  - 0.20 ) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20 + (float(p_trim) - 100.0) * 1e-3; //WITH TRIM
+    p_dpt = ( Voltage - 0.20 - verror - 0.004) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
     update_error();
 
     pos = findClosest(dp, 55, p_dpt);
@@ -577,15 +579,17 @@ void update_error() {
   if (cycle_pos > 115) {
     if (vcorr_count < 20) {
       vcorr_count += 1;
-      verror_sum += ( Voltage - 5.0 * 0.04 );
+      verror_sum += ( Voltage - 0.2 ); //-5*0.04
+      
       //verror+=Voltage;
       init_verror = true;
     }
-    //Serial.print("Verror (mV) and count: ");Serial.print(verror_sum*1000);Serial.print(",  ");Serial.println(vcorr_count);
+    Serial.print("Verror (mV) and count: ");Serial.print(verror_sum*1000);Serial.print(",  ");Serial.println(vcorr_count);
   }
-  if (cycle_pos < 10 && init_verror) {
-    verror = verror_sum / ((float)vcorr_count + 1);
+  if (cycle_pos < 5 && init_verror) {
+    verror = verror_sum / ((float)vcorr_count + 1.);
     //Serial.print("Verror (mV) and count: ");Serial.print(verror*1000);Serial.print(",  ");Serial.println(vcorr_count);
+    Serial.print("Verror (mV) and count: ");Serial.println(verror*1000);
     verror_sum = 0.;
     vcorr_count = 0;
     init_verror = false;
@@ -635,3 +639,8 @@ void check_buzzer_mute() {
         buzzmuted=false;
     }
 }
+
+
+void autotrim_flux(){
+  
+  }

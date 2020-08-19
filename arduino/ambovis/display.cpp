@@ -44,7 +44,7 @@ void tft_draw(void) {
     rx[valsreaded]=cycle_pos;
     ry[valsreaded]=pressure_p*2.;     
 
-    yflux[0]=yflux[1];yflux[1]=int(_flux*0.035);
+    yflux[0]=yflux[1];yflux[1]=int(flow_f*0.035);
     yvt[0]=yvt[1];yvt[1]=int((_mlInsVol - _mlExsVol)*0.1);
 
     
