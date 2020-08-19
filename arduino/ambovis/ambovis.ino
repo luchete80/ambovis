@@ -331,7 +331,7 @@ void setup() {
     tft.begin();
     tft.fillScreen(ILI9341_BLACK);
 
-    digitalWrite(PIN_BUZZER,1);
+    digitalWrite(PIN_BUZZER,0);
     digitalWrite(BCK_LED,LOW);
     buzzmuted=false;
     last_mute=HIGH;
@@ -541,20 +541,20 @@ void loop() {
                   isbuzzeron=!isbuzzeron;
                   if (isbuzzeron){
                       //tone(PIN_BUZZER,440);
-                      digitalWrite(PIN_BUZZER,1);
+                      digitalWrite(PIN_BUZZER,0);
                   }   
                   else {
                       //noTone(PIN_BUZZER);
-                      digitalWrite(PIN_BUZZER,0);
+                      digitalWrite(PIN_BUZZER,1);
                   }
               }
           } else {  //buzz muted
-              digitalWrite(PIN_BUZZER,0);
+              digitalWrite(PIN_BUZZER,1);
               //noTone(PIN_BUZZER);
           }
     } else {//state > 0
       //noTone(PIN_BUZZER);
-      digitalWrite(PIN_BUZZER,0);
+      digitalWrite(PIN_BUZZER,1);
       isbuzzeron=true;        //Inverted logic
     }
 
