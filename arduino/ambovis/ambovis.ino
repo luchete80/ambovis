@@ -331,7 +331,7 @@ void setup() {
     tft.begin();
     tft.fillScreen(ILI9341_BLACK);
 
-    digitalWrite(PIN_BUZZER,0);
+    digitalWrite(PIN_BUZZER,1); //LOW, INVERTED
     digitalWrite(BCK_LED,LOW);
     buzzmuted=false;
     last_mute=HIGH;
