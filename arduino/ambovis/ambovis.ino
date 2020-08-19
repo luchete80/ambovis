@@ -247,7 +247,7 @@ void setup() {
   digitalWrite(PIN_EN, LOW);
 
   writeLine(1, "RespirAR FIUBA", 4);
-  writeLine(2, "v1.0.8", 8);
+  writeLine(2, "v1.0.9", 8);
   
   p_dpt0 = 0;
   ads.begin();
