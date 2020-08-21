@@ -53,6 +53,12 @@ v1.0.8
 - Se calcula peep factor solo una vez
 - Se corrige error de PID K (se agrega la ordenada al origen)
 
+v1.0.9
+- Corregido bug de filtro
+- Se vuelve a autotrim (error -0.004mV)
+- Se invierte buzzer
+- Se aumenta tiempo de mute a 1 min
+
  
 PENDIENTES:
 - LED AMARILLO

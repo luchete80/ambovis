@@ -358,7 +358,7 @@ void loop() {
   check_encoder();
 
   time = millis();
-  check_buzzer_mute();
+  //check_buzzer_mute();
   //Serial.print("Carga: ");Serial.println(analogRead(PIN_BAT_LEV));
   
   if (millis() > lastSave + TIME_SAVE) {
