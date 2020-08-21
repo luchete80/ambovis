@@ -187,7 +187,7 @@ void setup() {
     pinMode(YELLOW_LED, OUTPUT); //Set buzzerPin as output
     pinMode(RED_LED, OUTPUT); //Set buzzerPin as output
 
-    digitalWrite(PIN_BUZZER,1); //LOW, INVERTED
+    digitalWrite(PIN_BUZZER,LOW); //LOW, INVERTED
         
   // PID
   pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
