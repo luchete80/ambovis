@@ -358,7 +358,7 @@ void loop() {
   check_encoder();
 
   time = millis();
-  //check_buzzer_mute();
+  check_buzzer_mute();
   //Serial.print("Carga: ");Serial.println(analogRead(PIN_BAT_LEV));
   
   if (millis() > lastSave + TIME_SAVE) {
@@ -537,30 +537,30 @@ void loop() {
     show_changed_options = false;
   }
 
-    if (alarm_state > 0) {
-
-          if (!buzzmuted) {
-              if (millis() > timebuzz + TIME_BUZZER) {
-                  timebuzz=millis();
-                  isbuzzeron=!isbuzzeron;
-                  if (isbuzzeron){
-                      //tone(PIN_BUZZER,440);
-                      digitalWrite(PIN_BUZZER,0);
-                  }   
-                  else {
-                      //noTone(PIN_BUZZER);
-                      digitalWrite(PIN_BUZZER,1);
-                  }
-              }
-          } else {  //buzz muted
-              digitalWrite(PIN_BUZZER,1);
-              //noTone(PIN_BUZZER);
-          }
-    } else {//state > 0
-      //noTone(PIN_BUZZER);
-      digitalWrite(PIN_BUZZER,1);
-      isbuzzeron=true;        //Inverted logic
-    }
+//    if (alarm_state > 0) {
+//
+//          if (!buzzmuted) {
+//              if (millis() > timebuzz + TIME_BUZZER) {
+//                  timebuzz=millis();
+//                  isbuzzeron=!isbuzzeron;
+//                  if (isbuzzeron){
+//                      //tone(PIN_BUZZER,440);
+//                      digitalWrite(PIN_BUZZER,0);
+//                  }   
+//                  else {
+//                      //noTone(PIN_BUZZER);
+//                      digitalWrite(PIN_BUZZER,1);
+//                  }
+//              }
+//          } else {  //buzz muted
+//              digitalWrite(PIN_BUZZER,1);
+//              //noTone(PIN_BUZZER);
+//          }
+//    } else {//state > 0
+//      //noTone(PIN_BUZZER);
+//      digitalWrite(PIN_BUZZER,1);
+//      isbuzzeron=true;        //Inverted logic
+//    }
 
 
 }//LOOP
