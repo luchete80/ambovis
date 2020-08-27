@@ -141,7 +141,7 @@ void print_bat(){
     level=0.;
     tft.setRotation(0);
     //tft.fillRect(180,150,70,20, ILI9341_BLACK);//ONLY BAT LEVEL
-    tft.fillRect(180,130,70,50, ILI9341_BLACK);    float fac=0.0279;  //5./(1024.*0.175)
+    tft.fillRect(180,250,70,50, ILI9341_BLACK);    float fac=0.0279;  //5./(1024.*0.175)
     
     //Vt > 24V   =>   PC = 100%
     //Vmin < Vt < 24V   =>   PC[%] = (Vt[V]-Vmin)/(24-Vmin)*100
@@ -156,16 +156,16 @@ void print_bat(){
       }
     dtostrf(level_perc, 2, 0, buffer);
     //dtostrf(level, 2, 1, buffer);
-    Serial.print("Bat level: ");Serial.println(level);
-    tft.setCursor(150, 150);tft.println("Bat:");
-    tft.setCursor(200, 150);tft.println(buffer);
-    tft.setCursor(220, 150);tft.println("%");
+    //Serial.print("Bat level: ");Serial.println(level);
+    tft.setCursor(150, 260);tft.println("Bat:");
+    tft.setCursor(200, 260);tft.println(buffer);
+    tft.setCursor(220, 260);tft.println("%");
 
     dtostrf(level, 1, 2, buffer);
     //Temporary
-    Serial.print("Bat level: ");Serial.println(level);
-    tft.setCursor(150, 130);tft.println("Vo:");
-    tft.setCursor(180, 130);tft.println(buffer);
+    //Serial.print("Bat level: ");Serial.println(level);
+    tft.setCursor(150, 280);tft.println("Vo:");
+    tft.setCursor(180, 280);tft.println(buffer);
 
 }
 void print_vols(){

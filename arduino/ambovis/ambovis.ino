@@ -187,7 +187,7 @@ void setup() {
     pinMode(YELLOW_LED, OUTPUT); //Set buzzerPin as output
     pinMode(RED_LED, OUTPUT); //Set buzzerPin as output
 
-    digitalWrite(PIN_BUZZER,LOW); //LOW, INVERTED
+    digitalWrite(PIN_BUZZER,BUZZER_LOW); //LOW, INVERTED
         
   // PID
   pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
@@ -390,7 +390,11 @@ void loop() {
 //	     Serial.println(int(pressure_p));//Serial.print(",");
 //     //Serial.println(analogRead(A0));
 //	     #ifdef FILTER_FLUX
-//	     Serial.print(int(flow_f));Serial.print(",");
+       Serial.print(Voltage,5);Serial.print(",");
+       Serial.print(verror,3);Serial.print(",");
+       Serial.print(p_dpt,5);Serial.print(",");
+       Serial.print(_mlInsVol - _mlExsVol);Serial.print(",");
+       Serial.println(flow_f,2);
 //       #else
 //       Serial.print(int(_flux));Serial.print(",");
 //       #endif      
@@ -418,8 +422,8 @@ void loop() {
     adc0 = ads.readADC_SingleEnded(0);
     Voltage = (adc0 * 0.1875) *0.001; //Volts
 
-    // p_dpt = ( Voltage - verror  - 0.20 ) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20 + (float(p_trim) - 100.0) * 1e-3; //WITH TRIM
-    p_dpt = ( Voltage - 0.20 - verror - 0.004) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
+     p_dpt = ( Voltage - verror  - 0.20 ) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20 + (float(p_trim) - 100.0) * 1e-3; //WITH TRIM
+    //p_dpt = ( Voltage - 0.20 - verror - 0.004) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM  //ADDED TRIM
     update_error();
 
     pos = findClosest(dp, 55, p_dpt);
@@ -537,30 +541,30 @@ void loop() {
     show_changed_options = false;
   }
 
-//    if (alarm_state > 0) {
-//
-//          if (!buzzmuted) {
-//              if (millis() > timebuzz + TIME_BUZZER) {
-//                  timebuzz=millis();
-//                  isbuzzeron=!isbuzzeron;
-//                  if (isbuzzeron){
-//                      //tone(PIN_BUZZER,440);
-//                      digitalWrite(PIN_BUZZER,0);
-//                  }   
-//                  else {
-//                      //noTone(PIN_BUZZER);
-//                      digitalWrite(PIN_BUZZER,1);
-//                  }
-//              }
-//          } else {  //buzz muted
-//              digitalWrite(PIN_BUZZER,1);
-//              //noTone(PIN_BUZZER);
-//          }
-//    } else {//state > 0
-//      //noTone(PIN_BUZZER);
-//      digitalWrite(PIN_BUZZER,1);
-//      isbuzzeron=true;        //Inverted logic
-//    }
+    if (alarm_state > 0) {
+
+          if (!buzzmuted) {
+              if (millis() > timebuzz + TIME_BUZZER) {
+                  timebuzz=millis();
+                  isbuzzeron=!isbuzzeron;
+                  if (isbuzzeron){
+                      //tone(PIN_BUZZER,440);
+                      digitalWrite(PIN_BUZZER,BUZZER_LOW);
+                  }   
+                  else {
+                      //noTone(PIN_BUZZER);
+                      digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+                  }
+              }
+          } else {  //buzz muted
+              digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+              //noTone(PIN_BUZZER);
+          }
+    } else {//state > 0
+      //noTone(PIN_BUZZER);
+      digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+      isbuzzeron=true;        //Inverted logic
+    }
 
 
 }//LOOP
@@ -579,18 +583,18 @@ void update_error() {
   //UPDATING VERROR
   if (cycle_pos > 115) {
     if (vcorr_count < 20) {
-      vcorr_count += 1;
+      vcorr_count += 1.;
       verror_sum += ( Voltage - 0.2 ); //-5*0.04
       
       //verror+=Voltage;
       init_verror = true;
     }
-    Serial.print("Verror (mV) and count: ");Serial.print(verror_sum*1000);Serial.print(",  ");Serial.println(vcorr_count);
+    //Serial.print("Verror (mV) and count: ");Serial.print(verror_sum*1000);Serial.print(",  ");Serial.println(vcorr_count);
   }
   if (cycle_pos < 5 && init_verror) {
     verror = verror_sum / ((float)vcorr_count + 1.);
     //Serial.print("Verror (mV) and count: ");Serial.print(verror*1000);Serial.print(",  ");Serial.println(vcorr_count);
-    Serial.print("Verror (mV) and count: ");Serial.println(verror*1000);
+    //Serial.print("Verror (mV) and count: ");Serial.println(verror*1000);
     verror_sum = 0.;
     vcorr_count = 0;
     init_verror = false;

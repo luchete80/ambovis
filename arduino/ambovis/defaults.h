@@ -9,6 +9,7 @@
 //#define DEBUG_UPDATE 1
 //#define FILTER_FLUX 1
 #define DEBUG_OFF 1 //Release version
+#define BUZZER_LOW 1
 
 #define BMP_I2C 1  //Pressure Sensor
 
@@ -36,7 +37,6 @@
 // Valores motor
 #define STEPPER_MICROSTEPS 16
 #define STEPPER_STEPS_PER_REVOLUTION 200
-
 #define STEPPER_MICROSTEPS_PER_REVOLUTION (STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS)
 //#define STEPPER_DIR 1
 #define STEPPER_HOMING_DIRECTION    (1)
