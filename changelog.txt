@@ -59,11 +59,23 @@ v1.0.9
 - Se invierte buzzer
 - Se aumenta tiempo de mute a 1 min
 
- 
-PENDIENTES:
-- LED AMARILLO
-- TECLAS INVERTIDAS DENTRO DE SELECCION
+v1.0.9 (pisado)
+- Vuelta a trim
+- Se el % de baterias abajo en el display 
+- Se activa e invierte buzzer
 
+v1.0.10
+- Se agrega menu 4 (dpip, factor peep se pasa a esta pantalla, presion de ac,factor de ac)
+
+
+- Modificaciones
+- Se bajan los maximos de pid de 1000 a 990
+- Se reordena la navegacion del menu de conf (izq a der, arr a a abajo)
+
+
+- A modificar (bugs)
+- Hacer visible el cursor en constantes pid "d" y "D"
+- Refresco al bajar un digito en variables
 
 
 

@@ -216,4 +216,11 @@ extern bool filter;
 extern byte pfmin,pfmax;
 extern float peep_fac;
 extern float pf_min,pf_max;
+extern float dpip;extern byte dpip_b;
+extern int max_accel,min_accel,max_speed,min_speed,max_cd,min_cd,max_pidk,min_pidk;
+extern int max_pidi,min_pidi;
+extern int max_pidd,min_pidd;
+
+extern float f_acc;extern byte f_acc_b;
+extern byte p_acc;
 #endif /* INC_MECHANICAL_VENTILATION_H */

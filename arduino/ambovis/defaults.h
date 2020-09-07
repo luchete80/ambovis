@@ -132,7 +132,6 @@ extern bool send_data;
 extern byte alarm_state;
 
 //PID LIMITS
-extern int max_accel,min_accel,max_speed,min_speed,max_cd,min_cd,max_pidk,min_pidk;
 extern bool change_pid_params;
 extern unsigned long time;
 

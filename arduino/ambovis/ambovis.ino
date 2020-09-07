@@ -120,6 +120,8 @@ int16_t adc0;
 int max_accel,min_accel;
 int max_speed, min_speed;
 int min_pidk,max_pidk;
+int min_pidi,max_pidi;
+int min_pidd,max_pidd;
 byte pfmin,pfmax;
 float pf_min,pf_max;
 float peep_fac;
@@ -247,7 +249,7 @@ void setup() {
   digitalWrite(PIN_EN, LOW);
 
   writeLine(1, "RespirAR FIUBA", 4);
-  writeLine(2, "v1.0.9", 8);
+  writeLine(2, "v1.0.10", 8);
   
   p_dpt0 = 0;
   ads.begin();
@@ -324,8 +326,18 @@ void setup() {
   EEPROM.get(eeAddress, max_pidk);  eeAddress+= sizeof(max_pidk);
   EEPROM.get(eeAddress, alarm_vt);  eeAddress+= sizeof(alarm_vt);
   EEPROM.get(eeAddress, filter);    eeAddress+= sizeof(filter);
-  EEPROM.get(eeAddress, pfmin);       eeAddress+= sizeof(pfmin);
-  EEPROM.get(eeAddress, pfmax);       eeAddress+= sizeof(pfmax);
+  EEPROM.get(eeAddress, pfmin);     eeAddress+= sizeof(pfmin);
+  EEPROM.get(eeAddress, pfmax);     eeAddress+= sizeof(pfmax);
+  EEPROM.get(eeAddress, dpip_b);    eeAddress+= sizeof(dpip_b);
+  EEPROM.get(eeAddress, min_pidi);  eeAddress+= sizeof(min_pidi);
+  EEPROM.get(eeAddress, max_pidi);  eeAddress+= sizeof(max_pidi);  
+  EEPROM.get(eeAddress, min_pidd);  eeAddress+= sizeof(min_pidd);
+  EEPROM.get(eeAddress, max_pidd);  eeAddress+= sizeof(max_pidd);
+  EEPROM.get(eeAddress, p_acc);      eeAddress+= sizeof(p_acc);
+  EEPROM.get(eeAddress, f_acc_b);    eeAddress+= sizeof(f_acc_b);
+
+  f_acc=(float)f_acc_b/10.;
+  dpip=(float)dpip_b/10.;
   
   Serial.print("Maxcd: ");Serial.println(max_cd);
         
@@ -376,9 +388,16 @@ void loop() {
     EEPROM.put(eeAddress, max_pidk);  eeAddress+= sizeof(max_pidk);
     EEPROM.put(eeAddress, alarm_vt);  eeAddress+= sizeof(alarm_vt);
     EEPROM.put(eeAddress, filter);    eeAddress+= sizeof(filter);   
-    EEPROM.put(eeAddress, pfmin);       eeAddress+= sizeof(pfmin);
-    EEPROM.put(eeAddress, pfmax);       eeAddress+= sizeof(pfmax);
-           
+    EEPROM.put(eeAddress, pfmin);     eeAddress+= sizeof(pfmin);
+    EEPROM.put(eeAddress, pfmax);     eeAddress+= sizeof(pfmax);
+    EEPROM.put(eeAddress, dpip_b);    eeAddress+= sizeof(dpip_b);
+    EEPROM.put(eeAddress, min_pidi);  eeAddress+= sizeof(min_pidi);
+    EEPROM.put(eeAddress, max_pidi);  eeAddress+= sizeof(max_pidi);  
+    EEPROM.put(eeAddress, min_pidd);  eeAddress+= sizeof(min_pidd);
+    EEPROM.put(eeAddress, max_pidd);  eeAddress+= sizeof(max_pidd);
+    EEPROM.put(eeAddress, p_acc);      eeAddress+= sizeof(p_acc);
+    EEPROM.put(eeAddress, f_acc_b);    eeAddress+= sizeof(f_acc_b);                 
+    
     lastSave = millis();
   }
 
