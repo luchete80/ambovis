@@ -405,15 +405,17 @@ void loop() {
   if ( time > lastShowSensor + TIME_SHOW ) {
 
       lastShowSensor=time; 
-//       Serial.print(int(cycle_pos));Serial.print(",");
+       Serial.print(int(cycle_pos));Serial.print(",");
 //	     Serial.println(int(pressure_p));//Serial.print(",");
 //     //Serial.println(analogRead(A0));
 //	     #ifdef FILTER_FLUX
        Serial.print(Voltage,5);Serial.print(",");
        Serial.print(verror,3);Serial.print(",");
        Serial.print(p_dpt,5);Serial.print(",");
-       Serial.print(_mlInsVol - _mlExsVol);Serial.print(",");
+//       Serial.print(_mlInsVol - _mlExsVol);Serial.print(",");
        Serial.println(flow_f,2);
+       //Serial.println(_flux,2);
+       
 //       #else
 //       Serial.print(int(_flux));Serial.print(",");
 //       #endif      
@@ -441,10 +443,13 @@ void loop() {
     adc0 = ads.readADC_SingleEnded(0);
     Voltage = (adc0 * 0.1875) *0.001; //Volts
 
-     p_dpt = ( Voltage - verror  - 0.20 ) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20 + (float(p_trim) - 100.0) * 1e-3; //WITH TRIM
+    p_dpt = ( Voltage /*- verror*/ - 0.20 ) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
+    //ORIGINAL CON ERROR NEN TENSION
+    // p_dpt = ( Voltage - 0.20 -verror ) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20 + (float(p_trim) - 100.0) * 1e-3 - verror; //WITH TRIM
     //p_dpt = ( Voltage - 0.20 - verror - 0.004) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM  //ADDED TRIM
     update_error();
 
+    p_dpt -= verror + (float(p_trim) - 100.0) * 1e-3; //WITH TRIM
     pos = findClosest(dp, 55, p_dpt);
     //flux should be shifted up (byte storage issue)
     _flux = po_flux[pos] - 100 + ( float (po_flux[pos + 1] - 100) - float (po_flux[pos] - 100) ) * ( p_dpt - float(dp[pos]) ) / (float)( dp[pos + 1] - dp[pos]);
@@ -600,11 +605,11 @@ void timer1Isr(void)
 
 void update_error() {
   //UPDATING VERROR
-  if (cycle_pos > 115) {
+  if (cycle_pos > 100) {
     if (vcorr_count < 20) {
       vcorr_count += 1.;
       verror_sum += ( Voltage - 0.2 ); //-5*0.04
-      
+      verror_sum +=p_dpt; //Si el error es de presion
       //verror+=Voltage;
       init_verror = true;
     }

@@ -148,7 +148,7 @@ void print_bat(){
     //Vt < Vmin   =>   PC = 0%
     for (int i=0;i<40;i++){
         level+=float(analogRead(PIN_BAT_LEV));
-        Serial.println(analogRead(PIN_BAT_LEV));
+        //Serial.println(analogRead(PIN_BAT_LEV));
         }
     level*=fac/40.;
     if (level > 24.0) level_perc =100.;
