@@ -122,7 +122,7 @@ void check_encoder ( ) {
             case 3:
               if ( menu_number == 0 ) {
                   encoderPos=oldEncPos=options.percInspEsp;
-                  min_sel=2;max_sel=3;   
+                  min_sel=1;max_sel=3;   
               } else if ( menu_number == 1 ) {
                     encoderPos=byte(0.1*float(alarm_vt));
                     min_sel=10;max_sel=50;//vt
