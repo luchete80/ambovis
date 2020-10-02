@@ -7,6 +7,9 @@ static bool clear_all_display;
 
 static byte max_pidk_byte,min_pidk_byte;
 
+bool change_sleep;
+int pressed=0;  //0 nothing , 1 enter, 2 bck
+
 byte back[8] = {
   0b00100,
   0b01000,
@@ -17,6 +20,58 @@ byte back[8] = {
   0b00001,
   0b11111
 };
+
+void updateState() {
+  // the button has been just pressed
+  if (bck_state == LOW) {
+      startPressed = time;
+      idleTime = startPressed - endPressed;
+      change_sleep=false;
+//      if (idleTime >= 500 && idleTime < 1000) {
+//          Serial.println("Button was idle for half a second");
+//      }
+//
+//      if (idleTime >= 1000) {
+//          Serial.println("Button was idle for one second or more"); 
+//      }
+
+  // the button has been just released
+  } else {
+      endPressed = time;
+      holdTime = endPressed - startPressed;
+
+//      if (holdTime >= 10 && holdTime < 1000) {
+//          Serial.println("Button was hold for half a second"); 
+//      }
+//      if (holdTime >= 500 && holdTime < 1000) {
+//          Serial.println("Button was hold for half a second"); 
+//      }
+//
+//      if (holdTime >= 1000) {
+//          Serial.println("Button was hold for one second or more"); 
+//      }
+
+  }
+}
+
+void updateCounter() {
+  // the button is still pressed
+  if (bck_state == LOW) {
+      holdTime = time - startPressed;
+
+//      if (holdTime >= 1000) {
+//          Serial.println("Button is hold for more than a second"); 
+//      }
+
+  // the button is still released
+  } else {
+      idleTime = time - endPressed;
+
+//      if (idleTime >= 1000) {
+//          Serial.println("Button is released for more than a second");  
+//      }
+  }
+}
 
 void init_display() {
   #ifdef LCD_I2C
@@ -61,11 +116,46 @@ void check_updn_button(int pin, byte *var, bool incr_decr) {
       }// if time > last button press
     }
 }
-    
+void check_bck_state(){
+      bck_state=digitalRead(PIN_MENU_BCK);         
+//    Serial.print("holdTime:");Serial.println(holdTime);
+//    Serial.print("change_sleep:");Serial.println(change_sleep);
+//    Serial.print("bck_state:");Serial.println(bck_state);
+//    Serial.print("sleep_mode:");Serial.println(sleep_mode);
+        
+    if (bck_state != last_bck_state) { 
+       updateState(); // button state changed. It runs only once.
+        if (bck_state == LOW ) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
+            if (time - lastButtonPress > 150) {
+              pressed = 2;
+              isitem_sel=false; 
+              lastButtonPress = time;
+            }// if time > last button press
+        } else {  //Button released
+          }
+    } else {
+       updateCounter(); // button state not changed. It runs in a loop.
+       if (holdTime > 2000 && !change_sleep){
+        Serial.println("Activando Sleep Mode");
+        if (!sleep_mode){
+            
+            sleep_mode=true;
+            put_to_sleep=true;
+        } else {
+           sleep_mode=false;   
+        }
+        change_sleep=true;
+        Serial.print("Sleep Mode");Serial.println(sleep_mode);
+        }
+    }
+    last_bck_state = bck_state;
+  
+  }
+  
 void check_encoder ( ) {
   check_updn_button(PIN_MENU_DN,&encoderPos,true);   //Increment
   check_updn_button(PIN_MENU_UP,&encoderPos,false);  //Decrement
-  int pressed=0;  //0 nothing , 1 enter, 2 bck
+  pressed=0;  //0 nothing , 1 enter, 2 bck
 
     if (digitalRead(PIN_MENU_EN) == LOW)  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
     if (time - lastButtonPress > 150) {
@@ -74,13 +164,16 @@ void check_encoder ( ) {
       lastButtonPress = time;
     }// if time > last button press
 
-    if (digitalRead(PIN_MENU_BCK) == LOW )  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
-        if (time - lastButtonPress > 150) {
-          pressed = 2;
-          isitem_sel=false; 
-          lastButtonPress = time;
-        }// if time > last button press
-                     
+// ORIGINAL BCK WITHOUT SLEEP MODE
+//    if (digitalRead(PIN_MENU_BCK) == LOW )  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
+//        if (time - lastButtonPress > 150) {
+//          pressed = 2;
+//          isitem_sel=false; 
+//          lastButtonPress = time;
+//        }// if time > last button press
+
+    check_bck_state();
+
     if (pressed > 0) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
       if (!isitem_sel) {
         curr_sel=oldEncPos=encoderPos=old_curr_sel;

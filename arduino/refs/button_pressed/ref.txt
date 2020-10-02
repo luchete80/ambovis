@@ -1,0 +1,1 @@
+https://stackoverflow.com/questions/32427630/how-to-detect-how-long-a-button-was-pressed-in-arduino

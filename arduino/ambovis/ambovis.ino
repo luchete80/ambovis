@@ -15,10 +15,15 @@
 #include "src/Pressure_Sensor/Pressure_Sensor.h"  //LUCIANO: MPX5050DP
 #include <EEPROM.h>
 
+#include<avr/sleep.h>
+
 bool init_verror;
 byte Cdyn;
 bool autopid;
 bool filter;
+bool sleep_mode;
+bool put_to_sleep;
+unsigned long print_bat_time;
 
 byte _back[8] = {
   0b00100,
@@ -166,6 +171,7 @@ byte max_sel, min_sel; //According to current selection
 
 void check_buzzer_mute();
 void autotrim_flux();
+void check_sleep_mode();  //Batt charge only
 
 bool isitem_sel;
 byte old_menu_pos=0;
@@ -177,6 +183,14 @@ MechVentilation * ventilation;
 VentilationOptions_t options;
 
 float p_dpt0;
+
+int bck_state ;     // current state of the button
+int last_bck_state ; // previous state of the button
+int startPressed ;    // the moment the button was pressed
+int endPressed ;      // the moment the button was released
+int holdTime ;        // how long the button was hold
+int idleTime ;        // how long the button was idle
+
 void setup() {
   
   Serial.begin(250000);
@@ -255,23 +269,23 @@ void setup() {
   ads.begin();
   verror = 0;
   float verrp = 0.;
-  for (int i = 0; i < 10; i++) {
-    adc0 = ads.readADC_SingleEnded(0);
-    Voltage = (adc0 * 0.1875) * 0.001; //VOLT!
-    Serial.print("Voltage dp: "); Serial.println(Voltage, 3);
-    verror += ( Voltage - 5.0 * 0.04 ); //IF VOUT IS: Vo=VS(0.09*P0.04) +/- ERR
-    //vo=vs(0.09 dp +0.04)+/-verr
-    p_dpt0 += 0.5 * (( Voltage /* 5.0/V_SUPPLY_HONEY */ - 0.1 * 4.8/* - corr_fs */) / (0.8 * 4.8) * DEFAULT_PSI_TO_CM_H20 * 2. - DEFAULT_PSI_TO_CM_H20);
-    verrp += (analogRead(A0) * 5. / 1024. - 5.*0.04);
-    Serial.print("Voltage p: "); Serial.println(analogRead(A0));
-    delay(10);
-  }
-
-  verror /= 10.; //
-  verrp /= 10.;
-  p_dpt0 /= 10.0;
-  Serial.print("dp (Flux) MPX Volt (mV) at p0: "); Serial.println(verror * 1000, 3);
-  Serial.print("pressure  MPX Volt (mV) at p0: "); Serial.println(verrp * 1000, 3);
+//  for (int i = 0; i < 10; i++) {
+//    adc0 = ads.readADC_SingleEnded(0);
+//    Voltage = (adc0 * 0.1875) * 0.001; //VOLT!
+//    Serial.print("Voltage dp: "); Serial.println(Voltage, 3);
+//    verror += ( Voltage - 5.0 * 0.04 ); //IF VOUT IS: Vo=VS(0.09*P0.04) +/- ERR
+//    //vo=vs(0.09 dp +0.04)+/-verr
+//    p_dpt0 += 0.5 * (( Voltage /* 5.0/V_SUPPLY_HONEY */ - 0.1 * 4.8/* - corr_fs */) / (0.8 * 4.8) * DEFAULT_PSI_TO_CM_H20 * 2. - DEFAULT_PSI_TO_CM_H20);
+//    verrp += (analogRead(A0) * 5. / 1024. - 5.*0.04);
+//    Serial.print("Voltage p: "); Serial.println(analogRead(A0));
+//    delay(10);
+//  }
+//
+//  verror /= 10.; //
+//  verrp /= 10.;
+//  p_dpt0 /= 10.0;
+//  Serial.print("dp (Flux) MPX Volt (mV) at p0: "); Serial.println(verror * 1000, 3);
+//  Serial.print("pressure  MPX Volt (mV) at p0: "); Serial.println(verrp * 1000, 3);
 
   Serial.print("dp  error : "); Serial.println(-verror / (5.*0.09));
   p_dpt0 = 0.20;
@@ -358,6 +372,9 @@ void setup() {
     pf_min=(float)pfmin/50.;
     pf_max=(float)pfmax/50.;
     peep_fac = -(pf_max-pf_min)/15.*last_pressure_min + pf_max;
+
+    sleep_mode=false;
+    put_to_sleep=false;
 }
 
 
@@ -366,230 +383,246 @@ byte pos;
 
 void loop() {
 
-  State state = ventilation->getState();
-  check_encoder();
 
-  time = millis();
-  check_buzzer_mute();
-  //Serial.print("Carga: ");Serial.println(analogRead(PIN_BAT_LEV));
-  
-  if (millis() > lastSave + TIME_SAVE) {
-    int eeAddress=0;
-    EEPROM.put(0, last_cycle);        eeAddress+= sizeof(unsigned long);
-    EEPROM.put(eeAddress, p_trim);    eeAddress+= sizeof(p_trim);
-    EEPROM.put(eeAddress, autopid);   eeAddress+= sizeof(autopid);
-    EEPROM.put(eeAddress, min_cd);    eeAddress+= sizeof(min_cd);
-    EEPROM.put(eeAddress, max_cd);    eeAddress+= sizeof(max_cd);
-    EEPROM.put(eeAddress, min_speed); eeAddress+= sizeof(min_speed);
-    EEPROM.put(eeAddress, max_speed); eeAddress+= sizeof(max_speed);
-    EEPROM.put(eeAddress, min_accel); eeAddress+= sizeof(min_accel);
-    EEPROM.put(eeAddress, max_accel); eeAddress+= sizeof(max_accel);
-    EEPROM.put(eeAddress, min_pidk);  eeAddress+= sizeof(min_pidk);
-    EEPROM.put(eeAddress, max_pidk);  eeAddress+= sizeof(max_pidk);
-    EEPROM.put(eeAddress, alarm_vt);  eeAddress+= sizeof(alarm_vt);
-    EEPROM.put(eeAddress, filter);    eeAddress+= sizeof(filter);   
-    EEPROM.put(eeAddress, pfmin);     eeAddress+= sizeof(pfmin);
-    EEPROM.put(eeAddress, pfmax);     eeAddress+= sizeof(pfmax);
-    EEPROM.put(eeAddress, dpip_b);    eeAddress+= sizeof(dpip_b);
-    EEPROM.put(eeAddress, min_pidi);  eeAddress+= sizeof(min_pidi);
-    EEPROM.put(eeAddress, max_pidi);  eeAddress+= sizeof(max_pidi);  
-    EEPROM.put(eeAddress, min_pidd);  eeAddress+= sizeof(min_pidd);
-    EEPROM.put(eeAddress, max_pidd);  eeAddress+= sizeof(max_pidd);
-    EEPROM.put(eeAddress, p_acc);      eeAddress+= sizeof(p_acc);
-    EEPROM.put(eeAddress, f_acc_b);    eeAddress+= sizeof(f_acc_b);                 
+
+  if (!sleep_mode){
+      State state = ventilation->getState();
+      check_encoder();
     
-    lastSave = millis();
-  }
-
-
-  if ( time > lastShowSensor + TIME_SHOW ) {
-
-      lastShowSensor=time; 
-       Serial.print(int(cycle_pos));Serial.print(",");
-//	     Serial.println(int(pressure_p));//Serial.print(",");
-//     //Serial.println(analogRead(A0));
-//	     #ifdef FILTER_FLUX
-       Serial.print(Voltage,5);Serial.print(",");
-       Serial.print(verror,3);Serial.print(",");
-       Serial.print(p_dpt,5);Serial.print(",");
-//       Serial.print(_mlInsVol - _mlExsVol);Serial.print(",");
-       Serial.println(flow_f,2);
-       //Serial.println(_flux,2);
-       
-//       #else
-//       Serial.print(int(_flux));Serial.print(",");
-//       #endif      
-//      Serial.println(int(alarm_state));
-      //Serial.print(",");
-       //Serial.println(int(_mlInsVol-_mlExsVol));
-//      
-      //Serial.print(",");Serial.println(int(alarm_state));     
-//      #ifdef FILTER_FLUX 
-//      Serial.print(Voltage*1000);Serial.print(",");Serial.print(p_dpt);Serial.print(",");Serial.println(_flux);/*Serial.print(",");/*Serial.print(",");Serial.println(_flux_sum/5.);*/
-//      #endif
-      //Serial.print(int(_mlInsVol));Serial.print(",");Serial.println(int(_mlExsVol));
-      tft_draw();
-
-  }
-
-
-  if (time > lastReadSensor + TIME_SENSOR) {
-
-    pressure_p = ( analogRead(A0) / (1023.) /*- verrp * 0.2 */ - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
-    
-    //pressure_p = (( float(analogRead(A0))/1023.*V_SUPPLY_HONEY - 0.1 * V_SUPPLY_HONEY/* - corr_fs */) / (0.8 * V_SUPPLY_HONEY) * DEFAULT_PSI_TO_CM_H20 * 2. - DEFAULT_PSI_TO_CM_H20);//HONEYWELL
+      time = millis();
+      check_buzzer_mute();
+      //Serial.print("Carga: ");Serial.println(analogRead(PIN_BAT_LEV));
+      
+      if (millis() > lastSave + TIME_SAVE) {
+        int eeAddress=0;
+        EEPROM.put(0, last_cycle);        eeAddress+= sizeof(unsigned long);
+        EEPROM.put(eeAddress, p_trim);    eeAddress+= sizeof(p_trim);
+        EEPROM.put(eeAddress, autopid);   eeAddress+= sizeof(autopid);
+        EEPROM.put(eeAddress, min_cd);    eeAddress+= sizeof(min_cd);
+        EEPROM.put(eeAddress, max_cd);    eeAddress+= sizeof(max_cd);
+        EEPROM.put(eeAddress, min_speed); eeAddress+= sizeof(min_speed);
+        EEPROM.put(eeAddress, max_speed); eeAddress+= sizeof(max_speed);
+        EEPROM.put(eeAddress, min_accel); eeAddress+= sizeof(min_accel);
+        EEPROM.put(eeAddress, max_accel); eeAddress+= sizeof(max_accel);
+        EEPROM.put(eeAddress, min_pidk);  eeAddress+= sizeof(min_pidk);
+        EEPROM.put(eeAddress, max_pidk);  eeAddress+= sizeof(max_pidk);
+        EEPROM.put(eeAddress, alarm_vt);  eeAddress+= sizeof(alarm_vt);
+        EEPROM.put(eeAddress, filter);    eeAddress+= sizeof(filter);   
+        EEPROM.put(eeAddress, pfmin);     eeAddress+= sizeof(pfmin);
+        EEPROM.put(eeAddress, pfmax);     eeAddress+= sizeof(pfmax);
+        EEPROM.put(eeAddress, dpip_b);    eeAddress+= sizeof(dpip_b);
+        EEPROM.put(eeAddress, min_pidi);  eeAddress+= sizeof(min_pidi);
+        EEPROM.put(eeAddress, max_pidi);  eeAddress+= sizeof(max_pidi);  
+        EEPROM.put(eeAddress, min_pidd);  eeAddress+= sizeof(min_pidd);
+        EEPROM.put(eeAddress, max_pidd);  eeAddress+= sizeof(max_pidd);
+        EEPROM.put(eeAddress, p_acc);      eeAddress+= sizeof(p_acc);
+        EEPROM.put(eeAddress, f_acc_b);    eeAddress+= sizeof(f_acc_b);                 
+        
+        lastSave = millis();
+      }
     
     
-    adc0 = ads.readADC_SingleEnded(0);
-    Voltage = (adc0 * 0.1875) *0.001; //Volts
-
-    p_dpt = ( Voltage /*- verror*/ - 0.20 ) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
-    //ORIGINAL CON ERROR NEN TENSION
-    // p_dpt = ( Voltage - 0.20 -verror ) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20 + (float(p_trim) - 100.0) * 1e-3 - verror; //WITH TRIM
-    //p_dpt = ( Voltage - 0.20 - verror - 0.004) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM  //ADDED TRIM
-    update_error();
-
-    p_dpt -= verror + (float(p_trim) - 100.0) * 1e-3; //WITH TRIM
-    pos = findClosest(dp, 55, p_dpt);
-    //flux should be shifted up (byte storage issue)
-    _flux = po_flux[pos] - 100 + ( float (po_flux[pos + 1] - 100) - float (po_flux[pos] - 100) ) * ( p_dpt - float(dp[pos]) ) / (float)( dp[pos + 1] - dp[pos]);
-    _flux *= 16.6667;
-
-    if (filter) {
-        flux_count++;    //Filter
-        for (int i = 0; i < 4; i++) {
-          _flux_fil[i] = _flux_fil[i + 1];
+      if ( time > lastShowSensor + TIME_SHOW ) {
+    
+          lastShowSensor=time; 
+//           Serial.print(int(cycle_pos));Serial.print(",");
+//    //	     Serial.println(int(pressure_p));//Serial.print(",");
+//    //     //Serial.println(analogRead(A0));
+//    //	     #ifdef FILTER_FLUX
+//           Serial.print(Voltage,5);Serial.print(",");
+//           Serial.print(verror,3);Serial.print(",");
+//           Serial.print(p_dpt,5);Serial.print(",");
+//    //       Serial.print(_mlInsVol - _mlExsVol);Serial.print(",");
+//           Serial.println(flow_f,2);
+           //Serial.println(_flux,2);
+           
+    //       #else
+    //       Serial.print(int(_flux));Serial.print(",");
+    //       #endif      
+    //      Serial.println(int(alarm_state));
+          //Serial.print(",");
+           //Serial.println(int(_mlInsVol-_mlExsVol));
+    //      
+          //Serial.print(",");Serial.println(int(alarm_state));     
+    //      #ifdef FILTER_FLUX 
+    //      Serial.print(Voltage*1000);Serial.print(",");Serial.print(p_dpt);Serial.print(",");Serial.println(_flux);/*Serial.print(",");/*Serial.print(",");Serial.println(_flux_sum/5.);*/
+    //      #endif
+          //Serial.print(int(_mlInsVol));Serial.print(",");Serial.println(int(_mlExsVol));
+          tft_draw();
+    
+      }
+    
+    
+      if (time > lastReadSensor + TIME_SENSOR) {
+    
+        pressure_p = ( analogRead(A0) / (1023.) /*- verrp * 0.2 */ - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
+        
+        //pressure_p = (( float(analogRead(A0))/1023.*V_SUPPLY_HONEY - 0.1 * V_SUPPLY_HONEY/* - corr_fs */) / (0.8 * V_SUPPLY_HONEY) * DEFAULT_PSI_TO_CM_H20 * 2. - DEFAULT_PSI_TO_CM_H20);//HONEYWELL
+        
+        
+        adc0 = ads.readADC_SingleEnded(0);
+        Voltage = (adc0 * 0.1875) *0.001; //Volts
+    
+        p_dpt = ( Voltage /*- verror*/ - 0.20 ) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
+        //ORIGINAL CON ERROR NEN TENSION
+        // p_dpt = ( Voltage - 0.20 -verror ) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20 + (float(p_trim) - 100.0) * 1e-3 - verror; //WITH TRIM
+        //p_dpt = ( Voltage - 0.20 - verror - 0.004) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM  //ADDED TRIM
+        update_error();
+    
+        p_dpt -= verror + (float(p_trim) - 100.0) * 1e-3; //WITH TRIM
+        pos = findClosest(dp, 55, p_dpt);
+        //flux should be shifted up (byte storage issue)
+        _flux = po_flux[pos] - 100 + ( float (po_flux[pos + 1] - 100) - float (po_flux[pos] - 100) ) * ( p_dpt - float(dp[pos]) ) / (float)( dp[pos + 1] - dp[pos]);
+        _flux *= 16.6667;
+    
+        if (filter) {
+            flux_count++;    //Filter
+            for (int i = 0; i < 4; i++) {
+              _flux_fil[i] = _flux_fil[i + 1];
+            }
+            _flux_fil[4] = _flux;
+            _flux_sum = 0.;
+            for (int i = 0; i < 5; i++)
+                _flux_sum += _flux_fil[i];
+                
+            flow_f = _flux_sum / 5.;
+        } else {
+            flow_f = _flux;
         }
-        _flux_fil[4] = _flux;
-        _flux_sum = 0.;
-        for (int i = 0; i < 5; i++)
-            _flux_sum += _flux_fil[i];
-            
-        flow_f = _flux_sum / 5.;
-    } else {
-        flow_f = _flux;
-    }
-
-    if (_flux > 0) {
-      _mlInsVol += flow_f * float((millis() - lastReadSensor)) * 0.001; //flux in l and time in msec, results in ml
-    } else {
-      _mlExsVol -= flow_f * float((millis() - lastReadSensor)) * 0.001; //flux in l and time in msec, results in ml
-    }
-
-    lastReadSensor = millis();
-
-    //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
-    if (pressure_p > pressure_max) {
-      pressure_max = pressure_p;
-    }
-    if (pressure_p < pressure_min) {
-      pressure_min = pressure_p;
-    }
-  }//Read Sensor
-
-  if (alarm_vt) {
     
-  }
-  if ( ventilation -> getCycleNum () != last_cycle ) {
-    vt=(_mllastInsVol + _mllastInsVol)/2;
-    if (vt<alarm_vt)  isalarmvt_on=1;
-    else              isalarmvt_on=0;
-    if ( last_pressure_max > alarm_max_pressure + 1 ) {
-    if ( last_pressure_min < alarm_peep_pressure - 1) {
-        if (!isalarmvt_on)  alarm_state = 3;
-        else                alarm_state = 13;
-      } else {
-        if (!isalarmvt_on)  alarm_state = 2;
-        else                alarm_state = 12;
-      }
-    } else {
-      if ( last_pressure_min < alarm_peep_pressure - 1 ) {
-        if (!isalarmvt_on) alarm_state = 1;
-        else               alarm_state = 11;
-      } else {
-        if (!isalarmvt_on)  alarm_state = 0;
-        else                alarm_state = 10;
-      }
-    }
+        if (_flux > 0) {
+          _mlInsVol += flow_f * float((millis() - lastReadSensor)) * 0.001; //flux in l and time in msec, results in ml
+        } else {
+          _mlExsVol -= flow_f * float((millis() - lastReadSensor)) * 0.001; //flux in l and time in msec, results in ml
+        }
     
-    last_cycle = ventilation->getCycleNum();
-
-    display_lcd();
-    update_display = true;
-    last_update_display = time;
-
-#ifdef DEBUG_PID
-    if (vent_mode = VENTMODE_PCL) {
-      float err = (float)(pressure_max - options.peakInspiratoryPressure) / options.peakInspiratoryPressure;
-      errpid_prom += fabs(err);
-      errpid_prom_sig += err;
-      Serial.println("Error PID: "); Serial.print(err, 5);
-      ciclo_errpid++;
-
-      if (ciclo_errpid > 4) {
-        errpid_prom /= 5.; errpid_prom_sig /= 5.;
-        Serial.print(options.peakInspiratoryPressure); Serial.print(" "); Serial.print(errpid_prom, 5); Serial.print(" "); Serial.println(errpid_prom_sig, 5);
-        errpid_prom = 0.; errpid_prom_sig = 0.;
-        ciclo_errpid = 0;
+        lastReadSensor = millis();
+    
+        //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
+        if (pressure_p > pressure_max) {
+          pressure_max = pressure_p;
+        }
+        if (pressure_p < pressure_min) {
+          pressure_min = pressure_p;
+        }
+      }//Read Sensor
+    
+      if (alarm_vt) {
+        
       }
-    }
-#endif
-    if (digitalRead(PIN_POWEROFF)) {
-          digitalWrite(YELLOW_LED,HIGH);
-          //Serial.println("Yellow high");
-    } else {
-          digitalWrite(YELLOW_LED,LOW);
-      }
-  }//change cycle
-
-  if (display_needs_update) {
-
-    display_lcd();
-    display_needs_update = false;
-  }
-
-  if ( update_options ) {
-    ventilation->change_config(options);
-    update_options = false;
-    //show_changed_options=true;
-  }//
-
-  if ( millis () - last_vent_time > TIME_BASE ) {
-    ventilation -> update();
-  }
-
-  //HERE changed_options flag is not updating until cycle hcanges
-  if (show_changed_options && ((millis() - last_update_display) > time_update_display) ) {
-    display_lcd();  //WITHOUT CLEAR!
-    last_update_display = millis();
-    show_changed_options = false;
-  }
-
-    if (alarm_state > 0) {
-
-          if (!buzzmuted) {
-              if (millis() > timebuzz + TIME_BUZZER) {
-                  timebuzz=millis();
-                  isbuzzeron=!isbuzzeron;
-                  if (isbuzzeron){
-                      //tone(PIN_BUZZER,440);
-                      digitalWrite(PIN_BUZZER,BUZZER_LOW);
-                  }   
-                  else {
-                      //noTone(PIN_BUZZER);
-                      digitalWrite(PIN_BUZZER,!BUZZER_LOW);
-                  }
-              }
-          } else {  //buzz muted
-              digitalWrite(PIN_BUZZER,!BUZZER_LOW);
-              //noTone(PIN_BUZZER);
+      if ( ventilation -> getCycleNum () != last_cycle ) {
+        vt=(_mllastInsVol + _mllastInsVol)/2;
+        if (vt<alarm_vt)  isalarmvt_on=1;
+        else              isalarmvt_on=0;
+        if ( last_pressure_max > alarm_max_pressure + 1 ) {
+        if ( last_pressure_min < alarm_peep_pressure - 1) {
+            if (!isalarmvt_on)  alarm_state = 3;
+            else                alarm_state = 13;
+          } else {
+            if (!isalarmvt_on)  alarm_state = 2;
+            else                alarm_state = 12;
           }
-    } else {//state > 0
-      //noTone(PIN_BUZZER);
-      digitalWrite(PIN_BUZZER,!BUZZER_LOW);
-      isbuzzeron=true;        //Inverted logic
-    }
+        } else {
+          if ( last_pressure_min < alarm_peep_pressure - 1 ) {
+            if (!isalarmvt_on) alarm_state = 1;
+            else               alarm_state = 11;
+          } else {
+            if (!isalarmvt_on)  alarm_state = 0;
+            else                alarm_state = 10;
+          }
+        }
+        
+        last_cycle = ventilation->getCycleNum();
+    
+        display_lcd();
+        update_display = true;
+        last_update_display = time;
+    
+    #ifdef DEBUG_PID
+        if (vent_mode = VENTMODE_PCL) {
+          float err = (float)(pressure_max - options.peakInspiratoryPressure) / options.peakInspiratoryPressure;
+          errpid_prom += fabs(err);
+          errpid_prom_sig += err;
+          Serial.println("Error PID: "); Serial.print(err, 5);
+          ciclo_errpid++;
+    
+          if (ciclo_errpid > 4) {
+            errpid_prom /= 5.; errpid_prom_sig /= 5.;
+            Serial.print(options.peakInspiratoryPressure); Serial.print(" "); Serial.print(errpid_prom, 5); Serial.print(" "); Serial.println(errpid_prom_sig, 5);
+            errpid_prom = 0.; errpid_prom_sig = 0.;
+            ciclo_errpid = 0;
+          }
+        }
+    #endif
+        if (digitalRead(PIN_POWEROFF)) {
+              digitalWrite(YELLOW_LED,HIGH);
+              //Serial.println("Yellow high");
+        } else {
+              digitalWrite(YELLOW_LED,LOW);
+          }
+      }//change cycle
+    
+      if (display_needs_update) {
+    
+        display_lcd();
+        display_needs_update = false;
+      }
+    
+      if ( update_options ) {
+        ventilation->change_config(options);
+        update_options = false;
+        //show_changed_options=true;
+      }//
+    
+      if ( millis () - last_vent_time > TIME_BASE ) {
+        ventilation -> update();
+      }
+    
+      //HERE changed_options flag is not updating until cycle hcanges
+      if (show_changed_options && ((millis() - last_update_display) > time_update_display) ) {
+        display_lcd();  //WITHOUT CLEAR!
+        last_update_display = millis();
+        show_changed_options = false;
+      }
+    
+        if (alarm_state > 0) {
+    
+              if (!buzzmuted) {
+                  if (millis() > timebuzz + TIME_BUZZER) {
+                      timebuzz=millis();
+                      isbuzzeron=!isbuzzeron;
+                      if (isbuzzeron){
+                          digitalWrite(PIN_BUZZER,BUZZER_LOW);
+                      }   
+                      else {
+                          digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+                      }
+                  }
+              } else {  //buzz muted
+                  digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+              }
+        } else {//state > 0
+          digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+          isbuzzeron=true;        //Inverted logic
+        }
 
+  //! sleep_mode
+  } else { 
+      if (put_to_sleep){
+          tft.fillScreen(ILI9341_BLACK);
+          digitalWrite(PIN_LCD_EN,HIGH);
+          put_to_sleep=false;  
+          print_bat_time=time;
+          print_bat();
+      }
+      if (time > print_bat_time + 5000){
+        print_bat();
+        print_bat_time=time;
+      }
+      time = millis();
+      check_bck_state();
+  }
+  
 
 }//LOOP
 

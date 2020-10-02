@@ -128,9 +128,11 @@ class VentilationOptions_t {
 //general variables
 extern byte vent_mode;
 extern bool send_data;
+extern bool sleep_mode;
 
 extern byte alarm_state;
 
+extern bool put_to_sleep;
 //PID LIMITS
 extern bool change_pid_params;
 extern unsigned long time;

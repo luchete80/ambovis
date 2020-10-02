@@ -1,0 +1,12 @@
+
+
+Topic: Low power consumption (0.1 uA) but wake up on keypad press (Read 21718 times)
+https://forum.arduino.cc/index.php/topic,132947.0.html
+
+
+https://forum.arduino.cc/index.php?topic=364945.0
+Con interrupt
+
+
+ESTE ES CON TRANSISTOR
+https://forum.arduino.cc/index.php?topic=508310.0
