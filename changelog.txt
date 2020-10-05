@@ -78,6 +78,22 @@ v1.0.10
 - Refresco al bajar un digito en variables
 
 
+- v-1.1.1
+Bugs Menu
+- Cursor posicion reparada en Menu PID opciones  "D" y "d" (no se mostraba) (L)
+- Valores por abajo de 100 ("p,i,d") del menu PID se muestran correctamente (L)
+*********************
+- Silenciado de buzzers en sleep
+
+PENDIENTES
+- Guardado en memoria del valor "D,d,i,I" (no se guaradn)
+
+
+
+
+
+- CORRIDA 
+
 
 /////////////
 // botones //

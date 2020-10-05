@@ -15,8 +15,6 @@
 #include "src/Pressure_Sensor/Pressure_Sensor.h"  //LUCIANO: MPX5050DP
 #include <EEPROM.h>
 
-#include<avr/sleep.h>
-
 bool init_verror;
 byte Cdyn;
 bool autopid;
@@ -614,6 +612,7 @@ void loop() {
           put_to_sleep=false;  
           print_bat_time=time;
           print_bat();
+          digitalWrite(PIN_BUZZER,!BUZZER_LOW); //Buzzer inverted
       }
       if (time > print_bat_time + 5000){
         print_bat();

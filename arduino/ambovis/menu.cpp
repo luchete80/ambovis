@@ -529,13 +529,13 @@ void clear_n_sel(int menu){
           case 8: 
             lcd_selxy(6,2);break;  
           case 9: 
-            lcd_selxy(13,3);break;              
+            lcd_selxy(12,2);break;              
           case 10: 
             lcd_selxy(0,3);break;  
           case 11: 
             lcd_selxy(6,3);break;              
           case 12: 
-            lcd_selxy(13,3);break;  
+            lcd_selxy(12,3);break;  
       }
     }//menu number 
     else if (menu==3) {  
@@ -643,10 +643,10 @@ void display_lcd ( ) {
     writeLine(3, "C:", 10);
     writeLine(3, String(last_cycle), 12);
   } else if (menu_number ==2 ){//PID
-    lcd_clearxy(3,0,2); lcd_clearxy(9,0,3);lcd_clearxy(15,0,3);
-    lcd_clearxy(3,1,2); lcd_clearxy(9,1,3);lcd_clearxy(15,1,3);
-    lcd_clearxy(3,2,3); 
-    lcd_clearxy(3,3,3);
+
+    for (int i=0;i<3;i++){
+        lcd_clearxy(3,i,3); lcd_clearxy(9,i,3);lcd_clearxy(15,i,3);
+      }
         
     writeLine(0, "c:" + String(min_cd), 1); 
     writeLine(1, "C:" + String(max_cd), 1); 
