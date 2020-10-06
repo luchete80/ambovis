@@ -85,8 +85,21 @@ Bugs Menu
 *********************
 - Silenciado de buzzers en sleep
 
-PENDIENTES
-- Guardado en memoria del valor "D,d,i,I" (no se guaradn)
+-v-1.1.2
+Bugs Menu
+- Cursor y valor de ON/OFF en opcion filtro "F" menu nro 2  
+- Error en seleccion y guardado de constantes PID min y max (menu 3)
+- El menu principal (1) ahora tiene solo 4 selecciones validas (antes segun el modo tenia la seleccion de vol o pip anulada)
+- Orientadas leyendas de PIP en ambos modos menu ppak
+- Agregado "PIP: -" en caso VCV para mostrar que no es seleccionable 
+- Se saca nivel de tension del tft
+*********
+- Corregidos caracteres extraños menu luego sleep
+- Corregida leyenda nivel de bat (Superpuesto "%" en tft)
+
+
+
+
 
 
 
