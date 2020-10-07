@@ -389,6 +389,7 @@ void loop() {
       lcd.clear();
       init_display();
       display_lcd();
+      tft.fillScreen(ILI9341_BLACK);
       wake_up=false;
       }
       State state = ventilation->getState();
