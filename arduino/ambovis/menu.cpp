@@ -142,7 +142,8 @@ void check_bck_state(){
             sleep_mode=true;
             put_to_sleep=true;
         } else {
-           sleep_mode=false;   
+           sleep_mode=false;
+           wake_up=true;   
         }
         change_sleep=true;
         Serial.print("Sleep Mode");Serial.println(sleep_mode);
@@ -178,8 +179,7 @@ void check_encoder ( ) {
       if (!isitem_sel) {
         curr_sel=oldEncPos=encoderPos=old_curr_sel;
       }
-      if (vent_mode==VENTMODE_PCL && curr_sel==4 && menu_number == 0) curr_sel++; //Not selecting pip in VCL 
-            
+                  
       if (isitem_sel) {
           switch (curr_sel){
             case 1: 
@@ -229,9 +229,13 @@ void check_encoder ( ) {
             break;
             case 4: 
                 if ( menu_number == 0 ) {
-                    if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
-                      encoderPos=oldEncPos=options.tidalVolume;
-                      min_sel=200;max_sel=800;
+                    if ( vent_mode==VENTMODE_PCL){
+ //                     encoderPos=oldEncPos=options.tidalVolume;
+ //                     min_sel=200;max_sel=800;
+                        encoderPos=oldEncPos=options.peakInspiratoryPressure;
+                        min_sel=15;max_sel=30;
+                        Serial.print("pip: ");Serial.println(options.peakInspiratoryPressure);
+                        Serial.print("encoderpos: ");Serial.println(encoderPos);
                     } else {//Manual
                       encoderPos=oldEncPos=options.percVolume;
                       min_sel=40;max_sel=100;            
@@ -249,8 +253,8 @@ void check_encoder ( ) {
                 break;
                   case 5: 
                 if ( menu_number == 0 ) {
-                    encoderPos=oldEncPos=options.peakInspiratoryPressure;
-                    min_sel=15;max_sel=30;
+//                    encoderPos=oldEncPos=options.peakInspiratoryPressure;
+//                    min_sel=15;max_sel=30;
                 } else if ( menu_number == 1 ) {//menu 0
                       min_sel=0;max_sel=1; 
                 } else if ( menu_number == 2 ){
@@ -263,7 +267,8 @@ void check_encoder ( ) {
                 break;
                 case 6:
                     if ( menu_number == 1 ){
-                        encoderPos=filter;
+                        if (filter) encoderPos=1;
+                        else        encoderPos=0;
                         min_sel=0;max_sel=1;
                     } else if ( menu_number == 2 ){
                         encoderPos=max_accel/10;
@@ -278,31 +283,31 @@ void check_encoder ( ) {
                     break;
                 case 8:
                     if ( menu_number == 2 ){
-                        encoderPos=max_pidk/10;
+                        encoderPos=byte(min_pidi/2);
                         min_sel=2;max_sel=200;
                     }                
                 break;
                 case 9:
                     if ( menu_number == 2 ){
-                        encoderPos=min_pidi/2;
+                        encoderPos=byte(min_pidd/2);
                         min_sel=2;max_sel=200;
                     }
                     break;
                 case 10:
                     if ( menu_number == 2 ){
-                        encoderPos=max_pidi/2;
+                        encoderPos=max_pidk/10;
                         min_sel=2;max_sel=200;
                     }                
                 break;
                 case 11:
                     if ( menu_number == 2 ){
-                        encoderPos=min_pidd/2;
+                        encoderPos=byte(max_pidi/2);
                         min_sel=2;max_sel=200;
                     }
                     break;
                 case 12:
                     if ( menu_number == 2 ){
-                        encoderPos=max_pidd/2;
+                        encoderPos=byte(max_pidd/2);
                         min_sel=2;max_sel=200;
                     }                
                 break;
@@ -321,7 +326,7 @@ void check_encoder ( ) {
           encoderPos=oldEncPos=curr_sel;
 
           if ( menu_number == 0 ) {
-              if (encoderPos > 5) {
+              if (encoderPos > 4) {
                   encoderPos=1;
                   menu_number+=1;
               } else if ( encoderPos < 1) {
@@ -333,7 +338,7 @@ void check_encoder ( ) {
                   encoderPos=1;
                   menu_number=2;         
                } else if ( encoderPos < 1) {
-                  encoderPos=5;
+                  encoderPos=4;
                   menu_number=0;
               }
           } else if (menu_number == 2) {
@@ -396,13 +401,12 @@ void check_encoder ( ) {
                 break;
               case 4:
                 if ( menu_number == 0 ) {
-                    if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL){
-                      options.tidalVolume = encoderPos;
-                      #ifdef DEBUG_UPDATE
-                      Serial.print("tidal ");Serial.print(options.tidalVolume);Serial.print("encoder pos");Serial.print(encoderPos);
-                      #endif
+                    if (vent_mode==VENTMODE_PCL){
+                      options.peakInspiratoryPressure = encoderPos;
+                        Serial.print("pip: ");Serial.println(options.peakInspiratoryPressure);
+                        Serial.print("encoderpos: ");Serial.println(encoderPos);
                       } else { //manual
-                      options.percVolume =encoderPos;
+                      options.percVolume = encoderPos;
                     }
                 } else if (menu_number == 1) {
                     p_trim=encoderPos;
@@ -412,7 +416,7 @@ void check_encoder ( ) {
                 break;
               case 5:
                 if ( menu_number == 0 ) {
-                    options.peakInspiratoryPressure = encoderPos;
+                    //options.peakInspiratoryPressure = encoderPos;
                 } else if (menu_number == 1) {
                     autopid=encoderPos;
                 } else if (menu_number == 2) {
@@ -423,7 +427,8 @@ void check_encoder ( ) {
                 if ( menu_number == 0 )
                   options.peakEspiratoryPressure = encoderPos;
                 else if ( menu_number == 1 )  //There is not 6 in menu 1
-                    filter  = encoderPos;
+                    if (encoderPos==1) filter  = true;
+                    else                filter=false;
                 else if ( menu_number == 2 )  //There is not 6 in menu 1
                     max_accel  = int((float)encoderPos*10.);
                 break;
@@ -450,7 +455,9 @@ void check_encoder ( ) {
                 break;
             case 11:
                 if ( menu_number == 2 ){
-                    max_pidi=encoderPos*2;
+                    max_pidi=int(encoderPos)*2;
+                    Serial.print("Max pid i:");Serial.println(max_pidi);
+                    Serial.print("Encoder pos:");Serial.println(encoderPos);
                 }
                 break;
             case 12:
@@ -484,9 +491,10 @@ void clear_n_sel(int menu){
               case 3:
                 lcd_selxy(0,2);break;
               case 4: 
-                lcd_selxy(9,0);break;
-              case 5: 
-                lcd_selxy(8,1);break;
+                if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL)  lcd_selxy(8,1);//pcl
+                else                                                      lcd_selxy(9,0);
+//              case 5: 
+//                lcd_selxy(8,1);break;
             }
      } else if (menu==1){  
       lcd_clearxy(0,0);
@@ -563,14 +571,14 @@ void display_lcd ( ) {
         lcd.clear();        
   clear_n_sel(menu_number);
   if (menu_number==0) {  
-    lcd_clearxy(5,1,3); lcd_clearxy(12,0,4);
-    lcd_clearxy(5,2,2); lcd_clearxy(14,1,2);
-                        lcd_clearxy(13,2,2);
+    lcd_clearxy(12,0,4);
+    lcd_clearxy(5,1,3); lcd_clearxy(14,1,2);
+    lcd_clearxy(5,2,2); lcd_clearxy(13,2,2);
   
     switch (vent_mode){
       case VENTMODE_VCL:
         writeLine(0, "MOD:VCV", 1); writeLine(0, "V:" + String(options.tidalVolume), 10);    
-        writeLine(1, "PIP : ", 10);
+        writeLine(1, "PIP: -", 9);
       break;
       case VENTMODE_PCL:
         writeLine(0, "MOD:PCV", 1); 
@@ -580,7 +588,7 @@ void display_lcd ( ) {
       case VENTMODE_MAN:
         writeLine(0, "MOD:VCV", 1); 
         writeLine(0, "V:" + String(options.percVolume)+"%", 10);    
-        writeLine(1, "PIP : ", 10);
+        writeLine(1, "PIP: -", 9);
       break;
     }
      
@@ -632,7 +640,7 @@ void display_lcd ( ) {
     dtostrf((float(p_trim-100)), 2, 0, tempstr);
     writeLine(2, "TRIM:" + String(tempstr) + "e-3", 1); 
 
-    writeLine(2, " F:" , 12);
+    writeLine(2, "F:" , 13);
     if (filter)     writeLine(2, "ON", 15);
     else            writeLine(2, "OFF", 15);    
          

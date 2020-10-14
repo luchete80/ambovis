@@ -20,7 +20,7 @@ byte Cdyn;
 bool autopid;
 bool filter;
 bool sleep_mode;
-bool put_to_sleep;
+bool put_to_sleep,wake_up;
 unsigned long print_bat_time;
 
 byte _back[8] = {
@@ -261,7 +261,7 @@ void setup() {
   digitalWrite(PIN_EN, LOW);
 
   writeLine(1, "RespirAR FIUBA", 4);
-  writeLine(2, "v1.1.0", 8);
+  writeLine(2, "v1.1.1", 8);
   
   p_dpt0 = 0;
   ads.begin();
@@ -373,6 +373,7 @@ void setup() {
 
     sleep_mode=false;
     put_to_sleep=false;
+    wake_up=false;
 }
 
 
@@ -384,6 +385,13 @@ void loop() {
 
 
   if (!sleep_mode){
+    if (wake_up){
+      lcd.clear();
+      init_display();
+      display_lcd();
+    tft.fillScreen(ILI9341_BLACK);
+      wake_up=false;
+      }
       State state = ventilation->getState();
       check_encoder();
     
@@ -613,6 +621,7 @@ void loop() {
           print_bat_time=time;
           print_bat();
           digitalWrite(PIN_BUZZER,!BUZZER_LOW); //Buzzer inverted
+          lcd.clear();
       }
       if (time > print_bat_time + 5000){
         print_bat();

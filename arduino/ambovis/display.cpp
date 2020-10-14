@@ -159,15 +159,15 @@ void print_bat(){
     dtostrf(level_perc, 2, 0, buffer);
     //dtostrf(level, 2, 1, buffer);
     //Serial.print("Bat level: ");Serial.println(level);
-    tft.setCursor(150, 260);tft.println("Bat:");
-    tft.setCursor(200, 260);tft.println(buffer);
+    tft.setCursor(130, 260);tft.println("Bat:");
+    tft.setCursor(180, 260);tft.println(buffer);
     tft.setCursor(220, 260);tft.println("%");
 
     dtostrf(level, 1, 2, buffer);
     //Temporary
     //Serial.print("Bat level: ");Serial.println(level);
-    tft.setCursor(150, 280);tft.println("Vo:");
-    tft.setCursor(180, 280);tft.println(buffer);
+    //tft.setCursor(150, 280);tft.println("Vo:");
+    //tft.setCursor(180, 280);tft.println(buffer);
 
 }
 void print_vols(){
