@@ -196,9 +196,9 @@ void MechVentilation :: update ( void )
         #endif
         
         //adding_vol=true;
-        #ifdef DEBUG_UPDATE
+        //#ifdef DEBUG_UPDATE
           Serial.println("INSUFLACION ");        
-        #endif
+        //#endif
   
         last_pressure_max=pressure_max;
         last_pressure_min=pressure_min;
@@ -322,6 +322,7 @@ void MechVentilation :: update ( void )
     break;
     case State_Insufflation:
     {
+        Serial.print("tiempo insp: ");Serial.println(_msecTimerCnt);
         /* Stepper control: set end position */
         if (vent_mode==VENTMODE_VCL && _mlInsVol>_tidalVol){
             _stepper->setTargetPositionToStop();
@@ -344,6 +345,8 @@ void MechVentilation :: update ( void )
                 #endif
             }
             _setState(Init_Exsufflation);
+            //Serial.print("_msecTimerCnt: ");Serial.println(_msecTimerCnt);
+            //Serial.print("TIEMPO: ");Serial.println(millis();
             if (_recruitmentMode) {
                 deactivateRecruitment();
             }

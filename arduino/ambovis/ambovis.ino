@@ -431,6 +431,7 @@ void loop() {
       if ( time > lastShowSensor + TIME_SHOW ) {
     
           lastShowSensor=time; 
+          //Serial.println(time);
 //           Serial.print(int(cycle_pos));Serial.print(",");
 //    //	     Serial.println(int(pressure_p));//Serial.print(",");
 //    //     //Serial.println(analogRead(A0));
@@ -598,17 +599,17 @@ void loop() {
                       timebuzz=millis();
                       isbuzzeron=!isbuzzeron;
                       if (isbuzzeron){
-                          digitalWrite(PIN_BUZZER,BUZZER_LOW);
+                          //digitalWrite(PIN_BUZZER,BUZZER_LOW);
                       }   
                       else {
-                          digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+                          //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
                       }
                   }
               } else {  //buzz muted
-                  digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+                  //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
               }
         } else {//state > 0
-          digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+          //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
           isbuzzeron=true;        //Inverted logic
         }
 
@@ -620,7 +621,7 @@ void loop() {
           put_to_sleep=false;  
           print_bat_time=time;
           print_bat();
-          digitalWrite(PIN_BUZZER,!BUZZER_LOW); //Buzzer inverted
+          //digitalWrite(PIN_BUZZER,!BUZZER_LOW); //Buzzer inverted
           lcd.clear();
       }
       if (time > print_bat_time + 5000){
