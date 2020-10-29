@@ -165,24 +165,12 @@ void MechVentilation :: update ( void )
     extern volatile byte debugMsgCounter;
     #endif
 
-  _msecTimerCnt=(unsigned long)(millis()-_msecTimerStartCycle);
-  
-  cycle_pos=byte( (float) ( (_msecTimerCnt)/(float)timeoutCycle * 127.0f) );
-  int extra_time=0;
-  if (_currentState == State_Exsufflation) extra_time=_timeoutIns;
-  cycle_pos=byte( (float) ( (_msecTimerCnt+(float)extra_time)/(float)timeoutCycle * 127.0f) );
-
-//    if (pressures.state != SensorStateOK)
-//    {                                  // Sensor error detected: return to zero position and continue from there
-//        _sensor_error_detected = true; //An error was detected in sensors
-//        /* Status update, for this time */
-//        // TODO: SAVE PREVIOUS CYCLE IN MEMORY AND RERUN IT
-//        Serial.println("fail sensor");
-//        _setState(State_Exsufflation);
-//    }
-//    else {
-//        _sensor_error_detected = false; //clear flag
-//    }
+    _msecTimerCnt=(unsigned long)(millis()-_msecTimerStartCycle);
+    
+    cycle_pos=byte( (float) ( (_msecTimerCnt)/(float)timeoutCycle * 127.0f) );
+    int extra_time=0;
+    if (_currentState == State_Exsufflation) extra_time=_timeoutIns;
+    cycle_pos=byte( (float) ( (_msecTimerCnt+(float)extra_time)/(float)timeoutCycle * 127.0f) );
 
     switch (_currentState)
     {
@@ -204,8 +192,6 @@ void MechVentilation :: update ( void )
         last_pressure_min=pressure_min;
         pressure_max=0;
         pressure_min=60;
-
-        // Close Solenoid Valve
 
         totalCyclesInThisState = (_timeoutIns) / TIME_BASE;
 
@@ -437,15 +423,12 @@ void MechVentilation :: update ( void )
 
         /* Stepper control*/
         #ifdef ACCEL_STEPPER
-
+        _stepper->setSpeed(STEPPER_SPEED_EXSUFF);
+        _stepper->setAcceleration(STEPPER_ACC_EXSUFFLATION);
         #else
         _stepper->setSpeedInStepsPerSecond(STEPPER_SPEED_EXSUFF);
         _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_EXSUFFLATION);
-        //LUCIANO
-        //_stepper->setTargetPositionInSteps(
-          //  STEPPER_DIR * (STEPPER_LOWEST_POSITION));
-          _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
-        //---------------------LUCIANO
+        _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
 
           #endif
           

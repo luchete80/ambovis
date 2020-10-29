@@ -621,8 +621,11 @@ void display_lcd ( ) {
     
     dtostrf(_timeoutIns*0.001, 1, 1, tempstr);
     writeLine(3, "I:" + String(tempstr), 9); 
-    dtostrf(_timeoutEsp*0.001, 1, 1, tempstr);
-    writeLine(3, "E:" + String(tempstr), 15); 
+    //dtostrf(_timeoutEsp*0.001, 1, 1, tempstr);
+    //writeLine(3, "E:" + String(tempstr), 15); 
+    dtostrf(ventilation->getCycleTime()*0.001, 1, 1, tempstr);
+    writeLine(3, "i:" + String(tempstr), 15); 
+   
       
   } else if (menu_number ==1 ) {//OTHER SETTINGS
                         lcd_clearxy(12,0,8);

@@ -79,6 +79,7 @@ public:
     void activateRecruitment(void);
     void deactivateRecruitment(void);
     byte _mode;
+    unsigned long getCycleTime(){return this->_msecTimerCnt;}
     /**
      * getters
      */
@@ -223,4 +224,5 @@ extern int max_pidd,min_pidd;
 
 extern float f_acc;extern byte f_acc_b;
 extern byte p_acc;
+extern MechVentilation * ventilation;
 #endif /* INC_MECHANICAL_VENTILATION_H */

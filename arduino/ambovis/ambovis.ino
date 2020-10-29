@@ -22,7 +22,7 @@ bool filter;
 bool sleep_mode;
 bool put_to_sleep,wake_up;
 unsigned long print_bat_time;
-
+unsigned long _msecTimerCnt=0;
 byte _back[8] = {
   0b00100,
   0b01000,
