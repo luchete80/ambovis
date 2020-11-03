@@ -601,9 +601,9 @@ void display_lcd ( ) {
   
     writeLine(2, String(options.percInspEsp), 6);
   
-    #ifdef DEBUG_UPDATE
-      Serial.print("Presion mostrada: ");Serial.println(pressure_max);
-    #endif
+//    #ifdef DEBUG_UPDATE
+//      Serial.print("Presion mostrada: ");Serial.println(pressure_max);
+//    #endif
     dtostrf(last_pressure_max, 2, 0, tempstr);
     writeLine(1, String(tempstr), 16);  
     
