@@ -29,6 +29,36 @@ byte dpip_b;
 float f_acc;byte f_acc_b;
 byte  p_acc;
 
+long initial_homing=-1;
+void MechVentilation ::goHome(){
+
+  #ifdef ACCEL_STEPPER
+    Serial.print("Stepper is Homing . . . . . . . . . . . ");
+
+  while (digitalRead(PIN_ENDSTOP)) {  // Make the Stepper move CCW until the switch is activated
+    _stepper->moveTo(initial_homing);  // Set the position to move to
+    initial_homing--;  // Decrease by 1 for next move if needed
+    _stepper->run();  // Start moving the stepper
+    delay(5);
+  }
+
+  _stepper->setCurrentPosition(0);  // Set the current position as zero for now
+  _stepper->setMaxSpeed(100.0);      // Set Max Speed of Stepper (Slower to get better accuracy)
+  _stepper->setAcceleration(100.0);  // Set Acceleration of Stepper
+  initial_homing = 1;
+
+  while (!digitalRead(PIN_ENDSTOP)) { // Make the Stepper move CW until the switch is deactivated
+    _stepper->moveTo(initial_homing);
+    _stepper->run();
+    initial_homing++;
+    delay(5);
+  }
+
+  _stepper->setCurrentPosition(0);
+  Serial.println("Homing Completed");
+  #endif
+}
+
 MechVentilation::MechVentilation(
         #ifdef ACCEL_STEPPER
         AccelStepper *stepper,
@@ -172,146 +202,166 @@ void MechVentilation :: update ( void )
     if (_currentState == State_Exsufflation) extra_time=_timeoutIns;
     cycle_pos=byte( (float) ( (_msecTimerCnt+(float)extra_time)/(float)timeoutCycle * 127.0f) );
 
-    switch (_currentState)
-    {
-    case Init_Insufflation:
-    {
-        //Filter vars
-        #ifdef FLUX_FILTER
-        flux_filter_time=millis();
-        flux_count=0;
-        //flux_sum=0;
-        #endif
-        
-        //adding_vol=true;
-        //#ifdef DEBUG_UPDATE
-          Serial.println("INSUFLACION ");        
-        //#endif
-  
-        last_pressure_max=pressure_max;
-        last_pressure_min=pressure_min;
-        pressure_max=0;
-        pressure_min=60;
-
-        totalCyclesInThisState = (_timeoutIns) / TIME_BASE;
-
-        _msecTimerStartCycle=millis();  //Luciano
-        
-        for (int i=0;i<2;i++) Cdyn_pass[i]=Cdyn_pass[i+1];
-        Cdyn_pass[2]=_mllastInsVol/(last_pressure_max-last_pressure_min);
-        Cdyn=(Cdyn_pass[0]+Cdyn_pass[1]+Cdyn_pass[2])/3.;
-        _mllastInsVol=int(_mlInsVol);
-        _mllastExsVol=int(fabs(_mlExsVol));
-        
-        //_mlInsVol2=0;
-        _mlInsVol=0.;
-        _mlExsVol=0.;
-        
-        wait_NoMove=false;
-        /* Stepper control: set acceleration and end-position */
-
-        #ifdef ACCEL_STEPPER
-        _stepper->setSpeed(STEPPER_SPEED_DEFAULT);
-        _stepper->moveTo(STEPPER_HIGHEST_POSITION);
-        #else
-        // Note: this can only be called when the motor is stopped
-        //IMPORTANT FROM https://github.com/Stan-Reifel/FlexyStepper/blob/master/Documentation.md
-        _stepper->setSpeedInStepsPerSecond(STEPPER_SPEED_DEFAULT);
-        _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_INSUFFLATION);
-
-        if (vent_mode!=VENTMODE_MAN)  //VCL && PCL
-          _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
-        else { //MANUAL MODE
-          _stepper->setTargetPositionInSteps(int (STEPPER_HIGHEST_POSITION*(float)_percVol/100.));
-          _stepperSpeed=STEPPER_HIGHEST_POSITION*(float(_percVol)*0.01)/( (float)(_timeoutIns*0.001) * DEFAULT_FRAC_CYCLE_VCL_INSUFF);//En [ml/s]
-        #ifdef DEBUG_UPDATE
-          Serial.print("Manual mode Timeout ins , speed: ");Serial.print(_timeoutIns);Serial.print(" ");Serial.println(_stepperSpeed);
-        #endif
-          _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCEL_MAX);
-          if (_stepperSpeed>STEPPER_SPEED_MAX)
-            _stepperSpeed=STEPPER_SPEED_MAX;
-            _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
-        } 
-        #endif
-        
-        _pid->reset();
-
-#if DEBUG_STATE_MACHINE
-        debugMsg[debugMsgCounter++] = "State: InitInsuflation at " + String(millis());
-#endif
-
-        /* Status update, reset timer, for next time, and reset PID integrator to zero */
-        _setState(State_Insufflation);
-
-        currentTime = millis();
-        display_needs_update=true;
+    switch (_currentState) {
+        case Init_Insufflation:
+        {
+            //Filter vars
+            #ifdef FLUX_FILTER
+            flux_filter_time=millis();
+            flux_count=0;
+            //flux_sum=0;
+            #endif
+            
+            //adding_vol=true;
+            #ifdef DEBUG_UPDATE
+              Serial.println("INSUFLACION ");        
+            #endif
       
-      if (vent_mode==VENTMODE_PCL){
-      if (autopid) {
-      
-          if (change_pid_params) {
-                speed_m =(float)STEPPER_MICROSTEPS*float(max_speed-min_speed)/float(max_cd-min_cd);
-                speed_b =(float)STEPPER_MICROSTEPS*(float)max_speed-speed_m*(float)max_cd;
-                accel_m =(float)STEPPER_MICROSTEPS*float(max_accel-min_accel)/float(max_cd-min_cd);
-                accel_b =(float)STEPPER_MICROSTEPS*(float)max_accel-accel_m*(float)max_cd;
-                pidk_m  =(float)(max_pidk-min_pidk)/float(max_cd-min_cd);
-                pidk_b  =(float)max_pidk - pidk_m*(float)max_cd;
+            last_pressure_max=pressure_max;
+            last_pressure_min=pressure_min;
+            pressure_max=0;
+            pressure_min=60;
+    
+            totalCyclesInThisState = (_timeoutIns) / TIME_BASE;
+    
+            _msecTimerStartCycle=millis();  //Luciano
+            
+            for (int i=0;i<2;i++) Cdyn_pass[i]=Cdyn_pass[i+1];
+            Cdyn_pass[2]=_mllastInsVol/(last_pressure_max-last_pressure_min);
+            Cdyn=(Cdyn_pass[0]+Cdyn_pass[1]+Cdyn_pass[2])/3.;
+            _mllastInsVol=int(_mlInsVol);
+            _mllastExsVol=int(fabs(_mlExsVol));
+            
+            //_mlInsVol2=0;
+            _mlInsVol=0.;
+            _mlExsVol=0.;
+            
+            wait_NoMove=false;
+            /* Stepper control: set acceleration and end-position */
+    
+            #ifdef ACCEL_STEPPER
+            _stepper->setSpeed(STEPPER_SPEED_DEFAULT);
+            _stepper->setAcceleration(STEPPER_ACC_INSUFFLATION);
+    
+            if (vent_mode!=VENTMODE_MAN)  //VCL && PCL
+              _stepper->moveTo(STEPPER_HIGHEST_POSITION);
+            else { //MANUAL MODE
+                _stepper->moveTo(int (STEPPER_HIGHEST_POSITION*(float)_percVol/100.));
                 
-                pidi_m  =(float)(max_pidi-min_pidi)/float(max_cd-min_cd);
-                pidi_b  =(float)max_pidi - pidi_m*(float)max_cd;
-                pidd_m  =(float)(max_pidd-min_pidd)/float(max_cd-min_cd);
-                pidd_b  =(float)max_pidd - pidd_m*(float)max_cd;
-                //cdyn_m=
-                // max_acc,min_acc,max_speed,min_speed,max_cd,min_cd
-                change_pid_params=false;
-                //Serial.print("Speed m b:"); Serial.print(speed_m);Serial.print(" ");Serial.println(speed_b);
-                //Serial.print("Accel m b:"); Serial.print(accel_m);Serial.print(" ");Serial.println(accel_b);
-                //Serial.print("pidk m b:"); Serial.print(pidk_m);Serial.print(" ");Serial.println(pidk_b);
+                _stepperSpeed=STEPPER_HIGHEST_POSITION*(float(_percVol)*0.01)/( (float)(_timeoutIns*0.001) * DEFAULT_FRAC_CYCLE_VCL_INSUFF);//En [ml/s]
+              #ifdef DEBUG_UPDATE
+                Serial.print("Manual mode Timeout ins , speed: ");Serial.print(_timeoutIns);Serial.print(" ");Serial.println(_stepperSpeed);
+              #endif
+                _stepper->setAcceleration(STEPPER_ACCEL_MAX);
+                if (_stepperSpeed>STEPPER_SPEED_MAX)
+                  _stepperSpeed=STEPPER_SPEED_MAX;
+                  _stepper->setSpeed(_stepperSpeed);
+            }//manual 
+            #else
+            // Note: this can only be called when the motor is stopped
+            //IMPORTANT FROM https://github.com/Stan-Reifel/FlexyStepper/blob/master/Documentation.md
+            _stepper->setSpeedInStepsPerSecond(STEPPER_SPEED_DEFAULT);
+            _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_INSUFFLATION);
+    
+            if (vent_mode!=VENTMODE_MAN)  //VCL && PCL
+              _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
+            else { //MANUAL MODE
+                _stepper->setTargetPositionInSteps(int (STEPPER_HIGHEST_POSITION*(float)_percVol/100.));
+                _stepperSpeed=STEPPER_HIGHEST_POSITION*(float(_percVol)*0.01)/( (float)(_timeoutIns*0.001) * DEFAULT_FRAC_CYCLE_VCL_INSUFF);//En [ml/s]
+              #ifdef DEBUG_UPDATE
+                Serial.print("Manual mode Timeout ins , speed: ");Serial.print(_timeoutIns);Serial.print(" ");Serial.println(_stepperSpeed);
+              #endif
+                _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCEL_MAX);
+                if (_stepperSpeed>STEPPER_SPEED_MAX)
+                  _stepperSpeed=STEPPER_SPEED_MAX;
+                  _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
+            }//manual
+            #endif
+            
+            _pid->reset();
+    
+            #if DEBUG_STATE_MACHINE
+                    debugMsg[debugMsgCounter++] = "State: InitInsuflation at " + String(millis());
+            #endif
+    
+            /* Status update, reset timer, for next time, and reset PID integrator to zero */
+            _setState(State_Insufflation);
+    
+            currentTime = millis();
+            display_needs_update=true;
+          
+          if (vent_mode==VENTMODE_PCL){
+          if (autopid) {
+          
+              if (change_pid_params) {
+                    speed_m =(float)STEPPER_MICROSTEPS*float(max_speed-min_speed)/float(max_cd-min_cd);
+                    speed_b =(float)STEPPER_MICROSTEPS*(float)max_speed-speed_m*(float)max_cd;
+                    accel_m =(float)STEPPER_MICROSTEPS*float(max_accel-min_accel)/float(max_cd-min_cd);
+                    accel_b =(float)STEPPER_MICROSTEPS*(float)max_accel-accel_m*(float)max_cd;
+                    pidk_m  =(float)(max_pidk-min_pidk)/float(max_cd-min_cd);
+                    pidk_b  =(float)max_pidk - pidk_m*(float)max_cd;
+                    
+                    pidi_m  =(float)(max_pidi-min_pidi)/float(max_cd-min_cd);
+                    pidi_b  =(float)max_pidi - pidi_m*(float)max_cd;
+                    pidd_m  =(float)(max_pidd-min_pidd)/float(max_cd-min_cd);
+                    pidd_b  =(float)max_pidd - pidd_m*(float)max_cd;
+                    //cdyn_m=
+                    // max_acc,min_acc,max_speed,min_speed,max_cd,min_cd
+                    change_pid_params=false;
+                    //Serial.print("Speed m b:"); Serial.print(speed_m);Serial.print(" ");Serial.println(speed_b);
+                    //Serial.print("Accel m b:"); Serial.print(accel_m);Serial.print(" ");Serial.println(accel_b);
+                    //Serial.print("pidk m b:"); Serial.print(pidk_m);Serial.print(" ");Serial.println(pidk_b);
+              }
+              if ( abs ( last_pressure_max - _pip) >  dpip ){
+                      
+                      if ( Cdyn < min_cd ) {
+                           PID_KP                   = min_pidk * peep_fac; //Orig 250
+                           STEPPER_SPEED_MAX =        STEPPER_MICROSTEPS * min_speed;	//Originally 4000
+            			         STEPPER_ACC_INSUFFLATION = STEPPER_MICROSTEPS *  min_accel;            
+                      } else if ( Cdyn > max_cd ) {
+                           PID_KP                   = max_pidk*peep_fac; //orig 1000
+                           STEPPER_SPEED_MAX        = STEPPER_MICROSTEPS * max_speed; //Originally 12000
+            			         if (_pip>p_acc) 
+            			          STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  max_accel * f_acc;//But the limit is calculated with range from 200 to 700
+                           else         
+                            STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  max_accel;
+                            //STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  600;
+                           
+                      }
+                      else {
+    
+                          PID_KP=( pidk_m*(float)Cdyn + pidk_b)*peep_fac;
+                          STEPPER_SPEED_MAX=float(Cdyn) * speed_m + speed_b;  //Originally was 250
+                          STEPPER_ACC_INSUFFLATION=(accel_m*(float)Cdyn+accel_b); //WITHOUT MICROSTEPS (ALREADY DONE IN CALC)
+          			  }
+                  _pid->setGains(PID_KP,PID_KI, PID_KD);
+                  _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);
+              }
+          } else {//no autopid
+                  PID_KP=700.01;
+                  PID_KI=20.01;
+                  PID_KD=100.01;
+                  STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  600;
+                  STEPPER_SPEED_MAX=14000;              
+                  _pid->setGains(PID_KP,PID_KI, PID_KD);
+                  _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);     
           }
-          if ( abs ( last_pressure_max - _pip) >  dpip ){
-                  
-                  if ( Cdyn < min_cd ) {
-                       PID_KP                   = min_pidk * peep_fac; //Orig 250
-                       STEPPER_SPEED_MAX =        STEPPER_MICROSTEPS * min_speed;	//Originally 4000
-        			         STEPPER_ACC_INSUFFLATION = STEPPER_MICROSTEPS *  min_accel;            
-                  } else if ( Cdyn > max_cd ) {
-                       PID_KP                   = max_pidk*peep_fac; //orig 1000
-                       STEPPER_SPEED_MAX        = STEPPER_MICROSTEPS * max_speed; //Originally 12000
-        			         if (_pip>p_acc) 
-        			          STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  max_accel * f_acc;//But the limit is calculated with range from 200 to 700
-                       else         
-                        STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  max_accel;
-                        //STEPPER_ACC_INSUFFLATION= STEPPER_MICROSTEPS *  600;
-                       
-                  }
-                  else {
-
-                      PID_KP=( pidk_m*(float)Cdyn + pidk_b)*peep_fac;
-                      STEPPER_SPEED_MAX=float(Cdyn) * speed_m + speed_b;  //Originally was 250
-                      STEPPER_ACC_INSUFFLATION=(accel_m*(float)Cdyn+accel_b); //WITHOUT MICROSTEPS (ALREADY DONE IN CALC)
-      			  }
-              _pid->setGains(PID_KP,PID_KI, PID_KD);
-              _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);
-          }
-      } else {//no autopid
-              PID_KP=700.01;
-              PID_KI=20.01;
-              PID_KD=100.01;
-              STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  600;
-              STEPPER_SPEED_MAX=14000;              
-              _pid->setGains(PID_KP,PID_KI, PID_KD);
-              _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);     
-      }
-      }//if pcl
-
-    }// INIT INSUFFLATION
-    break;
+          }//if pcl
+    
+        }// INIT INSUFFLATION
+        break;
     case State_Insufflation:
     {
+        #ifdef DEBUG_UPDATE
         Serial.print("tiempo insp: ");Serial.println(_msecTimerCnt);
+        #endif
         /* Stepper control: set end position */
         if (vent_mode==VENTMODE_VCL && _mlInsVol>_tidalVol){
+            #ifdef ACCEL_STEPPER
+            _stepper->stop();
+            #else
             _stepper->setTargetPositionToStop();
+            #endif
             //_setState(Init_Exsufflation); NOT BEGIN TO INSUFFLATE!
             wait_NoMove=true;
           }
@@ -320,22 +370,27 @@ void MechVentilation :: update ( void )
         //if (currentTime > totalCyclesInThisState)
         if(_msecTimerCnt > _timeoutIns)
         {
-            if (!_stepper->motionComplete()) //LUCIANO: NEW
-            {
-                // motor not finished, force motor to stop in current position
-                //_stepper->setTargetPositionInSteps(_stepper->getCurrentPositionInSteps());
-                //MODIFIED
-                _stepper->setTargetPositionToStop();
-                #ifdef DEBUG_UPDATE
-                  Serial.println("ENDED TIME WHILE MOVING");
-                #endif
-            }
+//            if (!_stepper->motionComplete()) //LUCIANO: NEW
+//            {
+//                // motor not finished, force motor to stop in current position
+//                //_stepper->setTargetPositionInSteps(_stepper->getCurrentPositionInSteps());
+//                //MODIFIED
+//                //
+//                // setup a "Stop" to begin the process of decelerating from the current velocity  
+//                // to zero, decelerating requires calls to processMove() until the move is complete
+//                // Note: This function can be used to stop a motion initiated in units of steps 
+//                // or revolutions
+//                //_stepper->setTargetPositionToStop();
+//                #ifdef DEBUG_UPDATE
+//                  Serial.println("ENDED TIME WHILE MOVING");
+//                #endif
+//            }
             _setState(Init_Exsufflation);
             //Serial.print("_msecTimerCnt: ");Serial.println(_msecTimerCnt);
             //Serial.print("TIEMPO: ");Serial.println(millis();
-            if (_recruitmentMode) {
-                deactivateRecruitment();
-            }
+//            if (_recruitmentMode) {
+//                deactivateRecruitment();
+//            }
         }
         else //Time has not expired (State Insufflation)
         {
@@ -350,56 +405,66 @@ void MechVentilation :: update ( void )
                //#endif
                
                if (vent_mode==VENTMODE_VCL){
-                _pid->run(_flux,rem_flux,&_stepperSpeed);
-                //_stepperSpeed=STEPPER_SPEED_DEFAULT;
-                if (_stepperSpeed>STEPPER_SPEED_MAX_VCL)
-                  _stepperSpeed=STEPPER_SPEED_MAX_VCL;
+                  _pid->run(_flux,rem_flux,&_stepperSpeed);
+                  //_stepperSpeed=STEPPER_SPEED_DEFAULT;
+                  if (_stepperSpeed>STEPPER_SPEED_MAX_VCL)
+                    _stepperSpeed=STEPPER_SPEED_MAX_VCL;
                } else if (vent_mode==VENTMODE_PCL) {
 
-                  _pid->run(pressure_p, (float)_pip, &_stepperSpeed);
-                  //_stepperAccel=0.75*abs( _stepperSpeed - _stepper -> getCurrentVelocityInStepsPerSecond() ) / PID_TS * 1000.;
-                  if (_stepperSpeed > STEPPER_SPEED_MAX)
-                    _stepperSpeed=STEPPER_SPEED_MAX;
-                  if (_stepperAccel > STEPPER_ACCEL_MAX)
-                    _stepperAccel=STEPPER_ACCEL_MAX;
+                    _pid->run(pressure_p, (float)_pip, &_stepperSpeed);
+                    //_stepperAccel=0.75*abs( _stepperSpeed - _stepper -> getCurrentVelocityInStepsPerSecond() ) / PID_TS * 1000.;
+                    if (_stepperSpeed > STEPPER_SPEED_MAX){
+                      _stepperSpeed=STEPPER_SPEED_MAX;
+                      #ifdef DEBUG_UPDATE
+                      Serial.println("Max Speed reached");
+                      #endif
+                      }
+                    if (_stepperAccel > STEPPER_ACCEL_MAX) {
+                        #ifdef DEBUG_UPDATE
+                        Serial.println("Max Accel reached");
+                        _stepperAccel=STEPPER_ACCEL_MAX;
+                        #endif
+                    }
                }                
                #ifdef DEBUG_UPDATE
                 Serial.print("Req accel: ");Serial.println(_stepperAccel);
                 Serial.print("Pres, pip: "); Serial.print(int(pressure_p)); Serial.print(" "); Serial.print(int(_pip));  Serial.print("reqSpeed: "); Serial.print(int(_stepperSpeed));  
-                Serial.print("Curr Speed: "); Serial.print(int(_stepper->getCurrentVelocityInStepsPerSecond()));  Serial.print("Accel: "); Serial.println(int(_stepperAccel));                    
+                //Serial.print("Curr Speed: "); Serial.print(int(_stepper->getCurrentVelocityInStepsPerSecond()));  Serial.print("Accel: "); Serial.println(int(_stepperAccel));                    
                #endif
 
               if (vent_mode !=VENTMODE_MAN){  //only if auto
                 // TODO: if _currentPressure > _pip + 5, trigger alarm
                 #ifdef ACCEL_STEPPER  //LUCIANO
-                  _stepper->setSpeed(_stepperSpeed);
-                  _stepper->moveTo(STEPPER_HIGHEST_POSITION);
+                  _stepper->setSpeed(abs(_stepperSpeed));
+                  
+                  if (_stepperSpeed == 0){
+                    _stepper->stop();
+                  }                  
+                  if (_stepperSpeed > 0){
+                      _stepper->moveTo(STEPPER_HIGHEST_POSITION);
+                  } else{
+                      _stepper->moveTo(STEPPER_LOWEST_POSITION);
+                  }
+  
+                  if ( (pressure_p)>_pip)
+                    _stepper->stop();
                 #else
                 _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
-                //_stepper->setAccelerationInStepsPerSecondPerSecond(abs(_stepperAccel));
                 
                 if (_stepperSpeed == 0){
                   _stepper->setTargetPositionToStop();
-                  //Serial.print("VELOCIDAD CERO!");
                 }                  
                 if (_stepperSpeed > 0){
                     _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
-                }
-                else{
+                } else{
                     _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
-                   // if (!_stepper->motionComplete())
-                   //   _stepper->setTargetPositionToStop();
                 }
 
-                    if ( (pressure_p)>_pip)
-                      _stepper->setTargetPositionToStop();
-              }//vent mode
+                if ( (pressure_p)>_pip)
+                  _stepper->setTargetPositionToStop();
+
               #endif
-              //Serial.println("CUrrtime");Serial.println(_msecTimerCnt);
-              //Serial.println("timeout");Serial.println(_msecTimeoutInsufflation);
-  
-  //            if (_stepper->getCurrentPositionInSteps()==STEPPER_HIGHEST_POSITION)
-  //              _stepper->setTargetPositionToStop();
+              }//vent mode !man
             }//!Wait no move!
 
         }
@@ -408,17 +473,16 @@ void MechVentilation :: update ( void )
     case Init_Exsufflation:
     {
       _msecTimerStartCycle=millis();
-      //Serial.print("Current pressure");Serial.println(_currentPressure);
-      
-//#if DEBUG_UPDATE
-//        Serial.println("Starting exsuflation");
-//#endif
+            
+      #if DEBUG_UPDATE
+              Serial.println("Starting exsuflation");
+      #endif
 
         totalCyclesInThisState = _timeoutEsp / TIME_BASE;
 
-#if DEBUG_STATE_MACHINE
-        debugMsg[debugMsgCounter++] = "ExsuflationTime=" + String(totalCyclesInThisState);
-#endif
+      #if DEBUG_STATE_MACHINE
+              debugMsg[debugMsgCounter++] = "ExsuflationTime=" + String(totalCyclesInThisState);
+      #endif
 
 
         /* Stepper control*/
@@ -432,9 +496,9 @@ void MechVentilation :: update ( void )
 
           #endif
           
-#if DEBUG_STATE_MACHINE
-        debugMsg[debugMsgCounter++] = "Motor: to exsuflation at " + String(millis());
-#endif
+        #if DEBUG_STATE_MACHINE
+                debugMsg[debugMsgCounter++] = "Motor: to exsuflation at " + String(millis());
+        #endif
 
         _pid->reset();
 
@@ -447,28 +511,7 @@ void MechVentilation :: update ( void )
     break;
     case State_Exsufflation:
     { 
-    
-//      if ( _flux < 10.)
-//        adding_vol=false;
-//#if 0
-//        if (_stepper->motionComplete())
-//        {
-//            if (currentFlow < _triggerThreshold && _hasTrigger)
-//            { // The start was triggered by patient
-//                _startWasTriggeredByPatient = true;
-//
-//#if DEBUG_STATE_MACHINE
-//                debugMsg[debugMsgCounter++] = "!!!! Trigered by patient";
-//#endif
-//
-//                /* Status update, for next time */
-//                _setState(Init_Insufflation);
-//            }
-//        }
-//#endif
-        // Time has expired
-        //if (currentTime > totalCyclesInThisState)
-        if(_msecTimerCnt > _timeoutEsp) 
+       if(_msecTimerCnt > _timeoutEsp) 
         {
 				/////////////////////////// ********** ORIGINAL 
 						// if (!_stepper->motionComplete())
@@ -486,35 +529,27 @@ void MechVentilation :: update ( void )
 				////////////////////////////////*** ORIGINAL
 
         //////////////////// NEW //////////////////////////
-        if (_stepper->getCurrentPositionInSteps()==STEPPER_LOWEST_POSITION) {
+        #ifdef ACCEL_STEPPER
+        if (_stepper->currentPosition()==STEPPER_LOWEST_POSITION) 
+        #else
+        if (_stepper->getCurrentPositionInSteps()==STEPPER_LOWEST_POSITION) 
+        #endif
+        {
   				  _setState(Init_Insufflation);
-  				  //_startWasTriggeredByPatient = false;
   				  _msecTimerStartCycle=millis();
             _cyclenum++;  //THIS ALWAYS SGOULD BE PRESENT
   		    }
         /////////////////// NEW ///////////////////////////
-        } else    //Time hasnot expired
-        {
-//            _pid->run(pressure_p, (float)_peep, &_stepperSpeed);
-//            _pid->run(float(pressure_p-pressure_p0), (float)_peep, &_stepperSpeed);
-//LUCIANO
-              _stepper->setSpeedInStepsPerSecond(4000);
-             // Serial.println(_stepperSpeed);
-//            if (_stepperSpeed >= 0)
-//                _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
-//            else
-//                _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
-
-
-        }
+        } 
     }
     break;
 
     case State_Homing:
     {
         // Open Solenoid Valve
-
-
+        #ifdef ACCEL_STEPPER
+          goHome();
+        #else
         if (_sensor_error_detected)
         {
             // error sensor reading
@@ -540,12 +575,12 @@ void MechVentilation :: update ( void )
             if (_stepper->moveToHomeInSteps(
                     STEPPER_HOMING_DIRECTION,
                     STEPPER_HOMING_SPEED,
-                    4000, //ATTENTION
+                    STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS, //ATTENTION
                     PIN_ENDSTOP) != true)
             {
-#if DEBUG_UPDATE
+            #if DEBUG_UPDATE
                     Serial.println("Homing failed");
-#endif
+            #endif
             } else{
               //_stepper->setCurrentPositionInSteps(int(STEPPER_HIGHEST_POSITION*0.12));
               
@@ -553,22 +588,20 @@ void MechVentilation :: update ( void )
             
         }
         else{
-#if DEBUG_UPDATE
-           Serial.println("No end stop detected.");
-#endif
+        #if DEBUG_UPDATE
+                   Serial.println("No end stop detected.");
+        #endif
         }
         /* Status update and reset timer, for next time */
-        currentTime = 0;
+        
         _setState(Init_Insufflation);
+        #endif //FLEXY_STEPPER
+        currentTime = 0;
+        
     }
     break;
-//
-//    case State_Error:
-//        break;
-//    default:
-//        //TODO
-//        break;
-    }
+
+    }//switch current state
       
 }//update
 
@@ -598,8 +631,7 @@ void MechVentilation::_init(
     {
         _triggerThreshold = options.triggerThreshold;
     }
-    else
-    {
+    else {
         _triggerThreshold = FLT_MAX;
     }
 

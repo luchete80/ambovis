@@ -1,14 +1,8 @@
 #include "pinout.h"
-#include "MechVentilation.h"
-#include "src/TimerOne/TimerOne.h"
 
-#include "src/AutoPID/AutoPID.h"
-#ifdef ACCEL_STEPPER
-#include "src/AccelStepper/AccelStepper.h"
-#include "src/FlexyStepper/FlexyStepper.h"
-#endif
+#include "menu.h"
+#include "display.h"
 
-#include "src/Pressure_Sensor/Pressure_Sensor.h"  //LUCIANO: MPX5050DP
 #include <EEPROM.h>
 
 bool init_verror;
@@ -43,16 +37,14 @@ unsigned long mute_count;
 
 int Compression_perc = 8; //80%
 
-#ifdef ACCEL_STEPPER
-AccelStepper *stepper = new AccelStepper(
-  //AccelStepper::DRIVER,
-  PIN_STEPPER_DIRECTION,
-  PIN_STEPPER_STEP);
-#else
-FlexyStepper * stepper = new FlexyStepper();
-#endif
 
 byte alarm_state = 0; //0: No alarm 1: peep 2: pip 3:both
+
+#ifdef LCD_I2C
+LiquidCrystal_I2C lcd(0x3F, 20, 4);
+#else
+LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
+#endif
 
 //MUTE
 boolean last_mute,curr_mute;
@@ -62,6 +54,9 @@ boolean buzzmuted;
 unsigned long timebuzz=0;
 bool isbuzzeron=false;
 
+
+Adafruit_ILI9341 tft=Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
+
 byte vcorr_count;
 byte p_trim = 100;
 float pressure_p;   //EXTERN!!
@@ -69,8 +64,7 @@ float last_pressure_max, last_pressure_min, last_pressure_peep;
 float pressure_peep;
 
 byte vent_mode = VENTMODE_PCL; //0
-//Adafruit_BMP280 _pres1Sensor;
-Pressure_Sensor _dpsensor;
+
 float verrp;
 float _flux,    flow_f;;
 //#ifdef FILTER_FLUX
@@ -177,7 +171,7 @@ int idleTime ;        // how long the button was idle
 void setup() {
   
   Serial.begin(250000);
-  //init_display();
+  init_display();
   isitem_sel=false;
 
     pinMode(PIN_BUZZER, OUTPUT); //Set buzzerPin as output
@@ -245,7 +239,9 @@ void setup() {
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
- 
+  writeLine(1, "RespirAR FIUBA", 4);
+  writeLine(2, "v1.1.1", 8);
+  
   p_dpt0 = 0;
   ads.begin();
   verror = 0;
@@ -277,8 +273,8 @@ void setup() {
   ventilation -> update();
 
   //sensors -> readPressure();
-//  lcd.createChar(0, _back);//Custom chars
-//  display_lcd();
+  lcd.createChar(0, _back);//Custom chars
+  display_lcd();
 
   //ENCODER
   curr_sel = old_curr_sel = 1; //COMPRESSION
@@ -340,8 +336,8 @@ void setup() {
   Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
   ventilation->setCycleNum(last_cycle);
 
-    //tft.begin();
-    //tft.fillScreen(ILI9341_BLACK);
+    tft.begin();
+    tft.fillScreen(ILI9341_BLACK);
 
 
     digitalWrite(BCK_LED,LOW);
@@ -349,7 +345,7 @@ void setup() {
     last_mute=HIGH;
     mute_count=0;
 
-    //lcd.clear();
+    lcd.clear();
 
     pf_min=(float)pfmin/50.;
     pf_max=(float)pfmax/50.;
@@ -370,14 +366,14 @@ void loop() {
 
   if (!sleep_mode){
     if (wake_up){
-//      lcd.clear();
-//      init_display();
-//      display_lcd();
-//    tft.fillScreen(ILI9341_BLACK);
+      lcd.clear();
+      init_display();
+      display_lcd();
+    tft.fillScreen(ILI9341_BLACK);
       wake_up=false;
       }
       State state = ventilation->getState();
-      //check_encoder();
+      check_encoder();
     
       time = millis();
       check_buzzer_mute();
@@ -439,7 +435,7 @@ void loop() {
     //      Serial.print(Voltage*1000);Serial.print(",");Serial.print(p_dpt);Serial.print(",");Serial.println(_flux);/*Serial.print(",");/*Serial.print(",");Serial.println(_flux_sum/5.);*/
     //      #endif
           //Serial.print(int(_mlInsVol));Serial.print(",");Serial.println(int(_mlExsVol));
-
+          tft_draw();
     
       }
     
@@ -525,7 +521,7 @@ void loop() {
         
         last_cycle = ventilation->getCycleNum();
     
-        //display_lcd();
+        display_lcd();
         update_display = true;
         last_update_display = time;
     
@@ -555,8 +551,8 @@ void loop() {
     
       if (display_needs_update) {
     
-        //display_lcd();
-        //display_needs_update = false;
+        display_lcd();
+        display_needs_update = false;
       }
     
       if ( update_options ) {
@@ -571,8 +567,8 @@ void loop() {
     
       //HERE changed_options flag is not updating until cycle hcanges
       if (show_changed_options && ((time - last_update_display) > time_update_display) ) {
-        //display_lcd();  //WITHOUT CLEAR!
-        //last_update_display = time;
+        display_lcd();  //WITHOUT CLEAR!
+        last_update_display = time;
         show_changed_options = false;
       }
     
@@ -600,20 +596,20 @@ void loop() {
   //! sleep_mode
   } else { 
       if (put_to_sleep){
-          //tft.fillScreen(ILI9341_BLACK);
+          tft.fillScreen(ILI9341_BLACK);
           digitalWrite(PIN_LCD_EN,HIGH);
           put_to_sleep=false;  
           print_bat_time=time;
-          //print_bat();
+          print_bat();
           //digitalWrite(PIN_BUZZER,!BUZZER_LOW); //Buzzer inverted
-          //lcd.clear();
+          lcd.clear();
       }
       if (time > print_bat_time + 5000){
-        //print_bat();
+        print_bat();
         print_bat_time=time;
       }
       time = millis();
-      //check_bck_state();
+      check_bck_state();
   }
 
   //stepper -> processMovement();
