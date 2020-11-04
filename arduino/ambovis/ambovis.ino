@@ -416,24 +416,16 @@ void loop() {
     
           lastShowSensor=time; 
           //Serial.println(time);
-//           Serial.print(int(cycle_pos));Serial.print(",");
-//    //	     Serial.println(int(pressure_p));//Serial.print(",");
-//    //     //Serial.println(analogRead(A0));
+          Serial.print(int(cycle_pos));Serial.print(",");
+          Serial.println(int(pressure_p));//Serial.print(",");
+          Serial.println(flow_f,2);
+          
 //    //	     #ifdef FILTER_FLUX
 //           Serial.print(Voltage,5);Serial.print(",");
 //           Serial.print(verror,3);Serial.print(",");
 //           Serial.print(p_dpt,5);Serial.print(",");
 //    //       Serial.print(_mlInsVol - _mlExsVol);Serial.print(",");
-//           Serial.println(flow_f,2);
-           //Serial.println(_flux,2);
-           
-    //       #else
-    //       Serial.print(int(_flux));Serial.print(",");
-    //       #endif      
     //      Serial.println(int(alarm_state));
-          //Serial.print(",");
-           //Serial.println(int(_mlInsVol-_mlExsVol));
-    //      
           //Serial.print(",");Serial.println(int(alarm_state));     
     //      #ifdef FILTER_FLUX 
     //      Serial.print(Voltage*1000);Serial.print(",");Serial.print(p_dpt);Serial.print(",");Serial.println(_flux);/*Serial.print(",");/*Serial.print(",");Serial.println(_flux_sum/5.);*/
@@ -447,10 +439,6 @@ void loop() {
       if (time > lastReadSensor + TIME_SENSOR) {
     
         pressure_p = ( analogRead(A0) / (1023.) /*- verrp * 0.2 */ - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
-        
-        //pressure_p = (( float(analogRead(A0))/1023.*V_SUPPLY_HONEY - 0.1 * V_SUPPLY_HONEY/* - corr_fs */) / (0.8 * V_SUPPLY_HONEY) * DEFAULT_PSI_TO_CM_H20 * 2. - DEFAULT_PSI_TO_CM_H20);//HONEYWELL
-        
-        
         adc0 = ads.readADC_SingleEnded(0);
         Voltage = (adc0 * 0.1875) *0.001; //Volts
     
