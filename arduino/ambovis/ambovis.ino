@@ -176,7 +176,7 @@ int idleTime ;        // how long the button was idle
 
 void setup() {
   
-  Serial.begin(250000);
+  Serial.begin(9600);
   //init_display();
   isitem_sel=false;
 
@@ -220,8 +220,8 @@ void setup() {
   // TODO: Añadir aquí la configuarcion inicial desde puerto serie
   options.respiratoryRate = DEFAULT_RPM;
   options.percInspEsp = 2; //1:1 to 1:4, is denom
-  //options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
-  options.peakInspiratoryPressure = 20.;
+  options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
+  
   options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
   options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
   options.hasTrigger = false;
@@ -383,42 +383,42 @@ void loop() {
       check_buzzer_mute();
       //Serial.print("Carga: ");Serial.println(analogRead(PIN_BAT_LEV));
       
-      if (time > lastSave + TIME_SAVE) {
-        int eeAddress=0;
-        EEPROM.put(0, last_cycle);        eeAddress+= sizeof(unsigned long);
-        EEPROM.put(eeAddress, p_trim);    eeAddress+= sizeof(p_trim);
-        EEPROM.put(eeAddress, autopid);   eeAddress+= sizeof(autopid);
-        EEPROM.put(eeAddress, min_cd);    eeAddress+= sizeof(min_cd);
-        EEPROM.put(eeAddress, max_cd);    eeAddress+= sizeof(max_cd);
-        EEPROM.put(eeAddress, min_speed); eeAddress+= sizeof(min_speed);
-        EEPROM.put(eeAddress, max_speed); eeAddress+= sizeof(max_speed);
-        EEPROM.put(eeAddress, min_accel); eeAddress+= sizeof(min_accel);
-        EEPROM.put(eeAddress, max_accel); eeAddress+= sizeof(max_accel);
-        EEPROM.put(eeAddress, min_pidk);  eeAddress+= sizeof(min_pidk);
-        EEPROM.put(eeAddress, max_pidk);  eeAddress+= sizeof(max_pidk);
-        EEPROM.put(eeAddress, alarm_vt);  eeAddress+= sizeof(alarm_vt);
-        EEPROM.put(eeAddress, filter);    eeAddress+= sizeof(filter);   
-        EEPROM.put(eeAddress, pfmin);     eeAddress+= sizeof(pfmin);
-        EEPROM.put(eeAddress, pfmax);     eeAddress+= sizeof(pfmax);
-        EEPROM.put(eeAddress, dpip_b);    eeAddress+= sizeof(dpip_b);
-        EEPROM.put(eeAddress, min_pidi);  eeAddress+= sizeof(min_pidi);
-        EEPROM.put(eeAddress, max_pidi);  eeAddress+= sizeof(max_pidi);  
-        EEPROM.put(eeAddress, min_pidd);  eeAddress+= sizeof(min_pidd);
-        EEPROM.put(eeAddress, max_pidd);  eeAddress+= sizeof(max_pidd);
-        EEPROM.put(eeAddress, p_acc);      eeAddress+= sizeof(p_acc);
-        EEPROM.put(eeAddress, f_acc_b);    eeAddress+= sizeof(f_acc_b);                 
-        
-        lastSave = millis();
-      }
-    
+//      if (time > lastSave + TIME_SAVE) {
+//        int eeAddress=0;
+//        EEPROM.put(0, last_cycle);        eeAddress+= sizeof(unsigned long);
+//        EEPROM.put(eeAddress, p_trim);    eeAddress+= sizeof(p_trim);
+//        EEPROM.put(eeAddress, autopid);   eeAddress+= sizeof(autopid);
+//        EEPROM.put(eeAddress, min_cd);    eeAddress+= sizeof(min_cd);
+//        EEPROM.put(eeAddress, max_cd);    eeAddress+= sizeof(max_cd);
+//        EEPROM.put(eeAddress, min_speed); eeAddress+= sizeof(min_speed);
+//        EEPROM.put(eeAddress, max_speed); eeAddress+= sizeof(max_speed);
+//        EEPROM.put(eeAddress, min_accel); eeAddress+= sizeof(min_accel);
+//        EEPROM.put(eeAddress, max_accel); eeAddress+= sizeof(max_accel);
+//        EEPROM.put(eeAddress, min_pidk);  eeAddress+= sizeof(min_pidk);
+//        EEPROM.put(eeAddress, max_pidk);  eeAddress+= sizeof(max_pidk);
+//        EEPROM.put(eeAddress, alarm_vt);  eeAddress+= sizeof(alarm_vt);
+//        EEPROM.put(eeAddress, filter);    eeAddress+= sizeof(filter);   
+//        EEPROM.put(eeAddress, pfmin);     eeAddress+= sizeof(pfmin);
+//        EEPROM.put(eeAddress, pfmax);     eeAddress+= sizeof(pfmax);
+//        EEPROM.put(eeAddress, dpip_b);    eeAddress+= sizeof(dpip_b);
+//        EEPROM.put(eeAddress, min_pidi);  eeAddress+= sizeof(min_pidi);
+//        EEPROM.put(eeAddress, max_pidi);  eeAddress+= sizeof(max_pidi);  
+//        EEPROM.put(eeAddress, min_pidd);  eeAddress+= sizeof(min_pidd);
+//        EEPROM.put(eeAddress, max_pidd);  eeAddress+= sizeof(max_pidd);
+//        EEPROM.put(eeAddress, p_acc);      eeAddress+= sizeof(p_acc);
+//        EEPROM.put(eeAddress, f_acc_b);    eeAddress+= sizeof(f_acc_b);                 
+//        
+//        lastSave = millis();
+//      }
+//    
     
       if ( time > lastShowSensor + TIME_SHOW ) {
     
           lastShowSensor=time; 
           //Serial.println(time);
-          Serial.print(int(cycle_pos));Serial.print(",");
-          Serial.println(int(pressure_p));//Serial.print(",");
-          Serial.println(flow_f,2);
+          //Serial1.print(int(cycle_pos));Serial.print(",");
+          //Serial1.println(int(pressure_p));//Serial.print(",");
+          //Serial1.println(flow_f,2);
           
 //    //	     #ifdef FILTER_FLUX
 //           Serial.print(Voltage,5);Serial.print(",");

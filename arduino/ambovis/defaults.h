@@ -16,8 +16,8 @@
 //#define PRUEBAS 1 // testing over arduino without sensors
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
-#define TIME_BASE   25                 // msec
-#define TIME_SENSOR 10                // msec
+#define TIME_BASE   1                 // msec
+#define TIME_SENSOR 5                // msec
 #define TIME_SHOW 	80                  //IF OLED DISPLAY IS USED FASTER THAN 50ms GIVES ERRORS IN THE PLOTS 
 #define TIME_SAVE 	5000
 #define TIME_BUZZER 500
@@ -118,7 +118,7 @@ extern int STEPPER_ACC_INSUFFLATION;    //(STEPPER_MICROSTEPS *  600)   // Steps
 #define DEFAULT_MAX_RPM 30
 #define DEFAULT_MIN_RPM 12
 #define DEFAULT_POR_INSPIRATORIO 33.3333F // %
-#define DEFAULT_PEAK_INSPIRATORY_PRESSURE 25
+#define DEFAULT_PEAK_INSPIRATORY_PRESSURE 30
 #define DEFAULT_PEAK_ESPIRATORY_PRESSURE 5
 
 #define V_SUPPLY_HONEY 5.0F

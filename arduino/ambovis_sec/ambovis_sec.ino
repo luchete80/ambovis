@@ -144,6 +144,9 @@ void check_sleep_mode();  //Batt charge only
 bool isitem_sel;
 byte old_menu_pos=0;
 byte old_menu_num=0;
+/* TODO: ARE THEY GONNA BE USED ?? */
+float dpip,dpip_b;
+float f_acc, f_acc_b, p_acc;
 
 VentilationOptions_t options;
 

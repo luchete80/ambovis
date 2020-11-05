@@ -623,7 +623,8 @@ void display_lcd ( ) {
     writeLine(3, "I:" + String(tempstr), 9); 
     //dtostrf(_timeoutEsp*0.001, 1, 1, tempstr);
     //writeLine(3, "E:" + String(tempstr), 15); 
-    dtostrf(ventilation->getCycleTime()*0.001, 1, 1, tempstr);
+    
+    //dtostrf(ventilation->getCycleTime()*0.001, 1, 1, tempstr);
     writeLine(3, "i:" + String(tempstr), 15); 
    
       

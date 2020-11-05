@@ -84,7 +84,7 @@ bool reach_home=false;
 
 void setup()
 {
-      Timer1.initialize(50);
+      Timer1.initialize(25);
       Timer1.attachInterrupt(timer1Isr);
       
         pinMode(PIN_BUZZER,OUTPUT);
