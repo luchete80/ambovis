@@ -12,13 +12,6 @@
 //#define DEBUG 1
 //enum serialpos={ALARM_=0,TIME_,PRESSURE_,FLUX_,VT_};
 //enum serialpos {TIME_=0,PRESSURE_,FLUX_,VT_,ALARM_};//ORIGINAL
-#define TIME_     0
-#define P_        1
-#define FLUX_     2
-#define ALARM_    3
-#define VT_       4
-#define VI_       5
-#define VE_       6
 
 // TODO MOVE TO SOME CLASSS
 extern byte valsreaded;

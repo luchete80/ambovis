@@ -260,7 +260,8 @@ void setup() {
     valsreaded=last_x=0;
     tft_cleaned=false;
 
-    xgra[1][1]=0;
+    xgra[P_][1]=0;
+    xgra[FLUX_][1]=0;
 
     time_serial_read=millis();
 }
@@ -287,10 +288,10 @@ void loop() {
 //
       time = millis();
       check_encoder();
-      if (time > time_serial_read + SERIAL_READ){
+      //if (time > time_serial_read + SERIAL_READ){
           recvchars=recvWithEndMarker();
-          time_serial_read=time;
-      }
+      //    time_serial_read=time;
+      //}
       showNewData();
       
       Serial.print("chars: ");Serial.println(receivedChars);
@@ -387,6 +388,8 @@ void update_error() {
       //verror+=Voltage;
       init_verror = true;
     }
+    Serial1.print("-1,");
+    Serial1.println(options.respiratoryRate);
     //Serial.print("Verror (mV) and count: ");Serial.print(verror_sum*1000);Serial.print(",  ");Serial.println(vcorr_count);
   }
   if (cycle_pos < 5 && init_verror) {

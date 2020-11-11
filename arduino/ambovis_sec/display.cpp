@@ -1,5 +1,6 @@
 #include "display.h"
 #include "MechVentilation.h"
+#include "Serial.h"
 
 //bool lcd_cleaned=false;
 
@@ -33,6 +34,8 @@ bool ve_readed,vi_readed;
 
 #endif
 
+void parseNfilterData();
+
 //enum _state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
 
 #define NO_ALARM        0
@@ -57,13 +60,12 @@ byte escala=32;
 byte x[128],y[64];
 
 
-void parseData();
 
 
 void tft_draw(void) {
     //Serial.println(cycle_pos);Serial.println(ry[valsreaded]);
 
-    parseData();
+    parseNfilterData();
     //last_x=cycle_pos;
     //last_x=integerFromPC[TIME_];
     //rx[valsreaded]=cycle_pos;
@@ -234,7 +236,7 @@ void print_vols(){
 
 
 
-void parseData() {
+void parseNfilterData() {
   char * strtokIndx; // this is used by strtok() as an index
 
   strtokIndx = strtok(receivedChars, ","); // this continues where the previous call left off
@@ -278,8 +280,8 @@ void parseData() {
       ve=integerFromPC[VE_];
       ve_readed=true;
   }
-
-  if ( integerFromPC[FLUX_] != 0 && abs(integerFromPC[FLUX_]) < abs(last_vals[FLUX_][1])+diff_var[FLUX_] && integerFromPC[TIME_] > xgra[FLUX_][1]) {
+  Serial.print("time y xgra flux");Serial.print(integerFromPC[TIME_]);Serial.print(",");Serial.print(xgra[FLUX_][1]);
+  if ( integerFromPC[FLUX_] != 0 && abs(integerFromPC[FLUX_]) < abs(last_vals[FLUX_][1])+diff_var[FLUX_] /* && integerFromPC[TIME_] > xgra[FLUX_][1]*/) {
     yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_])*0.04);
     last_vals[FLUX_][0]=last_vals[FLUX_][1];last_vals[FLUX_][1]=integerFromPC[FLUX_];
     xgra[FLUX_][0]=xgra[FLUX_][1];xgra[FLUX_][1]=integerFromPC[TIME_];

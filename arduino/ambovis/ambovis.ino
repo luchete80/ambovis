@@ -2,12 +2,14 @@
 #include "MechVentilation.h"
 #include "src/TimerOne/TimerOne.h"
 
+#include "Serial.h"
+
 #include "src/AutoPID/AutoPID.h"
 #ifdef ACCEL_STEPPER
 #include "src/AccelStepper/AccelStepper.h"
 #include "src/FlexyStepper/FlexyStepper.h"
 #endif
-
+int integerFromPC [5];
 #include "src/Pressure_Sensor/Pressure_Sensor.h"  //LUCIANO: MPX5050DP
 #include <EEPROM.h>
 
@@ -628,6 +630,10 @@ void update_error() {
       init_verror = true;
     }
     //Serial.print("Verror (mV) and count: ");Serial.print(verror_sum*1000);Serial.print(",  ");Serial.println(vcorr_count);
+    
+    recvWithEndMarker();
+    parseData();
+    Serial.print("Integers: ");Serial.print(integerFromPC [0]);Serial.print(",");Serial.println(integerFromPC [1]);
   }
   if (cycle_pos < 5 && init_verror) {
     verror = verror_sum / ((float)vcorr_count + 1.);
