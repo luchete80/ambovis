@@ -6,19 +6,22 @@
 //Connections and Debug Defs
 //#define ACCEL_STEPPER 1
 //#define DEBUG_PID 1
-#define DEBUG_UPDATE 1
+//#define DEBUG_UPDATE 1
 //#define FILTER_FLUX 1
-#define DEBUG_OFF 1 //Release version
-#define BUZZER_LOW 1
+#define DEBUG_OFF   1 //Release version
+#define BUZZER_LOW  1
 
-#define BMP_I2C 1  //Pressure Sensor
+#define DISPLAY_SEC 1
+
+#define BMP_I2C     1  //Pressure Sensor
 
 //#define PRUEBAS 1 // testing over arduino without sensors
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
+#define SERIAL_READ 30
 #define TIME_BASE   25                 // msec
 #define TIME_SENSOR 10                // msec
-#define TIME_SHOW 	80                  //IF OLED DISPLAY IS USED FASTER THAN 50ms GIVES ERRORS IN THE PLOTS 
+#define TIME_SHOW 	50                  //IF OLED DISPLAY IS USED FASTER THAN 50ms GIVES ERRORS IN THE PLOTS 
 #define TIME_SAVE 	5000
 #define TIME_BUZZER 500
 #define TIME_MUTE   60000             //msec

@@ -13,13 +13,23 @@
 //enum serialpos={ALARM_=0,TIME_,PRESSURE_,FLUX_,VT_};
 //enum serialpos {TIME_=0,PRESSURE_,FLUX_,VT_,ALARM_};//ORIGINAL
 #define TIME_     0
-#define PRESSURE_ 1
+#define P_        1
 #define FLUX_     2
-#define VT_       4
 #define ALARM_    3
+#define VT_       4
+#define VI_       5
+#define VE_       6
+
+// TODO MOVE TO SOME CLASSS
+extern byte valsreaded;
+extern byte last_x;
+extern bool tft_cleaned;
+extern int last_vals[7][2];;
+extern int xgra[5][2];
 
 //SPI HARDWARE SHOULD BE PINS CLK #13 AND MISO #11, WITH THIS CONSTRUCTOR!
 extern Adafruit_ILI9341 tft; //= Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
+
 
 void drawY2(uint16_t color);
 void print_bat();

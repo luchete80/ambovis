@@ -2,7 +2,8 @@
 
 #include "menu.h"
 #include "display.h"
-
+#include "Serial.h"
+#include "display.h"
 #include <EEPROM.h>
 
 bool init_verror;
@@ -24,25 +25,29 @@ byte _back[8] = {
   0b11111
 };
 
+int last_vals[7][2];
+int xgra[5][2];
+
 // FOR ADS
 #include <Wire.h>
 #include <Adafruit_ADS1015.h>
 Adafruit_ADS1115 ads(0x48);
 float Voltage = 0.0;
-int vt;
+//int vt;
 float _mlInsVol = 0;
 float _mlExsVol = 0;
 int _mllastInsVol, _mllastExsVol;
 unsigned long mute_count;
 
-int Compression_perc = 8; //80%
 
+int Compression_perc = 8; //80%
 
 byte alarm_state = 0; //0: No alarm 1: peep 2: pip 3:both
 
 #ifdef LCD_I2C
 LiquidCrystal_I2C lcd(0x3F, 20, 4);
 #else
+
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
 #endif
 
@@ -92,8 +97,7 @@ unsigned long time_update_display = 20; //ms
 unsigned long last_update_display;
 
 extern float _mlInsVol, _mlExsVol;
-extern byte stepper_time = 50;
-unsigned long last_stepper_time;
+
 unsigned long last_vent_time;
 unsigned long time;
 byte cycle_pos;
@@ -159,11 +163,16 @@ int endPressed ;      // the moment the button was released
 int holdTime ;        // how long the button was hold
 int idleTime ;        // how long the button was idle
 
+byte valsreaded;
+byte last_x;
+ bool tft_cleaned;
+unsigned long time_serial_read;
 void setup() {
-  
-  Serial.begin(250000);
-  init_display();
-  isitem_sel=false;
+
+    Serial1.begin(115200);
+    Serial.begin(250000);
+    init_display();
+    isitem_sel=false;
 
     pinMode(PIN_BUZZER, OUTPUT); //Set buzzerPin as output
     pinMode(GREEN_LED,  OUTPUT); //Set buzzerPin as output
@@ -173,63 +182,46 @@ void setup() {
 
     digitalWrite(PIN_BUZZER,BUZZER_LOW); //LOW, INVERTED
  
-
-  max_cd=40;  //T MODIFY: READ FROM MEM
-  min_cd=10;
-  min_speed = 250;  // x microsteps
-  max_speed = 750;  // x Microsteps, originally 16000 (with 16 ms = 750)
-  max_accel = 600;
-  min_accel = 200;
-  change_pid_params=true; //To calculate at first time
   
-  // Parte motor
-  pinMode(PIN_MUTE, INPUT_PULLUP);
-  pinMode(PIN_POWEROFF, INPUT);
-
-  pinMode(PIN_MENU_UP, INPUT_PULLUP);
-  pinMode(PIN_MENU_DN, INPUT_PULLUP);
-  pinMode(PIN_MENU_EN, INPUT_PULLUP);
-  pinMode(PIN_MENU_BCK, INPUT_PULLUP);
-  pinMode(PIN_BAT_LEV, INPUT);
+    max_cd=40;  //T MODIFY: READ FROM MEM
+    min_cd=10;
+    min_speed = 250;  // x microsteps
+    max_speed = 750;  // x Microsteps, originally 16000 (with 16 ms = 750)
+    max_accel = 600;
+    min_accel = 200;
+    change_pid_params=true; //To calculate at first time
+    
+    // Parte motor
+    pinMode(PIN_MUTE, INPUT_PULLUP);
+    pinMode(PIN_POWEROFF, INPUT);
   
-  // TODO: Añadir aquí la configuarcion inicial desde puerto serie
-  options.respiratoryRate = DEFAULT_RPM;
-  options.percInspEsp = 2; //1:1 to 1:4, is denom
-  //options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
-  options.peakInspiratoryPressure = 20.;
-  options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
-  options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
-  options.hasTrigger = false;
-  options.tidalVolume = 300;
-  options.percVolume = 100; //1 to 10
-
-
-  delay(100);
-
-  writeLine(1, "RespirAR FIUBA", 4);
-  writeLine(2, "v1.1.1", 8);
+    pinMode(PIN_MENU_UP, INPUT_PULLUP);
+    pinMode(PIN_MENU_DN, INPUT_PULLUP);
+    pinMode(PIN_MENU_EN, INPUT_PULLUP);
+    pinMode(PIN_MENU_BCK, INPUT_PULLUP);
+    pinMode(PIN_BAT_LEV, INPUT);
+    
+    // TODO: Añadir aquí la configuarcion inicial desde puerto serie
+    options.respiratoryRate = DEFAULT_RPM;
+    options.percInspEsp = 2; //1:1 to 1:4, is denom
+    //options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
+    options.peakInspiratoryPressure = 20.;
+    options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
+    options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
+    options.hasTrigger = false;
+    options.tidalVolume = 300;
+    options.percVolume = 100; //1 to 10
   
-  p_dpt0 = 0;
-  ads.begin();
-  verror = 0;
-  float verrp = 0.;
-//  for (int i = 0; i < 10; i++) {
-//    adc0 = ads.readADC_SingleEnded(0);
-//    Voltage = (adc0 * 0.1875) * 0.001; //VOLT!
-//    Serial.print("Voltage dp: "); Serial.println(Voltage, 3);
-//    verror += ( Voltage - 5.0 * 0.04 ); //IF VOUT IS: Vo=VS(0.09*P0.04) +/- ERR
-//    //vo=vs(0.09 dp +0.04)+/-verr
-//    p_dpt0 += 0.5 * (( Voltage /* 5.0/V_SUPPLY_HONEY */ - 0.1 * 4.8/* - corr_fs */) / (0.8 * 4.8) * DEFAULT_PSI_TO_CM_H20 * 2. - DEFAULT_PSI_TO_CM_H20);
-//    verrp += (analogRead(A0) * 5. / 1024. - 5.*0.04);
-//    Serial.print("Voltage p: "); Serial.println(analogRead(A0));
-//    delay(10);
-//  }
-//
-//  verror /= 10.; //
-//  verrp /= 10.;
-//  p_dpt0 /= 10.0;
-//  Serial.print("dp (Flux) MPX Volt (mV) at p0: "); Serial.println(verror * 1000, 3);
-//  Serial.print("pressure  MPX Volt (mV) at p0: "); Serial.println(verrp * 1000, 3);
+  
+    delay(100);
+  
+    writeLine(1, "RespirAR FIUBA", 4);
+    writeLine(2, "v1.1.1", 8);
+    
+    p_dpt0 = 0;
+    ads.begin();
+    verror = 0;
+    float verrp = 0.;
 
   Serial.print("dp  error : "); Serial.println(-verror / (5.*0.09));
   p_dpt0 = 0.20;
@@ -244,31 +236,7 @@ void setup() {
 
   lastReadSensor =   lastShowSensor = millis();
   last_update_display = millis();
-
-#ifdef DEBUG_UPDATE
-
-#endif
-
-  //STEPPER
-  last_stepper_time = millis();
-  last_vent_time = millis();
-
-  //Serial.print(",0,50");
-
-  
-  //Timer2.setPeriod(500000);
-  //Timer2.attachInterrupt(timer2Isr);
-
-#ifdef DEBUG_UPDATE
-  Serial.print("Honey Volt at p0: "); Serial.println(analogRead(A0) / 1023.);
-#endif
   int eeAddress=0;
-
- 
-  Serial.print("Maxcd: ");Serial.println(max_cd);
-        
-  Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
-
 
     tft.begin();
     tft.fillScreen(ILI9341_BLACK);
@@ -279,7 +247,7 @@ void setup() {
     last_mute=HIGH;
     mute_count=0;
 
-    lcd.clear();
+    //lcd.clear();
 
     pf_min=(float)pfmin/50.;
     pf_max=(float)pfmax/50.;
@@ -288,130 +256,125 @@ void setup() {
     sleep_mode=false;
     put_to_sleep=false;
     wake_up=false;
+
+    valsreaded=last_x=0;
+    tft_cleaned=false;
+
+    xgra[1][1]=0;
+
+    time_serial_read=millis();
 }
 
 
 bool update_display = false;
 byte pos;
 
+byte recvchars;
+
 void loop() {
 
-
-
-  if (!sleep_mode){
-    if (wake_up){
-      lcd.clear();
-      init_display();
-      display_lcd();
-      tft.fillScreen(ILI9341_BLACK);
-      wake_up=false;
-      }
-
-      check_encoder();
-    
+//
+//
+//  if (!sleep_mode){
+//    if (wake_up){
+//      lcd.clear();
+//      init_display();
+//      Serial.println("wake up");
+//      display_lcd();
+//      tft.fillScreen(ILI9341_BLACK);
+//      wake_up=false;
+//      }
+//
       time = millis();
-      check_buzzer_mute();
-      //Serial.print("Carga: ");Serial.println(analogRead(PIN_BAT_LEV));
-
+      check_encoder();
+      if (time > time_serial_read + SERIAL_READ){
+          recvchars=recvWithEndMarker();
+          time_serial_read=time;
+      }
+      showNewData();
+      
+      Serial.print("chars: ");Serial.println(receivedChars);
+      Serial.print("char length: ");Serial.println(recvchars);
+//    
+      
+//      check_buzzer_mute();
+//      //Serial.print("Carga: ");Serial.println(analogRead(PIN_BAT_LEV));
+//
       if ( time > lastShowSensor + TIME_SHOW ) {
     
           lastShowSensor=time; 
-          //Serial.println(time);
-//           Serial.print(int(cycle_pos));Serial.print(",");
-//    //	     Serial.println(int(pressure_p));//Serial.print(",");
-//    //     //Serial.println(analogRead(A0));
-//    //	     #ifdef FILTER_FLUX
-//           Serial.print(Voltage,5);Serial.print(",");
-//           Serial.print(verror,3);Serial.print(",");
-//           Serial.print(p_dpt,5);Serial.print(",");
-//    //       Serial.print(_mlInsVol - _mlExsVol);Serial.print(",");
-//           Serial.println(flow_f,2);
-           //Serial.println(_flux,2);
-           
-    //       #else
-    //       Serial.print(int(_flux));Serial.print(",");
-    //       #endif      
-    //      Serial.println(int(alarm_state));
-          //Serial.print(",");
-           //Serial.println(int(_mlInsVol-_mlExsVol));
-    //      
-          //Serial.print(",");Serial.println(int(alarm_state));     
-    //      #ifdef FILTER_FLUX 
-    //      Serial.print(Voltage*1000);Serial.print(",");Serial.print(p_dpt);Serial.print(",");Serial.println(_flux);/*Serial.print(",");/*Serial.print(",");Serial.println(_flux_sum/5.);*/
-    //      #endif
-          //Serial.print(int(_mlInsVol));Serial.print(",");Serial.println(int(_mlExsVol));
-          tft_draw();
+           tft_draw();
     
       }
-    
-    
-
-    
+//    
+//    
+//
+//        Serial.println("Graficando...");
         display_lcd();
         update_display = true;
         last_update_display = time;
-    
-     
+//    
+//     
       if (display_needs_update) {
     
         display_lcd();
         display_needs_update = false;
       }
-    
-      if ( update_options ) {
-        update_options = false;
-        //show_changed_options=true;
-      }//
-
-    
-      //HERE changed_options flag is not updating until cycle hcanges
-      if (show_changed_options && ((time - last_update_display) > time_update_display) ) {
+//    
+//      if ( update_options ) {
+//        update_options = false;
+//        //show_changed_options=true;
+//      }//
+//
+//    
+//      //HERE changed_options flag is not updating until cycle hcanges
+      if (show_changed_options && ((millis() - last_update_display) > time_update_display) ) {
         display_lcd();  //WITHOUT CLEAR!
-        last_update_display = time;
+        last_update_display = millis();
         show_changed_options = false;
       }
-    
-        if (alarm_state > 0) {
-    
-              if (!buzzmuted) {
-                  if (time > timebuzz + TIME_BUZZER) {
-                      timebuzz=time;
-                      isbuzzeron=!isbuzzeron;
-                      if (isbuzzeron){
-                          //digitalWrite(PIN_BUZZER,BUZZER_LOW);
-                      }   
-                      else {
-                          //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
-                      }
-                  }
-              } else {  //buzz muted
-                  //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
-              }
-        } else {//state > 0
-          //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
-          isbuzzeron=true;        //Inverted logic
-        }
-
-  //! sleep_mode
-  } else { 
-      if (put_to_sleep){
-          tft.fillScreen(ILI9341_BLACK);
-          digitalWrite(PIN_LCD_EN,HIGH);
-          put_to_sleep=false;  
-          print_bat_time=time;
-          print_bat();
-          //digitalWrite(PIN_BUZZER,!BUZZER_LOW); //Buzzer inverted
-          lcd.clear();
-      }
-      if (time > print_bat_time + 5000){
-        print_bat();
-        print_bat_time=time;
-      }
-      time = millis();
-      check_bck_state();
-  }
-
-  //stepper -> processMovement();
+//    
+////        if (alarm_state > 0) {
+////    
+////              if (!buzzmuted) {
+////                  if (time > timebuzz + TIME_BUZZER) {
+////                      timebuzz=time;
+////                      isbuzzeron=!isbuzzeron;
+////                      if (isbuzzeron){
+////                          //digitalWrite(PIN_BUZZER,BUZZER_LOW);
+////                      }   
+////                      else {
+////                          //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+////                      }
+////                  }
+////              } else {  //buzz muted
+////                  //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+////              }
+////        } else {//state > 0
+////          //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+////          isbuzzeron=true;        //Inverted logic
+////        }
+//
+//  //! sleep_mode
+//  } else { 
+//      if (put_to_sleep){
+//          tft.fillScreen(ILI9341_BLACK);
+//          digitalWrite(PIN_LCD_EN,HIGH);
+//          put_to_sleep=false;  
+//          print_bat_time=time;
+//          print_bat();
+//          //digitalWrite(PIN_BUZZER,!BUZZER_LOW); //Buzzer inverted
+//          lcd.clear();
+//      }
+//      if (time > print_bat_time + 5000){
+//        print_bat();
+//        print_bat_time=time;
+//      }
+//      time = millis();
+//      check_bck_state();
+//  }
+//
+//  //stepper -> processMovement();
 }//LOOP
 
 void update_error() {
@@ -477,3 +440,5 @@ void check_buzzer_mute() {
 void autotrim_flux(){
   
   }
+
+  

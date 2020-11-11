@@ -6,7 +6,7 @@
 //Connections and Debug Defs
 //#define ACCEL_STEPPER 1
 //#define DEBUG_PID 1
-#define DEBUG_UPDATE 1
+//#define DEBUG_UPDATE 1
 //#define FILTER_FLUX 1
 #define DEBUG_OFF 1 //Release version
 #define BUZZER_LOW 1
@@ -18,7 +18,7 @@
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE   1                 // msec
 #define TIME_SENSOR 5                // msec
-#define TIME_SHOW 	80                  //IF OLED DISPLAY IS USED FASTER THAN 50ms GIVES ERRORS IN THE PLOTS 
+#define TIME_SHOW 	50                  //IF OLED DISPLAY IS USED FASTER THAN 50ms GIVES ERRORS IN THE PLOTS 
 #define TIME_SAVE 	5000
 #define TIME_BUZZER 500
 #define TIME_MUTE   60000             //msec
@@ -48,33 +48,33 @@
 //#define STEPPER_SPEED_EXSUFF        (12000)
 //#define STEPPER_ACC_EXSUFFLATION    (200000)   // Steps/s2 (Originally was 2000 * microsteps)
 
-//#define STEPPER_MICROSTEPS 16
-//#define STEPPER_STEPS_PER_REVOLUTION 200
-//#define STEPPER_MICROSTEPS_PER_REVOLUTION (STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS)
-//#define STEPPER_HOMING_DIRECTION    (1)
-//#define STEPPER_HOMING_SPEED        (STEPPER_MICROSTEPS * 2000)   // Steps/s
-//#define STEPPER_LOWEST_POSITION     (-10)   // Steps
-//#define STEPPER_HIGHEST_POSITION    ( 3000 )   //270º ,2500 for 270º, 2850 for 220º, 2930 for 330º
-//#define STEPPER_SPEED_DEFAULT       (400)   // Steps/s
-//#define STEPPER_ACCEL_MAX           (8000)  //Originalmente 12000
-//#define STEPPER_SPEED_MAX_VCL       (12000)   // Steps/s  //Originally 1200, THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
-//#define STEPPER_SPEED_EXSUFF        (8000) //DEFAULT ORIG FROM REESPIRATOR (STEPPER_MICROSTEPS *  800)
-//#define STEPPER_ACC_EXSUFFLATION    (12000)   // Steps/s2 (Originally was 2000 * microsteps)
-
-/////
-#define STEPPER_MICROSTEPS 8
+#define STEPPER_MICROSTEPS 16
 #define STEPPER_STEPS_PER_REVOLUTION 200
 #define STEPPER_MICROSTEPS_PER_REVOLUTION (STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS)
-//#define STEPPER_DIR 1
 #define STEPPER_HOMING_DIRECTION    (1)
 #define STEPPER_HOMING_SPEED        (STEPPER_MICROSTEPS * 2000)   // Steps/s
 #define STEPPER_LOWEST_POSITION     (-10)   // Steps
-#define STEPPER_HIGHEST_POSITION    ( 1200 )   //270º ,2500 for 270º, 2850 for 220º, 2930 for 330º
+#define STEPPER_HIGHEST_POSITION    ( 3000 )   //270º ,2500 for 270º, 2850 for 220º, 2930 for 330º
 #define STEPPER_SPEED_DEFAULT       (400)   // Steps/s
-#define STEPPER_ACCEL_MAX           (8000) //CON 12000 se pasa! 
-#define STEPPER_SPEED_MAX_VCL       (1200)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
-#define STEPPER_SPEED_EXSUFF        (STEPPER_MICROSTEPS * 200)//Default for 3200 is 4000
-#define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  2000)   // Steps/s2
+#define STEPPER_ACCEL_MAX           (8000)  //Originalmente 12000
+#define STEPPER_SPEED_MAX_VCL       (6000)   // Steps/s  //Originally 1200, THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
+#define STEPPER_SPEED_EXSUFF        (8000) //DEFAULT ORIG FROM REESPIRATOR (STEPPER_MICROSTEPS *  800)
+#define STEPPER_ACC_EXSUFFLATION    (10000)   // Steps/s2 (Originally was 2000 * microsteps)
+
+/////
+//#define STEPPER_MICROSTEPS 8
+//#define STEPPER_STEPS_PER_REVOLUTION 200
+//#define STEPPER_MICROSTEPS_PER_REVOLUTION (STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS)
+////#define STEPPER_DIR 1
+//#define STEPPER_HOMING_DIRECTION    (1)
+//#define STEPPER_HOMING_SPEED        (STEPPER_MICROSTEPS * 2000)   // Steps/s
+//#define STEPPER_LOWEST_POSITION     (-10)   // Steps
+//#define STEPPER_HIGHEST_POSITION    ( 1200 )   //270º ,2500 for 270º, 2850 for 220º, 2930 for 330º
+//#define STEPPER_SPEED_DEFAULT       (400)   // Steps/s
+//#define STEPPER_ACCEL_MAX           (8000) //CON 12000 se pasa! 
+//#define STEPPER_SPEED_MAX_VCL       (1200)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
+//#define STEPPER_SPEED_EXSUFF        (STEPPER_MICROSTEPS * 200)//Default for 3200 is 4000
+//#define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  2000)   // Steps/s2
 
 //#define STEPPER_MICROSTEPS 4
 //#define STEPPER_STEPS_PER_REVOLUTION 200

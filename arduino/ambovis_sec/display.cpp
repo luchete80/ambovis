@@ -1,48 +1,77 @@
 #include "display.h"
 #include "MechVentilation.h"
 
-bool lcd_cleaned=false;
+//bool lcd_cleaned=false;
 
 unsigned long time_last_show=0;
 
 char a[10],b[10];
 
-const byte numChars = 32;
-char receivedChars[numChars]; // an array to store the received data
+bool state_chg;
+
 int last_t;
 int integerFromPC [5];
 float floatFromPC = 0.0;
 int axispos[]={100,170,300}; //from each graph
-byte state_r;
+//byte state_r;
 int buzzer=3; //pin
 
-enum _state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
+#include "Serial.h"
 
-_state state;
+#ifdef DISPLAY_SEC
 
-char recvChar;
-char endMarker = '>';
-boolean newData = false;
-byte valsreaded=0;
-int valsreaded_[3];
-byte last_x=0;
-
-
-int count=0;
-byte escala=32;
-byte x[128],y[64];
+float diff_var[]={5., 20., 800.,0.,300.}; 
 
 byte rx[128],ry[128];
 int  ry2[128];
 int yflux[2];
 int yvt[2];
 char buffer[10];
+int yp[2];
+int vi,ve,vt;
+bool ve_readed,vi_readed;
+
+#endif
+
+//enum _state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
+
+#define NO_ALARM        0
+#define PEEP_ALARM      1
+#define PIP_ALARM       2
+#define PEEP_PIP_ALARM  3
+
+bool wait4statechg=false;
+//_state state;
+int state,pre_state,state_r,last_state;//pre_state is to verification
+
+char recvChar;
+char endMarker = '>';
+
+
+int valsreaded_[3];
+//byte last_x=0;
+
+
+int count=0;
+byte escala=32;
+byte x[128],y[64];
+
+
+void parseData();
+
 
 void tft_draw(void) {
     //Serial.println(cycle_pos);Serial.println(ry[valsreaded]);
-    last_x=cycle_pos;
-    rx[valsreaded]=cycle_pos;
-    ry[valsreaded]=pressure_p*2.;     
+
+    parseData();
+    //last_x=cycle_pos;
+    //last_x=integerFromPC[TIME_];
+    //rx[valsreaded]=cycle_pos;
+    rx[valsreaded]=integerFromPC[TIME_];
+
+    //ry[valsreaded]=pressure_p*2.;     
+    if (integerFromPC[P_]!= 0)
+      ry[valsreaded]=integerFromPC[P_]*2.;    
 
     yflux[0]=yflux[1];yflux[1]=int(flow_f*0.035);
     yvt[0]=yvt[1];yvt[1]=int((_mlInsVol - _mlExsVol)*0.1);
@@ -51,10 +80,13 @@ void tft_draw(void) {
     tft.setRotation(1);
     if (valsreaded > 0)
         drawY2(ILI9341_GREEN);
-    valsreaded+=1;
     
-  	if (last_x<5 && !lcd_cleaned){
-    		lcd_cleaned=true;
+  	if (last_x<5 && !tft_cleaned){
+        #ifdef DEBUG_UPDATE
+        Serial.print("last_x: ");Serial.println(last_x);
+        Serial.println("Cleaning");
+        #endif
+    		tft_cleaned=true;
     		valsreaded=0;
     		for (int i=0;i<3;i++) 
     		    valsreaded_[i]=0;
@@ -65,7 +97,7 @@ void tft_draw(void) {
         tft.fillRect(0, 240 , 320, 10, ILI9341_GREEN);//x,y,lengthx,lentgthy
 
 		} else {
-		    lcd_cleaned=false;
+		    tft_cleaned=false;
 		}
 
 
@@ -75,14 +107,19 @@ void tft_draw(void) {
 }//loop
 
 void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
-
+  #ifdef DEBUG_UPDATE
+  Serial.print("Valsreaded: ");Serial.println(valsreaded);
+  Serial.print("rx(valsreaded) & rx(valsreaded-1): ");Serial.print(rx[valsreaded]);Serial.print(",");Serial.print(rx[valsreaded-1]);Serial.print(",");
+  #endif
   if ( rx[valsreaded] > rx[valsreaded-1] ) {//to avoid draw entire line to the begining at the end of the cycle
           for (int i=0;i<3;i++)
             tft.drawLine(axispos[i], 240-rx[valsreaded-1], axispos[i], 240-rx[valsreaded], ILI9341_DARKGREY);
             tft.fillRect(0, 240 - rx[valsreaded] - 10, 320, 10, ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
             //tft.fillRect(0, 240 - rx[valsreaded-1] + 1, 320, rx[valsreaded]-rx[valsreaded-1], ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
             
-            tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
+            //tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
+
+            tft.drawLine(axispos[0]-yp[0],              240-rx[valsreaded-1], axispos[0]-yp[1],             240-rx[valsreaded], color);
             tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_MAGENTA);
             tft.drawLine(axispos[2]-yvt[0],             240-rx[valsreaded-1], axispos[2]-yvt[1],            240-rx[valsreaded], ILI9341_BLUE);
 
@@ -192,3 +229,66 @@ void print_vols(){
     tft.println("VT: ");tft.setCursor(190, 220);tft.println(buffer);
  
   }
+
+
+
+
+
+void parseData() {
+  char * strtokIndx; // this is used by strtok() as an index
+
+  strtokIndx = strtok(receivedChars, ","); // this continues where the previous call left off
+  integerFromPC[0] = atoi(strtokIndx);     // convert this part to an integer
+
+  for (int i=1;i<7;i++) {
+      strtokIndx = strtok(NULL, ","); // this continues where the previous call left off
+      integerFromPC[i] = atoi(strtokIndx);     // convert this part to an integer
+  }
+  
+  if (integerFromPC[ALARM_]!=0 && !wait4statechg) {
+    pre_state++;
+  }
+
+ if (pre_state > 4 && !wait4statechg) {
+      state=integerFromPC[ALARM_];
+      state_chg=true;
+      wait4statechg=true;
+  }
+
+   if ( integerFromPC[TIME_] != last_x /*&& abs(integerFromPC[P_])<ry[valsreaded]+10 */&& /*/*integerFromPC[0] < 127 */ integerFromPC[TIME_] < last_x+20) {
+     valsreaded+=1;
+     last_x=integerFromPC[TIME_];
+     rx[valsreaded]=integerFromPC[TIME_];
+     ry[valsreaded]=integerFromPC[P_];     
+   }
+  Serial.print("time y xgra");Serial.print(integerFromPC[TIME_]);Serial.print(",");Serial.print(xgra[P_][1]);
+  if ( integerFromPC[P_] != 0 && abs(integerFromPC[P_]) < ( abs(last_vals[P_][1])+diff_var[P_] ) /*&& integerFromPC[TIME_] > xgra[P_][1]*/) {
+    Serial.print("yp0 y 1: ");Serial.print(yp[0]);Serial.print(",");Serial.println(yp[1]);
+    yp[0]=yp[1];yp[1]=int(float(integerFromPC[P_])*2.);
+    last_vals[P_][0]=last_vals[P_][1];last_vals[P_][1]=integerFromPC[P_];
+    xgra[P_][0]=xgra[P_][1];xgra[P_][1]=integerFromPC[TIME_];
+  }
+  
+  if (integerFromPC[VI_] != vi && !vi_readed) {
+      vi=integerFromPC[VI_];
+      vi_readed=true;
+  }
+
+  if (integerFromPC[VE_] != vi && !ve_readed) {
+      ve=integerFromPC[VE_];
+      ve_readed=true;
+  }
+
+  if ( integerFromPC[FLUX_] != 0 && abs(integerFromPC[FLUX_]) < abs(last_vals[FLUX_][1])+diff_var[FLUX_] && integerFromPC[TIME_] > xgra[FLUX_][1]) {
+    yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_])*0.04);
+    last_vals[FLUX_][0]=last_vals[FLUX_][1];last_vals[FLUX_][1]=integerFromPC[FLUX_];
+    xgra[FLUX_][0]=xgra[FLUX_][1];xgra[FLUX_][1]=integerFromPC[TIME_];
+  }
+   if ( integerFromPC[VT_] != 0 && abs(integerFromPC[VT_]) < abs(last_vals[VT_][1])+diff_var[VT_] && integerFromPC[TIME_] > xgra[VT_][1]) {
+    yvt[0]=yvt[1];yvt[1]=int(float(integerFromPC[VT_])*0.07);
+    last_vals[VT_][0]=last_vals[VT_][1];last_vals[VT_][1]=integerFromPC[VT_];
+    xgra[VT_][0]=xgra[VT_][1];xgra[VT_][1]=integerFromPC[TIME_];
+  }
+    
+    Serial.print("integers: ");Serial.print(integerFromPC[0]);Serial.print(",");Serial.print(integerFromPC[1]);Serial.print(",");Serial.print(integerFromPC[2]);Serial.print(",");Serial.println(integerFromPC[3]);
+}
