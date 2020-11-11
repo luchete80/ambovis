@@ -290,6 +290,8 @@ void loop() {
       check_encoder();
       //if (time > time_serial_read + SERIAL_READ){
           recvchars=recvWithEndMarker();
+          parseData();
+          cycle_pos=integerFromPC[TIME_];
       //    time_serial_read=time;
       //}
       showNewData();
@@ -306,6 +308,12 @@ void loop() {
           lastShowSensor=time; 
            tft_draw();
     
+      }
+
+      if (cycle_pos > 100) {
+          Serial.print("Sending by serial");
+          Serial1.print("-1,");
+          Serial1.println(byte(options.respiratoryRate));
       }
 //    
 //    
