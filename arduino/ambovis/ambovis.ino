@@ -44,7 +44,7 @@ float _mlInsVol = 0;
 float _mlExsVol = 0;
 int _mllastInsVol, _mllastExsVol;
 unsigned long mute_count;
-
+bool update_options_once;
 int Compression_perc = 8; //80%
 
 #ifdef ACCEL_STEPPER
@@ -374,6 +374,8 @@ void setup() {
     sleep_mode=false;
     put_to_sleep=false;
     wake_up=false;
+
+    update_options_once=true;
 }
 
 
@@ -544,6 +546,7 @@ void loop() {
         display_lcd();
         update_display = true;
         last_update_display = time;
+        update_options_once=true;
     
     #ifdef DEBUG_PID
         if (vent_mode = VENTMODE_PCL) {
@@ -574,12 +577,15 @@ void loop() {
         display_lcd();
         display_needs_update = false;
       }
-    
-      if ( update_options ) {
-        ventilation->change_config(options);
-        update_options = false;
-        //show_changed_options=true;
-      }//
+
+      if (cycle_pos > 110 && update_options_once) {
+          if ( update_options ) {
+            ventilation->change_config(options);
+            update_options = false;
+            update_options_once=false;
+            //show_changed_options=true;
+          }//
+      }
     
       if ( millis () - last_vent_time > TIME_BASE ) {
         ventilation -> update();
