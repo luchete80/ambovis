@@ -21,6 +21,9 @@ bool sleep_mode;
 bool put_to_sleep,wake_up;
 unsigned long print_bat_time;
 unsigned long _msecTimerCnt=0;
+
+bool update_options_once=true;
+
 byte _back[8] = {
   0b00100,
   0b01000,
@@ -541,6 +544,8 @@ void loop() {
         } else {
               digitalWrite(YELLOW_LED,LOW);
           }
+
+        update_options_once=true;
       }//change cycle
     
       if (display_needs_update) {
@@ -549,12 +554,15 @@ void loop() {
         //display_needs_update = false;
       }
     
-      if ( update_options ) {
-        ventilation->change_config(options);
-        update_options = false;
-        //show_changed_options=true;
-      }//
-    
+      if (cycle_pos > 110 && update_options_once){
+          if ( update_options ) {
+            ventilation->change_config(options);
+            update_options = false;
+            update_options_once=false;
+            //show_changed_options=true;
+          }//
+      }
+      
       if ( millis () - last_vent_time > TIME_BASE ) {
         ventilation -> update();
       }
