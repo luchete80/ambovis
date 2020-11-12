@@ -637,9 +637,13 @@ void update_error() {
     Serial.print("chars: ");Serial.println(receivedChars);
     Serial.print("Integers: ");Serial.print(integerFromPC [0]);Serial.print(",");Serial.println(integerFromPC [1]);
 
-    if (integerFromPC [1]!=0)
-      options.respiratoryRate=integerFromPC [1];
+    if (integerFromPC [0]!=0)
+    {
+      options.respiratoryRate=integerFromPC [0];
+      Serial.print("BPM changed!!");
+      ventilation->change_config(options);}
   }
+
   if (cycle_pos < 5 && init_verror) {
     verror = verror_sum / ((float)vcorr_count + 1.);
     //Serial.print("Verror (mV) and count: ");Serial.print(verror*1000);Serial.print(",  ");Serial.println(vcorr_count);
