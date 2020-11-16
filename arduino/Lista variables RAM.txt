@@ -1,0 +1,27 @@
+//        EEPROM.put(0, last_cycle);        eeAddress+= sizeof(unsigned long);
+//        EEPROM.put(eeAddress, p_trim);    eeAddress+= sizeof(p_trim);
+//        EEPROM.put(eeAddress, autopid);   eeAddress+= sizeof(autopid);
+//        EEPROM.put(eeAddress, min_cd);    eeAddress+= sizeof(min_cd);
+//        EEPROM.put(eeAddress, max_cd);    eeAddress+= sizeof(max_cd);
+//        EEPROM.put(eeAddress, min_speed); eeAddress+= sizeof(min_speed);
+//        EEPROM.put(eeAddress, max_speed); eeAddress+= sizeof(max_speed);
+//        EEPROM.put(eeAddress, min_accel); eeAddress+= sizeof(min_accel);
+//        EEPROM.put(eeAddress, max_accel); eeAddress+= sizeof(max_accel);
+//        EEPROM.put(eeAddress, min_pidk);  eeAddress+= sizeof(min_pidk);
+//        EEPROM.put(eeAddress, max_pidk);  eeAddress+= sizeof(max_pidk);
+//        EEPROM.put(eeAddress, alarm_vt);  eeAddress+= sizeof(alarm_vt);
+//        EEPROM.put(eeAddress, filter);    eeAddress+= sizeof(filter);   
+//        EEPROM.put(eeAddress, pfmin);     eeAddress+= sizeof(pfmin);
+//        EEPROM.put(eeAddress, pfmax);     eeAddress+= sizeof(pfmax);
+//        EEPROM.put(eeAddress, dpip_b);    eeAddress+= sizeof(dpip_b);
+//        EEPROM.put(eeAddress, min_pidi);  eeAddress+= sizeof(min_pidi);
+//        EEPROM.put(eeAddress, max_pidi);  eeAddress+= sizeof(max_pidi);  
+//        EEPROM.put(eeAddress, min_pidd);  eeAddress+= sizeof(min_pidd);
+//        EEPROM.put(eeAddress, max_pidd);  eeAddress+= sizeof(max_pidd);
+//        EEPROM.put(eeAddress, p_acc);      eeAddress+= sizeof(p_acc);
+//        EEPROM.put(eeAddress, f_acc_b);    eeAddress+= sizeof(f_acc_b);
+
+-1  
+0	RPM
+1	
+     

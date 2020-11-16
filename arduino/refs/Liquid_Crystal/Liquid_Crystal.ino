@@ -15,12 +15,12 @@
 //#define PIN_LCD_D6 A5
 //#define PIN_LCD_D7 A6
 
-#define PIN_LCD_RS  2
-#define PIN_LCD_EN  3
-#define PIN_LCD_D4  4
-#define PIN_LCD_D5  5
-#define PIN_LCD_D6  6
-#define PIN_LCD_D7  7
+#define PIN_LCD_RS 8
+#define PIN_LCD_EN 9
+#define PIN_LCD_D4 10
+#define PIN_LCD_D5 11
+#define PIN_LCD_D6 12
+#define PIN_LCD_D7 13
 
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
  
