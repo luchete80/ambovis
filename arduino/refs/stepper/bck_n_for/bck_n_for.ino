@@ -1,6 +1,6 @@
 #include "src/TimerOne/TimerOne.h"
 
-#define STEPPER_MICROSTEPS 8
+#define STEPPER_MICROSTEPS 16
 #define STEPPER_STEPS_PER_REVOLUTION 200
 
 #define STEPPER_MICROSTEPS_PER_REVOLUTION (STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS)
@@ -10,10 +10,10 @@
 // #define STEPPER_LOWEST_POSITION     (STEPPER_MICROSTEPS * -100)   // Steps
 // #define STEPPER_HIGHEST_POSITION    (STEPPER_MICROSTEPS *   50)   // Steps
 #define STEPPER_LOWEST_POSITION     (-10)   // Steps
-#define STEPPER_HIGHEST_POSITION    (STEPPER_MICROSTEPS * 50)   // Steps
-#define STEPPER_SPEED_DEFAULT       (STEPPER_MICROSTEPS *  200)   // Steps/s
+#define STEPPER_HIGHEST_POSITION    (STEPPER_MICROSTEPS * 180)   // Steps
+#define STEPPER_SPEED_DEFAULT       (STEPPER_MICROSTEPS *  800)   // Steps/s
 #define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  200)   // Steps/s2
-#define STEPPER_ACC_INSUFFLATION    (STEPPER_MICROSTEPS *  200)   // Steps/s2
+#define STEPPER_ACC_INSUFFLATION    (STEPPER_MICROSTEPS *  1600)   // Steps/s2
 
 
 #define PIN_STEPPER_STEP 6
@@ -84,7 +84,7 @@ bool reach_home=false;
 
 void setup()
 {
-      Timer1.initialize(25);
+      Timer1.initialize(50);
       Timer1.attachInterrupt(timer1Isr);
       
         pinMode(PIN_BUZZER,OUTPUT);
@@ -98,19 +98,19 @@ void setup()
 
 
 	#ifdef ACCEL
-  goHome();
+  //goHome();
   
 
     stepper.setMaxSpeed(STEPPER_SPEED_DEFAULT);
- stepper.setSpeed(STEPPER_SPEED_DEFAULT);
- stepper.moveTo(pos);
-  stepper.setAcceleration(1000);
+    stepper.setSpeed(STEPPER_SPEED_DEFAULT);
+    stepper.moveTo(pos);
+    stepper.setAcceleration(1000);
 #else
 
      
-	stepper.connectToPins(PIN_STEPPER_STEP, PIN_STEPPER_DIRECTION);
-  stepper.setStepsPerRevolution(STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS);
-  stepper.setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_EXSUFFLATION);
+  	stepper.connectToPins(PIN_STEPPER_STEP, PIN_STEPPER_DIRECTION);
+    stepper.setStepsPerRevolution(STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS);
+    stepper.setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_EXSUFFLATION);
 
     while(!reach_home){
     if (digitalRead(PIN_ENDSTOP)){
@@ -165,7 +165,7 @@ if ( (millis ()-change_time) > cycle_time){
       else
       stepper.setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
       
-      
+      stepper.setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_INSUFFLATION);
       stepper.setSpeedInStepsPerSecond(STEPPER_SPEED_DEFAULT);
       Serial.println("Insuflando");
       change_time=millis();

@@ -10,6 +10,9 @@ static byte max_pidk_byte,min_pidk_byte;
 bool change_sleep;
 int pressed=0;  //0 nothing , 1 enter, 2 bck
 
+byte opciones_mod[3];
+byte cant_opciones_mod;
+
 byte back[8] = {
   0b00100,
   0b01000,
@@ -20,6 +23,9 @@ byte back[8] = {
   0b00001,
   0b11111
 };
+
+Menu::Menu()
+{}
 
 void updateState() {
   // the button has been just pressed
@@ -379,7 +385,7 @@ void check_encoder ( ) {
                 else if (menu_number == 3)  {dpip_b = encoderPos; dpip  = float(encoderPos)/10.;}
                 break;
               case 2:
-                if ( menu_number == 0 )       options.respiratoryRate = encoderPos;
+                if ( menu_number == 0 )       {options.respiratoryRate = encoderPos; opciones_mod[0]=MENU_OPT_BPM;cant_opciones_mod=1;}
                 else  if (menu_number == 1)   alarm_peep_pressure     = encoderPos;
                 else  if (menu_number == 2)   min_speed  = int((float)encoderPos*10.);
                 else if ( menu_number == 3 ){

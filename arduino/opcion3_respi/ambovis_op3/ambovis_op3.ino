@@ -364,6 +364,7 @@ void setup() {
 
 
 bool update_display = false;
+bool read_serial_once=true;
 byte pos;
 
 void loop() {
@@ -413,7 +414,8 @@ void loop() {
 //        lastSave = millis();
 //      }
 //    
-    
+      read_menu();
+      
       if ( time > lastShowSensor + TIME_SHOW ) {
     
           lastShowSensor=time; 
@@ -422,8 +424,9 @@ void loop() {
           Serial1.print(int(pressure_p));Serial1.print(",");
           Serial1.println(flow_f,2);
 
-          //Serial.println(int(cycle_pos));
-          //Serial.println(flow_f,2);
+//          Serial.print(int(cycle_pos));Serial.print(",");
+//          Serial.print(int(pressure_p));Serial.print(",");
+//          Serial.println(flow_f,2);
           
 //    //	     #ifdef FILTER_FLUX
 //           Serial.print(Voltage,5);Serial.print(",");
@@ -546,6 +549,7 @@ void loop() {
           }
 
         update_options_once=true;
+        read_serial_once =true;
       }//change cycle
     
       if (display_needs_update) {
@@ -627,6 +631,25 @@ void timer1Isr(void)
   #endif
 }
 
+void read_menu(){
+    if (cycle_pos > 110) {
+
+          recvWithEndMarker();
+          showNewData();
+          parseData();
+    
+          if (integerFromPC [1]>0 && read_serial_once ){
+
+          Serial.print("chars: ");Serial.println(receivedChars);
+          Serial.print("Integers: ");Serial.print(integerFromPC [0]);Serial.print(",");Serial.println(integerFromPC [1]);
+          options.respiratoryRate=integerFromPC [1];
+          Serial.print("BPM changed!!");
+          update_options=true;
+          read_serial_once=false;
+        }
+    }
+}
+
 void update_error() {
   //UPDATING VERROR
   if (cycle_pos > 100) {
@@ -639,18 +662,18 @@ void update_error() {
     }
     //Serial.print("Verror (mV) and count: ");Serial.print(verror_sum*1000);Serial.print(",  ");Serial.println(vcorr_count);
     
-    recvWithEndMarker();
-    showNewData();
-    parseData();
-    Serial.print("chars: ");Serial.println(receivedChars);
-    Serial.print("Integers: ");Serial.print(integerFromPC [0]);Serial.print(",");Serial.println(integerFromPC [1]);
-
-    if (integerFromPC [0]!=0)
-    {
-      options.respiratoryRate=integerFromPC [0];
-      Serial.print("BPM changed!!");
-      ventilation->change_config(options);}
-  }
+//        recvWithEndMarker();
+//        showNewData();
+//        parseData();
+//        Serial.print("chars: ");Serial.println(receivedChars);
+//        Serial.print("Integers: ");Serial.print(integerFromPC [0]);Serial.print(",");Serial.println(integerFromPC [1]);
+//    
+//        if (integerFromPC [0]!=0){
+//          options.respiratoryRate=integerFromPC [0];
+//          Serial.print("BPM changed!!");
+//          ventilation->change_config(options);
+//        }
+    }
 
   if (cycle_pos < 5 && init_verror) {
     verror = verror_sum / ((float)vcorr_count + 1.);

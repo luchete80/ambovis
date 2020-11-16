@@ -33,7 +33,7 @@ int vi,ve,vt;
 bool ve_readed,vi_readed;
 
 #endif
-
+void print_params();
 void parseNfilterData();
 
 //enum _state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
@@ -97,6 +97,7 @@ void tft_draw(void) {
         tft.setRotation(1);
         tft.fillRect(0,0,60,100, ILI9341_BLACK); //FOR ALARMS, UPPER RIRHT
         tft.fillRect(0, 240 , 320, 10, ILI9341_GREEN);//x,y,lengthx,lentgthy
+        print_params();
 
 		} else {
 		    tft_cleaned=false;
@@ -119,7 +120,7 @@ void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WIT
             tft.fillRect(0, 240 - rx[valsreaded] - 10, 320, 10, ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
             //tft.fillRect(0, 240 - rx[valsreaded-1] + 1, 320, rx[valsreaded]-rx[valsreaded-1], ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
             
-            //tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
+            tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
 
             tft.drawLine(axispos[0]-yp[0],              240-rx[valsreaded-1], axispos[0]-yp[1],             240-rx[valsreaded], color);
             tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_MAGENTA);
@@ -209,6 +210,16 @@ void print_bat(){
     //tft.setCursor(180, 280);tft.println(buffer);
 
 }
+
+void print_params(){
+    tft.setRotation(0);
+    tft.fillRect(180,100,70,80, ILI9341_BLUE);
+    //itoa(integerFromPC[5], buffer, 10);
+    itoa(options.respiratoryRate, buffer, 10);
+    tft.setCursor(150, 100);  //Y es la posicion vertical aca
+    tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
+    tft.println("BPM: ");tft.setCursor(200, 100);tft.println(buffer);
+  }
 void print_vols(){
     tft.setRotation(0);
     tft.fillRect(180,160,70,80, ILI9341_BLACK);

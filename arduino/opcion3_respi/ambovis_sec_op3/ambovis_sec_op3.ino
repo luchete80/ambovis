@@ -28,6 +28,8 @@ byte _back[8] = {
 int last_vals[7][2];
 int xgra[5][2];
 
+Menu *menu;
+
 // FOR ADS
 #include <Wire.h>
 #include <Adafruit_ADS1015.h>
@@ -264,6 +266,7 @@ void setup() {
     xgra[FLUX_][1]=0;
 
     time_serial_read=millis();
+    cant_opciones_mod=0;
 }
 
 
@@ -288,16 +291,20 @@ void loop() {
 //
       time = millis();
       check_encoder();
+
+            
+
       //if (time > time_serial_read + SERIAL_READ){
           recvchars=recvWithEndMarker();
-          parseData();
+          //Serial.print("chars: ");Serial.println(receivedChars);
+          //parseData();
           cycle_pos=integerFromPC[TIME_];
+          //Serial.print("cyclepos: ");Serial.println(integerFromPC[P_]);
       //    time_serial_read=time;
       //}
       showNewData();
       
-      Serial.print("chars: ");Serial.println(receivedChars);
-      Serial.print("char length: ");Serial.println(recvchars);
+      //Serial.print("char length: ");Serial.println(recvchars);
 //    
       
 //      check_buzzer_mute();
@@ -312,8 +319,12 @@ void loop() {
 
       if (cycle_pos > 100) {
           Serial.print("Sending by serial");
-          Serial1.print("-1,");
-          Serial1.println(byte(options.respiratoryRate));
+          if (cant_opciones_mod>0){
+              opciones_mod[0]=MENU_OPT_BPM;cant_opciones_mod=0;
+              Serial1.print("-1,");
+              Serial1.println(byte(options.respiratoryRate));
+          }
+
       }
 //    
 //    
