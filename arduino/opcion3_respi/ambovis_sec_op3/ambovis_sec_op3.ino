@@ -316,6 +316,7 @@ void loop() {
               } else {
                   if ( integerFromPC[P_] < pressure_min){
                       pressure_min = (float)integerFromPC[P_];
+                      Serial.print("pmin");Serial.println(pressure_min);
                   }
                 }
               
@@ -341,7 +342,7 @@ void loop() {
 //
 
 
-      if (cycle_pos > 100) {
+      if (cycle_pos > 115) {
           #ifdef DEBUG_UPDATE 
           Serial.print("Sending by serial");
           #endif
@@ -354,7 +355,8 @@ void loop() {
           last_pressure_max = pressure_max;
           pressure_max = 0;
           last_pressure_min=pressure_min;
-          pressure_max = 100;
+          pressure_min = 100;
+          Serial.println("FIN DE CICLO");
       }
 
       if (cycle_pos < 5 && !change_cycle){

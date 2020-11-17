@@ -34,6 +34,7 @@ bool ve_readed,vi_readed;
 
 #endif
 void print_params();
+void print_press();
 void parseNfilterData();
 
 //enum _state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
@@ -98,6 +99,7 @@ void tft_draw(void) {
         tft.fillRect(0,0,60,100, ILI9341_BLACK); //FOR ALARMS, UPPER RIRHT
         tft.fillRect(0, 240 , 320, 10, ILI9341_GREEN);//x,y,lengthx,lentgthy
         print_params();
+        print_press();
 
 		} else {
 		    tft_cleaned=false;
@@ -211,6 +213,16 @@ void print_bat(){
     //tft.setCursor(180, 280);tft.println(buffer);
 
 }
+void print_press(){
+    tft.setRotation(0);
+    tft.fillRect(180,80,70,20, ILI9341_BLACK);
+    //itoa(integerFromPC[5], buffer, 10);
+    itoa(last_pressure_min, buffer, 10);
+    tft.setCursor(150, 80);  //Y es la posicion vertical aca
+    tft.setTextColor(ILI9341_RED);  tft.setTextSize(2);
+    tft.println("PEEP: ");tft.setCursor(200, 80);tft.println(buffer);
+  }
+
 
 void print_params(){
     tft.setRotation(0);
