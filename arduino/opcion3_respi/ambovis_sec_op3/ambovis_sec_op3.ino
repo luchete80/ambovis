@@ -14,6 +14,9 @@ bool sleep_mode;
 bool put_to_sleep,wake_up;
 unsigned long print_bat_time;
 unsigned long _msecTimerCnt=0;
+bool change_cycle;
+//int vt;
+
 byte _back[8] = {
   0b00100,
   0b01000,
@@ -38,7 +41,7 @@ Menu *menu;
 #include <Adafruit_ADS1015.h>
 Adafruit_ADS1115 ads(0x48);
 float Voltage = 0.0;
-//int vt;
+
 float _mlInsVol = 0;
 float _mlExsVol = 0;
 int _mllastInsVol, _mllastExsVol;
@@ -271,6 +274,8 @@ void setup() {
     time_serial_read=millis();
     cant_opciones_mod=0;
     wait4read=false;
+
+    change_cycle=false;
 }
 
 
@@ -305,8 +310,17 @@ void loop() {
           //Serial.print("chars: ");Serial.println(receivedChars);
           //parseData();
           cycle_pos=integerFromPC[TIME_];
-          if (integerFromPC[P_]> 0 )
-            wait4read=true;
+          if (integerFromPC[P_]> 0 ){
+              if ( integerFromPC[P_] > pressure_max){
+                  pressure_max = (float)integerFromPC[P_];
+              } else {
+                  if ( integerFromPC[P_] < pressure_min){
+                      pressure_min = (float)integerFromPC[P_];
+                  }
+                }
+              
+              wait4read=true;
+          }
           //Serial.print("cyclepos: ");Serial.println(integerFromPC[P_]);
           time_serial_read=time;
       }
@@ -337,7 +351,57 @@ void loop() {
               Serial1.println(seleccion_mod[0]);
           }//if hay opciones modificadas
 
+          last_pressure_max = pressure_max;
+          pressure_max = 0;
+          last_pressure_min=pressure_min;
+          pressure_max = 100;
       }
+
+      if (cycle_pos < 5 && !change_cycle){
+          //vt=(_mllastInsVol + _mllastInsVol)/2;
+          //if (vt<alarm_vt)  isalarmvt_on=1;
+          //else              isalarmvt_on=0;
+          if ( last_pressure_max > alarm_max_pressure + 1 ) {
+            if ( last_pressure_min < alarm_peep_pressure - 1) {
+                if (!isalarmvt_on)  alarm_state = 3;
+                else                alarm_state = 13;
+              } else {
+                if (!isalarmvt_on)  alarm_state = 2;
+                else                alarm_state = 12;
+              }
+            } else {
+              if ( last_pressure_min < alarm_peep_pressure - 1 ) {
+                if (!isalarmvt_on) alarm_state = 1;
+                else               alarm_state = 11;
+              } else {
+                if (!isalarmvt_on)  alarm_state = 0;
+                else                alarm_state = 10;
+              }
+          }
+          change_cycle=true;
+      }
+
+//        if ( ventilation -> getCycleNum () != last_cycle ) {
+//        vt=(_mllastInsVol + _mllastInsVol)/2;
+//        if (vt<alarm_vt)  isalarmvt_on=1;
+//        else              isalarmvt_on=0;
+//        if ( last_pressure_max > alarm_max_pressure + 1 ) {
+//        if ( last_pressure_min < alarm_peep_pressure - 1) {
+//            if (!isalarmvt_on)  alarm_state = 3;
+//            else                alarm_state = 13;
+//          } else {
+//            if (!isalarmvt_on)  alarm_state = 2;
+//            else                alarm_state = 12;
+//          }
+//        } else {
+//          if ( last_pressure_min < alarm_peep_pressure - 1 ) {
+//            if (!isalarmvt_on) alarm_state = 1;
+//            else               alarm_state = 11;
+//          } else {
+//            if (!isalarmvt_on)  alarm_state = 0;
+//            else                alarm_state = 10;
+//          }
+//        }
 //    
 //    
 //
@@ -373,38 +437,38 @@ void loop() {
                       timebuzz=time;
                       isbuzzeron=!isbuzzeron;
                       if (isbuzzeron){
-                          //digitalWrite(PIN_BUZZER,BUZZER_LOW);
+                          digitalWrite(PIN_BUZZER,BUZZER_LOW);
                       }   
                       else {
-                          //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+                          digitalWrite(PIN_BUZZER,!BUZZER_LOW);
                       }
                   }
               } else {  //buzz muted
-                  //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+                  digitalWrite(PIN_BUZZER,!BUZZER_LOW);
               }
         } else {//state > 0
-          //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+          digitalWrite(PIN_BUZZER,!BUZZER_LOW);
           isbuzzeron=true;        //Inverted logic
         }
 
   //! sleep_mode
-  } else { 
-      if (put_to_sleep){
-          tft.fillScreen(ILI9341_BLACK);
-          digitalWrite(PIN_LCD_EN,HIGH);
-          put_to_sleep=false;  
-          print_bat_time=time;
-          print_bat();
-          //digitalWrite(PIN_BUZZER,!BUZZER_LOW); //Buzzer inverted
-          lcd.clear();
-      }
-      if (time > print_bat_time + 5000){
-        print_bat();
-        print_bat_time=time;
-      }
-      time = millis();
-      check_bck_state();
-  }
+//  } else { 
+//      if (put_to_sleep){
+//          tft.fillScreen(ILI9341_BLACK);
+//          digitalWrite(PIN_LCD_EN,HIGH);
+//          put_to_sleep=false;  
+//          print_bat_time=time;
+//          print_bat();
+//          //digitalWrite(PIN_BUZZER,!BUZZER_LOW); //Buzzer inverted
+//          lcd.clear();
+//      }
+//      if (time > print_bat_time + 5000){
+//        print_bat();
+//        print_bat_time=time;
+//      }
+//      time = millis();
+//      check_bck_state();
+//  }
 
 }//LOOP
 

@@ -658,6 +658,12 @@ void read_menu(){
                   case 5:
                   options.percVolume = integerFromPC [1];
                   break;
+                  case 6:
+                  alarm_max_pressure = integerFromPC [1];
+                  break;
+                  case 7:
+                  alarm_peep_pressure = integerFromPC [1];
+                  break;
                   //Serial.print("BPM changed!!");
               }
 
