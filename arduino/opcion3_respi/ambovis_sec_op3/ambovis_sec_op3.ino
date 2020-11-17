@@ -25,6 +25,9 @@ byte _back[8] = {
   0b11111
 };
 
+
+bool wait4read;
+
 int last_vals[7][2];
 int xgra[5][2];
 
@@ -267,6 +270,7 @@ void setup() {
 
     time_serial_read=millis();
     cant_opciones_mod=0;
+    wait4read=false;
 }
 
 
@@ -295,35 +299,43 @@ void loop() {
             
 
       //if (time > time_serial_read + SERIAL_READ){
+      if (!wait4read){
           recvchars=recvWithEndMarker();
+          showNewData();
           //Serial.print("chars: ");Serial.println(receivedChars);
           //parseData();
           cycle_pos=integerFromPC[TIME_];
+          if (integerFromPC[P_]> 0 )
+            wait4read=true;
           //Serial.print("cyclepos: ");Serial.println(integerFromPC[P_]);
-      //    time_serial_read=time;
+          time_serial_read=time;
+      }
       //}
-      showNewData();
-      
+
+      if ( time > lastShowSensor + TIME_SHOW ) {
+
+          lastShowSensor=time; 
+          tft_draw();
+          wait4read=false;
+
+      }      
       //Serial.print("char length: ");Serial.println(recvchars);
 //    
       
 //      check_buzzer_mute();
 //      //Serial.print("Carga: ");Serial.println(analogRead(PIN_BAT_LEV));
 //
-      if ( time > lastShowSensor + TIME_SHOW ) {
-    
-          lastShowSensor=time; 
-           tft_draw();
-    
-      }
+
 
       if (cycle_pos > 100) {
+          #ifdef DEBUG_UPDATE 
           Serial.print("Sending by serial");
+          #endif
           if (cant_opciones_mod>0){
-              opciones_mod[0]=MENU_OPT_BPM;cant_opciones_mod=0;
-              Serial1.print("-1,");
-              Serial1.println(byte(options.respiratoryRate));
-          }
+              cant_opciones_mod=0;
+              Serial1.print(opciones_mod[0]);Serial1.print(",");
+              Serial1.println(seleccion_mod[0]);
+          }//if hay opciones modificadas
 
       }
 //    
@@ -354,47 +366,46 @@ void loop() {
         show_changed_options = false;
       }
 //    
-////        if (alarm_state > 0) {
-////    
-////              if (!buzzmuted) {
-////                  if (time > timebuzz + TIME_BUZZER) {
-////                      timebuzz=time;
-////                      isbuzzeron=!isbuzzeron;
-////                      if (isbuzzeron){
-////                          //digitalWrite(PIN_BUZZER,BUZZER_LOW);
-////                      }   
-////                      else {
-////                          //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
-////                      }
-////                  }
-////              } else {  //buzz muted
-////                  //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
-////              }
-////        } else {//state > 0
-////          //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
-////          isbuzzeron=true;        //Inverted logic
-////        }
-//
-//  //! sleep_mode
-//  } else { 
-//      if (put_to_sleep){
-//          tft.fillScreen(ILI9341_BLACK);
-//          digitalWrite(PIN_LCD_EN,HIGH);
-//          put_to_sleep=false;  
-//          print_bat_time=time;
-//          print_bat();
-//          //digitalWrite(PIN_BUZZER,!BUZZER_LOW); //Buzzer inverted
-//          lcd.clear();
-//      }
-//      if (time > print_bat_time + 5000){
-//        print_bat();
-//        print_bat_time=time;
-//      }
-//      time = millis();
-//      check_bck_state();
-//  }
-//
-//  //stepper -> processMovement();
+        if (alarm_state > 0) {
+    
+              if (!buzzmuted) {
+                  if (time > timebuzz + TIME_BUZZER) {
+                      timebuzz=time;
+                      isbuzzeron=!isbuzzeron;
+                      if (isbuzzeron){
+                          //digitalWrite(PIN_BUZZER,BUZZER_LOW);
+                      }   
+                      else {
+                          //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+                      }
+                  }
+              } else {  //buzz muted
+                  //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+              }
+        } else {//state > 0
+          //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+          isbuzzeron=true;        //Inverted logic
+        }
+
+  //! sleep_mode
+  } else { 
+      if (put_to_sleep){
+          tft.fillScreen(ILI9341_BLACK);
+          digitalWrite(PIN_LCD_EN,HIGH);
+          put_to_sleep=false;  
+          print_bat_time=time;
+          print_bat();
+          //digitalWrite(PIN_BUZZER,!BUZZER_LOW); //Buzzer inverted
+          lcd.clear();
+      }
+      if (time > print_bat_time + 5000){
+        print_bat();
+        print_bat_time=time;
+      }
+      time = millis();
+      check_bck_state();
+  }
+
 }//LOOP
 
 void update_error() {

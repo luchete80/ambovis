@@ -66,7 +66,7 @@ void tft_draw(void) {
     //Serial.println(cycle_pos);Serial.println(ry[valsreaded]);
 
     parseNfilterData();
-    //last_x=cycle_pos;
+    last_x=cycle_pos;
     //last_x=integerFromPC[TIME_];
     //rx[valsreaded]=cycle_pos;
     rx[valsreaded]=integerFromPC[TIME_];
@@ -118,9 +118,10 @@ void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WIT
           for (int i=0;i<3;i++)
             tft.drawLine(axispos[i], 240-rx[valsreaded-1], axispos[i], 240-rx[valsreaded], ILI9341_DARKGREY);
             tft.fillRect(0, 240 - rx[valsreaded] - 10, 320, 10, ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
-            //tft.fillRect(0, 240 - rx[valsreaded-1] + 1, 320, rx[valsreaded]-rx[valsreaded-1], ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
             
-            tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
+            tft.fillRect(0, 240 - rx[valsreaded-1] + 1, 320, rx[valsreaded]-rx[valsreaded-1], ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
+            
+            //tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
 
             tft.drawLine(axispos[0]-yp[0],              240-rx[valsreaded-1], axispos[0]-yp[1],             240-rx[valsreaded], color);
             tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_MAGENTA);
@@ -274,8 +275,8 @@ void parseNfilterData() {
      rx[valsreaded]=integerFromPC[TIME_];
      ry[valsreaded]=integerFromPC[P_];     
    }
-  Serial.print("time y xgra");Serial.print(integerFromPC[TIME_]);Serial.print(",");Serial.print(xgra[P_][1]);
-  if ( integerFromPC[P_] != 0 && abs(integerFromPC[P_]) < ( abs(last_vals[P_][1])+diff_var[P_] ) /*&& integerFromPC[TIME_] > xgra[P_][1]*/) {
+  //Serial.print("time y xgra");Serial.print(integerFromPC[TIME_]);Serial.print(",");Serial.print(xgra[P_][1]);
+  if ( integerFromPC[P_] != 0 /*&& abs(integerFromPC[P_]) < ( abs(last_vals[P_][1])+diff_var[P_] ) && integerFromPC[TIME_] > xgra[P_][1]*/) {
     Serial.print("yp0 y 1: ");Serial.print(yp[0]);Serial.print(",");Serial.println(yp[1]);
     yp[0]=yp[1];yp[1]=int(float(integerFromPC[P_])*2.);
     last_vals[P_][0]=last_vals[P_][1];last_vals[P_][1]=integerFromPC[P_];

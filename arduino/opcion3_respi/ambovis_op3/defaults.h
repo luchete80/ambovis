@@ -14,6 +14,10 @@
 #define BMP_I2C 1  //Pressure Sensor
 
 //#define PRUEBAS 1 // testing over arduino without sensors
+#define MENU_OPT_MOD    1
+#define MENU_OPT_BPM    2
+#define MENU_OPT_IE     3
+
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE   1                 // msec
@@ -57,7 +61,7 @@
 #define STEPPER_HIGHEST_POSITION    ( 3000 )   //270º ,2500 for 270º, 2850 for 220º, 2930 for 330º
 #define STEPPER_SPEED_DEFAULT       (400)   // Steps/s
 #define STEPPER_ACCEL_MAX           (STEPPER_MICROSTEPS *  2000)  //Originalmente 12000
-#define STEPPER_SPEED_MAX_VCL       (STEPPER_MICROSTEPS *  800)   // Steps/s  //Originally 1200, THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
+#define STEPPER_SPEED_MAX_VCL       (STEPPER_MICROSTEPS *  400)   // Steps/s  //Originally 1200, THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_SPEED_EXSUFF        (STEPPER_MICROSTEPS *  800) //DEFAULT ORIG FROM REESPIRATOR (STEPPER_MICROSTEPS *  800)
 #define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  1600)   // Steps/s2 (Originally was 2000 * microsteps)
 

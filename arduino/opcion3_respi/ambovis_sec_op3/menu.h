@@ -9,10 +9,13 @@
 #include <LiquidCrystal.h>
 #endif
 
-#define MENU_OPT_MOD    1
-#define MENU_OPT_BPM    2
-#define MENU_OPT_IE     3
-
+#define MENU_OPT_MOD      1
+#define MENU_OPT_BPM      2
+#define MENU_OPT_IE       3
+#define MENU_OPT_PIP      4
+#define MENU_OPT_VOL      5
+#define MENU_OPT_PIP_AL   6
+#define MENU_OPT_PEEP_AL  7
 
 class Menu{
   
@@ -73,5 +76,6 @@ extern bool isitem_sel;
 
 extern byte opciones_mod[3];
 extern byte cant_opciones_mod;
+extern byte seleccion_mod[3];
 
 #endif

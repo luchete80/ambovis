@@ -640,12 +640,29 @@ void read_menu(){
     
           if (integerFromPC [1]>0 && read_serial_once ){
 
-          Serial.print("chars: ");Serial.println(receivedChars);
-          Serial.print("Integers: ");Serial.print(integerFromPC [0]);Serial.print(",");Serial.println(integerFromPC [1]);
-          options.respiratoryRate=integerFromPC [1];
-          Serial.print("BPM changed!!");
+          //Serial.print("chars: ");Serial.println(receivedChars);
+          //Serial.print("Integers: ");Serial.print(integerFromPC [0]);Serial.print(",");Serial.println(integerFromPC [1]);
+              switch (integerFromPC [0]){
+                  case 1:
+                  vent_mode=byte(integerFromPC [1]);
+                  break;
+                  case 2:
+                  options.respiratoryRate = integerFromPC [1];
+                  break;
+                  case 3:
+                  options.percInspEsp = integerFromPC [1];
+                  break;
+                  case 4:
+                  options.peakInspiratoryPressure = integerFromPC [1];
+                  break;
+                  case 5:
+                  options.percVolume = integerFromPC [1];
+                  break;
+                  //Serial.print("BPM changed!!");
+              }
+
           update_options=true;
-          read_serial_once=false;
+          read_serial_once=false;//Se lee hasta que se reciba info correctamente
         }
     }
 }

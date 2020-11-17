@@ -12,6 +12,7 @@ int pressed=0;  //0 nothing , 1 enter, 2 bck
 
 byte opciones_mod[3];
 byte cant_opciones_mod;
+byte seleccion_mod[3];
 
 byte back[8] = {
   0b00100,
@@ -374,19 +375,21 @@ void check_encoder ( ) {
         } else if ( encoderPos < min_sel ) {
             encoderPos=oldEncPos=min_sel;
           } else {
-      
+        
         oldEncPos = encoderPos;
-
+        cant_opciones_mod=1;
+        seleccion_mod[0] = encoderPos;
+        
             switch (curr_sel) {
               case 1:
-                if ( menu_number == 0 )     vent_mode           = encoderPos;
-                else if (menu_number == 1)  alarm_max_pressure  = encoderPos;
+                if ( menu_number == 0 )     {vent_mode           = encoderPos;opciones_mod[0]=MENU_OPT_MOD;}
+                else if (menu_number == 1)  {alarm_max_pressure  = encoderPos;opciones_mod[0]=MENU_OPT_PIP_AL;}
                 else if (menu_number == 2)  {min_cd  = int(encoderPos);}
                 else if (menu_number == 3)  {dpip_b = encoderPos; dpip  = float(encoderPos)/10.;}
                 break;
               case 2:
-                if ( menu_number == 0 )       {options.respiratoryRate = encoderPos; opciones_mod[0]=MENU_OPT_BPM;cant_opciones_mod=1;}
-                else  if (menu_number == 1)   alarm_peep_pressure     = encoderPos;
+                if ( menu_number == 0 )       {options.respiratoryRate = encoderPos; opciones_mod[0]=MENU_OPT_BPM;}
+                else  if (menu_number == 1)   {alarm_peep_pressure     = encoderPos; opciones_mod[0]=MENU_OPT_PEEP_AL;}
                 else  if (menu_number == 2)   min_speed  = int((float)encoderPos*10.);
                 else if ( menu_number == 3 ){
                     Serial.print("encoderPos: ");Serial.println(encoderPos);
@@ -396,7 +399,7 @@ void check_encoder ( ) {
                 }
                 break;
               case 3:
-                if ( menu_number == 0 ) options.percInspEsp=encoderPos;
+                if ( menu_number == 0 ) {options.percInspEsp = encoderPos;opciones_mod[0]=MENU_OPT_IE;}
                 else    if (menu_number == 1) alarm_vt=int(10.*(float)encoderPos);
                 else    if (menu_number == 2) min_accel  = int((float)encoderPos*10.);
                 if ( menu_number == 3 ){
@@ -408,11 +411,13 @@ void check_encoder ( ) {
               case 4:
                 if ( menu_number == 0 ) {
                     if (vent_mode==VENTMODE_PCL){
-                      options.peakInspiratoryPressure = encoderPos;
+                        options.peakInspiratoryPressure = encoderPos;
+                        opciones_mod[0]=MENU_OPT_PIP;
                         Serial.print("pip: ");Serial.println(options.peakInspiratoryPressure);
                         Serial.print("encoderpos: ");Serial.println(encoderPos);
                       } else { //manual
                       options.percVolume = encoderPos;
+                      opciones_mod[0]=MENU_OPT_VOL;
                     }
                 } else if (menu_number == 1) {
                     p_trim=encoderPos;
