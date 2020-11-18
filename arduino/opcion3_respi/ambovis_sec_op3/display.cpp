@@ -305,7 +305,7 @@ void parseNfilterData() {
       ve_readed=true;
   }
   Serial.print("time y xgra flux");Serial.print(integerFromPC[TIME_]);Serial.print(",");Serial.print(xgra[FLUX_][1]);
-  if ( integerFromPC[FLUX_] != 0 && abs(integerFromPC[FLUX_]) < abs(last_vals[FLUX_][1])+diff_var[FLUX_] /* && integerFromPC[TIME_] > xgra[FLUX_][1]*/) {
+  if ( integerFromPC[FLUX_] != 0 /*&& abs(integerFromPC[FLUX_]) < abs(last_vals[FLUX_][1])+diff_var[FLUX_] /* && integerFromPC[TIME_] > xgra[FLUX_][1]*/) {
     yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_])*0.04);
     last_vals[FLUX_][0]=last_vals[FLUX_][1];last_vals[FLUX_][1]=integerFromPC[FLUX_];
     xgra[FLUX_][0]=xgra[FLUX_][1];xgra[FLUX_][1]=integerFromPC[TIME_];

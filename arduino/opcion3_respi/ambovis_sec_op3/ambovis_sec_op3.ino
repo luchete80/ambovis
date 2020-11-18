@@ -15,6 +15,7 @@ bool put_to_sleep,wake_up;
 unsigned long print_bat_time;
 unsigned long _msecTimerCnt=0;
 bool change_cycle;
+unsigned long tft_draw_time;
 //int vt;
 
 byte _back[8] = {
@@ -330,7 +331,9 @@ void loop() {
       if ( time > lastShowSensor + TIME_SHOW ) {
 
           lastShowSensor=time; 
+          tft_draw_time=millis();
           tft_draw();
+          Serial.print("dra time: ");Serial.println(millis()-tft_draw_time);
           wait4read=false;
 
       }      
@@ -473,30 +476,6 @@ void loop() {
 //  }
 
 }//LOOP
-
-void update_error() {
-  //UPDATING VERROR
-  if (cycle_pos > 100) {
-    if (vcorr_count < 20) {
-      vcorr_count += 1.;
-      verror_sum += ( Voltage - 0.2 ); //-5*0.04
-      verror_sum +=p_dpt; //Si el error es de presion
-      //verror+=Voltage;
-      init_verror = true;
-    }
-    Serial1.print("-1,");
-    Serial1.println(options.respiratoryRate);
-    //Serial.print("Verror (mV) and count: ");Serial.print(verror_sum*1000);Serial.print(",  ");Serial.println(vcorr_count);
-  }
-  if (cycle_pos < 5 && init_verror) {
-    verror = verror_sum / ((float)vcorr_count + 1.);
-    //Serial.print("Verror (mV) and count: ");Serial.print(verror*1000);Serial.print(",  ");Serial.println(vcorr_count);
-    //Serial.print("Verror (mV) and count: ");Serial.println(verror*1000);
-    verror_sum = 0.;
-    vcorr_count = 0;
-    init_verror = false;
-  }
-}
 
 
 int findClosest(float arr[], int n, float target) {
