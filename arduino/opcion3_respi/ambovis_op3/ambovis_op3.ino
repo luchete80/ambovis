@@ -632,7 +632,7 @@ void timer1Isr(void)
 }
 
 void read_menu(){
-    if (cycle_pos > 110) {
+    if (cycle_pos > 100) {
 
           recvWithEndMarker();
           showNewData();

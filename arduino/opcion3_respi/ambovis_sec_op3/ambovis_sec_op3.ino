@@ -345,10 +345,10 @@ void loop() {
 //
 
 
-      if (cycle_pos > 115) {
-          #ifdef DEBUG_UPDATE 
+      if (cycle_pos > 100) {
+          //#ifdef DEBUG_UPDATE 
           Serial.print("Sending by serial");
-          #endif
+          //#endif
           if (cant_opciones_mod>0){
               cant_opciones_mod=0;
               Serial1.print(opciones_mod[0]);Serial1.print(",");
@@ -442,17 +442,17 @@ void loop() {
                       timebuzz=time;
                       isbuzzeron=!isbuzzeron;
                       if (isbuzzeron){
-                          digitalWrite(PIN_BUZZER,BUZZER_LOW);
+                          //digitalWrite(PIN_BUZZER,BUZZER_LOW);
                       }   
                       else {
-                          digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+                          //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
                       }
                   }
               } else {  //buzz muted
-                  digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+                  //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
               }
         } else {//state > 0
-          digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+          //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
           isbuzzeron=true;        //Inverted logic
         }
 

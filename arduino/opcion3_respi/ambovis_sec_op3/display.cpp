@@ -202,9 +202,9 @@ void print_bat(){
     dtostrf(level_perc, 2, 0, buffer);
     //dtostrf(level, 2, 1, buffer);
     //Serial.print("Bat level: ");Serial.println(level);
-    tft.setCursor(130, 260);tft.println("Bat:");
-    tft.setCursor(180, 260);tft.println(buffer);
-    tft.setCursor(220, 260);tft.println("%");
+    tft.setCursor(130, 300);tft.println("Bat:");
+    tft.setCursor(180, 300);tft.println(buffer);
+    tft.setCursor(220, 300);tft.println("%");
 
     dtostrf(level, 1, 2, buffer);
     //Temporary
@@ -235,24 +235,24 @@ void print_params(){
   }
 void print_vols(){
     tft.setRotation(0);
-    tft.fillRect(180,160,70,80, ILI9341_BLACK);
+    tft.fillRect(180,200,70,80, ILI9341_RED);
     //itoa(integerFromPC[5], buffer, 10);
     itoa(_mllastInsVol, buffer, 10);
-    tft.setCursor(150, 180);
+    tft.setCursor(150, 220);
     tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
-    tft.println("Vi: ");tft.setCursor(190, 180);tft.println(buffer);
+    tft.println("Vi: ");tft.setCursor(190, 220);tft.println(buffer);
 
 
     
     itoa(_mllastExsVol, buffer, 10);
-    tft.setCursor(150, 200);
+    tft.setCursor(150, 240);
     tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
-    tft.println("Ve: ");tft.setCursor(190, 200);tft.println(buffer);
+    tft.println("Ve: ");tft.setCursor(190, 240);tft.println(buffer);
     
     itoa((_mllastInsVol + _mllastExsVol)/2, buffer, 10);
-    tft.setCursor(150, 220);
+    tft.setCursor(150, 260);
     tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
-    tft.println("VT: ");tft.setCursor(190, 220);tft.println(buffer);
+    tft.println("VT: ");tft.setCursor(190, 260);tft.println(buffer);
  
   }
 
