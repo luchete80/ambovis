@@ -8,7 +8,7 @@ float pressure_max;
 float pressure_min;
 
 static int highest_man_pos;
-unsigned long _msecTimerStartCycle;
+unsigned long _msecTimerStartCycle,_msecTimerStartWholeCycle; //CADA CILO;
 
 byte Cdyn_pass[3];
 
@@ -205,7 +205,6 @@ void MechVentilation :: update ( void )
     switch (_currentState) {
         case Init_Insufflation:
         {
-            flujo_positivo=true;
             
             //Filter vars
             #ifdef FLUX_FILTER
@@ -226,7 +225,7 @@ void MechVentilation :: update ( void )
     
             totalCyclesInThisState = (_timeoutIns) / TIME_BASE;
     
-            _msecTimerStartCycle=millis();  //Luciano
+            _msecTimerStartCycle=_msecTimerStartWholeCycle=millis();  //Luciano
             
             for (int i=0;i<2;i++) Cdyn_pass[i]=Cdyn_pass[i+1];
             Cdyn_pass[2]=_mllastInsVol/(last_pressure_max-last_pressure_min);

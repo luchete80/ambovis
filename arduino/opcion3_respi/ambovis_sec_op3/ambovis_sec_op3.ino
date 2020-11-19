@@ -326,7 +326,6 @@ void loop() {
                           Serial.print("pmin");Serial.println(pressure_min);
                       }
                     }
-                  
                   wait4read=true;
               }
           }
@@ -354,7 +353,7 @@ void loop() {
 //
 
 
-      if (cycle_pos > 110) {
+      if (cycle_pos > 100) {
           //#ifdef DEBUG_UPDATE 
           Serial.print("Sending by serial");
           //#endif

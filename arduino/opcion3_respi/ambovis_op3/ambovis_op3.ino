@@ -24,6 +24,9 @@ unsigned long _msecTimerCnt=0;
 int tinsp_f,tesp_f; //Tiempos respecto a flujo cero
 bool flujo_positivo;
 
+float zero_flow,zero_flow_sum;
+
+
 bool update_options_once=true;
 byte cant_menu_leidos;
 byte _back[8] = {
@@ -373,14 +376,6 @@ byte pos;
 
 void loop() {
 
-
-    if ( cycle_pos > 30 && flujo_positivo){
-      if (flow_f < 0 ){
-          tinsp_f = time - _msecTimerStartCycle;
-          flujo_positivo=false;
-          Serial.print("REAL insp time: ");Serial.println(tinsp_f);
-      }
-    }   
       
   if (!sleep_mode){
     if (wake_up){
@@ -394,6 +389,19 @@ void loop() {
       //check_encoder();
     
       time = millis();
+          if (flow_f > THRESHOLD_FLOW ){
+        flujo_positivo=true; }
+        
+      if ( cycle_pos > 5 && flujo_positivo){
+        //Serial.print("REAL insp time: ");Serial.println(tinsp_f);
+        if (flow_f < zero_flow ){
+            tinsp_f = cycle_pos;
+            flujo_positivo=false;
+            Serial.print("REAL insp time: ");Serial.println(tinsp_f);
+            Serial.print("REAL insp time: ");Serial.println(time - _msecTimerStartWholeCycle);
+        }
+      }   
+    
       check_buzzer_mute();
       //Serial.print("Carga: ");Serial.println(analogRead(PIN_BAT_LEV));
       
@@ -428,21 +436,21 @@ void loop() {
       read_menu();
 
   
-      #ifdef DEBUG_UPDATE
-      Serial.print(int(cycle_pos));Serial.print(",");
-      Serial.print(int(pressure_p));Serial.print(",");
-      Serial.print(flow_f,2);Serial.print(",");
-      Serial.println(_mlInsVol - _mlExsVol);
-      #endif
+      //#ifdef DEBUG_UPDATE
+//      Serial.print(int(cycle_pos));Serial.print(",");
+//      Serial.print(int(pressure_p));Serial.print(",");
+//      Serial.print(flow_f,2);Serial.print(",");
+//      Serial.println(_mlInsVol - _mlExsVol);
+      //#endif
       
       if ( time > lastShowSensor + TIME_SHOW ) {
     
           lastShowSensor=time; 
           //Serial.println(time);
-          Serial1.print(int(cycle_pos));Serial1.print(",");
-          Serial1.print(int(pressure_p));Serial1.print(",");
-          Serial1.print(flow_f,2);Serial1.print(",");
-          Serial1.println(_mlInsVol - _mlExsVol);
+          Serial1.print(byte(cycle_pos));Serial1.print(",");
+          Serial1.println(byte(pressure_p));//Serial1.print(",");
+          //Serial1.println(flow_f,2);//Serial1.print(",");
+          //Serial1.println(_mlInsVol - _mlExsVol);
 
           #ifdef DEBUG_UPDATE
           Serial.print(int(cycle_pos));Serial.print(",");
@@ -585,7 +593,7 @@ void loop() {
           }//
       }
 
-      send_final_data();
+      //send_final_data();
       
       if ( millis () - last_vent_time > TIME_BASE ) {
         ventilation -> update();
@@ -650,7 +658,7 @@ void read_menu(){
     
           if (integerFromPC [1]>0 && read_serial_once ){
 
-          //Serial.print("chars: ");Serial.println(receivedChars);
+          Serial.print("chars: ");Serial.println(receivedChars);
           //Serial.print("Integers: ");Serial.print(integerFromPC [0]);Serial.print(",");Serial.println(integerFromPC [1]);
               switch (integerFromPC [0]){
                   case 1:
@@ -661,6 +669,7 @@ void read_menu(){
                   break;
                   case 3:
                   options.percInspEsp = integerFromPC [1];
+                  Serial.print("CHANGED IE to: ");Serial.println(integerFromPC [1]);
                   break;
                   case 4:
                   options.peakInspiratoryPressure = integerFromPC [1];
@@ -695,6 +704,8 @@ void update_error() {
       verror_sum +=p_dpt; //Si el error es de presion
       //verror+=Voltage;
       init_verror = true;
+
+      zero_flow_sum+=flow_f;
     }
     //Serial.print("Verror (mV) and count: ");Serial.print(verror_sum*1000);Serial.print(",  ");Serial.println(vcorr_count);
     
@@ -713,11 +724,13 @@ void update_error() {
 
   if (cycle_pos < 5 && init_verror) {
     verror = verror_sum / ((float)vcorr_count + 1.);
+    zero_flow =  zero_flow_sum / ((float)vcorr_count + 1.);
     //Serial.print("Verror (mV) and count: ");Serial.print(verror*1000);Serial.print(",  ");Serial.println(vcorr_count);
-    //Serial.print("Verror (mV) and count: ");Serial.println(verror*1000);
+    Serial.print("Zero flow: ");Serial.println(zero_flow);
     verror_sum = 0.;
     vcorr_count = 0;
     init_verror = false;
+    zero_flow_sum=0;
   }
 }
 

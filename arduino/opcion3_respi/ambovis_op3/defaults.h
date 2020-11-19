@@ -17,7 +17,7 @@
 #define MENU_OPT_MOD    1
 #define MENU_OPT_BPM    2
 #define MENU_OPT_IE     3
-
+#define THRESHOLD_FLOW  200
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE   1                 // msec

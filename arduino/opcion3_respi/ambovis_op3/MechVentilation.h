@@ -201,7 +201,10 @@ extern int _mllastInsVol,_mllastExsVol;
 //_mlInsVol2;
 //extern float _stepperSpeed;
 extern float pressure_sec,psec_max,last_psec_max;
+
 extern unsigned long _msecTimerStartCycle; //CADA semiciclo
+extern unsigned long _msecTimerStartWholeCycle; //CADA CILO
+
 extern bool display_needs_update;
 extern byte flux_count;
 extern unsigned long flux_filter_time;

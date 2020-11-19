@@ -73,12 +73,12 @@ void tft_draw(void) {
     rx[valsreaded]=integerFromPC[TIME_];
 
     //ry[valsreaded]=pressure_p*2.;     
-    if (integerFromPC[P_]!= 0){
-      Serial.print("P leido: ");Serial.println(integerFromPC[P_]);
-      ry[valsreaded]=integerFromPC[P_]*2.;    
-      valsreaded+=1;
-      last_x=integerFromPC[TIME_];
-    }
+//    if (integerFromPC[P_]!= 0){
+//      Serial.print("P leido: ");Serial.println(integerFromPC[P_]);
+//      ry[valsreaded]=integerFromPC[P_]*2.;    
+//      valsreaded+=1;
+//      last_x=integerFromPC[TIME_];
+//    }
 
     yflux[0]=yflux[1];yflux[1]=int(flow_f*0.035);
     yvt[0]=yvt[1];yvt[1]=int((_mlInsVol - _mlExsVol)*0.1);
@@ -86,7 +86,7 @@ void tft_draw(void) {
     
     tft.setRotation(1);
     if (valsreaded > 0)
-        drawY2(ILI9341_GREEN);
+        drawY2();
     
   	if (last_x<5 && !tft_cleaned){
         #ifdef DEBUG_UPDATE
@@ -117,21 +117,19 @@ void tft_draw(void) {
     
 }//loop
 
-void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
+void drawY2(){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
   #ifdef DEBUG_UPDATE
   Serial.print("Valsreaded: ");Serial.println(valsreaded);
   Serial.print("rx(valsreaded) & rx(valsreaded-1): ");Serial.print(rx[valsreaded]);Serial.print(",");Serial.print(rx[valsreaded-1]);Serial.print(",");
   #endif
   if ( rx[valsreaded] > rx[valsreaded-1] ) {//to avoid draw entire line to the begining at the end of the cycle
           for (int i=0;i<3;i++)
-            tft.drawLine(axispos[i], 240-rx[valsreaded-1], axispos[i], 240-rx[valsreaded], ILI9341_DARKGREY);
+            tft.drawLine(axispos[i], 240-rx[valsreaded-1], axispos[i], 240-rx[valsreaded], ILI9341_DARKGREY); //Ejes
             tft.fillRect(0, 240 - rx[valsreaded] - 10, 320, 10, ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
             
             tft.fillRect(0, 240 - rx[valsreaded-1] + 1, 320, rx[valsreaded]-rx[valsreaded-1], ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
             
-            tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
-
-            //tft.drawLine(axispos[0]-yp[0],              240-rx[valsreaded-1], axispos[0]-yp[1],             240-rx[valsreaded], color);
+            tft.drawLine(axispos[0]-yp[0],              240-rx[valsreaded-1], axispos[0]-yp[1],             240-rx[valsreaded], ILI9341_GREEN);
             tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_MAGENTA);
             tft.drawLine(axispos[2]-yvt[0],             240-rx[valsreaded-1], axispos[2]-yvt[1],            240-rx[valsreaded], ILI9341_BLUE);
 
@@ -276,20 +274,10 @@ void parseNfilterData() {
       strtokIndx = strtok(NULL, ","); // this continues where the previous call left off
       integerFromPC[i] = atoi(strtokIndx);     // convert this part to an integer
   }
-//  
-//  if (integerFromPC[ALARM_]!=0 && !wait4statechg) {
-//    pre_state++;
-//  }
-//
-// if (pre_state > 4 && !wait4statechg) {
-//      state=integerFromPC[ALARM_];
-//      state_chg=true;
-//      wait4statechg=true;
-//  }
 
-   if ( integerFromPC[TIME_] != last_x /*&& abs(integerFromPC[P_])<ry[valsreaded]+10 */&& /*/*integerFromPC[0] < 127 */ integerFromPC[TIME_] < last_x+20) {
-     //valsreaded+=1;
-     //last_x=integerFromPC[TIME_];
+   if ( integerFromPC[TIME_] != last_x /*&& abs(integerFromPC[P_])<ry[valsreaded]+10 */&& integerFromPC[0] < 127 && integerFromPC[TIME_] < last_x+20) {
+     valsreaded+=1;
+     last_x=integerFromPC[TIME_];
      rx[valsreaded]=integerFromPC[TIME_];
      ry[valsreaded]=integerFromPC[P_];     
    }
