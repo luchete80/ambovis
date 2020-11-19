@@ -310,20 +310,25 @@ void loop() {
       if (!wait4read){
           recvchars=recvWithEndMarker();
           showNewData();
-          //Serial.print("chars: ");Serial.println(receivedChars);
+          Serial.print("chars: ");Serial.println(receivedChars);
           //parseData();
           cycle_pos=integerFromPC[TIME_];
-          if (integerFromPC[P_]> 0 ){
-              if ( integerFromPC[P_] > pressure_max){
-                  pressure_max = (float)integerFromPC[P_];
-              } else {
-                  if ( integerFromPC[P_] < pressure_min){
-                      pressure_min = (float)integerFromPC[P_];
-                      Serial.print("pmin");Serial.println(pressure_min);
-                  }
-                }
-              
-              wait4read=true;
+          if (integerFromPC[TIME_] == 128){
+              _mllastInsVol= integerFromPC[1];
+              _mllastExsVol= integerFromPC[2];            
+          } else {
+              if (integerFromPC[P_]> 0 ){
+                  if ( integerFromPC[P_] > pressure_max){
+                      pressure_max = (float)integerFromPC[P_];
+                  } else {
+                      if ( integerFromPC[P_] < pressure_min){
+                          pressure_min = (float)integerFromPC[P_];
+                          Serial.print("pmin");Serial.println(pressure_min);
+                      }
+                    }
+                  
+                  wait4read=true;
+              }
           }
           //Serial.print("cyclepos: ");Serial.println(integerFromPC[P_]);
           time_serial_read=time;

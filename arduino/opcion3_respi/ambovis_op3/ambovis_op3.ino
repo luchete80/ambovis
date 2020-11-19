@@ -634,7 +634,8 @@ void timer1Isr(void)
 void send_final_data(){
     if ( cycle_pos > 100 && cant_menu_leidos >= 3 ) {
         Serial1.print("128,");
-        Serial1.print(vt);Serial1.print(",");
+        Serial1.print(_mllastInsVol);Serial1.print(",");
+        Serial1.print(_mllastExsVol);Serial1.print(",");
         Serial1.print(tinsp_f);Serial1.print(",");
         Serial1.print(last_pressure_max);Serial1.print(",");
         Serial1.println(last_pressure_min);  
