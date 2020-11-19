@@ -6,7 +6,7 @@
 //Connections and Debug Defs
 //#define ACCEL_STEPPER 1
 //#define DEBUG_PID 1
-#define DEBUG_UPDATE 1
+//#define DEBUG_UPDATE 1
 //#define FILTER_FLUX 1
 #define DEBUG_OFF 1 //Release version
 #define BUZZER_LOW 1
@@ -22,7 +22,7 @@
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE   1                 // msec
 #define TIME_SENSOR 5                // msec
-#define TIME_SHOW 	50                  //IF OLED DISPLAY IS USED FASTER THAN 50ms GIVES ERRORS IN THE PLOTS 
+#define TIME_SHOW 	25                  //IF OLED DISPLAY IS USED FASTER THAN 50ms GIVES ERRORS IN THE PLOTS 
 #define TIME_SAVE 	5000
 #define TIME_BUZZER 500
 #define TIME_MUTE   60000             //msec
@@ -56,7 +56,7 @@
 #define STEPPER_STEPS_PER_REVOLUTION 200
 #define STEPPER_MICROSTEPS_PER_REVOLUTION (STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS)
 #define STEPPER_HOMING_DIRECTION    (1)
-#define STEPPER_HOMING_SPEED        (STEPPER_MICROSTEPS * 200)   // Steps/s
+#define STEPPER_HOMING_SPEED        (STEPPER_MICROSTEPS * 50)   // Steps/s
 #define STEPPER_LOWEST_POSITION     (-10)   // Steps
 #define STEPPER_HIGHEST_POSITION    ( 3000 )   //270º ,2500 for 270º, 2850 for 220º, 2930 for 330º
 #define STEPPER_SPEED_DEFAULT       (400)   // Steps/s

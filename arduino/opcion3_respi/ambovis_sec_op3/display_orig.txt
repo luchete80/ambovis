@@ -74,7 +74,6 @@ void tft_draw(void) {
 
     //ry[valsreaded]=pressure_p*2.;     
     if (integerFromPC[P_]!= 0){
-      Serial.print("P leido: ");Serial.println(integerFromPC[P_]);
       ry[valsreaded]=integerFromPC[P_]*2.;    
       valsreaded+=1;
       last_x=integerFromPC[TIME_];
@@ -129,9 +128,9 @@ void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WIT
             
             tft.fillRect(0, 240 - rx[valsreaded-1] + 1, 320, rx[valsreaded]-rx[valsreaded-1], ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
             
-            tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
+            //tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
 
-            //tft.drawLine(axispos[0]-yp[0],              240-rx[valsreaded-1], axispos[0]-yp[1],             240-rx[valsreaded], color);
+            tft.drawLine(axispos[0]-yp[0],              240-rx[valsreaded-1], axispos[0]-yp[1],             240-rx[valsreaded], color);
             tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_MAGENTA);
             tft.drawLine(axispos[2]-yvt[0],             240-rx[valsreaded-1], axispos[2]-yvt[1],            240-rx[valsreaded], ILI9341_BLUE);
 
@@ -276,16 +275,16 @@ void parseNfilterData() {
       strtokIndx = strtok(NULL, ","); // this continues where the previous call left off
       integerFromPC[i] = atoi(strtokIndx);     // convert this part to an integer
   }
-//  
-//  if (integerFromPC[ALARM_]!=0 && !wait4statechg) {
-//    pre_state++;
-//  }
-//
-// if (pre_state > 4 && !wait4statechg) {
-//      state=integerFromPC[ALARM_];
-//      state_chg=true;
-//      wait4statechg=true;
-//  }
+  
+  if (integerFromPC[ALARM_]!=0 && !wait4statechg) {
+    pre_state++;
+  }
+
+ if (pre_state > 4 && !wait4statechg) {
+      state=integerFromPC[ALARM_];
+      state_chg=true;
+      wait4statechg=true;
+  }
 
    if ( integerFromPC[TIME_] != last_x /*&& abs(integerFromPC[P_])<ry[valsreaded]+10 */&& /*/*integerFromPC[0] < 127 */ integerFromPC[TIME_] < last_x+20) {
      //valsreaded+=1;

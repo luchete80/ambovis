@@ -176,6 +176,7 @@ byte valsreaded;
 byte last_x;
  bool tft_cleaned;
 unsigned long time_serial_read;
+int cant_enviadas_menu;
 void setup() {
 
     Serial1.begin(115200);
@@ -277,6 +278,7 @@ void setup() {
     wait4read=false;
 
     change_cycle=false;
+    cant_enviadas_menu=0;
 }
 
 
@@ -328,6 +330,8 @@ void loop() {
       }
       //}
 
+      //Si leo la ultima informacion al final del ciclo
+
       if ( time > lastShowSensor + TIME_SHOW ) {
 
           lastShowSensor=time; 
@@ -345,16 +349,19 @@ void loop() {
 //
 
 
-      if (cycle_pos > 100) {
+      if (cycle_pos > 110) {
           //#ifdef DEBUG_UPDATE 
           Serial.print("Sending by serial");
           //#endif
-          if (cant_opciones_mod>0){
+          if (cant_opciones_mod>0 && cant_enviadas_menu < 3 ){
               cant_opciones_mod=0;
               Serial1.print(opciones_mod[0]);Serial1.print(",");
               Serial1.println(seleccion_mod[0]);
+              cant_enviadas_menu++;
           }//if hay opciones modificadas
 
+          //Recibo data de flujo y tiempos
+          
           last_pressure_max = pressure_max;
           pressure_max = 0;
           last_pressure_min=pressure_min;
@@ -363,6 +370,7 @@ void loop() {
       }
 
       if (cycle_pos < 5 && !change_cycle){
+          cant_enviadas_menu=0;
           //vt=(_mllastInsVol + _mllastInsVol)/2;
           //if (vt<alarm_vt)  isalarmvt_on=1;
           //else              isalarmvt_on=0;
@@ -407,10 +415,7 @@ void loop() {
 //            else                alarm_state = 10;
 //          }
 //        }
-//    
-//    
-//
-//        Serial.println("Graficando...");
+
         display_lcd();
         update_display = true;
         last_update_display = time;

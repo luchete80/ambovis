@@ -205,6 +205,8 @@ void MechVentilation :: update ( void )
     switch (_currentState) {
         case Init_Insufflation:
         {
+            flujo_positivo=true;
+            
             //Filter vars
             #ifdef FLUX_FILTER
             flux_filter_time=millis();
@@ -347,7 +349,8 @@ void MechVentilation :: update ( void )
                   _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);     
           }
           }//if pcl
-    
+
+
         }// INIT INSUFFLATION
         break;
     case State_Insufflation:

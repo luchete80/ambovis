@@ -226,4 +226,5 @@ extern int max_pidd,min_pidd;
 extern float f_acc;extern byte f_acc_b;
 extern byte p_acc;
 extern MechVentilation * ventilation;
+extern bool flujo_positivo;
 #endif /* INC_MECHANICAL_VENTILATION_H */

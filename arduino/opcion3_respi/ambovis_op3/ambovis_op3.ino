@@ -3,7 +3,6 @@
 #include "src/TimerOne/TimerOne.h"
 
 #include "Serial.h"
-
 #include "src/AutoPID/AutoPID.h"
 #ifdef ACCEL_STEPPER
 #include "src/AccelStepper/AccelStepper.h"
@@ -22,8 +21,11 @@ bool put_to_sleep,wake_up;
 unsigned long print_bat_time;
 unsigned long _msecTimerCnt=0;
 
-bool update_options_once=true;
+int tinsp_f,tesp_f; //Tiempos respecto a flujo cero
+bool flujo_positivo;
 
+bool update_options_once=true;
+byte cant_menu_leidos;
 byte _back[8] = {
   0b00100,
   0b01000,
@@ -360,6 +362,8 @@ void setup() {
     sleep_mode=false;
     put_to_sleep=false;
     wake_up=false;
+
+    cant_menu_leidos=0;
 }
 
 
@@ -370,7 +374,14 @@ byte pos;
 void loop() {
 
 
-
+    if ( cycle_pos > 30 && flujo_positivo){
+      if (flow_f < 0 ){
+          tinsp_f = time - _msecTimerStartCycle;
+          flujo_positivo=false;
+          Serial.print("REAL insp time: ");Serial.println(tinsp_f);
+      }
+    }   
+      
   if (!sleep_mode){
     if (wake_up){
 //      lcd.clear();
@@ -415,6 +426,14 @@ void loop() {
 //      }
 //    
       read_menu();
+
+  
+      #ifdef DEBUG_UPDATE
+      Serial.print(int(cycle_pos));Serial.print(",");
+      Serial.print(int(pressure_p));Serial.print(",");
+      Serial.print(flow_f,2);Serial.print(",");
+      Serial.println(_mlInsVol - _mlExsVol);
+      #endif
       
       if ( time > lastShowSensor + TIME_SHOW ) {
     
@@ -422,11 +441,15 @@ void loop() {
           //Serial.println(time);
           Serial1.print(int(cycle_pos));Serial1.print(",");
           Serial1.print(int(pressure_p));Serial1.print(",");
-          Serial1.println(flow_f,2);
+          Serial1.print(flow_f,2);Serial1.print(",");
+          Serial1.println(_mlInsVol - _mlExsVol);
 
-//          Serial.print(int(cycle_pos));Serial.print(",");
-//          Serial.print(int(pressure_p));Serial.print(",");
-//          Serial.println(flow_f,2);
+          #ifdef DEBUG_UPDATE
+          Serial.print(int(cycle_pos));Serial.print(",");
+          Serial.print(int(pressure_p));Serial.print(",");
+          Serial.println(flow_f,2);
+          #endif
+          
           
 //    //	     #ifdef FILTER_FLUX
 //           Serial.print(Voltage,5);Serial.print(",");
@@ -498,27 +521,27 @@ void loop() {
         
       }
       if ( ventilation -> getCycleNum () != last_cycle ) {
-        vt=(_mllastInsVol + _mllastInsVol)/2;
-        if (vt<alarm_vt)  isalarmvt_on=1;
-        else              isalarmvt_on=0;
-        if ( last_pressure_max > alarm_max_pressure + 1 ) {
-        if ( last_pressure_min < alarm_peep_pressure - 1) {
-            if (!isalarmvt_on)  alarm_state = 3;
-            else                alarm_state = 13;
-          } else {
-            if (!isalarmvt_on)  alarm_state = 2;
-            else                alarm_state = 12;
-          }
-        } else {
-          if ( last_pressure_min < alarm_peep_pressure - 1 ) {
-            if (!isalarmvt_on) alarm_state = 1;
-            else               alarm_state = 11;
-          } else {
-            if (!isalarmvt_on)  alarm_state = 0;
-            else                alarm_state = 10;
-          }
-        }
-        
+          vt=(_mllastInsVol + _mllastExsVol)/2;
+//        if (vt<alarm_vt)  isalarmvt_on=1;
+//        else              isalarmvt_on=0;
+//        if ( last_pressure_max > alarm_max_pressure + 1 ) {
+//        if ( last_pressure_min < alarm_peep_pressure - 1) {
+//            if (!isalarmvt_on)  alarm_state = 3;
+//            else                alarm_state = 13;
+//          } else {
+//            if (!isalarmvt_on)  alarm_state = 2;
+//            else                alarm_state = 12;
+//          }
+//        } else {
+//          if ( last_pressure_min < alarm_peep_pressure - 1 ) {
+//            if (!isalarmvt_on) alarm_state = 1;
+//            else               alarm_state = 11;
+//          } else {
+//            if (!isalarmvt_on)  alarm_state = 0;
+//            else                alarm_state = 10;
+//          }
+//        }
+//        
         last_cycle = ventilation->getCycleNum();
     
         //display_lcd();
@@ -552,11 +575,6 @@ void loop() {
         read_serial_once =true;
       }//change cycle
     
-      if (display_needs_update) {
-    
-        //display_lcd();
-        //display_needs_update = false;
-      }
     
       if (cycle_pos > 110 && update_options_once){
           if ( update_options ) {
@@ -566,6 +584,8 @@ void loop() {
             //show_changed_options=true;
           }//
       }
+
+      send_final_data();
       
       if ( millis () - last_vent_time > TIME_BASE ) {
         ventilation -> update();
@@ -578,26 +598,6 @@ void loop() {
         show_changed_options = false;
       }
     
-        if (alarm_state > 0) {
-    
-              if (!buzzmuted) {
-                  if (time > timebuzz + TIME_BUZZER) {
-                      timebuzz=time;
-                      isbuzzeron=!isbuzzeron;
-                      if (isbuzzeron){
-                          //digitalWrite(PIN_BUZZER,BUZZER_LOW);
-                      }   
-                      else {
-                          //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
-                      }
-                  }
-              } else {  //buzz muted
-                  //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
-              }
-        } else {//state > 0
-          //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
-          isbuzzeron=true;        //Inverted logic
-        }
 
   //! sleep_mode
   } else { 
@@ -631,9 +631,18 @@ void timer1Isr(void)
   #endif
 }
 
+void send_final_data(){
+    if ( cycle_pos > 100 && cant_menu_leidos >= 3 ) {
+        Serial1.print("128,");
+        Serial1.print(vt);Serial1.print(",");
+        Serial1.print(tinsp_f);Serial1.print(",");
+        Serial1.print(last_pressure_max);Serial1.print(",");
+        Serial1.println(last_pressure_min);  
+    }
+}
 void read_menu(){
-    if (cycle_pos > 100) {
-
+    if (cycle_pos > 100 && cant_menu_leidos < 3) {
+          cant_menu_leidos++;
           recvWithEndMarker();
           showNewData();
           parseData();
@@ -670,6 +679,9 @@ void read_menu(){
           update_options=true;
           read_serial_once=false;//Se lee hasta que se reciba info correctamente
         }
+    }
+    if (cycle_pos<10){
+        cant_menu_leidos=0;  
     }
 }
 
