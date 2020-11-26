@@ -21,7 +21,7 @@ int buzzer=3; //pin
 
 #ifdef DISPLAY_SEC
 
-float diff_var[]={5., 20., 800.,0.,300.}; 
+float diff_var[]={10., 20., 800.,0.,300.}; 
 
 byte rx[128],ry[128];
 int  ry2[128];
@@ -80,7 +80,8 @@ void tft_draw(void) {
 //      last_x=integerFromPC[TIME_];
 //    }
 
-    yflux[0]=yflux[1];yflux[1]=int(flow_f*0.035);
+    //yflux[0]=yflux[1];yflux[1]=int(flow_f*0.035);//SI LLEGA CON EL VALOR REAL!
+    yflux[0]=yflux[1];yflux[1]=int(flow_f-127)*0.35;
     yvt[0]=yvt[1];yvt[1]=int((_mlInsVol - _mlExsVol)*0.1);
 
     
@@ -89,10 +90,10 @@ void tft_draw(void) {
         drawY2();
     
   	if (last_x<5 && !tft_cleaned){
-        #ifdef DEBUG_UPDATE
-        Serial.print("last_x: ");Serial.println(last_x);
+        //#ifdef DEBUG_UPDATE
+        //Serial.print("last_x: ");Serial.println(last_x);
         Serial.println("Cleaning");
-        #endif
+        //#endif
     		tft_cleaned=true;
     		valsreaded=0;
     		for (int i=0;i<3;i++) 
@@ -120,18 +121,16 @@ void tft_draw(void) {
 void drawY2(){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
   #ifdef DEBUG_UPDATE
   Serial.print("Valsreaded: ");Serial.println(valsreaded);
-  Serial.print("rx(valsreaded) & rx(valsreaded-1): ");Serial.print(rx[valsreaded]);Serial.print(",");Serial.print(rx[valsreaded-1]);Serial.print(",");
+  //Serial.print("rx(valsreaded) & rx(valsreaded-1): ");Serial.print(rx[valsreaded]);Serial.print(",");Serial.print(rx[valsreaded-1]);Serial.print(",");
   #endif
   if ( rx[valsreaded] > rx[valsreaded-1] ) {//to avoid draw entire line to the begining at the end of the cycle
           for (int i=0;i<3;i++)
             tft.drawLine(axispos[i], 240-rx[valsreaded-1], axispos[i], 240-rx[valsreaded], ILI9341_DARKGREY); //Ejes
             tft.fillRect(0, 240 - rx[valsreaded] - 10, 320, 10, ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
-            
-            tft.fillRect(0, 240 - rx[valsreaded-1] + 1, 320, rx[valsreaded]-rx[valsreaded-1], ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
-            
+           
             tft.drawLine(axispos[0]-yp[0],              240-rx[valsreaded-1], axispos[0]-yp[1],             240-rx[valsreaded], ILI9341_GREEN);
             tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_MAGENTA);
-            tft.drawLine(axispos[2]-yvt[0],             240-rx[valsreaded-1], axispos[2]-yvt[1],            240-rx[valsreaded], ILI9341_BLUE);
+            //tft.drawLine(axispos[2]-yvt[0],             240-rx[valsreaded-1], axispos[2]-yvt[1],            240-rx[valsreaded], ILI9341_BLUE);
 
   }
 }
@@ -274,7 +273,8 @@ void parseNfilterData() {
       strtokIndx = strtok(NULL, ","); // this continues where the previous call left off
       integerFromPC[i] = atoi(strtokIndx);     // convert this part to an integer
   }
-
+  
+   //Serial.print("integerFromPC[TIME_]");Serial.print(integerFromPC[TIME_]);Serial.print(" - "); Serial.print("last_x: ");Serial.println(last_x);
    if ( integerFromPC[TIME_] != last_x /*&& abs(integerFromPC[P_])<ry[valsreaded]+10 */&& integerFromPC[0] < 127 && integerFromPC[TIME_] < last_x+20) {
      valsreaded+=1;
      last_x=integerFromPC[TIME_];
@@ -282,7 +282,8 @@ void parseNfilterData() {
      ry[valsreaded]=integerFromPC[P_];     
    }
   //Serial.print("time y xgra");Serial.print(integerFromPC[TIME_]);Serial.print(",");Serial.print(xgra[P_][1]);
-  if ( integerFromPC[P_] != 0 /*&& abs(integerFromPC[P_]) < ( abs(last_vals[P_][1])+diff_var[P_] ) && integerFromPC[TIME_] > xgra[P_][1]*/) {
+  
+  if ( integerFromPC[P_] != 0 && abs(integerFromPC[P_]) < ( abs(last_vals[P_][1])+diff_var[P_] ) && integerFromPC[TIME_] > last_x /* && integerFromPC[TIME_] > xgra[P_][1]*/ ) {
     Serial.print("yp0 y 1: ");Serial.print(yp[0]);Serial.print(",");Serial.println(yp[1]);
     yp[0]=yp[1];yp[1]=int(float(integerFromPC[P_])*2.);
     last_vals[P_][0]=last_vals[P_][1];last_vals[P_][1]=integerFromPC[P_];
@@ -298,9 +299,10 @@ void parseNfilterData() {
       ve=integerFromPC[VE_];
       ve_readed=true;
   }
-  Serial.print("time y xgra flux");Serial.print(integerFromPC[TIME_]);Serial.print(",");Serial.print(xgra[FLUX_][1]);
-  if ( integerFromPC[FLUX_] != 0 && abs(integerFromPC[FLUX_]) < abs(last_vals[FLUX_][1])+diff_var[FLUX_] /* && integerFromPC[TIME_] > xgra[FLUX_][1]*/) {
-    yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_])*0.04);
+  //Serial.print("time y xgra flux");Serial.print(integerFromPC[TIME_]);Serial.print(",");Serial.print(xgra[FLUX_][1]);
+  if ( integerFromPC[FLUX_] != 0 /*&& abs(integerFromPC[FLUX_]) < abs(last_vals[FLUX_][1])+diff_var[FLUX_]  && integerFromPC[TIME_] > xgra[FLUX_][1]*/) {
+    //yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_])*0.04);
+    yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_]-127)*0.4);//SI VIENE COMO BYTE
     last_vals[FLUX_][0]=last_vals[FLUX_][1];last_vals[FLUX_][1]=integerFromPC[FLUX_];
     xgra[FLUX_][0]=xgra[FLUX_][1];xgra[FLUX_][1]=integerFromPC[TIME_];
   }
@@ -310,5 +312,5 @@ void parseNfilterData() {
     xgra[VT_][0]=xgra[VT_][1];xgra[VT_][1]=integerFromPC[TIME_];
   }
     
-    Serial.print("integers: ");Serial.print(integerFromPC[0]);Serial.print(",");Serial.print(integerFromPC[1]);Serial.print(",");Serial.print(integerFromPC[2]);Serial.print(",");Serial.println(integerFromPC[3]);
+    //Serial.print("integers: ");Serial.print(integerFromPC[0]);Serial.print(",");Serial.print(integerFromPC[1]);Serial.print(",");Serial.print(integerFromPC[2]);Serial.print(",");Serial.println(integerFromPC[3]);
 }

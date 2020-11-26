@@ -179,8 +179,8 @@ unsigned long time_serial_read;
 int cant_enviadas_menu;
 void setup() {
 
-    Serial1.begin(115200);
-    Serial.begin(250000);
+    Serial1.begin(250000);
+    Serial.begin(9600);
     init_display();
     isitem_sel=false;
 
@@ -279,6 +279,8 @@ void setup() {
 
     change_cycle=false;
     cant_enviadas_menu=0;
+
+    xgra[P_][1]=-10;
 }
 
 
@@ -341,7 +343,7 @@ void loop() {
           lastShowSensor=time; 
           tft_draw_time=millis();
           tft_draw();
-          Serial.print("dra time: ");Serial.println(millis()-tft_draw_time);
+          //Serial.print("dra time: ");Serial.println(millis()-tft_draw_time);
           wait4read=false;
 
       }      
@@ -355,7 +357,7 @@ void loop() {
 
       if (cycle_pos > 100) {
           //#ifdef DEBUG_UPDATE 
-          Serial.print("Sending by serial");
+          //Serial.print("Sending by serial");
           //#endif
           if (cant_opciones_mod>0 && cant_enviadas_menu < 3 ){
               cant_opciones_mod=0;
@@ -370,7 +372,7 @@ void loop() {
           pressure_max = 0;
           last_pressure_min=pressure_min;
           pressure_min = 100;
-          Serial.println("FIN DE CICLO");
+          //Serial.println("FIN DE CICLO");
       }
 
       if (cycle_pos < 5 && !change_cycle){

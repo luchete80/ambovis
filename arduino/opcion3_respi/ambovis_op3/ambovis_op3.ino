@@ -186,7 +186,7 @@ int idleTime ;        // how long the button was idle
 
 void setup() {
 
-    Serial1.begin(115200);
+    Serial1.begin(250000);
     Serial.begin(9600);
   //init_display();
   isitem_sel=false;
@@ -226,7 +226,7 @@ void setup() {
 
   // TODO: Añadir aquí la configuarcion inicial desde puerto serie
   options.respiratoryRate = DEFAULT_RPM;
-  options.percInspEsp = 2; //1:1 to 1:4, is denom
+  options.percInspEsp = 3; //1:1 to 1:4, is denom
   options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
   
   options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
@@ -449,6 +449,8 @@ void loop() {
           //Serial.println(time);
           Serial1.print(byte(cycle_pos));Serial1.print(",");
           Serial1.println(byte(pressure_p));//Serial1.print(",");
+          //byte flow_b=byte(flow_f/10.+127);
+          //Serial1.println(byte(flow_b));
           //Serial1.println(flow_f,2);//Serial1.print(",");
           //Serial1.println(_mlInsVol - _mlExsVol);
 
