@@ -21,7 +21,7 @@ int buzzer=3; //pin
 
 #ifdef DISPLAY_SEC
 
-float diff_var[]={10., 20., 800.,0.,300.}; 
+float diff_var[]={35., 20., 800.,0.,300.}; 
 
 byte rx[128],ry[128];
 int  ry2[128];
@@ -283,8 +283,8 @@ void parseNfilterData() {
    }
   //Serial.print("time y xgra");Serial.print(integerFromPC[TIME_]);Serial.print(",");Serial.print(xgra[P_][1]);
   
-  if ( integerFromPC[P_] != 0 && abs(integerFromPC[P_]) < ( abs(last_vals[P_][1])+diff_var[P_] ) && integerFromPC[TIME_] > last_x /* && integerFromPC[TIME_] > xgra[P_][1]*/ ) {
-    Serial.print("yp0 y 1: ");Serial.print(yp[0]);Serial.print(",");Serial.println(yp[1]);
+  if ( integerFromPC[P_] != 0 && abs(integerFromPC[P_]) < ( abs(last_vals[P_][1])+diff_var[P_] ) /*&& integerFromPC[TIME_] > last_x  && integerFromPC[TIME_] > xgra[P_][1]*/ ) {
+    Serial.print("yp0 y 1: ");Serial.print(yp[0]);Serial.print(",");Serial.print(yp[1]);Serial.print(", lastvals(p,1)");Serial.println(last_vals[P_][1]);
     yp[0]=yp[1];yp[1]=int(float(integerFromPC[P_])*2.);
     last_vals[P_][0]=last_vals[P_][1];last_vals[P_][1]=integerFromPC[P_];
     xgra[P_][0]=xgra[P_][1];xgra[P_][1]=integerFromPC[TIME_];

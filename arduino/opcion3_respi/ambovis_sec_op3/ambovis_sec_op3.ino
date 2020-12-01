@@ -312,7 +312,7 @@ void loop() {
       if (!wait4read){
           recvchars=recvWithEndMarker();
           showNewData();
-          Serial.print("chars: ");Serial.println(receivedChars);
+          Serial.print("chars: ");Serial.print(receivedChars);
           //parseData();
           cycle_pos=integerFromPC[TIME_];
           if (integerFromPC[TIME_] == 128){
@@ -329,6 +329,7 @@ void loop() {
                       }
                     }
                   wait4read=true;
+                  Serial.print(", DATOS OK, t, p: ");Serial.print(integerFromPC[TIME_]);Serial.print(", ");Serial.println(integerFromPC[P_]);
               }
           }
           //Serial.print("cyclepos: ");Serial.println(integerFromPC[P_]);
