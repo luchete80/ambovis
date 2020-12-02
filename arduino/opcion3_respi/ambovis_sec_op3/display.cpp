@@ -35,7 +35,6 @@ bool ve_readed,vi_readed;
 #endif
 void print_params();
 void print_press();
-void parseNfilterData();
 
 //enum _state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
 
@@ -66,7 +65,7 @@ byte x[128],y[64];
 void tft_draw(void) {
     //Serial.println(cycle_pos);Serial.println(ry[valsreaded]);
 
-    parseNfilterData();
+    //parseNfilterData();
     last_x=cycle_pos;
     //last_x=integerFromPC[TIME_];
     //rx[valsreaded]=cycle_pos;
@@ -89,9 +88,9 @@ void tft_draw(void) {
     if (valsreaded > 0)
         drawY2();
     
+        Serial.print("last_x: ");Serial.println(last_x);
   	if (last_x<5 && !tft_cleaned){
         //#ifdef DEBUG_UPDATE
-        Serial.print("last_x: ");Serial.println(last_x);
         Serial.println("Cleaning");
         //#endif
     		tft_cleaned=true;
@@ -263,17 +262,17 @@ void print_vols(){
 
 
 
-void parseNfilterData() {
-  char * strtokIndx; // this is used by strtok() as an index
-
-  strtokIndx = strtok(receivedChars, ","); // this continues where the previous call left off
-  integerFromPC[0] = atoi(strtokIndx);     // convert this part to an integer
-
-  for (int i=1;i<7;i++) {
-      strtokIndx = strtok(NULL, ","); // this continues where the previous call left off
-      integerFromPC[i] = atoi(strtokIndx);     // convert this part to an integer
-  }
-  
+void filterData() {
+//  char * strtokIndx; // this is used by strtok() as an index
+//
+//  strtokIndx = strtok(receivedChars, ","); // this continues where the previous call left off
+//  integerFromPC[0] = atoi(strtokIndx);     // convert this part to an integer
+//
+//  for (int i=1;i<7;i++) {
+//      strtokIndx = strtok(NULL, ","); // this continues where the previous call left off
+//      integerFromPC[i] = atoi(strtokIndx);     // convert this part to an integer
+//  }
+//  
    //Serial.print("integerFromPC[TIME_]");Serial.print(integerFromPC[TIME_]);Serial.print(" - "); Serial.print("last_x: ");Serial.println(last_x);
    if ( integerFromPC[TIME_] != last_x /*&& abs(integerFromPC[P_])<ry[valsreaded]+10 */&& integerFromPC[0] < 127 && integerFromPC[TIME_] < last_x+20) {
      valsreaded+=1;
@@ -287,7 +286,6 @@ void parseNfilterData() {
     Serial.print("yp0 y 1: ");Serial.print(yp[0]);Serial.print(",");Serial.print(yp[1]);Serial.print(", lastvals(p,1)");Serial.println(last_vals[P_][1]);
     yp[0]=yp[1];yp[1]=int(float(integerFromPC[P_])*2.);
     last_vals[P_][0]=last_vals[P_][1];last_vals[P_][1]=integerFromPC[P_];
-    xgra[P_][0]=xgra[P_][1];xgra[P_][1]=integerFromPC[TIME_];
   }
   
   if (integerFromPC[VI_] != vi && !vi_readed) {
@@ -295,17 +293,12 @@ void parseNfilterData() {
       vi_readed=true;
   }
 
-  if (integerFromPC[VE_] != vi && !ve_readed) {
-      ve=integerFromPC[VE_];
-      ve_readed=true;
-  }
   //Serial.print("time y xgra flux");Serial.print(integerFromPC[TIME_]);Serial.print(",");Serial.print(xgra[FLUX_][1]);
   if ( integerFromPC[FLUX_] != 0 && abs(integerFromPC[FLUX_]) < abs(last_vals[FLUX_][1])+diff_var[FLUX_] /* && integerFromPC[TIME_] > xgra[FLUX_][1]*/) {
     //yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_])*0.04);
     yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_]-127)*6*0.04);//SI VIENE COMO BYTE
     Serial.print("yflux: ");Serial.println(yflux[1]);
     last_vals[FLUX_][0]=last_vals[FLUX_][1];last_vals[FLUX_][1]=integerFromPC[FLUX_];
-    xgra[FLUX_][0]=xgra[FLUX_][1];xgra[FLUX_][1]=integerFromPC[TIME_];
   }
    if ( integerFromPC[VT_] != 0 && abs(integerFromPC[VT_]) < abs(last_vals[VT_][1])+diff_var[VT_] && integerFromPC[TIME_] > xgra[VT_][1]) {
     yvt[0]=yvt[1];yvt[1]=int(float(integerFromPC[VT_])*0.07);

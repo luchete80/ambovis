@@ -41,7 +41,7 @@ void parseData() {
   strtokIndx = strtok(receivedChars, ","); // this continues where the previous call left off
   integerFromPC[0] = atoi(strtokIndx);     // convert this part to an integer
 
-  for (int i=1;i<7;i++) {
+  for (int i=1;i<3;i++) {
       strtokIndx = strtok(NULL, ","); // this continues where the previous call left off
       integerFromPC[i] = atoi(strtokIndx);     // convert this part to an integer
   }

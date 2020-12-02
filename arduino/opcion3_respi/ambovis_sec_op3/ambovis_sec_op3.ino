@@ -312,14 +312,16 @@ void loop() {
       if (!wait4read){
           recvchars=recvWithEndMarker();
           showNewData();
-          Serial.print("chars: ");Serial.print(receivedChars);
-          //parseData();
+          Serial.print("chars: ");Serial.println(receivedChars);
+          parseData();
           cycle_pos=integerFromPC[TIME_];
+          
           if (integerFromPC[TIME_] == 128){
               _mllastInsVol= integerFromPC[1];
               _mllastExsVol= integerFromPC[2];            
           } else {
-              if (integerFromPC[P_]> 0 ){
+              filterData();
+              if (integerFromPC[P_]> 0 && cycle_pos > 0){
                   if ( integerFromPC[P_] > pressure_max){
                       pressure_max = (float)integerFromPC[P_];
                   } else {
@@ -335,7 +337,7 @@ void loop() {
           //Serial.print("cyclepos: ");Serial.println(integerFromPC[P_]);
           time_serial_read=time;
       }
-      //}
+
 
       //Si leo la ultima informacion al final del ciclo
 
@@ -399,6 +401,7 @@ void loop() {
               }
           }
           change_cycle=true;
+          Serial.print("**** FIN DE CICLO*****");
       }
 
 //        if ( ventilation -> getCycleNum () != last_cycle ) {

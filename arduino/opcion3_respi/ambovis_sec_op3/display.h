@@ -29,4 +29,5 @@ void print_bat();
 void tft_draw();
 void print_vols();
 void check_alarms();
+void filterData();
 #endif
