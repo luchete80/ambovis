@@ -174,7 +174,7 @@ class VentilationOptions_t {
 };
 
 #define MODE_VOL_CTL 0
-#define MODE_VOL_CTL 1
+#define MODE_PRE_CTL 1
 #define MODE_MANUAL  2
 
 #define VENTMODE_VCL 0
