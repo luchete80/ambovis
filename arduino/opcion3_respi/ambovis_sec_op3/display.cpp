@@ -11,7 +11,7 @@ char a[10],b[10];
 bool state_chg;
 
 int last_t;
-int integerFromPC [5];
+byte integerFromPC [5];
 float floatFromPC = 0.0;
 int axispos[]={100,170,300}; //from each graph
 //byte state_r;
@@ -80,7 +80,7 @@ void tft_draw(void) {
 //    }
 
 
-    Serial.print("flux: ");Serial.println(yflux[1]);
+    //Serial.print("flux: ");Serial.println(yflux[1]);
     yvt[0]=yvt[1];yvt[1]=int((_mlInsVol - _mlExsVol)*0.1);
 
     
@@ -88,7 +88,7 @@ void tft_draw(void) {
     if (valsreaded > 0)
         drawY2();
     
-        Serial.print("last_x: ");Serial.println(last_x);
+        //Serial.print("last_x: ");Serial.println(last_x);
   	if (last_x<5 && !tft_cleaned){
         //#ifdef DEBUG_UPDATE
         Serial.println("Cleaning");
@@ -119,7 +119,7 @@ void tft_draw(void) {
 
 void drawY2(){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
   #ifdef DEBUG_UPDATE
-  Serial.print("Valsreaded: ");Serial.println(valsreaded);
+  //Serial.print("Valsreaded: ");Serial.println(valsreaded);
   //Serial.print("rx(valsreaded) & rx(valsreaded-1): ");Serial.print(rx[valsreaded]);Serial.print(",");Serial.print(rx[valsreaded-1]);Serial.print(",");
   #endif
   if ( rx[valsreaded] > rx[valsreaded-1] ) {//to avoid draw entire line to the begining at the end of the cycle
@@ -283,28 +283,28 @@ void filterData() {
   //Serial.print("time y xgra");Serial.print(integerFromPC[TIME_]);Serial.print(",");Serial.print(xgra[P_][1]);
   
   if ( integerFromPC[P_] != 0 && abs(integerFromPC[P_]) < ( abs(last_vals[P_][1])+diff_var[P_] ) /*&& integerFromPC[TIME_] > last_x  && integerFromPC[TIME_] > xgra[P_][1]*/ ) {
-    Serial.print("yp0 y 1: ");Serial.print(yp[0]);Serial.print(",");Serial.print(yp[1]);Serial.print(", lastvals(p,1)");Serial.println(last_vals[P_][1]);
+    //Serial.print("yp0 y 1: ");Serial.print(yp[0]);Serial.print(",");Serial.print(yp[1]);Serial.print(", lastvals(p,1)");Serial.println(last_vals[P_][1]);
     yp[0]=yp[1];yp[1]=int(float(integerFromPC[P_])*2.);
     last_vals[P_][0]=last_vals[P_][1];last_vals[P_][1]=integerFromPC[P_];
   }
-  
-  if (integerFromPC[VI_] != vi && !vi_readed) {
-      vi=integerFromPC[VI_];
-      vi_readed=true;
-  }
-
-  //Serial.print("time y xgra flux");Serial.print(integerFromPC[TIME_]);Serial.print(",");Serial.print(xgra[FLUX_][1]);
-  if ( integerFromPC[FLUX_] != 0 && abs(integerFromPC[FLUX_]) < abs(last_vals[FLUX_][1])+diff_var[FLUX_] /* && integerFromPC[TIME_] > xgra[FLUX_][1]*/) {
-    //yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_])*0.04);
-    yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_]-127)*6*0.04);//SI VIENE COMO BYTE
-    Serial.print("yflux: ");Serial.println(yflux[1]);
+  if ( integerFromPC[FLUX_] != 0 /*&& abs(integerFromPC[FLUX_]) < abs(last_vals[FLUX_][1])+diff_var[FLUX_] /* && integerFromPC[TIME_] > xgra[FLUX_][1]*/) {
+    //yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_]-127)*6*0.04);//SI VIENE COMO BYTE
+    yflux[0]=yflux[1];yflux[1]=(integerFromPC[FLUX_]-127)*0.4;//SI VIENE COMO BYTE
+    //Serial.print("yflux: ");Serial.println(yflux[1]);
     last_vals[FLUX_][0]=last_vals[FLUX_][1];last_vals[FLUX_][1]=integerFromPC[FLUX_];
   }
-   if ( integerFromPC[VT_] != 0 && abs(integerFromPC[VT_]) < abs(last_vals[VT_][1])+diff_var[VT_] && integerFromPC[TIME_] > xgra[VT_][1]) {
-    yvt[0]=yvt[1];yvt[1]=int(float(integerFromPC[VT_])*0.07);
-    last_vals[VT_][0]=last_vals[VT_][1];last_vals[VT_][1]=integerFromPC[VT_];
-    xgra[VT_][0]=xgra[VT_][1];xgra[VT_][1]=integerFromPC[TIME_];
-  }
+    
+//  if (integerFromPC[VI_] != vi && !vi_readed) {
+//      vi=integerFromPC[VI_];
+//      vi_readed=true;
+//  }
+
+
+//   if ( integerFromPC[VT_] != 0 && abs(integerFromPC[VT_]) < abs(last_vals[VT_][1])+diff_var[VT_] && integerFromPC[TIME_] > xgra[VT_][1]) {
+//    yvt[0]=yvt[1];yvt[1]=int(float(integerFromPC[VT_])*0.07);
+//    last_vals[VT_][0]=last_vals[VT_][1];last_vals[VT_][1]=integerFromPC[VT_];
+//    xgra[VT_][0]=xgra[VT_][1];xgra[VT_][1]=integerFromPC[TIME_];
+//  }
     
     //Serial.print("integers: ");Serial.print(integerFromPC[0]);Serial.print(",");Serial.print(integerFromPC[1]);Serial.print(",");Serial.print(integerFromPC[2]);Serial.print(",");Serial.println(integerFromPC[3]);
 }

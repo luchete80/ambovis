@@ -312,7 +312,8 @@ void loop() {
       if (!wait4read){
           recvchars=recvWithEndMarker();
           showNewData();
-          Serial.print("chars: ");Serial.println(receivedChars);
+          //Serial.print("chars: ");
+          Serial.println(receivedChars);
           parseData();
           cycle_pos=integerFromPC[TIME_];
           
@@ -327,22 +328,18 @@ void loop() {
                   } else {
                       if ( integerFromPC[P_] < pressure_min){
                           pressure_min = (float)integerFromPC[P_];
-                          Serial.print("pmin");Serial.println(pressure_min);
+                          //Serial.print("pmin");Serial.println(pressure_min);
                       }
                     }
                   wait4read=true;
-                  Serial.print(", DATOS OK, t, p: ");Serial.print(integerFromPC[TIME_]);Serial.print(", ");Serial.println(integerFromPC[P_]);
+                  //Serial.print(", DATOS OK, t, p: ");Serial.print(integerFromPC[TIME_]);Serial.print(", ");Serial.println(integerFromPC[P_]);
               }
           }
           //Serial.print("cyclepos: ");Serial.println(integerFromPC[P_]);
           time_serial_read=time;
       }
 
-
-      //Si leo la ultima informacion al final del ciclo
-
       if ( time > lastShowSensor + TIME_SHOW ) {
-
           lastShowSensor=time; 
           tft_draw_time=millis();
           tft_draw();
@@ -401,7 +398,7 @@ void loop() {
               }
           }
           change_cycle=true;
-          Serial.print("**** FIN DE CICLO*****");
+          //Serial.print("**** FIN DE CICLO*****");
       }
 
 //        if ( ventilation -> getCycleNum () != last_cycle ) {

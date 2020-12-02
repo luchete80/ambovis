@@ -15,7 +15,7 @@ extern boolean newData;
 const byte numChars = 32;
 void showNewData();
 extern char receivedChars[numChars]; // an array to store the received datae;
-extern int integerFromPC [5];
+extern byte integerFromPC [5];
 
 byte recvWithEndMarker();
 void parseData();
