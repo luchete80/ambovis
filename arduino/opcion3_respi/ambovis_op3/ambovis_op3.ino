@@ -448,9 +448,9 @@ void loop() {
           lastShowSensor=time; 
           //Serial.println(time);
           Serial1.print(byte(cycle_pos));Serial1.print(",");
-          Serial1.println(byte(pressure_p));//Serial1.print(",");
-          //byte flow_b=byte(flow_f/10.+127);
-          //Serial1.println(byte(flow_b));
+          Serial1.print(byte(pressure_p));Serial1.print(",");
+          byte flow_b=byte(flow_f/6.+127);
+          Serial1.println(byte(flow_b));
           //Serial1.println(flow_f,2);//Serial1.print(",");
           //Serial1.println(_mlInsVol - _mlExsVol);
 

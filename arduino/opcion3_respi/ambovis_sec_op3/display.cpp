@@ -80,8 +80,8 @@ void tft_draw(void) {
 //      last_x=integerFromPC[TIME_];
 //    }
 
-    //yflux[0]=yflux[1];yflux[1]=int(flow_f*0.035);//SI LLEGA CON EL VALOR REAL!
-    yflux[0]=yflux[1];yflux[1]=int(flow_f-127)*0.35;
+
+    Serial.print("flux: ");Serial.println(yflux[1]);
     yvt[0]=yvt[1];yvt[1]=int((_mlInsVol - _mlExsVol)*0.1);
 
     
@@ -91,7 +91,7 @@ void tft_draw(void) {
     
   	if (last_x<5 && !tft_cleaned){
         //#ifdef DEBUG_UPDATE
-        //Serial.print("last_x: ");Serial.println(last_x);
+        Serial.print("last_x: ");Serial.println(last_x);
         Serial.println("Cleaning");
         //#endif
     		tft_cleaned=true;
@@ -300,9 +300,10 @@ void parseNfilterData() {
       ve_readed=true;
   }
   //Serial.print("time y xgra flux");Serial.print(integerFromPC[TIME_]);Serial.print(",");Serial.print(xgra[FLUX_][1]);
-  if ( integerFromPC[FLUX_] != 0 /*&& abs(integerFromPC[FLUX_]) < abs(last_vals[FLUX_][1])+diff_var[FLUX_]  && integerFromPC[TIME_] > xgra[FLUX_][1]*/) {
+  if ( integerFromPC[FLUX_] != 0 && abs(integerFromPC[FLUX_]) < abs(last_vals[FLUX_][1])+diff_var[FLUX_] /* && integerFromPC[TIME_] > xgra[FLUX_][1]*/) {
     //yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_])*0.04);
-    yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_]-127)*0.4);//SI VIENE COMO BYTE
+    yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_]-127)*6*0.04);//SI VIENE COMO BYTE
+    Serial.print("yflux: ");Serial.println(yflux[1]);
     last_vals[FLUX_][0]=last_vals[FLUX_][1];last_vals[FLUX_][1]=integerFromPC[FLUX_];
     xgra[FLUX_][0]=xgra[FLUX_][1];xgra[FLUX_][1]=integerFromPC[TIME_];
   }
