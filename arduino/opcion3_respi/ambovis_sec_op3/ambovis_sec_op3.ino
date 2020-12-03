@@ -335,7 +335,7 @@ void loop() {
                   //Serial.print(", DATOS OK, t, p: ");Serial.print(integerFromPC[TIME_]);Serial.print(", ");Serial.println(integerFromPC[P_]);
               }
           }
-          //Serial.print("cyclepos: ");Serial.println(integerFromPC[P_]);
+          Serial.print("press: ");Serial.println(integerFromPC[P_]);
           time_serial_read=time;
       }
 
