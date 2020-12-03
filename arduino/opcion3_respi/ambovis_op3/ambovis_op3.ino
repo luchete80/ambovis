@@ -588,6 +588,7 @@ void loop() {
     
       if (cycle_pos > 110 && update_options_once){
           if ( update_options ) {
+            Serial.println("Opciones cambiadas");
             ventilation->change_config(options);
             update_options = false;
             update_options_once=false;
@@ -665,6 +666,7 @@ void read_menu(){
               switch (integerFromPC [0]){
                   case 1:
                   vent_mode=byte(integerFromPC [1]);
+                  Serial.println("modo cambiada");
                   break;
                   case 2:
                   options.respiratoryRate = integerFromPC [1];

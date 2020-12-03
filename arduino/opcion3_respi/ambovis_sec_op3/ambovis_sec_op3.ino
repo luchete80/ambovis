@@ -77,7 +77,7 @@ float pressure_p;   //EXTERN!!
 float last_pressure_max, last_pressure_min, last_pressure_peep;
 float pressure_max,pressure_min,pressure_peep;
 
-byte vent_mode = VENTMODE_PCL; //0
+byte vent_mode = VENTMODE_VCL; //0
 
 float verrp;
 float _flux,    flow_f;;
