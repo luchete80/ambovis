@@ -355,11 +355,11 @@ void loop() {
 //
 
 
-      if (cycle_pos > 100) {
+      if (cycle_pos > 90) {
           //#ifdef DEBUG_UPDATE 
           //Serial.print("Sending by serial");
           //#endif
-          if (cant_opciones_mod>0 && cant_enviadas_menu < 3 ){
+          if (cant_opciones_mod>0 && cant_enviadas_menu < 2 ){
               cant_opciones_mod=0;
               Serial1.print(opciones_mod[0]);Serial1.print(",");
               Serial1.println(seleccion_mod[0]);

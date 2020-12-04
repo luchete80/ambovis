@@ -433,7 +433,6 @@ void loop() {
 //        lastSave = millis();
 //      }
 //    
-      read_menu();
 
   
       //#ifdef DEBUG_UPDATE
@@ -442,38 +441,32 @@ void loop() {
 //      Serial.print(flow_f,2);Serial.print(",");
 //      Serial.println(_mlInsVol - _mlExsVol);
       //#endif
-      
-      if ( time > lastShowSensor + TIME_SHOW ) {
-    
-          lastShowSensor=time; 
-          //Serial.println(time);
-          Serial1.print(byte(cycle_pos));Serial1.print(",");
-          Serial1.print(byte(pressure_p));Serial1.print(",");
-          byte flow_b=byte(flow_f/6.+127);
-          Serial1.println(byte(flow_b));
-          //Serial1.println(flow_f,2);//Serial1.print(",");
-          //Serial1.println(_mlInsVol - _mlExsVol);
 
-          #ifdef DEBUG_UPDATE
-          Serial.print(int(cycle_pos));Serial.print(",");
-          Serial.print(int(pressure_p));Serial.print(",");
-          Serial.println(flow_f,2);
-          #endif
-          
-          
-//    //	     #ifdef FILTER_FLUX
-//           Serial.print(Voltage,5);Serial.print(",");
-//           Serial.print(verror,3);Serial.print(",");
-//           Serial.print(p_dpt,5);Serial.print(",");
-//    //       Serial.print(_mlInsVol - _mlExsVol);Serial.print(",");
-    //      Serial.println(int(alarm_state));
-          //Serial.print(",");Serial.println(int(alarm_state));     
-    //      #ifdef FILTER_FLUX 
-    //      Serial.print(Voltage*1000);Serial.print(",");Serial.print(p_dpt);Serial.print(",");Serial.println(_flux);/*Serial.print(",");/*Serial.print(",");Serial.println(_flux_sum/5.);*/
-    //      #endif
-          //Serial.print(int(_mlInsVol));Serial.print(",");Serial.println(int(_mlExsVol));
-
+      if (cycle_pos < 110) {
+          if ( time > lastShowSensor + TIME_SHOW ) {
+        
+              lastShowSensor=time; 
+              //Serial.println(time);
+              Serial1.print(byte(cycle_pos));Serial1.print(",");
+              Serial1.print(byte(pressure_p));Serial1.print(",");
+              byte flow_b=byte(flow_f/6.+127);
+              Serial1.println(byte(flow_b));
+              //Serial1.println(flow_f,2);//Serial1.print(",");
+              //Serial1.println(_mlInsVol - _mlExsVol);
     
+              #ifdef DEBUG_UPDATE
+              Serial.print(int(cycle_pos));Serial.print(",");
+              Serial.print(int(pressure_p));Serial.print(",");
+              Serial.println(flow_f,2);
+              #endif
+        
+          }
+      } else {//cycle_pos>110
+          if (cant_menu_leidos < 2) {       
+              read_menu();
+          } else{
+              send_final_data();
+          }
       }
     
     
@@ -596,7 +589,6 @@ void loop() {
           }//
       }
 
-      //send_final_data();
       
       if ( millis () - last_vent_time > TIME_BASE ) {
         ventilation -> update();
@@ -643,89 +635,75 @@ void timer1Isr(void)
 }
 
 void send_final_data(){
-    if ( cycle_pos > 100 && cant_menu_leidos >= 3 ) {
-        Serial1.print("128,");
-        Serial1.print(_mllastInsVol);Serial1.print(",");
-        Serial1.print(_mllastExsVol);Serial1.print(",");
-        Serial1.println(tinsp_f);
-        Serial1.print(",");
-        Serial1.print(last_pressure_max);Serial1.print(",");
-        Serial1.println(last_pressure_min);  
-    }
+    Serial1.print("128,");
+    Serial1.print(_mllastInsVol);Serial1.print(",");
+    Serial1.print(_mllastExsVol);Serial1.print(",");
+    Serial1.println(tinsp_f);
+    Serial1.print(",");
+    Serial1.print(last_pressure_max);Serial1.print(",");
+    Serial1.println(last_pressure_min);  
+
 }
 void read_menu(){
-    if (cycle_pos > 100 && cant_menu_leidos < 3) {
-          cant_menu_leidos++;
-          recvWithEndMarker();
-          showNewData();
-          parseData();
+    cant_menu_leidos++;
+    recvWithEndMarker();
+    showNewData();
+    parseData();
     
-          if (integerFromPC [1]>0 && read_serial_once ){
-
-          Serial.print("chars: ");Serial.println(receivedChars);
-          //Serial.print("Integers: ");Serial.print(integerFromPC [0]);Serial.print(",");Serial.println(integerFromPC [1]);
-              switch (integerFromPC [0]){
-                  case 1:
-                  vent_mode=byte(integerFromPC [1]);
-                  Serial.println("modo cambiada");
-                  break;
-                  case 2:
-                  options.respiratoryRate = integerFromPC [1];
-                  break;
-                  case 3:
-                  options.percInspEsp = integerFromPC [1];
-                  Serial.print("CHANGED IE to: ");Serial.println(integerFromPC [1]);
-                  break;
-                  case 4:
-                  options.peakInspiratoryPressure = integerFromPC [1];
-                  break;
-                  case 5:
-                  options.percVolume = integerFromPC [1];
-                  break;
-                  case 6:
-                  alarm_max_pressure = integerFromPC [1];
-                  break;
-                  case 7:
-                  alarm_peep_pressure = integerFromPC [1];
-                  break;
-                  //Serial.print("BPM changed!!");
-              }
-
-          update_options=true;
-          read_serial_once=false;//Se lee hasta que se reciba info correctamente
+    if (integerFromPC [1]>0 && read_serial_once ){
+    
+    Serial.print("chars: ");Serial.println(receivedChars);
+    //Serial.print("Integers: ");Serial.print(integerFromPC [0]);Serial.print(",");Serial.println(integerFromPC [1]);
+        switch (integerFromPC [0]){
+            case 1:
+            vent_mode=byte(integerFromPC [1]);
+            Serial.println("modo cambiada");
+            break;
+            case 2:
+            options.respiratoryRate = integerFromPC [1];
+            break;
+            case 3:
+            options.percInspEsp = integerFromPC [1];
+            Serial.print("CHANGED IE to: ");Serial.println(integerFromPC [1]);
+            break;
+            case 4:
+            options.peakInspiratoryPressure = integerFromPC [1];
+            break;
+            case 5:
+            options.percVolume = integerFromPC [1];
+            break;
+            case 6:
+            alarm_max_pressure = integerFromPC [1];
+            break;
+            case 7:
+            alarm_peep_pressure = integerFromPC [1];
+            break;
+            //Serial.print("BPM changed!!");
         }
+    
+    update_options=true;
+    read_serial_once=false;//Se lee hasta que se reciba info correctamente
     }
+    
     if (cycle_pos<10){
         cant_menu_leidos=0;  
     }
 }
 
 void update_error() {
-  //UPDATING VERROR
-  if (cycle_pos > 100) {
-    if (vcorr_count < 20) {
-      vcorr_count += 1.;
-      verror_sum += ( Voltage - 0.2 ); //-5*0.04
-      verror_sum +=p_dpt; //Si el error es de presion
-      //verror+=Voltage;
-      init_verror = true;
+    //UPDATING VERROR
+    if (cycle_pos > 100) {
+      if (vcorr_count < 20) {
+        vcorr_count += 1.;
+        verror_sum += ( Voltage - 0.2 ); //-5*0.04
+        verror_sum +=p_dpt; //Si el error es de presion
+        //verror+=Voltage;
+        init_verror = true;
+  
+        zero_flow_sum+=flow_f;
+      }
 
-      zero_flow_sum+=flow_f;
-    }
-    //Serial.print("Verror (mV) and count: ");Serial.print(verror_sum*1000);Serial.print(",  ");Serial.println(vcorr_count);
-    
-//        recvWithEndMarker();
-//        showNewData();
-//        parseData();
-//        Serial.print("chars: ");Serial.println(receivedChars);
-//        Serial.print("Integers: ");Serial.print(integerFromPC [0]);Serial.print(",");Serial.println(integerFromPC [1]);
-//    
-//        if (integerFromPC [0]!=0){
-//          options.respiratoryRate=integerFromPC [0];
-//          Serial.print("BPM changed!!");
-//          ventilation->change_config(options);
-//        }
-    }
+  }
 
   if (cycle_pos < 5 && init_verror) {
     verror = verror_sum / ((float)vcorr_count + 1.);
