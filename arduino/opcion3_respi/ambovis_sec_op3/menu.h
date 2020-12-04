@@ -31,12 +31,15 @@ class Menu{
   };
   
   
-class Menu_inicial:public Menu{
-	
+class Menu_inic:public Menu{
+  byte _mod,_bpm,_i_e;	
 	
 	public:
-		Menu(byte *mode, byte *bpm, byte *i_e);
-}
+		Menu_inic(byte *mode, byte *bpm, byte *i_e);
+		void clear_n_sel( int menu );
+		void Menu_inic::check_encoder ( );
+		void Menu_inic::display_lcd ( );
+};
 
 
 #ifdef LCD_I2C
