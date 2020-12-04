@@ -28,6 +28,7 @@ byte back[8] = {
 Menu::Menu()
 {}
 
+
 void updateState() {
   // the button has been just pressed
   if (bck_state == LOW) {

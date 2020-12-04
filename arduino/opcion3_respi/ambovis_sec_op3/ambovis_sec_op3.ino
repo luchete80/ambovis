@@ -293,16 +293,16 @@ void loop() {
 
 //
 //
-//  if (!sleep_mode){
-//    if (wake_up){
-//      lcd.clear();
-//      init_display();
-//      Serial.println("wake up");
-//      display_lcd();
-//      tft.fillScreen(ILI9341_BLACK);
-//      wake_up=false;
-//      }
-//
+  if (!sleep_mode){
+    if (wake_up){
+      lcd.clear();
+      init_display();
+      Serial.println("wake up");
+      display_lcd();
+      tft.fillScreen(ILI9341_BLACK);
+      wake_up=false;
+      }
+
       time = millis();
       check_encoder();
 
@@ -468,24 +468,24 @@ void loop() {
           isbuzzeron=true;        //Inverted logic
         }
 
-  //! sleep_mode
-//  } else { 
-//      if (put_to_sleep){
-//          tft.fillScreen(ILI9341_BLACK);
-//          digitalWrite(PIN_LCD_EN,HIGH);
-//          put_to_sleep=false;  
-//          print_bat_time=time;
-//          print_bat();
-//          //digitalWrite(PIN_BUZZER,!BUZZER_LOW); //Buzzer inverted
-//          lcd.clear();
-//      }
-//      if (time > print_bat_time + 5000){
-//        print_bat();
-//        print_bat_time=time;
-//      }
-//      time = millis();
-//      check_bck_state();
-//  }
+    //! sleep_mode
+    } else { 
+        if (put_to_sleep){
+            tft.fillScreen(ILI9341_BLACK);
+            digitalWrite(PIN_LCD_EN,HIGH);
+            put_to_sleep=false;  
+            print_bat_time=time;
+            print_bat();
+            //digitalWrite(PIN_BUZZER,!BUZZER_LOW); //Buzzer inverted
+            lcd.clear();
+        }
+        if (time > print_bat_time + 5000){
+          print_bat();
+          print_bat_time=time;
+        }
+        time = millis();
+        check_bck_state();
+    }
 
 }//LOOP
 

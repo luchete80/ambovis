@@ -29,7 +29,14 @@ class Menu{
   
   
   };
-
+  
+  
+class Menu_inicial:public Menu{
+	
+	
+	public:
+		Menu(byte *mode, byte *bpm, byte *i_e);
+}
 
 
 #ifdef LCD_I2C
