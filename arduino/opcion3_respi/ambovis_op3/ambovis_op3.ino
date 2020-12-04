@@ -175,6 +175,8 @@ AutoPID * pid;
 MechVentilation * ventilation;
 VentilationOptions_t options;
 
+byte last_menu_value = 0;
+
 float p_dpt0;
 
 int bck_state ;     // current state of the button
@@ -442,7 +444,7 @@ void loop() {
 //      Serial.println(_mlInsVol - _mlExsVol);
       //#endif
 
-      if (cycle_pos < 110) {
+      if (cycle_pos < 92) {
           if ( time > lastShowSensor + TIME_SHOW ) {
         
               lastShowSensor=time; 
@@ -462,11 +464,17 @@ void loop() {
         
           }
       } else {//cycle_pos>110
-          if (cant_menu_leidos < 2) {       
+          //Serial.println("ciclo mayor a 100");
+          if (cant_menu_leidos < 10) {   
+              //Serial.print("leyendo menu");    
               read_menu();
           } else{
               send_final_data();
           }
+      }
+
+      if (cycle_pos<10){
+          cant_menu_leidos=0;  
       }
     
     
@@ -645,49 +653,50 @@ void send_final_data(){
 
 }
 void read_menu(){
-    cant_menu_leidos++;
+    
     recvWithEndMarker();
     showNewData();
     parseData();
     
-    if (integerFromPC [1]>0 && read_serial_once ){
-    
-    Serial.print("chars: ");Serial.println(receivedChars);
-    //Serial.print("Integers: ");Serial.print(integerFromPC [0]);Serial.print(",");Serial.println(integerFromPC [1]);
-        switch (integerFromPC [0]){
-            case 1:
-            vent_mode=byte(integerFromPC [1]);
-            Serial.println("modo cambiada");
-            break;
-            case 2:
-            options.respiratoryRate = integerFromPC [1];
-            break;
-            case 3:
-            options.percInspEsp = integerFromPC [1];
-            Serial.print("CHANGED IE to: ");Serial.println(integerFromPC [1]);
-            break;
-            case 4:
-            options.peakInspiratoryPressure = integerFromPC [1];
-            break;
-            case 5:
-            options.percVolume = integerFromPC [1];
-            break;
-            case 6:
-            alarm_max_pressure = integerFromPC [1];
-            break;
-            case 7:
-            alarm_peep_pressure = integerFromPC [1];
-            break;
-            //Serial.print("BPM changed!!");
-        }
-    
-    update_options=true;
-    read_serial_once=false;//Se lee hasta que se reciba info correctamente
+    if ( cant_menu_leidos > 1 && integerFromPC [1] == last_menu_value) {
+            
+        if (integerFromPC [1]>0 && read_serial_once ){
+        Serial.println ("VALOR CORRECTO: "+String(last_menu_value));
+        Serial.print("chars: ");Serial.println(receivedChars);
+        //Serial.print("Integers: ");Serial.print(integerFromPC [0]);Serial.print(",");Serial.println(integerFromPC [1]);
+            switch (integerFromPC [0]){
+                case 1:
+                vent_mode=byte(integerFromPC [1]);
+                Serial.println("modo cambiada");
+                break;
+                case 2:
+                options.respiratoryRate = integerFromPC [1];
+                break;
+                case 3:
+                options.percInspEsp = integerFromPC [1];
+                Serial.print("CHANGED IE to: ");Serial.println(integerFromPC [1]);
+                break;
+                case 4:
+                options.peakInspiratoryPressure = integerFromPC [1];
+                break;
+                case 5:
+                options.percVolume = integerFromPC [1];
+                break;
+                case 6:
+                alarm_max_pressure = integerFromPC [1];
+                break;
+                case 7:
+                alarm_peep_pressure = integerFromPC [1];
+                break;
+                //Serial.print("BPM changed!!");
+            }
+        
+          update_options=true;
+          read_serial_once=false;//Se lee hasta que se reciba info correctamente
+          }
     }
-    
-    if (cycle_pos<10){
-        cant_menu_leidos=0;  
-    }
+        cant_menu_leidos++;
+        last_menu_value = integerFromPC [1];
 }
 
 void update_error() {

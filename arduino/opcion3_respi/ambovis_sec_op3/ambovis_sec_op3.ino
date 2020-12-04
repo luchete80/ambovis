@@ -335,18 +335,38 @@ void loop() {
                   //Serial.print(", DATOS OK, t, p: ");Serial.print(integerFromPC[TIME_]);Serial.print(", ");Serial.println(integerFromPC[P_]);
               }
           }
-          Serial.print("press: ");Serial.println(integerFromPC[P_]);
+          //Serial.print("press: ");Serial.println(integerFromPC[P_]);
           time_serial_read=time;
+
+          if (cycle_pos>90)
+              wait4read=true;
+      
+      } else {
+          Serial.print("ciclo mayor a 90");
+          if ( cycle_pos>90) {
+              if (cant_opciones_mod>0 ){
+                  for (int i=0;i<5;i++){
+                      Serial.println("enviando menu");
+                      Serial1.print(opciones_mod[0]);Serial1.print(",");
+                      Serial1.println(seleccion_mod[0]);
+                  }
+              } else {
+                
+              }//Si se modificaron opciones
+          }
+          wait4read=false;
+      } //escribo los parametros 5 veces y muestro
+
+      if ( cycle_pos < 90 ) {
+          if ( time > lastShowSensor + TIME_SHOW ) {
+              lastShowSensor=time; 
+              tft_draw_time=millis();
+              tft_draw();
+              //Serial.print("dra time: ");Serial.println(millis()-tft_draw_time);
+              wait4read=false;
+          }
       }
 
-      if ( time > lastShowSensor + TIME_SHOW ) {
-          lastShowSensor=time; 
-          tft_draw_time=millis();
-          tft_draw();
-          //Serial.print("dra time: ");Serial.println(millis()-tft_draw_time);
-          wait4read=false;
-
-      }      
       //Serial.print("char length: ");Serial.println(recvchars);
 //    
       
@@ -355,7 +375,7 @@ void loop() {
 //
 
 
-      if (cycle_pos > 90) {
+      if (cycle_pos > 100) {
           //#ifdef DEBUG_UPDATE 
           //Serial.print("Sending by serial");
           //#endif
