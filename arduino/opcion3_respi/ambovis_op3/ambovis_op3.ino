@@ -656,10 +656,12 @@ void read_menu(){
     
     recvWithEndMarker();
     showNewData();
+    Serial.println("chars: "+ String(receivedChars));
     parseData();
+    Serial.println("leyendo menu");
     
     if ( cant_menu_leidos > 1 && integerFromPC [1] == last_menu_value) {
-            
+        Serial.println("ultimo valor de menu: " + String(last_menu_value));
         if (integerFromPC [1]>0 && read_serial_once ){
         Serial.println ("VALOR CORRECTO: "+String(last_menu_value));
         Serial.print("chars: ");Serial.println(receivedChars);

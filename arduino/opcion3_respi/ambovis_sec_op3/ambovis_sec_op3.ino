@@ -345,7 +345,7 @@ void loop() {
           Serial.print("ciclo mayor a 90");
           if ( cycle_pos>90) {
               if (cant_opciones_mod>0 ){
-                  for (int i=0;i<5;i++){
+                  for (int i=0;i<10;i++){
                       Serial.println("enviando menu");
                       Serial1.print(opciones_mod[0]);Serial1.print(",");
                       Serial1.println(seleccion_mod[0]);
