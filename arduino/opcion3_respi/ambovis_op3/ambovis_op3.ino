@@ -444,7 +444,7 @@ void loop() {
 //      Serial.println(_mlInsVol - _mlExsVol);
       //#endif
 
-      if (cycle_pos < 92) {
+      if (cycle_pos < 95) {
           if ( time > lastShowSensor + TIME_SHOW ) {
         
               lastShowSensor=time; 

@@ -377,17 +377,7 @@ void loop() {
 //
 
 
-      if (cycle_pos > 100) {
-          //#ifdef DEBUG_UPDATE 
-          //Serial.print("Sending by serial");
-          //#endif
-          if (cant_opciones_mod>0 && cant_enviadas_menu < 2 ){
-              cant_opciones_mod=0;
-              Serial1.print(opciones_mod[0]);Serial1.print(",");
-              Serial1.println(seleccion_mod[0]);
-              cant_enviadas_menu++;
-          }//if hay opciones modificadas
-
+      if (cycle_pos > 90) {
           //Recibo data de flujo y tiempos
           change_cycle=false;
           //Serial.println("FIN DE CICLO");

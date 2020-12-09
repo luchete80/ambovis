@@ -603,7 +603,6 @@ void display_lcd ( ) {
       break;
     }
      
-      
     writeLine(1, "BPM:" + String(options.respiratoryRate), 1);
     writeLine(2, "IE:1:", 1);
   
