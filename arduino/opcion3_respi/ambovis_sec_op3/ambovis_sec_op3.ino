@@ -325,9 +325,11 @@ void loop() {
               if (integerFromPC[P_]> 0 && cycle_pos > 0){
                   if ( integerFromPC[P_] > pressure_max){
                       pressure_max = (float)integerFromPC[P_];
+                      Serial.println("presion max alcanzada" + String(pressure_max));
                   } else {
                       if ( integerFromPC[P_] < pressure_min){
                           pressure_min = (float)integerFromPC[P_];
+                          Serial.println("presion min alcanzada" + String(pressure_min));
                           //Serial.print("pmin");Serial.println(pressure_min);
                       }
                     }
@@ -387,15 +389,11 @@ void loop() {
           }//if hay opciones modificadas
 
           //Recibo data de flujo y tiempos
-          
-          last_pressure_max = pressure_max;
-          pressure_max = 0;
-          last_pressure_min=pressure_min;
-          pressure_min = 100;
+          change_cycle=false;
           //Serial.println("FIN DE CICLO");
       }
 
-      if (cycle_pos < 5 && !change_cycle){
+      if (cycle_pos < 10 && !change_cycle){
           cant_enviadas_menu=0;
           //vt=(_mllastInsVol + _mllastInsVol)/2;
           //if (vt<alarm_vt)  isalarmvt_on=1;
@@ -417,8 +415,13 @@ void loop() {
                 else                alarm_state = 10;
               }
           }
+          last_pressure_max = pressure_max;
+          pressure_max = 0;
+          last_pressure_min=pressure_min;
+          pressure_min = 100;
+          
           change_cycle=true;
-          //Serial.print("**** FIN DE CICLO*****");
+          Serial.println("FIN CICLO");
       }
 
 //        if ( ventilation -> getCycleNum () != last_cycle ) {

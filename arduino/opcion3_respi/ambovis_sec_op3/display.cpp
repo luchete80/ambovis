@@ -217,12 +217,18 @@ void print_bat(){
 }
 void print_press(){
     tft.setRotation(0);
-    tft.fillRect(180,100,70,20, ILI9341_BLACK);
+    tft.fillRect(180,80,70,40, ILI9341_BLACK);
     //itoa(integerFromPC[5], buffer, 10);
+    
+    itoa(last_pressure_max, buffer, 10);
+    tft.setCursor(150, 80);  //Y es la posicion vertical aca
+    tft.setTextColor(ILI9341_RED);  tft.setTextSize(2);
+    tft.println("PIP: ");tft.setCursor(200, 80);tft.println(buffer);
+    
     itoa(last_pressure_min, buffer, 10);
     tft.setCursor(150, 100);  //Y es la posicion vertical aca
     tft.setTextColor(ILI9341_RED);  tft.setTextSize(2);
-    tft.println("PEEP: ");tft.setCursor(200, 100);tft.println(buffer);
+    tft.println("PEEP: ");tft.setCursor(220, 100);tft.println(buffer);
   }
 
 
