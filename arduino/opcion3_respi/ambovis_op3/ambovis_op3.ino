@@ -21,6 +21,8 @@ bool put_to_sleep,wake_up;
 unsigned long print_bat_time;
 unsigned long _msecTimerCnt=0;
 
+bool final_data_sent;
+
 int tinsp_f,tesp_f; //Tiempos respecto a flujo cero
 bool flujo_positivo;
 
@@ -369,6 +371,7 @@ void setup() {
     wake_up=false;
 
     cant_menu_leidos=0;
+    final_data_sent=false;
 }
 
 
@@ -398,8 +401,8 @@ void loop() {
         if (flow_f < zero_flow ){
             tinsp_f = cycle_pos;
             flujo_positivo=false;
-            Serial.print("REAL insp time: ");Serial.println(tinsp_f);
-            Serial.print("REAL insp time: ");Serial.println(time - _msecTimerStartWholeCycle);
+            //Serial.print("REAL insp time: ");Serial.println(tinsp_f);
+            //Serial.print("REAL insp time: ");Serial.println(time - _msecTimerStartWholeCycle);
         }
       }   
     
@@ -443,7 +446,7 @@ void loop() {
 //      Serial.println(_mlInsVol - _mlExsVol);
       //#endif
 
-      if (cycle_pos < 95) {
+      if (cycle_pos < 92) {
           if ( time > lastShowSensor + TIME_SHOW ) {
         
               lastShowSensor=time; 
@@ -452,6 +455,7 @@ void loop() {
               Serial1.print(byte(pressure_p));Serial1.print(",");
               byte flow_b=byte(flow_f/6.+127);
               Serial1.println(byte(flow_b));
+              Serial.println(flow_b);
               //Serial1.println(flow_f,2);//Serial1.print(",");
               //Serial1.println(_mlInsVol - _mlExsVol);
     
@@ -468,12 +472,16 @@ void loop() {
               //Serial.print("leyendo menu");    
               read_menu();
           } else{
-              send_final_data();
+              if (!final_data_sent){
+                  send_final_data();
+                  final_data_sent=true;
+              }
           }
       }
 
       if (cycle_pos<10){
           cant_menu_leidos=0;  
+          final_data_sent=false;
       }
     
     
@@ -643,24 +651,26 @@ void timer1Isr(void)
 
 void send_final_data(){
     Serial1.print("128,");
-    Serial1.print(_mllastInsVol);Serial1.print(",");
-    Serial1.print(_mllastExsVol);Serial1.print(",");
+    Serial1.print(byte(_mllastInsVol/5));Serial1.print(",");
+    Serial1.print(byte(_mllastExsVol/5));Serial1.print(",");
     Serial1.println(tinsp_f);
     Serial1.print(",");
     Serial1.print(last_pressure_max);Serial1.print(",");
     Serial1.println(last_pressure_min);  
+
+    //Serial.print("flujos: ");
+    //Serial.print(_mllastInsVol);Serial.print(",");
+    //Serial.println(_mllastExsVol);
 
 }
 void read_menu(){
     
     recvWithEndMarker();
     showNewData();
-    Serial.println("chars: "+ String(receivedChars));
     parseData();
-    Serial.println("leyendo menu");
     
     if ( cant_menu_leidos > 1 && integerFromPC [1] == last_menu_value) {
-        Serial.println("ultimo valor de menu: " + String(last_menu_value));
+            
         if (integerFromPC [1]>0 && read_serial_once ){
         Serial.println ("VALOR CORRECTO: "+String(last_menu_value));
         Serial.print("chars: ");Serial.println(receivedChars);
@@ -681,8 +691,7 @@ void read_menu(){
                 options.peakInspiratoryPressure = integerFromPC [1];
                 break;
                 case 5:
-                Serial.print("CAMBIADO PORC A : ");Serial.println(integerFromPC [1]);
-                options.percVolume = byte(integerFromPC [1]);
+                options.percVolume = integerFromPC [1];
                 break;
                 case 6:
                 alarm_max_pressure = integerFromPC [1];
@@ -720,7 +729,7 @@ void update_error() {
     verror = verror_sum / ((float)vcorr_count + 1.);
     zero_flow =  zero_flow_sum / ((float)vcorr_count + 1.);
     //Serial.print("Verror (mV) and count: ");Serial.print(verror*1000);Serial.print(",  ");Serial.println(vcorr_count);
-    Serial.print("Zero flow: ");Serial.println(zero_flow);
+    //Serial.print("Zero flow: ");Serial.println(zero_flow);
     verror_sum = 0.;
     vcorr_count = 0;
     init_verror = false;

@@ -318,8 +318,8 @@ void loop() {
           cycle_pos=integerFromPC[TIME_];
           
           if (integerFromPC[TIME_] == 128){
-              _mllastInsVol= integerFromPC[1];
-              _mllastExsVol= integerFromPC[2];            
+              _mllastInsVol= integerFromPC[1]*5;
+              _mllastExsVol= integerFromPC[2]*5;            
           } else {
               filterData();
               if (integerFromPC[P_]> 0 && cycle_pos > 0){

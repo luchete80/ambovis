@@ -297,7 +297,7 @@ void filterData() {
   }
   if ( integerFromPC[FLUX_] != 0 /*&& abs(integerFromPC[FLUX_]) < abs(last_vals[FLUX_][1])+diff_var[FLUX_] /* && integerFromPC[TIME_] > xgra[FLUX_][1]*/) {
     //yflux[0]=yflux[1];yflux[1]=int(float(integerFromPC[FLUX_]-127)*6*0.04);//SI VIENE COMO BYTE
-    yflux[0]=yflux[1];yflux[1]=(integerFromPC[FLUX_]-127)*0.4;//SI VIENE COMO BYTE
+    yflux[0]=yflux[1];yflux[1]=((int)(integerFromPC[FLUX_])-127)*0.4;//SI VIENE COMO BYTE
     //Serial.print("yflux: ");Serial.println(yflux[1]);
     last_vals[FLUX_][0]=last_vals[FLUX_][1];last_vals[FLUX_][1]=integerFromPC[FLUX_];
   }
