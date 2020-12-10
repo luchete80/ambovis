@@ -682,7 +682,8 @@ void read_menu(){
                 options.peakInspiratoryPressure = integerFromPC [1];
                 break;
                 case 5:
-                options.percVolume = integerFromPC [1];
+                Serial.print("CAMBIADO PORC A : ");Serial.println(integerFromPC [1]);
+                options.percVolume = byte(integerFromPC [1]);
                 break;
                 case 6:
                 alarm_max_pressure = integerFromPC [1];
