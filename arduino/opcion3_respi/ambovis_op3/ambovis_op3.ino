@@ -377,7 +377,6 @@ bool read_serial_once=true;
 byte pos;
 
 void loop() {
-  //Serial.println ("Vent mode: " + String(vent_mode));
       
   if (!sleep_mode){
     if (wake_up){
@@ -470,7 +469,6 @@ void loop() {
               read_menu();
           } else{
               send_final_data();
-              Serial.println ("Vent mode: " + String(vent_mode));
           }
       }
 
