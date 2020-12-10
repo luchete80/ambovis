@@ -78,7 +78,7 @@ float pressure_p;   //EXTERN!!
 float last_pressure_max, last_pressure_min, last_pressure_peep;
 float pressure_peep;
 
-byte vent_mode = VENTMODE_VCL; //0
+byte vent_mode = VENTMODE_MAN; //2
 //Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
 float verrp;
@@ -377,7 +377,7 @@ bool read_serial_once=true;
 byte pos;
 
 void loop() {
-
+  //Serial.println ("Vent mode: " + String(vent_mode));
       
   if (!sleep_mode){
     if (wake_up){
@@ -470,6 +470,7 @@ void loop() {
               read_menu();
           } else{
               send_final_data();
+              Serial.println ("Vent mode: " + String(vent_mode));
           }
       }
 

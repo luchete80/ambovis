@@ -47,7 +47,7 @@ float _mlInsVol = 0;
 float _mlExsVol = 0;
 int _mllastInsVol, _mllastExsVol;
 unsigned long mute_count;
-
+float cycle_time;
 
 int Compression_perc = 8; //80%
 
@@ -67,6 +67,7 @@ unsigned long time_mute;
 boolean buzzmuted;
 unsigned long timebuzz=0;
 bool isbuzzeron=false;
+
 
 
 Adafruit_ILI9341 tft=Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
@@ -109,7 +110,8 @@ extern float _mlInsVol, _mlExsVol;
 
 unsigned long last_vent_time;
 unsigned long time;
-byte cycle_pos;
+byte cycle_pos,last_cycle_pos;
+unsigned long last_measured_time;
 int16_t adc0;
 
 int max_accel,min_accel;
@@ -374,8 +376,8 @@ void loop() {
 //      //Serial.print("Carga: ");Serial.println(analogRead(PIN_BAT_LEV));
 //
 
-
       if (cycle_pos > 100) {
+          change_cycle=false;
           //#ifdef DEBUG_UPDATE 
           //Serial.print("Sending by serial");
           //#endif
@@ -394,8 +396,15 @@ void loop() {
           pressure_min = 100;
           //Serial.println("FIN DE CICLO");
       }
-
-      if (cycle_pos < 5 && !change_cycle){
+      
+      /////////////////////////////////////////
+      /////////// CAMBIO DE CICLO /////////////
+      /////////////////////////////////////////
+      if (cycle_pos < 20 && cycle_pos != 0 && !change_cycle){
+          change_cycle=true;
+          Serial.println("change_cycle"+String(change_cycle));
+          Serial.println("CAMBIO DE CICLO");
+          Serial.println ("cycle_pos"+ String (cycle_pos));
           cant_enviadas_menu=0;
           //vt=(_mllastInsVol + _mllastInsVol)/2;
           //if (vt<alarm_vt)  isalarmvt_on=1;
@@ -417,7 +426,13 @@ void loop() {
                 else                alarm_state = 10;
               }
           }
-          change_cycle=true;
+         
+
+          cycle_time = float (127.f + float(cycle_pos - last_cycle_pos))/127.f*float(millis() - last_measured_time)*0.001;
+          Serial.println ("last_cycle_pos"+ String (last_cycle_pos));
+          Serial.println("cycle_time" + String(cycle_time));
+          last_measured_time=millis();
+          last_cycle_pos = cycle_pos;
           //Serial.print("**** FIN DE CICLO*****");
       }
 

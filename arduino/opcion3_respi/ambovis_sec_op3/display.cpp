@@ -230,10 +230,12 @@ void print_params(){
     tft.setRotation(0);
     tft.fillRect(180,120,70,80, ILI9341_BLUE);
     //itoa(integerFromPC[5], buffer, 10);
-    itoa(options.respiratoryRate, buffer, 10);
+    //itoa(options.respiratoryRate, buffer, 10);
+    
     tft.setCursor(150, 120);  //Y es la posicion vertical aca
     tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
-    tft.println("ti: ");tft.setCursor(200, 120);tft.println(buffer);
+    dtostrf(cycle_time, 1, 2, buffer);
+    tft.println("tc: ");tft.setCursor(200, 120);tft.println(buffer);
   }
 void print_vols(){
     tft.setRotation(0);

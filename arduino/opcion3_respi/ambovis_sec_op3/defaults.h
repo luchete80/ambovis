@@ -193,4 +193,6 @@ extern bool put_to_sleep,wake_up;
 extern bool change_pid_params;
 extern unsigned long time;
 
+extern float cycle_time;
+
 #endif // DEFAULTS_H
