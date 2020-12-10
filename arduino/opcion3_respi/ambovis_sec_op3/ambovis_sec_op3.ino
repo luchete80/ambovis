@@ -47,7 +47,7 @@ float _mlInsVol = 0;
 float _mlExsVol = 0;
 int _mllastInsVol, _mllastExsVol;
 unsigned long mute_count;
-float cycle_time;
+
 
 int Compression_perc = 8; //80%
 
@@ -67,7 +67,6 @@ unsigned long time_mute;
 boolean buzzmuted;
 unsigned long timebuzz=0;
 bool isbuzzeron=false;
-
 
 
 Adafruit_ILI9341 tft=Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
@@ -110,8 +109,7 @@ extern float _mlInsVol, _mlExsVol;
 
 unsigned long last_vent_time;
 unsigned long time;
-byte cycle_pos,last_cycle_pos;
-unsigned long last_measured_time;
+byte cycle_pos;
 int16_t adc0;
 
 int max_accel,min_accel;
@@ -228,7 +226,7 @@ void setup() {
     delay(100);
   
     writeLine(1, "RespirAR FIUBA", 4);
-    writeLine(2, "v1.1.1", 8);
+    writeLine(2, "v1.1.2", 8);
     
     p_dpt0 = 0;
     ads.begin();
@@ -325,12 +323,14 @@ void loop() {
           } else {
               filterData();
               if (integerFromPC[P_]> 0 && cycle_pos > 0){
-                  if ( integerFromPC[P_] > pressure_max){
+                  if ( integerFromPC[P_] > pressure_max && integerFromPC[P_]< 40){
                       pressure_max = (float)integerFromPC[P_];
+                      Serial.println("presion max alcanzada" + String(pressure_max));
                   } else {
-                      if ( integerFromPC[P_] < pressure_min){
+                      if ( integerFromPC[P_] < pressure_min && cycle_pos >30){
                           pressure_min = (float)integerFromPC[P_];
-                          //Serial.print("pmin");Serial.println(pressure_min);
+                          Serial.println("presion min alcanzada" + String(pressure_min));
+                          Serial.print("pmin");Serial.println(pressure_min);
                       }
                     }
                   wait4read=true;
@@ -347,7 +347,7 @@ void loop() {
           Serial.print("ciclo mayor a 90");
           if ( cycle_pos>90) {
               if (cant_opciones_mod>0 ){
-                  for (int i=0;i<5;i++){
+                  for (int i=0;i<10;i++){
                       Serial.println("enviando menu");
                       Serial1.print(opciones_mod[0]);Serial1.print(",");
                       Serial1.println(seleccion_mod[0]);
@@ -376,35 +376,14 @@ void loop() {
 //      //Serial.print("Carga: ");Serial.println(analogRead(PIN_BAT_LEV));
 //
 
-      if (cycle_pos > 100) {
-          change_cycle=false;
-          //#ifdef DEBUG_UPDATE 
-          //Serial.print("Sending by serial");
-          //#endif
-          if (cant_opciones_mod>0 && cant_enviadas_menu < 2 ){
-              cant_opciones_mod=0;
-              Serial1.print(opciones_mod[0]);Serial1.print(",");
-              Serial1.println(seleccion_mod[0]);
-              cant_enviadas_menu++;
-          }//if hay opciones modificadas
 
+      if (cycle_pos > 90) {
           //Recibo data de flujo y tiempos
-          
-          last_pressure_max = pressure_max;
-          pressure_max = 0;
-          last_pressure_min=pressure_min;
-          pressure_min = 100;
+          change_cycle=false;
           //Serial.println("FIN DE CICLO");
       }
-      
-      /////////////////////////////////////////
-      /////////// CAMBIO DE CICLO /////////////
-      /////////////////////////////////////////
-      if (cycle_pos < 20 && cycle_pos != 0 && !change_cycle){
-          change_cycle=true;
-          Serial.println("change_cycle"+String(change_cycle));
-          Serial.println("CAMBIO DE CICLO");
-          Serial.println ("cycle_pos"+ String (cycle_pos));
+
+      if (cycle_pos < 10 && !change_cycle){
           cant_enviadas_menu=0;
           //vt=(_mllastInsVol + _mllastInsVol)/2;
           //if (vt<alarm_vt)  isalarmvt_on=1;
@@ -426,14 +405,13 @@ void loop() {
                 else                alarm_state = 10;
               }
           }
-         
-
-          cycle_time = float (127.f + float(cycle_pos - last_cycle_pos))/127.f*float(millis() - last_measured_time)*0.001;
-          Serial.println ("last_cycle_pos"+ String (last_cycle_pos));
-          Serial.println("cycle_time" + String(cycle_time));
-          last_measured_time=millis();
-          last_cycle_pos = cycle_pos;
-          //Serial.print("**** FIN DE CICLO*****");
+          last_pressure_max = pressure_max;
+          pressure_max = 0;
+          last_pressure_min=pressure_min;
+          pressure_min = 100;
+          
+          change_cycle=true;
+          Serial.println("FIN CICLO");
       }
 
 //        if ( ventilation -> getCycleNum () != last_cycle ) {

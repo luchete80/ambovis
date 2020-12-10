@@ -217,12 +217,18 @@ void print_bat(){
 }
 void print_press(){
     tft.setRotation(0);
-    tft.fillRect(180,100,70,20, ILI9341_BLACK);
+    tft.fillRect(180,80,70,40, ILI9341_BLACK);
     //itoa(integerFromPC[5], buffer, 10);
+    
+    itoa(last_pressure_max, buffer, 10);
+    tft.setCursor(150, 80);  //Y es la posicion vertical aca
+    tft.setTextColor(ILI9341_RED);  tft.setTextSize(2);
+    tft.println("PIP: ");tft.setCursor(200, 80);tft.println(buffer);
+    
     itoa(last_pressure_min, buffer, 10);
     tft.setCursor(150, 100);  //Y es la posicion vertical aca
     tft.setTextColor(ILI9341_RED);  tft.setTextSize(2);
-    tft.println("PEEP: ");tft.setCursor(200, 100);tft.println(buffer);
+    tft.println("PEEP: ");tft.setCursor(210, 100);tft.println(buffer);
   }
 
 
@@ -234,8 +240,8 @@ void print_params(){
     
     tft.setCursor(150, 120);  //Y es la posicion vertical aca
     tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
-    dtostrf(cycle_time, 1, 2, buffer);
-    tft.println("tc: ");tft.setCursor(200, 120);tft.println(buffer);
+    //dtostrf(cycle_time, 1, 2, buffer);
+    //tft.println("tc: ");tft.setCursor(200, 120);tft.println(buffer);
   }
 void print_vols(){
     tft.setRotation(0);
@@ -284,7 +290,7 @@ void filterData() {
    }
   //Serial.print("time y xgra");Serial.print(integerFromPC[TIME_]);Serial.print(",");Serial.print(xgra[P_][1]);
   
-  if ( integerFromPC[P_] != 0 /*&& abs(integerFromPC[P_]) < ( abs(last_vals[P_][1])+diff_var[P_] ) /*&& integerFromPC[TIME_] > last_x  && integerFromPC[TIME_] > xgra[P_][1]*/ ) {
+  if ( integerFromPC[P_] != 0 && abs(integerFromPC[P_]) < 40 /*( abs(last_vals[P_][1])+diff_var[P_] ) /*&& integerFromPC[TIME_] > last_x  && integerFromPC[TIME_] > xgra[P_][1]*/ ) {
     //Serial.print("yp0 y 1: ");Serial.print(yp[0]);Serial.print(",");Serial.print(yp[1]);Serial.print(", lastvals(p,1)");Serial.println(last_vals[P_][1]);
     yp[0]=yp[1];yp[1]=int(float(integerFromPC[P_])*2.);
     last_vals[P_][0]=last_vals[P_][1];last_vals[P_][1]=integerFromPC[P_];

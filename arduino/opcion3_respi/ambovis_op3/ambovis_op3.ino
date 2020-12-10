@@ -443,7 +443,7 @@ void loop() {
 //      Serial.println(_mlInsVol - _mlExsVol);
       //#endif
 
-      if (cycle_pos < 92) {
+      if (cycle_pos < 95) {
           if ( time > lastShowSensor + TIME_SHOW ) {
         
               lastShowSensor=time; 
@@ -655,10 +655,12 @@ void read_menu(){
     
     recvWithEndMarker();
     showNewData();
+    Serial.println("chars: "+ String(receivedChars));
     parseData();
+    Serial.println("leyendo menu");
     
     if ( cant_menu_leidos > 1 && integerFromPC [1] == last_menu_value) {
-            
+        Serial.println("ultimo valor de menu: " + String(last_menu_value));
         if (integerFromPC [1]>0 && read_serial_once ){
         Serial.println ("VALOR CORRECTO: "+String(last_menu_value));
         Serial.print("chars: ");Serial.println(receivedChars);
@@ -679,7 +681,8 @@ void read_menu(){
                 options.peakInspiratoryPressure = integerFromPC [1];
                 break;
                 case 5:
-                options.percVolume = integerFromPC [1];
+                Serial.print("CAMBIADO PORC A : ");Serial.println(integerFromPC [1]);
+                options.percVolume = byte(integerFromPC [1]);
                 break;
                 case 6:
                 alarm_max_pressure = integerFromPC [1];

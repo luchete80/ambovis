@@ -675,6 +675,7 @@ void MechVentilation::change_config(VentilationOptions_t options) {
     _percIE= options.percInspEsp;
     setRPM(_rpm); //Include set inspiratory cycle
     _percVol=options.percVolume;
+    Serial.println("perc vol: " + String (_percVol));
 
     _mode = options.modeCtl;
 }

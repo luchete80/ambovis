@@ -177,9 +177,8 @@ class VentilationOptions_t {
 #define MODE_PRE_CTL 1
 #define MODE_MANUAL  2
 
-#define VENTMODE_VCL 0
 #define VENTMODE_PCL 1
-#define VENTMODE_MAN 2
+#define VENTMODE_VCL 2
 
 //general variables
 extern byte vent_mode;

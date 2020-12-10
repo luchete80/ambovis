@@ -591,23 +591,18 @@ void display_lcd ( ) {
     lcd_clearxy(5,2,2); lcd_clearxy(13,2,2);
   
     switch (vent_mode){
-      case VENTMODE_VCL:
-        writeLine(0, "MOD:VCV", 1); writeLine(0, "V:" + String(options.tidalVolume), 10);    
-        writeLine(1, "PIP: -", 9);
-      break;
       case VENTMODE_PCL:
         writeLine(0, "MOD:PCV", 1); 
         writeLine(1, "PIP:" + String(options.peakInspiratoryPressure), 9);
         writeLine(0, "V: -", 10);
       break;    
-      case VENTMODE_MAN:
+      case VENTMODE_VCL:
         writeLine(0, "MOD:VCV", 1); 
         writeLine(0, "V:" + String(options.percVolume)+"%", 10);    
         writeLine(1, "PIP: -", 9);
       break;
     }
      
-      
     writeLine(1, "BPM:" + String(options.respiratoryRate), 1);
     writeLine(2, "IE:1:", 1);
   
