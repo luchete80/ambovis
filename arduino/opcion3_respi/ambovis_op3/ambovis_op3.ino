@@ -373,6 +373,11 @@ void setup() {
 
     cant_menu_leidos=0;
     final_data_sent=false;
+
+    bool init=false;
+    while (!init){
+      
+      }
 }
 
 
@@ -594,12 +599,12 @@ void loop() {
         read_serial_once =true;
       }//change cycle
 
-      if (cycle_pos > 100){
-          if (vent_mode==VENTMODE_MAN)  
-              digitalWrite(PIN_MODE,HIGH);
-          else if (vent_mode == VENTMODE_PCL)
-              digitalWrite(PIN_MODE,LOW);
-      }
+//      if (cycle_pos > 100){
+//          if (vent_mode==VENTMODE_MAN)  
+//              digitalWrite(PIN_MODE,HIGH);
+//          else if (vent_mode == VENTMODE_PCL)
+//              digitalWrite(PIN_MODE,LOW);
+//      }
     
       if (cycle_pos > 110 && update_options_once){
           if ( update_options ) {

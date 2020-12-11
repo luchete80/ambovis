@@ -228,7 +228,6 @@ void setup() {
     writeLine(1, "RespirAR FIUBA", 4);
     writeLine(2, "v1.1.3", 8);
 	
-	delay(2000);
     
     p_dpt0 = 0;
     ads.begin();
@@ -283,6 +282,16 @@ void setup() {
     cant_enviadas_menu=0;
 
     xgra[P_][1]=-10;
+
+    delay(2000);
+
+    bool init=false;
+    byte bpm,i_e;
+    Menu_inic menuini(&vent_mode, &bpm, &i_e);
+    
+    while (!init){
+          
+    }
 }
 
 
