@@ -226,7 +226,9 @@ void setup() {
     delay(100);
   
     writeLine(1, "RespirAR FIUBA", 4);
-    writeLine(2, "v1.1.2", 8);
+    writeLine(2, "v1.1.3", 8);
+	
+	delay(2000);
     
     p_dpt0 = 0;
     ads.begin();

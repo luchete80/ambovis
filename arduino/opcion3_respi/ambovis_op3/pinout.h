@@ -8,6 +8,8 @@
 // Stepper homing
 #define PIN_ENDSTOP 5
 
+#define PIN_MODE   2
+
 // Display
 
 #ifdef LCD_I2C
@@ -40,7 +42,6 @@
 #define RED_LED         47
 
 #define PIN_BUZZER      3
-#define PIN_MUTE        2
 
 #define PIN_MENU_UP     30
 #define PIN_MENU_DN     34

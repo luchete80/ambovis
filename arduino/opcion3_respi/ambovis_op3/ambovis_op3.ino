@@ -164,7 +164,7 @@ byte reading = 0; //somewhere to store the direct values we read from our interr
 
 byte max_sel, min_sel; //According to current selection
 
-void check_buzzer_mute();
+//void check_buzzer_mute();
 void autotrim_flux();
 void check_sleep_mode();  //Batt charge only
 
@@ -195,6 +195,7 @@ void setup() {
   //init_display();
   isitem_sel=false;
 
+    pinMode(PIN_MODE, OUTPUT); //Set buzzerPin as output
     pinMode(PIN_BUZZER, OUTPUT); //Set buzzerPin as output
     pinMode(GREEN_LED,  OUTPUT); //Set buzzerPin as output
     pinMode(BCK_LED,    OUTPUT); //Set buzzerPin as output
@@ -220,7 +221,7 @@ void setup() {
   change_pid_params=true; //To calculate at first time
   
   // Parte motor
-  pinMode(PIN_MUTE, INPUT_PULLUP);
+  
   pinMode(PIN_POWEROFF, INPUT);
   pinMode(PIN_EN, OUTPUT);
 
@@ -406,7 +407,7 @@ void loop() {
         }
       }   
     
-      check_buzzer_mute();
+      //check_buzzer_mute();
       //Serial.print("Carga: ");Serial.println(analogRead(PIN_BAT_LEV));
       
 //      if (time > lastSave + TIME_SAVE) {
@@ -592,7 +593,13 @@ void loop() {
         update_options_once=true;
         read_serial_once =true;
       }//change cycle
-    
+
+      if (cycle_pos > 100){
+          if (vent_mode==VENTMODE_MAN)  
+              digitalWrite(PIN_MODE,HIGH);
+          else if (vent_mode == VENTMODE_PCL)
+              digitalWrite(PIN_MODE,LOW);
+      }
     
       if (cycle_pos > 110 && update_options_once){
           if ( update_options ) {
@@ -768,18 +775,7 @@ boolean debounce(boolean last, int pin) {
     return current;
 }
 
-void check_buzzer_mute() {
-    curr_mute = debounce ( last_mute, PIN_MUTE );         //Debounce for Up button
-    if (last_mute== HIGH && curr_mute == LOW && !buzzmuted){
-        mute_count=time;
-        buzzmuted=true;
-    }
-    last_mute = curr_mute;
-    if(buzzmuted) {
-        if (time > mute_count  + TIME_MUTE)  //each count is every 500 ms
-        buzzmuted=false;
-    }
-}
+
 
 
 void autotrim_flux(){
