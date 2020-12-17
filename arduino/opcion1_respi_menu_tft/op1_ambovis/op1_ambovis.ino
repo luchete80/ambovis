@@ -433,7 +433,8 @@ void loop() {
         EEPROM.put(eeAddress, max_pidd);  eeAddress+= sizeof(max_pidd);
         EEPROM.put(eeAddress, p_acc);      eeAddress+= sizeof(p_acc);
         EEPROM.put(eeAddress, f_acc_b);    eeAddress+= sizeof(f_acc_b);                 
-        
+        EEPROM.put(eeAddress, options.respiratoryRate);    eeAddress+= sizeof(options.respiratoryRate);
+          
         lastSave = millis();
       }
     

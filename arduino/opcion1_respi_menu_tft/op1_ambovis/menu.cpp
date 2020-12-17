@@ -704,7 +704,7 @@ void display_lcd ( ) {
 
 Menu_inic::Menu_inic(byte *mode, byte *bpm, byte *i_e){
     
-    
+    clear_all_display=false;
     bool fin=false;
     menu_number=0;
     lcd.clear();
@@ -877,8 +877,8 @@ void Menu_inic::display_lcd ( ) {
     lcd_clearxy(5,2,2); lcd_clearxy(13,2,2);
   
      
-    writeLine(0, "INGRESE PARAMS", 4);
-  writeLine(1, "BPM: " + String(_mod), 1);
+    writeLine(0, "INGRESE PARAMS", 3);
+    writeLine(1, "MOD: " + String(_mod), 1);
     writeLine(2, "BPM: " + String(_bpm), 1);
     writeLine(3, "IE:1:"+ String(_i_e), 1);
     writeLine(3, "FIN:", 10);
