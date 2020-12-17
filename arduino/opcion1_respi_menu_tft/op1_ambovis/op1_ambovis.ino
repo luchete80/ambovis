@@ -1,3 +1,5 @@
+//VERSION 1.1.1
+
 #include "pinout.h"
 #include "MechVentilation.h"
 #include "src/TimerOne/TimerOne.h"
@@ -261,7 +263,13 @@ void setup() {
   digitalWrite(PIN_EN, LOW);
 
   writeLine(1, "RespirAR FIUBA", 4);
-  writeLine(2, "v1.1.1", 8);
+  writeLine(2, "v1.1.3.d", 8);
+  delay(2000);
+
+  //Antes de arrancar voy al menu inicial
+  bool init=false;
+  byte bpm,i_e;
+  Menu_inic menuini(&vent_mode, &bpm, &i_e); //Loop is inside constructor!!!
   
   p_dpt0 = 0;
   ads.begin();
@@ -287,7 +295,6 @@ void setup() {
 
   Serial.print("dp  error : "); Serial.println(-verror / (5.*0.09));
   p_dpt0 = 0.20;
-
 
   // configura la ventilación
   ventilation -> start();
@@ -347,7 +354,8 @@ void setup() {
   EEPROM.get(eeAddress, max_pidd);  eeAddress+= sizeof(max_pidd);
   EEPROM.get(eeAddress, p_acc);      eeAddress+= sizeof(p_acc);
   EEPROM.get(eeAddress, f_acc_b);    eeAddress+= sizeof(f_acc_b);
-
+  EEPROM.get(eeAddress, options.respiratoryRate);    eeAddress+= sizeof(options.respiratoryRate);
+  
   f_acc=(float)f_acc_b/10.;
   dpip=(float)dpip_b/10.;
   

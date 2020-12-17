@@ -9,7 +9,7 @@
 //#define DEBUG_UPDATE 1
 //#define FILTER_FLUX 1
 #define DEBUG_OFF 1 //Release version
-#define BUZZER_LOW 1
+#define BUZZER_LOW 0
 
 #define BMP_I2C 1  //Pressure Sensor
 

@@ -19,6 +19,30 @@ extern LiquidCrystal_I2C lcd;
 extern LiquidCrystal lcd;
 #endif
 
+class Menu{
+  
+  byte cant_opciones_mod;
+  byte opciones_mod[3];
+  
+  public:
+
+  Menu(){};
+  ~Menu(){};
+  
+  
+  };
+  
+  
+class Menu_inic:public Menu{
+  byte _mod,_bpm,_i_e;  
+  
+  public:
+    Menu_inic(byte *mode, byte *bpm, byte *i_e);
+    void clear_n_sel( int menu );
+    void Menu_inic::check_encoder ( );
+    void Menu_inic::display_lcd ( );
+};
+
 extern byte max_sel,min_sel; //According to current selection
 extern unsigned long lastButtonPress;
 
