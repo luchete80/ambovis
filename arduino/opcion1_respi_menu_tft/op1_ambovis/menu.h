@@ -36,6 +36,7 @@ class Menu{
 class Menu_inic:public Menu{
   byte _mod,_bpm,_i_e;  
   unsigned long last_update_display;
+  bool fin=false;
   public:
     Menu_inic(byte *mode, byte *bpm, byte *i_e);
     void clear_n_sel( int menu );

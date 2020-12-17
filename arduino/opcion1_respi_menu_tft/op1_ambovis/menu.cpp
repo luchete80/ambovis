@@ -703,16 +703,22 @@ void display_lcd ( ) {
 //////////////////////////////////////
 
 Menu_inic::Menu_inic(byte *mode, byte *bpm, byte *i_e){
-    
+    _mod=*mode;_bpm=*bpm;_i_e=*i_e;
+    mode=&_mod; 
+    bpm=&_bpm;
+    i_e=&_i_e;
     clear_all_display=false;
-    bool fin=false;
+    fin=false;
     menu_number=0;
     lcd.clear();
+    
+    lastButtonPress=0;
+    lcd_selxy(0,1);
     display_lcd();
     last_update_display=millis();
     while (!fin){
         this->check_encoder();
-
+        time=millis();
         if (show_changed_options && ((millis() - last_update_display) > 50) ) {
             display_lcd();  //WITHOUT CLEAR!
             last_update_display = millis();
@@ -727,22 +733,23 @@ Menu_inic::Menu_inic(byte *mode, byte *bpm, byte *i_e){
 
 
 void Menu_inic::check_encoder ( ) {
-  check_updn_button(PIN_MENU_DN,&encoderPos,true);   //Increment
-  check_updn_button(PIN_MENU_UP,&encoderPos,false);  //Decrement
-  pressed=0;  //0 nothing , 1 enter, 2 bck
-
-    if (digitalRead(PIN_MENU_EN) == LOW)  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
-    if (time - lastButtonPress > 150) {
-      pressed = 1;
-      isitem_sel=true; 
-      lastButtonPress = time;
-    }// if time > last button press
-
+    check_updn_button(PIN_MENU_DN,&encoderPos,true);   //Increment
+    check_updn_button(PIN_MENU_UP,&encoderPos,false);  //Decrement
+    Serial.println("Encoder Pos: " +String( encoderPos) );
+    pressed=0;  //0 nothing , 1 enter, 2 bck
+    if (digitalRead(PIN_MENU_EN) == LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
+        if (time - lastButtonPress > 150) {
+          pressed = 1;
+          isitem_sel=true; 
+          lastButtonPress = time;
+        }// if time > last button press
+    }
     check_bck_state();
 
     if (pressed > 0) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
       if (!isitem_sel) {
         curr_sel=oldEncPos=encoderPos=old_curr_sel;
+        Serial.println("Item sel, curr_sel"+String(curr_sel));
       }
                   
       if (isitem_sel) {
@@ -755,9 +762,9 @@ void Menu_inic::check_encoder ( ) {
             break;
             case 2: 
                 if ( menu_number == 0 ) {
-                    encoderPos=oldEncPos=options.respiratoryRate;
+                    encoderPos=oldEncPos=_bpm;
                     min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
-                    } 
+                } 
             break;
             case 3:
               if ( menu_number == 0 ) {
@@ -776,17 +783,7 @@ void Menu_inic::check_encoder ( ) {
             break;
             case 4: 
                 if ( menu_number == 0 ) {
-                    if ( vent_mode==VENTMODE_PCL){
- //                     encoderPos=oldEncPos=options.tidalVolume;
- //                     min_sel=200;max_sel=800;
-                        encoderPos=oldEncPos=options.peakInspiratoryPressure;
-                        min_sel=15;max_sel=30;
-                        Serial.print("pip: ");Serial.println(options.peakInspiratoryPressure);
-                        Serial.print("encoderpos: ");Serial.println(encoderPos);
-                    } else {//Manual
-                      encoderPos=oldEncPos=options.percVolume;
-                      min_sel=40;max_sel=100;            
-                    } 
+                    fin=true;
                 }
                 break;
       }
@@ -805,11 +802,11 @@ void Menu_inic::check_encoder ( ) {
 
           if ( menu_number == 0 ) {
               if (encoderPos > 4) {
-                  encoderPos=1;
-                  menu_number+=1;
+                  encoderPos=4;
+                  //menu_number+=1;
               } else if ( encoderPos < 1) {
-                  encoderPos=5;
-                  menu_number=3;
+                  encoderPos=1;
+                  //menu_number=3;
               }
           } 
           clear_all_display=true;
@@ -827,13 +824,13 @@ void Menu_inic::check_encoder ( ) {
         
             switch (curr_sel) {
               case 1:
-                if ( menu_number == 0 )     {vent_mode           = encoderPos;}
+                if ( menu_number == 0 )       { _mod = encoderPos; }
                 break;
               case 2:
-                if ( menu_number == 0 )       {}
+                if ( menu_number == 0 )       { _bpm = encoderPos; }
                 break;
               case 3:
-                if ( menu_number == 0 ) {}
+                if ( menu_number == 0 )       { _i_e = encoderPos; }
 
                 break;
               case 4:
@@ -871,27 +868,33 @@ void Menu_inic::clear_n_sel(int menu){
      } 
 }
 
-
 void Menu_inic::display_lcd ( ) {
   
   if (clear_all_display)
         lcd.clear();        
   clear_n_sel(menu_number);
   if (menu_number==0) {  
-    lcd_clearxy(12,0,4);
-    lcd_clearxy(5,1,3); lcd_clearxy(14,1,2);
-    lcd_clearxy(5,2,2); lcd_clearxy(13,2,2);
-  
+    lcd_clearxy(6,1,3); 
+    lcd_clearxy(6,2,2); 
+    lcd_clearxy(6,3,2);  
      
     writeLine(0, "INGRESE PARAMS", 3);
-    writeLine(1, "MOD: " + String(_mod), 1);
+    writeLine(1, "MOD: ",1);
+    
+    Serial.println("modo: "+String(_mod));
+    if ( _mod == VENTMODE_MAN ) {
+        writeLine(1, "MAN", 6);
+    }
+    else if ( _mod == VENTMODE_PCL ) { 
+        writeLine(1, "PCL", 6);
+    }
     writeLine(2, "BPM: " + String(_bpm), 1);
-    writeLine(3, "IE:1:"+ String(_i_e), 1);
-    writeLine(3, "FIN:", 10);
-   
+    writeLine(3, "IE:  1:" + String(_i_e), 1);
+    writeLine(3, "FIN: ", 13);
       
   } 
-  
+
+
   clear_all_display=false;
 
 }

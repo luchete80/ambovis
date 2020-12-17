@@ -193,7 +193,7 @@ int idleTime ;        // how long the button was idle
 
 void setup() {
   
-  Serial.begin(250000);
+  Serial.begin(9600);
   init_display();
   isitem_sel=false;
 
@@ -264,12 +264,56 @@ void setup() {
 
   writeLine(1, "RespirAR FIUBA", 4);
   writeLine(2, "v1.1.3.d", 8);
-  delay(2000);
+  delay(1000);
 
+  #ifdef DEBUG_UPDATE
+    Serial.print("Honey Volt at p0: "); Serial.println(analogRead(A0) / 1023.);
+  #endif
+  int eeAddress=0;
+  EEPROM.get(0, last_cycle); eeAddress+= sizeof(unsigned long);
+  EEPROM.get(eeAddress, p_trim);    eeAddress+= sizeof(p_trim);
+  EEPROM.get(eeAddress, autopid);   eeAddress+= sizeof(autopid);
+  EEPROM.get(eeAddress, min_cd);    eeAddress+= sizeof(min_cd);
+  EEPROM.get(eeAddress, max_cd);    eeAddress+= sizeof(max_cd);
+  EEPROM.get(eeAddress, min_speed); eeAddress+= sizeof(min_speed);
+  EEPROM.get(eeAddress, max_speed); eeAddress+= sizeof(max_speed);
+  EEPROM.get(eeAddress, min_accel); eeAddress+= sizeof(min_accel);
+  EEPROM.get(eeAddress, max_accel); eeAddress+= sizeof(max_accel);
+  EEPROM.get(eeAddress, min_pidk);  eeAddress+= sizeof(min_pidk);
+  EEPROM.get(eeAddress, max_pidk);  eeAddress+= sizeof(max_pidk);
+  EEPROM.get(eeAddress, alarm_vt);  eeAddress+= sizeof(alarm_vt);
+  EEPROM.get(eeAddress, filter);    eeAddress+= sizeof(filter);
+  EEPROM.get(eeAddress, pfmin);     eeAddress+= sizeof(pfmin);
+  EEPROM.get(eeAddress, pfmax);     eeAddress+= sizeof(pfmax);
+  EEPROM.get(eeAddress, dpip_b);    eeAddress+= sizeof(dpip_b);
+  EEPROM.get(eeAddress, min_pidi);  eeAddress+= sizeof(min_pidi);
+  EEPROM.get(eeAddress, max_pidi);  eeAddress+= sizeof(max_pidi);  
+  EEPROM.get(eeAddress, min_pidd);  eeAddress+= sizeof(min_pidd);
+  EEPROM.get(eeAddress, max_pidd);  eeAddress+= sizeof(max_pidd);
+  EEPROM.get(eeAddress, p_acc);      eeAddress+= sizeof(p_acc);
+  EEPROM.get(eeAddress, f_acc_b);    eeAddress+= sizeof(f_acc_b);
+  EEPROM.get(eeAddress, options.respiratoryRate);    eeAddress+= sizeof(options.respiratoryRate);
+  
   //Antes de arrancar voy al menu inicial
   bool init=false;
   byte bpm,i_e;
-  Menu_inic menuini(&vent_mode, &bpm, &i_e); //Loop is inside constructor!!!
+
+
+  tft.begin();
+  tft.fillScreen(ILI9341_BLACK);
+  tft.setRotation(0);
+  tft.setTextColor(ILI9341_BLUE); tft.setTextSize(4); 
+  tft.setCursor(30, 80);
+  tft.println("RespirAR");   
+  tft.setCursor(50, 130);
+  tft.setTextColor(ILI9341_MAGENTA); tft.setTextSize(5); 
+  tft.println("FIUBA");  
+  tft.setTextColor(ILI9341_GREEN); tft.setTextSize(3); 
+  tft.setCursor(40, 180);
+  tft.println("v.1.1.3.d");   
+  
+  Menu_inic menuini(&vent_mode, &options.respiratoryRate, &i_e); //Loop is inside constructor!!!
+  tft.fillScreen(ILI9341_BLACK);
   
   p_dpt0 = 0;
   ads.begin();
@@ -328,33 +372,6 @@ void setup() {
   //Timer2.setPeriod(500000);
   //Timer2.attachInterrupt(timer2Isr);
 
-#ifdef DEBUG_UPDATE
-  Serial.print("Honey Volt at p0: "); Serial.println(analogRead(A0) / 1023.);
-#endif
-  int eeAddress=0;
-  EEPROM.get(0, last_cycle); eeAddress+= sizeof(unsigned long);
-  EEPROM.get(eeAddress, p_trim);    eeAddress+= sizeof(p_trim);
-  EEPROM.get(eeAddress, autopid);   eeAddress+= sizeof(autopid);
-  EEPROM.get(eeAddress, min_cd);    eeAddress+= sizeof(min_cd);
-  EEPROM.get(eeAddress, max_cd);    eeAddress+= sizeof(max_cd);
-  EEPROM.get(eeAddress, min_speed); eeAddress+= sizeof(min_speed);
-  EEPROM.get(eeAddress, max_speed); eeAddress+= sizeof(max_speed);
-  EEPROM.get(eeAddress, min_accel); eeAddress+= sizeof(min_accel);
-  EEPROM.get(eeAddress, max_accel); eeAddress+= sizeof(max_accel);
-  EEPROM.get(eeAddress, min_pidk);  eeAddress+= sizeof(min_pidk);
-  EEPROM.get(eeAddress, max_pidk);  eeAddress+= sizeof(max_pidk);
-  EEPROM.get(eeAddress, alarm_vt);  eeAddress+= sizeof(alarm_vt);
-  EEPROM.get(eeAddress, filter);    eeAddress+= sizeof(filter);
-  EEPROM.get(eeAddress, pfmin);     eeAddress+= sizeof(pfmin);
-  EEPROM.get(eeAddress, pfmax);     eeAddress+= sizeof(pfmax);
-  EEPROM.get(eeAddress, dpip_b);    eeAddress+= sizeof(dpip_b);
-  EEPROM.get(eeAddress, min_pidi);  eeAddress+= sizeof(min_pidi);
-  EEPROM.get(eeAddress, max_pidi);  eeAddress+= sizeof(max_pidi);  
-  EEPROM.get(eeAddress, min_pidd);  eeAddress+= sizeof(min_pidd);
-  EEPROM.get(eeAddress, max_pidd);  eeAddress+= sizeof(max_pidd);
-  EEPROM.get(eeAddress, p_acc);      eeAddress+= sizeof(p_acc);
-  EEPROM.get(eeAddress, f_acc_b);    eeAddress+= sizeof(f_acc_b);
-  EEPROM.get(eeAddress, options.respiratoryRate);    eeAddress+= sizeof(options.respiratoryRate);
   
   f_acc=(float)f_acc_b/10.;
   dpip=(float)dpip_b/10.;
@@ -363,9 +380,6 @@ void setup() {
         
   Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
   ventilation->setCycleNum(last_cycle);
-
-    tft.begin();
-    tft.fillScreen(ILI9341_BLACK);
 
 
     digitalWrite(BCK_LED,LOW);
