@@ -708,10 +708,16 @@ Menu_inic::Menu_inic(byte *mode, byte *bpm, byte *i_e){
     bool fin=false;
     menu_number=0;
     lcd.clear();
+    display_lcd();
+    last_update_display=millis();
     while (!fin){
         this->check_encoder();
-        display_lcd();
-      
+
+        if (show_changed_options && ((millis() - last_update_display) > 50) ) {
+            display_lcd();  //WITHOUT CLEAR!
+            last_update_display = millis();
+            show_changed_options = false;
+        }
       
       
     }
