@@ -727,7 +727,7 @@ Menu_inic::Menu_inic(byte *mode, byte *bpm, byte *i_e){
       
       
     }
-
+    isitem_sel=false;
 
 }
 
