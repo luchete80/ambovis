@@ -652,7 +652,7 @@ void display_lcd ( ) {
 
     writeLine(3, "C:", 10);
     writeLine(3, String(last_cycle), 12);
-  } else if (menu_number ==2 ){//PID
+  } else if (menu_number == 2 ){//PID  1
 
     for (int i=0;i<3;i++){
         lcd_clearxy(3,i,3); lcd_clearxy(9,i,3);lcd_clearxy(15,i,3);

@@ -9,7 +9,13 @@
 #include <LiquidCrystal.h>
 #endif
 
-
+#define MAIN_MENU         0
+#define ALARM_MENU        1
+#define SETTINGS_MENU     2
+#define SETTINGS_MENU     3
+#define PID_SETT_MENU_1   4
+#define PID_SETT_MENU_2   5
+#define SCREEN_MENU       6
 
 #ifdef LCD_I2C
 extern LiquidCrystal_I2C lcd;
