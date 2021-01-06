@@ -186,8 +186,7 @@ void check_encoder ( ) {
              if ( menu_number == 0 ) {
 
                 } else if ( menu_number == 1 ) {
-                    min_sel=20;max_sel=50;
-                    encoderPos=oldEncPos=alarm_max_pressure;            
+        
              } else if ( menu_number == 2 ) {
                 encoderPos=min_cd;
                 min_sel=0;max_sel=max_cd;
@@ -201,8 +200,8 @@ void check_encoder ( ) {
                     min_sel=1;max_sel=2;
                     encoderPos=oldEncPos=vent_mode;
                     } else if ( menu_number == 1 ) {
-                        min_sel=5;max_sel=30;
-                        encoderPos=oldEncPos=alarm_peep_pressure;                          
+                        min_sel=20;max_sel=50;
+                        encoderPos=oldEncPos=alarm_max_pressure;        
                     } else if ( menu_number == 2 ){
                         encoderPos=min_speed/10;     
                         min_sel=10;max_sel=100;             
@@ -216,8 +215,8 @@ void check_encoder ( ) {
                   encoderPos=oldEncPos=options.respiratoryRate;
                   min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;   
               } else if ( menu_number == 1 ) {
-                    encoderPos=byte(0.1*float(alarm_vt));
-                    min_sel=10;max_sel=50;//vt
+                    min_sel=5;max_sel=30;
+                    encoderPos=oldEncPos=alarm_peep_pressure;    
               } else if ( menu_number == 2 ) {
                     encoderPos=min_accel/10; 
                     min_sel=10;max_sel=100; 
@@ -240,8 +239,10 @@ void check_encoder ( ) {
                       min_sel=40;max_sel=100;            
                     } 
                 } else if ( menu_number == 1 ) {//menu 0
-                    encoderPos=oldEncPos=p_trim;
-                    min_sel=0;max_sel=200;   
+                    encoderPos=byte(0.1*float(alarm_vt));
+                    min_sel=10;max_sel=50;//vt
+//                    encoderPos=oldEncPos=p_trim;
+//                    min_sel=0;max_sel=200;   
                 } else if ( menu_number == 2 ) {
                     encoderPos=max_cd;
                     min_sel=10;max_sel=80;
@@ -324,7 +325,7 @@ void check_encoder ( ) {
           curr_sel=encoderPos;
           encoderPos=oldEncPos=curr_sel;
 
-          if ( menu_number == 0 ) {
+          if ( menu_number == MAIN_MENU ) {
               if (encoderPos > 5) {
                   encoderPos=1;
                   menu_number+=1;
@@ -332,7 +333,7 @@ void check_encoder ( ) {
                   encoderPos=5;
                   menu_number=3;
               }
-          } else if (menu_number == 1) {
+          } else if (menu_number == ALARM_MENU) {
                if (encoderPos > 6) {
                   encoderPos=1;
                   menu_number=2;         
@@ -340,21 +341,21 @@ void check_encoder ( ) {
                   encoderPos=4;
                   menu_number=0;
               }
-          } else if (menu_number == 2) {
+          }  else if (menu_number == SETTINGS_MENU) {
+             if (curr_sel > 4) {
+              encoderPos=1;
+              menu_number=0; 
+             } else if ( encoderPos < 1) {
+                  encoderPos=12;
+                  menu_number=2;
+              }
+          } else if (menu_number == PID_SETT_MENU_1) {
              if (curr_sel > 12) {
               encoderPos=1;
               menu_number=3; 
              } else if ( encoderPos < 1) {
                   encoderPos=6;
                   menu_number=1;
-              }
-          } else if (menu_number == 3) {
-             if (curr_sel > 5) {
-              encoderPos=1;
-              menu_number=0; 
-             } else if ( encoderPos < 1) {
-                  encoderPos=12;
-                  menu_number=2;
               }
           }
           clear_all_display=true;
@@ -372,6 +373,7 @@ void check_encoder ( ) {
 
             switch (curr_sel) {
               case 1:
+                //TODO: MODIFICAR POR EL NUMERO DE MENU
                 if ( menu_number == 0 )     vent_mode           = encoderPos;
                 else if (menu_number == 1)  alarm_max_pressure  = encoderPos;
                 else if (menu_number == 2)  {min_cd  = int(encoderPos);}
@@ -379,7 +381,7 @@ void check_encoder ( ) {
                 break;
               case 2:
                 if ( menu_number == 0 )       vent_mode           = encoderPos;
-                else  if (menu_number == 1)   alarm_peep_pressure     = encoderPos;
+                else  if (menu_number == 1)   alarm_max_pressure  = encoderPos;
                 else  if (menu_number == 2)   min_speed  = int((float)encoderPos*10.);
                 else if ( menu_number == 3 ){
                     Serial.print("encoderPos: ");Serial.println(encoderPos);
@@ -390,7 +392,7 @@ void check_encoder ( ) {
                 break;
               case 3:
                 if ( menu_number == 0 ) options.respiratoryRate = encoderPos;
-                else    if (menu_number == 1) alarm_vt=int(10.*(float)encoderPos);
+                else    if (menu_number == 1) alarm_peep_pressure     = encoderPos;
                 else    if (menu_number == 2) min_accel  = int((float)encoderPos*10.);
                 if ( menu_number == 3 ){
                     pfmax=encoderPos;
@@ -408,7 +410,7 @@ void check_encoder ( ) {
                       options.percVolume = encoderPos;
                     }
                 } else if (menu_number == 1) {
-                    p_trim=encoderPos;
+                    alarm_vt=int(10.*(float)encoderPos);
                 } else if (menu_number == 2) {max_cd  = int(encoderPos);
                 } else if (menu_number == 3) {p_acc=encoderPos;}
                     
@@ -478,7 +480,7 @@ void check_encoder ( ) {
 }
 
 void clear_n_sel(int menu){
-    if (menu==0) {  
+    if (menu==MAIN_MENU) {  
         lcd_clearxy(0,0);
         lcd_clearxy(0,1);lcd_clearxy(8,1);
         lcd_clearxy(0,2);lcd_clearxy(8,2);
@@ -494,25 +496,26 @@ void clear_n_sel(int menu){
               case 5: 
                 lcd_selxy(8,2);break;
             }
-     } else if (menu==1){  
+     } else if (menu==ALARM_MENU){  
       lcd_clearxy(0,0);
-      lcd_clearxy(0,1);lcd_clearxy(12,2);
-      lcd_clearxy(0,2);lcd_clearxy(0,3);
+      lcd_clearxy(0,1);lcd_clearxy(7,1);
+      lcd_clearxy(0,2);lcd_clearxy(7,2);
+      lcd_clearxy(0,3);
       switch(curr_sel){
           case 1: 
-            lcd_selxy(0,0);break;//PIP
+            lcd_selxy(0,0);break;//MENU
           case 2: 
-            lcd_selxy(0,1);break;//PEEP
+            lcd_selxy(0,1);break;//PIP
           case 3:
-            lcd_selxy(10,1);break;
+            lcd_selxy(7,1);break;
           case 4: 
             lcd_selxy(0,2);break;
           case 5: 
-            lcd_selxy(0,3);break;
+            lcd_selxy(7,2);break;
           case 6: 
-            lcd_selxy(12,2);break;
+            lcd_selxy(0,3);break;
       }
-    } else if (menu==2) {  
+    } else if (menu==PID_SETT_MENU_1) {  
       lcd_clearxy(0,0);lcd_clearxy(6,0);lcd_clearxy(12,0);
       lcd_clearxy(0,1);lcd_clearxy(6,1);lcd_clearxy(12,1);
       lcd_clearxy(0,2);
@@ -544,7 +547,7 @@ void clear_n_sel(int menu){
             lcd_selxy(12,3);break;  
       }
     }//menu number 
-    else if (menu==3) {  
+    else if (menu==SETTINGS_MENU) {  
       lcd_clearxy(0,0);lcd_clearxy(6,0);lcd_clearxy(12,0);
       lcd_clearxy(0,1);lcd_clearxy(6,1);lcd_clearxy(12,1);
       lcd_clearxy(0,2);
@@ -625,34 +628,45 @@ void display_lcd ( ) {
 //    writeLine(3, "i:" + String(tempstr), 15); 
    
       
-  } else if (menu_number ==1 ) {//OTHER SETTINGS
-                        lcd_clearxy(12,0,8);
-    lcd_clearxy(8,1,2); lcd_clearxy(16,1,3);
-                        lcd_clearxy(15,2,3);
+  } else if (menu_number == ALARM_MENU ) {  //OTHER SETTINGS
+    lcd_clearxy(5,1,2);lcd_clearxy(13,1,2);
+    lcd_clearxy(4,2,3);lcd_clearxy(13,2,3);
+    lcd_clearxy(6,3,2);lcd_clearxy(14,3,6);
 
     writeLine(0, "MENU ALARMAS", 1);     
     writeLine(1, "PIP:" + String(alarm_max_pressure), 1); 
+   
+    writeLine(1, "PEEP:" + String(alarm_peep_pressure), 8); 
+    writeLine(2, "VT:" +  String(alarm_vt), 1);
     
-//    dtostrf(Cdyn*1.01972, 2, 1, tempstr);
-//    writeLine(0, "CD:" + String(tempstr), 10); 
+    writeLine(2, "VM:" /*+ String(alarm_vt)*/, 8);
     
-    writeLine(1, "PEEP:" + String(alarm_peep_pressure), 9); 
-    writeLine(2, "VT:" + String(alarm_vt), 1);
+    writeLine(3, "AMBU:", 1);
+    
+    writeLine(3, "CIC:", 10);
+    writeLine(3, String(last_cycle), 14);
+    
+  } else if (menu_number == SETTINGS_MENU ){//2
+    lcd_clearxy(6,1,5);lcd_clearxy(16,1,3);
+    lcd_clearxy(6,2,3);//lcd_clearxy(13,2,3);
+    
+    writeLine(0, "MENU AJUSTES", 1);         
     
     dtostrf((float(p_trim-100)), 2, 0, tempstr);
-    writeLine(2, "TRIM:" + String(tempstr) + "e-3", 1); 
+    writeLine(1, "TRIM:" + String(tempstr) + "e-3", 1); 
 
-    writeLine(2, "F:" , 13);
-    if (filter)     writeLine(2, "ON", 15);
-    else            writeLine(2, "OFF", 15);    
-         
-    writeLine(3, "AUTO: ", 1);
-    if (autopid)    writeLine(3, "ON", 6);
-    else            writeLine(3, "OFF", 6);    
+    writeLine(1, "FIL:" , 12);
+    if (filter)     writeLine(1, "ON", 16);
+    else            writeLine(1, "OFF", 16);    
 
-    writeLine(3, "C:", 10);
-    writeLine(3, String(last_cycle), 12);
-  } else if (menu_number == 2 ){//PID  1
+    writeLine(2, "AUTO: ", 1);
+    if (autopid)    writeLine(2, "ON", 6);
+    else            writeLine(2, "OFF", 6);    
+
+    dtostrf(Cdyn*1.01972, 2, 1, tempstr);
+    writeLine(3, "CD:" + String(tempstr), 0);   
+  }
+  else if (menu_number == PID_SETT_MENU_1 ){//PID  1
 
     for (int i=0;i<3;i++){
         lcd_clearxy(3,i,3); lcd_clearxy(9,i,3);lcd_clearxy(15,i,3);
