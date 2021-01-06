@@ -573,7 +573,8 @@ void display_lcd ( ) {
     lcd_clearxy(5,1,3); 
     if (vent_mode==VENTMODE_PCL){lcd_clearxy(13,1,2);}else if (vent_mode==VENTMODE_MAN){lcd_clearxy(11,1,2);}
     lcd_clearxy(5,2,2); lcd_clearxy(11,2,2);
-
+    lcd_clearxy(4,3,2); lcd_clearxy(11,3,2);lcd_clearxy(18,3,3);
+    
     writeLine(0, "MENU PRINCIPAL", 1);
     switch (vent_mode){
       case VENTMODE_VCL:
@@ -609,13 +610,12 @@ void display_lcd ( ) {
       Serial.print("Max press conv: ");Serial.println(tempstr);
       Serial.print("Min Max press");  Serial.print(pressure_min);Serial.print(" ");Serial.println(pressure_max);
     #endif
-      
-    writeLine(3, "PEEP: ", 11);
+
     dtostrf(last_pressure_min, 2, 0, tempstr);
-    writeLine(3, String(tempstr), 7);  
+    writeLine(3, "PEP:"+String(tempstr), 7);
     
     dtostrf((_mllastInsVol + _mllastExsVol)/2.*options.respiratoryRate*0.001, 2, 1, tempstr);
-    writeLine(3, "VM:" + String(tempstr), 12);
+    writeLine(3, "VM:" + String(tempstr), 14);
     
 //    dtostrf(_timeoutIns*0.001, 1, 1, tempstr);
 //    writeLine(3, "I:" + String(tempstr), 9); 
@@ -633,8 +633,8 @@ void display_lcd ( ) {
     writeLine(0, "MENU ALARMAS", 1);     
     writeLine(1, "PIP:" + String(alarm_max_pressure), 1); 
     
-    dtostrf(Cdyn*1.01972, 2, 1, tempstr);
-    writeLine(0, "CD:" + String(tempstr), 10); 
+//    dtostrf(Cdyn*1.01972, 2, 1, tempstr);
+//    writeLine(0, "CD:" + String(tempstr), 10); 
     
     writeLine(1, "PEEP:" + String(alarm_peep_pressure), 9); 
     writeLine(2, "VT:" + String(alarm_vt), 1);
