@@ -163,7 +163,7 @@ byte po_flux[] = {0, 10, 20, 30, 40, 50, 55, 60, 65, 70, 75, 80, 85, 86, 87, 88,
 
 bool change_pid_params=false;
 
-byte encoderPos = 1; //this variable stores our current value of encoder position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
+byte encoderPos = 1; //this variable stores our current value of   position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
 byte oldEncPos = 1; //stores the last encoder position value so we can compare to the current reading and see if it has changed (so we know when to print to the serial monitor)
 byte reading = 0; //somewhere to store the direct values we read from our interrupt pins before checking to see if we have moved a whole detent
 
@@ -197,6 +197,11 @@ void setup() {
   init_display();
   isitem_sel=false;
 
+    pinMode(PIN_LCD_SLEEP, OUTPUT); //Set buzzerPin as output
+    digitalWrite(PIN_LCD_SLEEP,HIGH); //LOW, INVERTED
+    pinMode(TFT_SLEEP, OUTPUT); //Set buzzerPin as output
+    digitalWrite(TFT_SLEEP,HIGH); //LOW, INVERTED
+    
     pinMode(PIN_BUZZER, OUTPUT); //Set buzzerPin as output
     pinMode(GREEN_LED,  OUTPUT); //Set buzzerPin as output
     pinMode(BCK_LED,    OUTPUT); //Set buzzerPin as output

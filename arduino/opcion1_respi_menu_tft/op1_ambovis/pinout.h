@@ -19,6 +19,7 @@
 #define PIN_LCD_D5 11
 #define PIN_LCD_D6 12
 #define PIN_LCD_D7 13
+#define PIN_LCD_SLEEP 42
 #endif
 
 // #define PIN_BME_CS2  4  // sensor de presion 2
@@ -32,6 +33,7 @@
 #define TFT_CS 		53
 #define TFT_DC 		49
 #define TFT_RST 	48
+#define TFT_SLEEP 40
 
 #define PIN_POWEROFF    43
 #define BCK_LED         44
