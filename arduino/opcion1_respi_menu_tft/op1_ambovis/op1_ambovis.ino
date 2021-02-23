@@ -197,6 +197,11 @@ void setup() {
   init_display();
   isitem_sel=false;
 
+    pinMode(PIN_LCD_SLEEP, OUTPUT); //Set buzzerPin as output
+    digitalWrite(PIN_LCD_SLEEP,HIGH); //LOW, INVERTED
+    pinMode(TFT_SLEEP, OUTPUT); //Set buzzerPin as output
+    digitalWrite(TFT_SLEEP,HIGH); //LOW, INVERTED
+    
     pinMode(PIN_BUZZER, OUTPUT); //Set buzzerPin as output
     pinMode(GREEN_LED,  OUTPUT); //Set buzzerPin as output
     pinMode(BCK_LED,    OUTPUT); //Set buzzerPin as output
