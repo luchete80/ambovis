@@ -338,6 +338,7 @@ void check_encoder ( ) {
         if      (encoderPos<0)   encoderPos=0;
         else if (encoderPos>5)   encoderPos=5;
         menu_number=encoderPos;
+        encoderPos=oldEncPos=menu_number;
         clear_all_display=true;
         display_lcd();
     }else {// if (switching_menus)
