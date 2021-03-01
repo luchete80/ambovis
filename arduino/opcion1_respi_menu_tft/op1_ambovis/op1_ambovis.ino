@@ -142,6 +142,7 @@ unsigned long last_cycle;
 unsigned int _timeoutIns,_timeoutEsp; //In ms
 
 byte menu_number = 0;
+bool switching_menus =true;
 //TODO: READ FROM EEPROM
 byte alarm_max_pressure = 35;
 byte alarm_peep_pressure = 5;

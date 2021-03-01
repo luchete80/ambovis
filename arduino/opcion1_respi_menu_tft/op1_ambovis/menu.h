@@ -24,6 +24,7 @@ extern LiquidCrystal_I2C lcd;
 extern LiquidCrystal lcd;
 #endif
 
+extern bool switching_menus;
 class Menu{
   
   byte cant_opciones_mod;
