@@ -749,8 +749,9 @@ Menu_inic::Menu_inic(byte *mode, byte *bpm, byte *i_e){
     lcd.clear();
     
     lastButtonPress=0;
-    lcd_selxy(0,1);
+    curr_sel=1;
     display_lcd();
+    //lcd_selxy(0,1);
     last_update_display=millis();
     while (!fin){
         this->check_encoder();
