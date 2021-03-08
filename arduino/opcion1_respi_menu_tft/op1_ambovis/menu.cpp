@@ -741,9 +741,9 @@ void display_lcd ( ) {
 
 Menu_inic::Menu_inic(byte *mode, byte *bpm, byte *i_e){
     _mod=*mode;_bpm=*bpm;_i_e=*i_e;
-    mode=&_mod; 
-    bpm=&_bpm;
-    i_e=&_i_e;
+//    mode=&_mod; 
+//    bpm=&_bpm;
+//    i_e=&_i_e;
     clear_all_display=false;
     fin=false;
     menu_number=0;
@@ -765,6 +765,8 @@ Menu_inic::Menu_inic(byte *mode, byte *bpm, byte *i_e){
     }
     isitem_sel=false;
     curr_sel=old_curr_sel=1;
+    Serial.println("bpm "+String(*bpm));
+    *mode=_mod;*bpm=_bpm;*i_e=_i_e;
 
 }
 
@@ -937,3 +939,42 @@ void Menu_inic::display_lcd ( ) {
   clear_all_display=false;
 
 }
+
+void Menu_inic::check_bck_state(){
+      bck_state=digitalRead(PIN_MENU_BCK);         
+       
+    if (bck_state != last_bck_state) { 
+       updateState(); // button state changed. It runs only once.
+        if (bck_state == LOW ) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
+            if (time - lastButtonPress > 150) {
+
+                  pressed = 2;
+                  lastButtonPress = time;
+                  if (isitem_sel){
+                      isitem_sel=false; 
+                  } else {
+                      switching_menus=true;
+                  }
+               
+            }// if time > last button press
+        } else {  //Button released
+          }
+    } else {
+       updateCounter(); // button state not changed. It runs in a loop.
+       if (holdTime > 2000 && !change_sleep){
+        Serial.println("Activando Sleep Mode");
+        if (!sleep_mode){
+            
+            sleep_mode=true;
+            put_to_sleep=true;
+        } else {
+           sleep_mode=false;
+           wake_up=true;   
+        }
+        change_sleep=true;
+        Serial.print("Sleep Mode");Serial.println(sleep_mode);
+        }
+    }
+    last_bck_state = bck_state;
+  
+  }

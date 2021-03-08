@@ -85,7 +85,7 @@ float pressure_p;   //EXTERN!!
 float last_pressure_max, last_pressure_min, last_pressure_peep;
 float pressure_peep;
 
-byte vent_mode = VENTMODE_MAN; //0
+byte vent_mode;// = VENTMODE_MAN; //0
 //Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
 float verrp;
@@ -241,8 +241,8 @@ void setup() {
   digitalWrite(PIN_EN, HIGH);
 
   // TODO: Añadir aquí la configuarcion inicial desde puerto serie
-  options.respiratoryRate = DEFAULT_RPM;
-  options.percInspEsp = 2; //1:1 to 1:4, is denom
+
+  //options.percInspEsp = 2; //1:1 to 1:4, is denom
   //options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
   options.peakInspiratoryPressure = 20.;
   options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
@@ -319,6 +319,7 @@ void setup() {
   tft.println("v.1.1.3.d");   
   
   Menu_inic menuini(&vent_mode, &options.respiratoryRate, &i_e); //Loop is inside constructor!!!
+  Serial.println("bpm"+String(options.respiratoryRate));
   tft.fillScreen(ILI9341_BLACK);
   
   p_dpt0 = 0;

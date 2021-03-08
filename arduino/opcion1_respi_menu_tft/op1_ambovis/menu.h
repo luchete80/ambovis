@@ -48,6 +48,7 @@ class Menu_inic:public Menu{
     void clear_n_sel( int menu );
     void Menu_inic::check_encoder ( );
     void Menu_inic::display_lcd ( );
+    void check_bck_state();
 };
 
 extern byte max_sel,min_sel; //According to current selection
