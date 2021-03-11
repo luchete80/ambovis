@@ -242,7 +242,7 @@ void setup() {
 
   // TODO: Añadir aquí la configuarcion inicial desde puerto serie
 
-  //options.percInspEsp = 2; //1:1 to 1:4, is denom
+  options.percInspEsp = 2; //1:1 to 1:4, is denom
   //options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
   options.peakInspiratoryPressure = 20.;
   options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
@@ -299,6 +299,8 @@ void setup() {
   EEPROM.get(eeAddress, p_acc);      eeAddress+= sizeof(p_acc);
   EEPROM.get(eeAddress, f_acc_b);    eeAddress+= sizeof(f_acc_b);
   EEPROM.get(eeAddress, options.respiratoryRate);    eeAddress+= sizeof(options.respiratoryRate);
+  EEPROM.get(eeAddress, options.percInspEsp);    eeAddress+= sizeof(options.percInspEsp);
+  EEPROM.get(eeAddress, vent_mode);    eeAddress+= sizeof(vent_mode);
   
   //Antes de arrancar voy al menu inicial
   bool init=false;
@@ -318,7 +320,7 @@ void setup() {
   tft.setCursor(40, 180);
   tft.println("v.1.1.3.d");   
   
-  Menu_inic menuini(&vent_mode, &options.respiratoryRate, &i_e); //Loop is inside constructor!!!
+  Menu_inic menuini(&vent_mode, &options.respiratoryRate, &options.percInspEsp); //Loop is inside constructor!!!
   Serial.println("bpm"+String(options.respiratoryRate));
   tft.fillScreen(ILI9341_BLACK);
   
@@ -455,7 +457,9 @@ void loop() {
         EEPROM.put(eeAddress, p_acc);      eeAddress+= sizeof(p_acc);
         EEPROM.put(eeAddress, f_acc_b);    eeAddress+= sizeof(f_acc_b);                 
         EEPROM.put(eeAddress, options.respiratoryRate);    eeAddress+= sizeof(options.respiratoryRate);
-          
+        EEPROM.put(eeAddress, options.percInspEsp);    eeAddress+= sizeof(options.percInspEsp);
+        EEPROM.put(eeAddress, vent_mode);    eeAddress+= sizeof(vent_mode);
+        
         lastSave = millis();
       }
     
