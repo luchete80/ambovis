@@ -634,24 +634,24 @@ void loop() {
     
         if (alarm_state > 0) {
     
-              if (!buzzmuted) {
-                  if (millis() > timebuzz + TIME_BUZZER) {
-                      timebuzz=millis();
-                      isbuzzeron=!isbuzzeron;
-                      if (isbuzzeron){
-                          //digitalWrite(PIN_BUZZER,BUZZER_LOW);
-                      }   
-                      else {
-                          //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
-                      }
-                  }
-              } else {  //buzz muted
-                  //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
-              }
-        } else {//state > 0
-          //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
-          isbuzzeron=true;        //Inverted logic
-        }
+//              if (!buzzmuted) {
+//                  if (millis() > timebuzz + TIME_BUZZER) {
+//                      timebuzz=millis();
+//                      isbuzzeron=!isbuzzeron;
+//                      if (isbuzzeron){
+//                          //digitalWrite(PIN_BUZZER,BUZZER_LOW);
+//                      }   
+//                      else {
+//                          //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+//                      }
+//                  }
+//              } else {  //buzz muted
+//                  //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+//              }
+//        } else {//state > 0
+//          //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+//          isbuzzeron=true;        //Inverted logic
+//        }
 
   //! sleep_mode
   } else { 
