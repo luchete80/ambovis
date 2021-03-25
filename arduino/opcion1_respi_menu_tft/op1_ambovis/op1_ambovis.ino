@@ -632,8 +632,8 @@ void loop() {
         show_changed_options = false;
       }
     
-        if (alarm_state > 0) {
-    
+//        if (alarm_state > 0) {
+//    
 //              if (!buzzmuted) {
 //                  if (millis() > timebuzz + TIME_BUZZER) {
 //                      timebuzz=millis();
