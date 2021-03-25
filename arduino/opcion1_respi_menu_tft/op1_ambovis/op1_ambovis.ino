@@ -583,7 +583,7 @@ void loop() {
         update_options_once=true;
     
     #ifdef DEBUG_PID
-        if (vent_mode = VENTMODE_PCL) {
+        if (vent_mode == VENTMODE_PCL) {
           float err = (float)(pressure_max - options.peakInspiratoryPressure) / options.peakInspiratoryPressure;
           errpid_prom += fabs(err);
           errpid_prom_sig += err;

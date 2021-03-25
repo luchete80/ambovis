@@ -15,8 +15,9 @@ byte Cdyn_pass[3];
 int PID_KP=400.01;
 int PID_KI=20.01;
 int PID_KD=50.01;
-int STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  600;
-int STEPPER_SPEED_MAX=14000;
+//int STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  450;
+int STEPPER_ACC_INSUFFLATION;
+int STEPPER_SPEED_MAX;
 
 //static
 float speed_m,accel_m,speed_b,accel_b;
@@ -43,6 +44,8 @@ MechVentilation::MechVentilation(
         stepper,
         pid,
         options);
+    STEPPER_ACC_INSUFFLATION= 8000;
+    STEPPER_SPEED_MAX=12000;
 }
 
 //TODO: use this method to play a beep in main loop, 1 second long for example.
@@ -227,7 +230,7 @@ void MechVentilation :: update ( void )
         #ifdef DEBUG_UPDATE
           Serial.print("Manual mode Timeout ins , speed: ");Serial.print(_timeoutIns);Serial.print(" ");Serial.println(_stepperSpeed);
         #endif
-          _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCEL_MAX);
+
           if (_stepperSpeed>STEPPER_SPEED_MAX)
             _stepperSpeed=STEPPER_SPEED_MAX;
             _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
