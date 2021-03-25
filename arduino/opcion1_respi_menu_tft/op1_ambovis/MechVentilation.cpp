@@ -16,8 +16,8 @@ int PID_KP=400.01;
 int PID_KI=20.01;
 int PID_KD=50.01;
 //int STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  450;
-int STEPPER_ACC_INSUFFLATION;
-int STEPPER_SPEED_MAX;
+int STEPPER_ACC_INSUFFLATION=10000;
+int STEPPER_SPEED_MAX=12000;
 
 //static
 float speed_m,accel_m,speed_b,accel_b;
@@ -44,8 +44,6 @@ MechVentilation::MechVentilation(
         stepper,
         pid,
         options);
-    STEPPER_ACC_INSUFFLATION= 8000;
-    STEPPER_SPEED_MAX=12000;
 }
 
 //TODO: use this method to play a beep in main loop, 1 second long for example.
@@ -236,7 +234,7 @@ void MechVentilation :: update ( void )
             _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
         } 
         #endif
-        
+        _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCEL_MAX);
         _pid->reset();
 
 #if DEBUG_STATE_MACHINE

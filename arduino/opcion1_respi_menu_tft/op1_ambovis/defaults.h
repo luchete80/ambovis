@@ -68,7 +68,7 @@
 #define STEPPER_LOWEST_POSITION     (-30)   // Steps
 #define STEPPER_HIGHEST_POSITION    ( 2900 )   //270º ,2500 for 270º, 2850 for 220º, 2930 for 330º
 #define STEPPER_SPEED_DEFAULT       (400)   // Steps/s
-#define STEPPER_ACCEL_MAX           (STEPPER_MICROSTEPS *  2000)  //Originalmente 12000
+#define STEPPER_ACCEL_MAX           (STEPPER_MICROSTEPS *  400)  //Originalmente 12000
 #define STEPPER_SPEED_MAX_VCL       (STEPPER_MICROSTEPS *  600)   // Steps/s  //Originally 1200, THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_SPEED_EXSUFF        (STEPPER_MICROSTEPS *  800) //DEFAULT ORIG FROM REESPIRATOR (STEPPER_MICROSTEPS *  800)
 #define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  1600)   // Steps/s2 (Originally was 2000 * microsteps)
