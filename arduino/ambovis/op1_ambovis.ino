@@ -320,7 +320,7 @@ void setup() {
   tft.setCursor(40, 180);
   tft.println("v.1.1.3.d");   
   
-  Menu_inic menuini(&vent_mode, &options.respiratoryRate, &options.percInspEsp); //Loop is inside constructor!!!
+  //Menu_inic menuini(&vent_mode, &options.respiratoryRate, &options.percInspEsp); //Loop is inside constructor!!!
   Serial.println("bpm"+String(options.respiratoryRate));
   tft.fillScreen(ILI9341_BLACK);
   
@@ -406,7 +406,7 @@ void setup() {
     put_to_sleep=false;
     wake_up=false;
 
-    update_options_once=true;
+    //update_options_once=true; //TODO:REMOVE THIS
 }
 
 
@@ -612,14 +612,14 @@ void loop() {
         display_needs_update = false;
       }
 
-      if (cycle_pos > 110 && update_options_once) {
+      //if (cycle_pos > 110 && update_options_once) { TODO: REMOVE THIS
           if ( update_options ) {
             ventilation->change_config(options);
             update_options = false;
             update_options_once=false;
             //show_changed_options=true;
           }//
-      }
+      //}
     
       if ( millis () - last_vent_time > TIME_BASE ) {
         ventilation -> update();
