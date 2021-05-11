@@ -1,0 +1,4 @@
+20200912
+1. Correccion de elegir porcentaje de apriete (estaba en modo manual, se cambia el modo de inicio)
+2. Se corrige maximos en maximos de PIP y PEEP (PIP por maximo y peep por tiempo )
+3. Se corrige el grafico filtrando por PIP maxima

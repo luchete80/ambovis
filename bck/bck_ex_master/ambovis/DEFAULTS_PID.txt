@@ -1,0 +1,21 @@
+Cd
+Min: 10 Max: 40
+
+Speed (hay que multiplicar x microsteps)
+Min: 250 Max: 750 (Para 16ms son 4000 y 12000)
+Speed_B 1660
+Speed_m 266.67
+
+
+Acc (hay que multiplicar x microsteps)
+Min: 200 (3200)
+Max: 600 (9600)
+m: 13.33
+b= 66.67
+STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS*(13.33*(float)Cdyn+66.6);
+
+
+Log de lo calculado
+Speed m b:266.67 1333.33
+Accel m b:213.33 1066.67
+pidk m b:25.00 0.00

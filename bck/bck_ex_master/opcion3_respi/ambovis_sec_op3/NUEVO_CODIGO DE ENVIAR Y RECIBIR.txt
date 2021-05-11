@@ -1,0 +1,59 @@
+
+      if (cycle_pos < 90) {
+          if (!wait4read){
+              recvchars=recvWithEndMarker();
+              showNewData();
+              //Serial.print("chars: ");
+              Serial.println(receivedChars);
+              parseData();
+              cycle_pos=integerFromPC[TIME_];
+              
+              if (integerFromPC[TIME_] == 128){
+                  _mllastInsVol= integerFromPC[1];
+                  _mllastExsVol= integerFromPC[2];            
+              } else {
+                  filterData();
+                  if (integerFromPC[P_]> 0 && cycle_pos > 0){
+                      if ( integerFromPC[P_] > pressure_max){
+                          pressure_max = (float)integerFromPC[P_];
+                      } else {
+                          if ( integerFromPC[P_] < pressure_min){
+                              pressure_min = (float)integerFromPC[P_];
+                              //Serial.print("pmin");Serial.println(pressure_min);
+                          }
+                        }
+                      wait4read=true;
+                      //Serial.print(", DATOS OK, t, p: ");Serial.print(integerFromPC[TIME_]);Serial.print(", ");Serial.println(integerFromPC[P_]);
+                  }
+              }
+              Serial.print("press: ");Serial.println(integerFromPC[P_]);
+              time_serial_read=time;
+          }
+    
+          if ( time > lastShowSensor + TIME_SHOW ) {
+              lastShowSensor=time; 
+              tft_draw_time=millis();
+              tft_draw();
+              //Serial.print("dra time: ");Serial.println(millis()-tft_draw_time);
+              wait4read=false;
+    
+          }      
+      } else {//cycle > 90
+          //#ifdef DEBUG_UPDATE 
+          //Serial.print("Sending by serial");
+          //#endif
+          if (cant_opciones_mod>0 && cant_enviadas_menu < 2 ){
+              cant_opciones_mod=0;
+              Serial1.print(opciones_mod[0]);Serial1.print(",");
+              Serial1.println(seleccion_mod[0]);
+              cant_enviadas_menu++;
+          }//if hay opciones modificadas
+
+          //Recibo data de flujo y tiempos
+          
+          last_pressure_max = pressure_max;
+          pressure_max = 0;
+          last_pressure_min=pressure_min;
+          pressure_min = 100;
+          //Serial.println("FIN DE CICLO");
+      }
