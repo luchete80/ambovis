@@ -1,5 +1,3 @@
-//VERSION 1.1.1
-
 #include "pinout.h"
 #include "MechVentilation.h"
 #include "src/TimerOne/TimerOne.h"
@@ -24,7 +22,7 @@ bool filter;
 bool sleep_mode;
 bool put_to_sleep,wake_up;
 unsigned long print_bat_time;
-unsigned long _msecTimerCnt=0;
+
 byte _back[8] = {
   0b00100,
   0b01000,
@@ -46,14 +44,14 @@ float _mlInsVol = 0;
 float _mlExsVol = 0;
 int _mllastInsVol, _mllastExsVol;
 unsigned long mute_count;
-bool update_options_once;
+
 int Compression_perc = 8; //80%
 
 #ifdef ACCEL_STEPPER
 AccelStepper *stepper = new AccelStepper(
-  //AccelStepper::DRIVER,
-  PIN_STEPPER_DIRECTION,
-  PIN_STEPPER_STEP);
+  AccelStepper::DRIVER,
+  PIN_STEPPER_STEP,
+  PIN_STEPPER_DIRECTION);
 #else
 FlexyStepper * stepper = new FlexyStepper();
 #endif
@@ -85,7 +83,7 @@ float pressure_p;   //EXTERN!!
 float last_pressure_max, last_pressure_min, last_pressure_peep;
 float pressure_peep;
 
-byte vent_mode;// = VENTMODE_MAN; //0
+byte vent_mode = VENTMODE_MAN; //0
 //Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
 float verrp;
@@ -142,7 +140,6 @@ unsigned long last_cycle;
 unsigned int _timeoutIns,_timeoutEsp; //In ms
 
 byte menu_number = 0;
-bool switching_menus =true;
 //TODO: READ FROM EEPROM
 byte alarm_max_pressure = 35;
 byte alarm_peep_pressure = 5;
@@ -164,7 +161,7 @@ byte po_flux[] = {0, 10, 20, 30, 40, 50, 55, 60, 65, 70, 75, 80, 85, 86, 87, 88,
 
 bool change_pid_params=false;
 
-byte encoderPos = 1; //this variable stores our current value of   position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
+byte encoderPos = 1; //this variable stores our current value of encoder position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
 byte oldEncPos = 1; //stores the last encoder position value so we can compare to the current reading and see if it has changed (so we know when to print to the serial monitor)
 byte reading = 0; //somewhere to store the direct values we read from our interrupt pins before checking to see if we have moved a whole detent
 
@@ -194,12 +191,10 @@ int idleTime ;        // how long the button was idle
 
 void setup() {
   
-  Serial.begin(9600);
+  Serial.begin(115200);
   init_display();
   isitem_sel=false;
 
-    pinMode(PIN_LCD_SLEEP, OUTPUT); //Set buzzerPin as output
-    digitalWrite(PIN_LCD_SLEEP,HIGH); //LOW, INVERTED
     pinMode(TFT_SLEEP, OUTPUT); //Set buzzerPin as output
     digitalWrite(TFT_SLEEP,HIGH); //LOW, INVERTED
     
@@ -241,7 +236,7 @@ void setup() {
   digitalWrite(PIN_EN, HIGH);
 
   // TODO: Añadir aquí la configuarcion inicial desde puerto serie
-
+  options.respiratoryRate = DEFAULT_RPM;
   options.percInspEsp = 2; //1:1 to 1:4, is denom
   //options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
   options.peakInspiratoryPressure = 20.;
@@ -269,60 +264,7 @@ void setup() {
   digitalWrite(PIN_EN, LOW);
 
   writeLine(1, "RespirAR FIUBA", 4);
-  writeLine(2, "v1.1.3.d", 8);
-  delay(1000);
-
-  #ifdef DEBUG_UPDATE
-    Serial.print("Honey Volt at p0: "); Serial.println(analogRead(A0) / 1023.);
-  #endif
-  int eeAddress=0;
-  EEPROM.get(0, last_cycle); eeAddress+= sizeof(unsigned long);
-  EEPROM.get(eeAddress, p_trim);    eeAddress+= sizeof(p_trim);
-  EEPROM.get(eeAddress, autopid);   eeAddress+= sizeof(autopid);
-  EEPROM.get(eeAddress, min_cd);    eeAddress+= sizeof(min_cd);
-  EEPROM.get(eeAddress, max_cd);    eeAddress+= sizeof(max_cd);
-  EEPROM.get(eeAddress, min_speed); eeAddress+= sizeof(min_speed);
-  EEPROM.get(eeAddress, max_speed); eeAddress+= sizeof(max_speed);
-  EEPROM.get(eeAddress, min_accel); eeAddress+= sizeof(min_accel);
-  EEPROM.get(eeAddress, max_accel); eeAddress+= sizeof(max_accel);
-  EEPROM.get(eeAddress, min_pidk);  eeAddress+= sizeof(min_pidk);
-  EEPROM.get(eeAddress, max_pidk);  eeAddress+= sizeof(max_pidk);
-  EEPROM.get(eeAddress, alarm_vt);  eeAddress+= sizeof(alarm_vt);
-  EEPROM.get(eeAddress, filter);    eeAddress+= sizeof(filter);
-  EEPROM.get(eeAddress, pfmin);     eeAddress+= sizeof(pfmin);
-  EEPROM.get(eeAddress, pfmax);     eeAddress+= sizeof(pfmax);
-  EEPROM.get(eeAddress, dpip_b);    eeAddress+= sizeof(dpip_b);
-  EEPROM.get(eeAddress, min_pidi);  eeAddress+= sizeof(min_pidi);
-  EEPROM.get(eeAddress, max_pidi);  eeAddress+= sizeof(max_pidi);  
-  EEPROM.get(eeAddress, min_pidd);  eeAddress+= sizeof(min_pidd);
-  EEPROM.get(eeAddress, max_pidd);  eeAddress+= sizeof(max_pidd);
-  EEPROM.get(eeAddress, p_acc);      eeAddress+= sizeof(p_acc);
-  EEPROM.get(eeAddress, f_acc_b);    eeAddress+= sizeof(f_acc_b);
-  EEPROM.get(eeAddress, options.respiratoryRate);    eeAddress+= sizeof(options.respiratoryRate);
-  EEPROM.get(eeAddress, options.percInspEsp);    eeAddress+= sizeof(options.percInspEsp);
-  EEPROM.get(eeAddress, vent_mode);    eeAddress+= sizeof(vent_mode);
-  
-  //Antes de arrancar voy al menu inicial
-  bool init=false;
-  byte bpm,i_e;
-
-
-  tft.begin();
-  tft.fillScreen(ILI9341_BLACK);
-  tft.setRotation(0);
-  tft.setTextColor(ILI9341_BLUE); tft.setTextSize(4); 
-  tft.setCursor(30, 80);
-  tft.println("RespirAR");   
-  tft.setCursor(50, 130);
-  tft.setTextColor(ILI9341_MAGENTA); tft.setTextSize(5); 
-  tft.println("FIUBA");  
-  tft.setTextColor(ILI9341_GREEN); tft.setTextSize(3); 
-  tft.setCursor(40, 180);
-  tft.println("v.1.1.3.d");   
-  
-  //Menu_inic menuini(&vent_mode, &options.respiratoryRate, &options.percInspEsp); //Loop is inside constructor!!!
-  Serial.println("bpm"+String(options.respiratoryRate));
-  tft.fillScreen(ILI9341_BLACK);
+  writeLine(2, "v1.1.1", 8);
   
   p_dpt0 = 0;
   ads.begin();
@@ -349,9 +291,41 @@ void setup() {
   Serial.print("dp  error : "); Serial.println(-verror / (5.*0.09));
   p_dpt0 = 0.20;
 
+
   // configura la ventilación
   ventilation -> start();
   ventilation -> update();
+
+  //
+        #ifdef ACCEL_STEPPER
+          stepper->setSpeed(STEPPER_HOMING_SPEED);
+          
+        long initial_homing=-1;
+        //// HOMING TODO: PASAR NUEVAMENTE ESTA VARIABLE A PRIVADA 
+          while (digitalRead(PIN_ENDSTOP)) {  // Make the Stepper move CCW until the switch is activated   
+            stepper->moveTo(initial_homing);  // Set the position to move to
+            initial_homing--;  // Decrease by 1 for next move if needed
+            stepper->run();  // Start moving the stepper
+            delay(5);
+        }
+          stepper->setCurrentPosition(0);  // Set the current position as zero for now
+          initial_homing=1;
+        
+          while (!digitalRead(PIN_ENDSTOP)) { // Make the Stepper move CW until the switch is deactivated
+            stepper->moveTo(initial_homing);  
+            stepper->run();
+            initial_homing++;
+            delay(5);
+         }
+         long position=stepper->currentPosition();
+         Serial.print("Position ");Serial.print(position);
+         stepper->setCurrentPosition(STEPPER_LOWEST_POSITION);
+         position=stepper->currentPosition();
+         Serial.print("Position ");Serial.print(position);
+         
+         Serial.println("home end");
+         #endif
+    //
 
   //sensors -> readPressure();
   lcd.createChar(0, _back);//Custom chars
@@ -376,12 +350,38 @@ void setup() {
 
   //Serial.print(",0,50");
 
-  Timer1.initialize(50);
+  Timer1.initialize(20);
   Timer1.attachInterrupt(timer1Isr);
   //Timer2.setPeriod(500000);
   //Timer2.attachInterrupt(timer2Isr);
+  Serial.println("Reading ROM");
+#ifdef DEBUG_UPDATE
+  Serial.print("Honey Volt at p0: "); Serial.println(analogRead(A0) / 1023.);
+#endif
+  int eeAddress=0;
+  EEPROM.get(0, last_cycle); eeAddress+= sizeof(unsigned long);
+  EEPROM.get(eeAddress, p_trim);    eeAddress+= sizeof(p_trim);
+  EEPROM.get(eeAddress, autopid);   eeAddress+= sizeof(autopid);
+  EEPROM.get(eeAddress, min_cd);    eeAddress+= sizeof(min_cd);
+  EEPROM.get(eeAddress, max_cd);    eeAddress+= sizeof(max_cd);
+  EEPROM.get(eeAddress, min_speed); eeAddress+= sizeof(min_speed);
+  EEPROM.get(eeAddress, max_speed); eeAddress+= sizeof(max_speed);
+  EEPROM.get(eeAddress, min_accel); eeAddress+= sizeof(min_accel);
+  EEPROM.get(eeAddress, max_accel); eeAddress+= sizeof(max_accel);
+  EEPROM.get(eeAddress, min_pidk);  eeAddress+= sizeof(min_pidk);
+  EEPROM.get(eeAddress, max_pidk);  eeAddress+= sizeof(max_pidk);
+  EEPROM.get(eeAddress, alarm_vt);  eeAddress+= sizeof(alarm_vt);
+  EEPROM.get(eeAddress, filter);    eeAddress+= sizeof(filter);
+  EEPROM.get(eeAddress, pfmin);     eeAddress+= sizeof(pfmin);
+  EEPROM.get(eeAddress, pfmax);     eeAddress+= sizeof(pfmax);
+  EEPROM.get(eeAddress, dpip_b);    eeAddress+= sizeof(dpip_b);
+  EEPROM.get(eeAddress, min_pidi);  eeAddress+= sizeof(min_pidi);
+  EEPROM.get(eeAddress, max_pidi);  eeAddress+= sizeof(max_pidi);  
+  EEPROM.get(eeAddress, min_pidd);  eeAddress+= sizeof(min_pidd);
+  EEPROM.get(eeAddress, max_pidd);  eeAddress+= sizeof(max_pidd);
+  EEPROM.get(eeAddress, p_acc);      eeAddress+= sizeof(p_acc);
+  EEPROM.get(eeAddress, f_acc_b);    eeAddress+= sizeof(f_acc_b);
 
-  
   f_acc=(float)f_acc_b/10.;
   dpip=(float)dpip_b/10.;
   
@@ -389,6 +389,9 @@ void setup() {
         
   Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
   ventilation->setCycleNum(last_cycle);
+
+    tft.begin();
+    tft.fillScreen(ILI9341_BLACK);
 
 
     digitalWrite(BCK_LED,LOW);
@@ -405,8 +408,7 @@ void setup() {
     sleep_mode=false;
     put_to_sleep=false;
     wake_up=false;
-
-    //update_options_once=true; //TODO:REMOVE THIS
+     Serial.println("Exiting setup");
 }
 
 
@@ -456,41 +458,27 @@ void loop() {
         EEPROM.put(eeAddress, max_pidd);  eeAddress+= sizeof(max_pidd);
         EEPROM.put(eeAddress, p_acc);      eeAddress+= sizeof(p_acc);
         EEPROM.put(eeAddress, f_acc_b);    eeAddress+= sizeof(f_acc_b);                 
-        EEPROM.put(eeAddress, options.respiratoryRate);    eeAddress+= sizeof(options.respiratoryRate);
-        EEPROM.put(eeAddress, options.percInspEsp);    eeAddress+= sizeof(options.percInspEsp);
-        EEPROM.put(eeAddress, vent_mode);    eeAddress+= sizeof(vent_mode);
         
         lastSave = millis();
       }
-    
+
+      
     
       if ( time > lastShowSensor + TIME_SHOW ) {
-    
+
+      #ifdef DEBUG_STEPPER
+//      unsigned long reltime = ventilation->getMSecTimerCnt();
+//      Serial.print("Rel Msec: ");Serial.print(reltime);Serial.print(", Abs: ");
+//      Serial.println(time);
+      #endif
           lastShowSensor=time; 
-          //Serial.println(time);
 //           Serial.print(int(cycle_pos));Serial.print(",");
-//    //	     Serial.println(int(pressure_p));//Serial.print(",");
-//    //     //Serial.println(analogRead(A0));
-//    //	     #ifdef FILTER_FLUX
 //           Serial.print(Voltage,5);Serial.print(",");
 //           Serial.print(verror,3);Serial.print(",");
 //           Serial.print(p_dpt,5);Serial.print(",");
-//    //       Serial.print(_mlInsVol - _mlExsVol);Serial.print(",");
+//
 //           Serial.println(flow_f,2);
-           //Serial.println(_flux,2);
-           
-    //       #else
-    //       Serial.print(int(_flux));Serial.print(",");
-    //       #endif      
-    //      Serial.println(int(alarm_state));
-          //Serial.print(",");
-           //Serial.println(int(_mlInsVol-_mlExsVol));
-    //      
-          //Serial.print(",");Serial.println(int(alarm_state));     
-    //      #ifdef FILTER_FLUX 
-    //      Serial.print(Voltage*1000);Serial.print(",");Serial.print(p_dpt);Serial.print(",");Serial.println(_flux);/*Serial.print(",");/*Serial.print(",");Serial.println(_flux_sum/5.);*/
-    //      #endif
-          //Serial.print(int(_mlInsVol));Serial.print(",");Serial.println(int(_mlExsVol));
+
           tft_draw();
     
       }
@@ -580,10 +568,9 @@ void loop() {
         display_lcd();
         update_display = true;
         last_update_display = time;
-        update_options_once=true;
     
     #ifdef DEBUG_PID
-        if (vent_mode == VENTMODE_PCL) {
+        if (vent_mode = VENTMODE_PCL) {
           float err = (float)(pressure_max - options.peakInspiratoryPressure) / options.peakInspiratoryPressure;
           errpid_prom += fabs(err);
           errpid_prom_sig += err;
@@ -611,15 +598,12 @@ void loop() {
         display_lcd();
         display_needs_update = false;
       }
-
-      //if (cycle_pos > 110 && update_options_once) { TODO: REMOVE THIS
-          if ( update_options ) {
-            ventilation->change_config(options);
-            update_options = false;
-            update_options_once=false;
-            //show_changed_options=true;
-          }//
-      //}
+    
+//      if ( update_options ) {
+//        ventilation->change_config(options);
+//        update_options = false;
+//        //show_changed_options=true;
+//      }//
     
       if ( millis () - last_vent_time > TIME_BASE ) {
         ventilation -> update();
@@ -639,17 +623,17 @@ void loop() {
 //                      timebuzz=millis();
 //                      isbuzzeron=!isbuzzeron;
 //                      if (isbuzzeron){
-//                          //digitalWrite(PIN_BUZZER,BUZZER_LOW);
+//                          digitalWrite(PIN_BUZZER,BUZZER_LOW);
 //                      }   
 //                      else {
-//                          //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+//                          digitalWrite(PIN_BUZZER,!BUZZER_LOW);
 //                      }
 //                  }
 //              } else {  //buzz muted
-//                  //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+//                  digitalWrite(PIN_BUZZER,!BUZZER_LOW);
 //              }
 //        } else {//state > 0
-//          //digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+//          digitalWrite(PIN_BUZZER,!BUZZER_LOW);
 //          isbuzzeron=true;        //Inverted logic
 //        }
 
@@ -661,7 +645,7 @@ void loop() {
           put_to_sleep=false;  
           print_bat_time=time;
           print_bat();
-          //digitalWrite(PIN_BUZZER,!BUZZER_LOW); //Buzzer inverted
+          digitalWrite(PIN_BUZZER,!BUZZER_LOW); //Buzzer inverted
           lcd.clear();
       }
       if (time > print_bat_time + 5000){
@@ -671,7 +655,12 @@ void loop() {
       time = millis();
       check_bck_state();
   }
-  
+
+//    #ifdef ACCEL_STEPPER
+//    stepper->run();
+//  #else
+//    stepper -> processMovement(); //LUCIANO
+//  #endif
 
 }//LOOP
 

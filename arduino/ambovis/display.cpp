@@ -42,8 +42,7 @@ void tft_draw(void) {
     //Serial.println(cycle_pos);Serial.println(ry[valsreaded]);
     last_x=cycle_pos;
     rx[valsreaded]=cycle_pos;
-    ry[valsreaded]=pressure_p*2.;
-
+    ry[valsreaded]=pressure_p*2.;     
 
     yflux[0]=yflux[1];yflux[1]=int(flow_f*0.035);
     yvt[0]=yvt[1];yvt[1]=int((_mlInsVol - _mlExsVol)*0.1);
@@ -82,14 +81,7 @@ void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WIT
             tft.drawLine(axispos[i], 240-rx[valsreaded-1], axispos[i], 240-rx[valsreaded], ILI9341_DARKGREY);
             tft.fillRect(0, 240 - rx[valsreaded] - 10, 320, 10, ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
             //tft.fillRect(0, 240 - rx[valsreaded-1] + 1, 320, rx[valsreaded]-rx[valsreaded-1], ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
-
-            //PIP AL
-            byte yal=alarm_max_pressure*2;
-            tft.drawLine(axispos[0]- yal, 240-rx[valsreaded-1], axispos[0] - yal,   240-rx[valsreaded], ILI9341_RED);
             
-            yal=alarm_peep_pressure*2;
-            tft.drawLine(axispos[0]- yal, 240-rx[valsreaded-1], axispos[0] - yal,   240-rx[valsreaded], ILI9341_ORANGE);
-                        
             tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
             tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_MAGENTA);
             tft.drawLine(axispos[2]-yvt[0],             240-rx[valsreaded-1], axispos[2]-yvt[1],            240-rx[valsreaded], ILI9341_BLUE);

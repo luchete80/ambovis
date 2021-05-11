@@ -4,9 +4,10 @@
 #include "Arduino.h"
 //#define LCD_I2C 1 //IT DOES NOT WORK WITH ENCODER
 //Connections and Debug Defs
-//#define ACCEL_STEPPER 1
+#define ACCEL_STEPPER 1
 //#define DEBUG_PID 1
-//#define DEBUG_UPDATE 1
+//#define DEBUG_UPDATE  1
+#define DEBUG_STEPPER     1
 //#define FILTER_FLUX 1
 #define DEBUG_OFF 1 //Release version
 #define BUZZER_LOW 0
@@ -34,24 +35,42 @@
 //#define ENABLED_SENSOR_VOLUME_SFM3300 1
 #endif
 
-// Valores motor
-#define STEPPER_MICROSTEPS 16
+// // Valores motor
+// #define STEPPER_MICROSTEPS 16
+// #define STEPPER_STEPS_PER_REVOLUTION 200
+// #define STEPPER_MICROSTEPS_PER_REVOLUTION (STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS)
+// //#define STEPPER_DIR 1
+// #define STEPPER_HOMING_DIRECTION    (1)
+// #define STEPPER_HOMING_SPEED        (STEPPER_MICROSTEPS * 2000)   // Steps/s
+// //#define STEPPER_LOWEST_POSITION     (STEPPER_MICROSTEPS *  -100)   // Steps
+// //#define STEPPER_HIGHEST_POSITION    (STEPPER_MICROSTEPS *   100)   // Steps
+// #define STEPPER_LOWEST_POSITION     (-10)   // Steps
+// #define STEPPER_HIGHEST_POSITION    ( 2930 )   //270º ,2500 for 270º, 2850 for 220º, 2930 for 330º
+// #define STEPPER_SPEED_DEFAULT       (400)   // Steps/s
+// extern int STEPPER_SPEED_MAX;       //(14000)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
+// #define STEPPER_ACCEL_MAX           (8000)
+// #define STEPPER_SPEED_MAX_VCL       (1200)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
+// #define STEPPER_SPEED_EXSUFF        (4000)
+// #define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  2000)   // Steps/s2
+// extern int STEPPER_ACC_INSUFFLATION;    //(STEPPER_MICROSTEPS *  600)   // Steps/s2
+
+
+#define STEPPER_MICROSTEPS 4
 #define STEPPER_STEPS_PER_REVOLUTION 200
 #define STEPPER_MICROSTEPS_PER_REVOLUTION (STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS)
 //#define STEPPER_DIR 1
 #define STEPPER_HOMING_DIRECTION    (1)
-#define STEPPER_HOMING_SPEED        (STEPPER_MICROSTEPS * 2000)   // Steps/s
+#define STEPPER_HOMING_SPEED        (STEPPER_MICROSTEPS * 600)   // Steps/s
 //#define STEPPER_LOWEST_POSITION     (STEPPER_MICROSTEPS *  -100)   // Steps
 //#define STEPPER_HIGHEST_POSITION    (STEPPER_MICROSTEPS *   100)   // Steps
-#define STEPPER_LOWEST_POSITION     (-10)   // Steps
-#define STEPPER_HIGHEST_POSITION    ( 2930 )   //270º ,2500 for 270º, 2850 for 220º, 2930 for 330º
+#define STEPPER_LOWEST_POSITION     (-5)   // Steps
+#define STEPPER_HIGHEST_POSITION    ( 183 * STEPPER_MICROSTEPS)   //270º ,2500 for 270º, 2850 for 220º, 2930 for 330º
 #define STEPPER_SPEED_DEFAULT       (400)   // Steps/s
 extern int STEPPER_SPEED_MAX;       //(14000)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
-#define STEPPER_ACCEL_MAX           (8000)
-#define STEPPER_SPEED_MAX_VCL       (1200)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
-#define STEPPER_SPEED_EXSUFF        (4000)
-#define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  2000)   // Steps/s2
-extern int STEPPER_ACC_INSUFFLATION;    //(STEPPER_MICROSTEPS *  600)   // Steps/s2
+#define STEPPER_ACCEL_MAX           (3000 * STEPPER_MICROSTEPS)
+#define STEPPER_SPEED_MAX_VCL       (75 * STEPPER_MICROSTEPS)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
+#define STEPPER_SPEED_EXSUFF        (250 * STEPPER_MICROSTEPS)
+//#define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  2000)   // Steps/s2
 
 // Valores por defecto
 #define DEFAULT_HEIGHT 170 // cm
@@ -61,7 +80,7 @@ extern int STEPPER_ACC_INSUFFLATION;    //(STEPPER_MICROSTEPS *  600)   // Steps
 #define DEFAULT_MIN_VTIDAL 240
 #define DEFAULT_FRAC_CYCLE_VCL_INSUFF 0.75
 #define DEFAULT_TRIGGER_THRESHOLD 3.0
-#define DEFAULT_RPM 14
+#define DEFAULT_RPM 30
 #define DEFAULT_MAX_RPM 30
 #define DEFAULT_MIN_RPM 12
 #define DEFAULT_POR_INSPIRATORIO 33.3333F // %

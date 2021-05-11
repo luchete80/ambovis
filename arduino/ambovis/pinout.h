@@ -19,7 +19,6 @@
 #define PIN_LCD_D5 11
 #define PIN_LCD_D6 12
 #define PIN_LCD_D7 13
-#define PIN_LCD_SLEEP 42
 #endif
 
 // #define PIN_BME_CS2  4  // sensor de presion 2
