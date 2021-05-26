@@ -1,7 +1,7 @@
 #include "pinout.h"
 #include "MechVentilation.h"
 #include "src/TimerOne/TimerOne.h"
-//#include "src/TimerTwo/TimerTwo.h"
+#include "src/TimerTwo/TimerTwo.h"
 
 #include "menu.h"
 #include "display.h"
@@ -352,8 +352,8 @@ void setup() {
 
   Timer1.initialize(20);
   Timer1.attachInterrupt(timer1Isr);
-  //Timer2.setPeriod(500000);
-  //Timer2.attachInterrupt(timer2Isr);
+  Timer2.setPeriod(20000);
+  Timer2.attachInterrupt(timer2Isr);
   Serial.println("Reading ROM");
 #ifdef DEBUG_UPDATE
   Serial.print("Honey Volt at p0: "); Serial.println(analogRead(A0) / 1023.);
@@ -428,7 +428,13 @@ void loop() {
       wake_up=false;
       }
       State state = ventilation->getState();
+//      #ifdef DEBUG_STEPPER
+//        Serial.print("Running menu ini: ");Serial.println(time);
+//      #endif
       check_encoder();
+//      #ifdef DEBUG_STEPPER
+//        Serial.print("Running menu end: ");Serial.println(time);
+//      #endif      
     
       time = millis();
       check_buzzer_mute();
@@ -605,9 +611,9 @@ void loop() {
 //        //show_changed_options=true;
 //      }//
     
-      if ( millis () - last_vent_time > TIME_BASE ) {
-        ventilation -> update();
-      }
+//      if ( millis () - last_vent_time > TIME_BASE ) {
+//        ventilation -> update();
+//      }
     
       //HERE changed_options flag is not updating until cycle hcanges
       if (show_changed_options && ((millis() - last_update_display) > time_update_display) ) {
@@ -696,10 +702,10 @@ void update_error() {
   }
 }
 
-//void timer2Isr(void)
-//{
-//  ventilation -> update();
-//}
+void timer2Isr(void)
+{
+  ventilation -> update();
+}
 
 //
 
