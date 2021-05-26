@@ -428,14 +428,8 @@ void loop() {
       wake_up=false;
       }
       State state = ventilation->getState();
-//      #ifdef DEBUG_STEPPER
-//        Serial.print("Running menu ini: ");Serial.println(time);
-//      #endif
       check_encoder();
-//      #ifdef DEBUG_STEPPER
-//        Serial.print("Running menu end: ");Serial.println(time);
-//      #endif      
-    
+   
       time = millis();
       check_buzzer_mute();
       //Serial.print("Carga: ");Serial.println(analogRead(PIN_BAT_LEV));
