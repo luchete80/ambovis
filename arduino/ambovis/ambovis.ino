@@ -24,14 +24,14 @@ bool put_to_sleep,wake_up;
 unsigned long print_bat_time;
 
 byte _back[8] = {
-  0b00100,
-  0b01000,
-  0b11111,
-  0b01001,
-  0b00101,
-  0b00001,
-  0b00001,
-  0b11111
+  0b00100, //4
+  0b01000, //8
+  0b11111, //31
+  0b01001, //9
+  0b00101, //5
+  0b00001, //1
+  0b00001, //1
+  0b11111  //31  
 };
 
 // FOR ADS
@@ -236,6 +236,7 @@ void setup() {
   digitalWrite(PIN_EN, HIGH);
 
   // TODO: Añadir aquí la configuarcion inicial desde puerto serie
+  // **** Ventilation options
   options.respiratoryRate = DEFAULT_RPM;
   options.percInspEsp = 2; //1:1 to 1:4, is denom
   //options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
@@ -263,7 +264,7 @@ void setup() {
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
-  writeLine(1, "RespirAR FIUBA", 4);
+  writeLine(1, "RespirAR FIUBA test", 2);
   writeLine(2, "v1.1.1", 8);
   
   p_dpt0 = 0;
@@ -301,6 +302,8 @@ void setup() {
           stepper->setSpeed(STEPPER_HOMING_SPEED);
           
         long initial_homing=-1;
+        //**** Esto controla el fin de carrera? es paar poner la posicion cero
+        
         //// HOMING TODO: PASAR NUEVAMENTE ESTA VARIABLE A PRIVADA 
           while (digitalRead(PIN_ENDSTOP)) {  // Make the Stepper move CCW until the switch is activated   
             stepper->moveTo(initial_homing);  // Set the position to move to
