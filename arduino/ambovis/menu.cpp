@@ -82,6 +82,7 @@ void init_display() {
   //lcd.backlight();
   lcd.clear();
   lcd.setCursor(0, 0);
+  lcd.createChar(0,back);
 }
 
 void writeLine(int line, String message = "", int offsetLeft = 0) {

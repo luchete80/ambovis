@@ -23,27 +23,20 @@ bool sleep_mode;
 bool put_to_sleep,wake_up;
 unsigned long print_bat_time;
 
-byte _back[8] = {
-  0b00100,
-  0b01000,
-  0b11111,
-  0b01001,
-  0b00101,
-  0b00001,
-  0b00001,
-  0b11111
-};
 
 // FOR ADS
 #include <Wire.h>
 #include <Adafruit_ADS1015.h>
-Adafruit_ADS1115 ads(0x48);
+Adafruit_ADS1115 ads(0x48);           //Conversor AD para leer mejor el flujo a partir de la presion
 float Voltage = 0.0;
 int vt;
 float _mlInsVol = 0;
 float _mlExsVol = 0;
 int _mllastInsVol, _mllastExsVol;
 unsigned long mute_count;
+
+void read_memory(); //Lee la EEPROM, usa variables externas, quiza deberian englobarse en un vector dinamico todos los offsets
+void write_memory();
 
 int Compression_perc = 8; //80%
 
@@ -328,7 +321,6 @@ void setup() {
     //
 
   //sensors -> readPressure();
-  lcd.createChar(0, _back);//Custom chars
   display_lcd();
 
   //ENCODER
@@ -358,29 +350,8 @@ void setup() {
 #ifdef DEBUG_UPDATE
   Serial.print("Honey Volt at p0: "); Serial.println(analogRead(A0) / 1023.);
 #endif
-  int eeAddress=0;
-  EEPROM.get(0, last_cycle); eeAddress+= sizeof(unsigned long);
-  EEPROM.get(eeAddress, p_trim);    eeAddress+= sizeof(p_trim);
-  EEPROM.get(eeAddress, autopid);   eeAddress+= sizeof(autopid);
-  EEPROM.get(eeAddress, min_cd);    eeAddress+= sizeof(min_cd);
-  EEPROM.get(eeAddress, max_cd);    eeAddress+= sizeof(max_cd);
-  EEPROM.get(eeAddress, min_speed); eeAddress+= sizeof(min_speed);
-  EEPROM.get(eeAddress, max_speed); eeAddress+= sizeof(max_speed);
-  EEPROM.get(eeAddress, min_accel); eeAddress+= sizeof(min_accel);
-  EEPROM.get(eeAddress, max_accel); eeAddress+= sizeof(max_accel);
-  EEPROM.get(eeAddress, min_pidk);  eeAddress+= sizeof(min_pidk);
-  EEPROM.get(eeAddress, max_pidk);  eeAddress+= sizeof(max_pidk);
-  EEPROM.get(eeAddress, alarm_vt);  eeAddress+= sizeof(alarm_vt);
-  EEPROM.get(eeAddress, filter);    eeAddress+= sizeof(filter);
-  EEPROM.get(eeAddress, pfmin);     eeAddress+= sizeof(pfmin);
-  EEPROM.get(eeAddress, pfmax);     eeAddress+= sizeof(pfmax);
-  EEPROM.get(eeAddress, dpip_b);    eeAddress+= sizeof(dpip_b);
-  EEPROM.get(eeAddress, min_pidi);  eeAddress+= sizeof(min_pidi);
-  EEPROM.get(eeAddress, max_pidi);  eeAddress+= sizeof(max_pidi);  
-  EEPROM.get(eeAddress, min_pidd);  eeAddress+= sizeof(min_pidd);
-  EEPROM.get(eeAddress, max_pidd);  eeAddress+= sizeof(max_pidd);
-  EEPROM.get(eeAddress, p_acc);      eeAddress+= sizeof(p_acc);
-  EEPROM.get(eeAddress, f_acc_b);    eeAddress+= sizeof(f_acc_b);
+  
+  read_memory();
 
   f_acc=(float)f_acc_b/10.;
   dpip=(float)dpip_b/10.;
@@ -417,8 +388,6 @@ byte pos;
 
 void loop() {
 
-
-
   if (!sleep_mode){
     if (wake_up){
       lcd.clear();
@@ -435,29 +404,7 @@ void loop() {
       //Serial.print("Carga: ");Serial.println(analogRead(PIN_BAT_LEV));
       
       if (millis() > lastSave + TIME_SAVE) {
-        int eeAddress=0;
-        EEPROM.put(0, last_cycle);        eeAddress+= sizeof(unsigned long);
-        EEPROM.put(eeAddress, p_trim);    eeAddress+= sizeof(p_trim);
-        EEPROM.put(eeAddress, autopid);   eeAddress+= sizeof(autopid);
-        EEPROM.put(eeAddress, min_cd);    eeAddress+= sizeof(min_cd);
-        EEPROM.put(eeAddress, max_cd);    eeAddress+= sizeof(max_cd);
-        EEPROM.put(eeAddress, min_speed); eeAddress+= sizeof(min_speed);
-        EEPROM.put(eeAddress, max_speed); eeAddress+= sizeof(max_speed);
-        EEPROM.put(eeAddress, min_accel); eeAddress+= sizeof(min_accel);
-        EEPROM.put(eeAddress, max_accel); eeAddress+= sizeof(max_accel);
-        EEPROM.put(eeAddress, min_pidk);  eeAddress+= sizeof(min_pidk);
-        EEPROM.put(eeAddress, max_pidk);  eeAddress+= sizeof(max_pidk);
-        EEPROM.put(eeAddress, alarm_vt);  eeAddress+= sizeof(alarm_vt);
-        EEPROM.put(eeAddress, filter);    eeAddress+= sizeof(filter);   
-        EEPROM.put(eeAddress, pfmin);     eeAddress+= sizeof(pfmin);
-        EEPROM.put(eeAddress, pfmax);     eeAddress+= sizeof(pfmax);
-        EEPROM.put(eeAddress, dpip_b);    eeAddress+= sizeof(dpip_b);
-        EEPROM.put(eeAddress, min_pidi);  eeAddress+= sizeof(min_pidi);
-        EEPROM.put(eeAddress, max_pidi);  eeAddress+= sizeof(max_pidi);  
-        EEPROM.put(eeAddress, min_pidd);  eeAddress+= sizeof(min_pidd);
-        EEPROM.put(eeAddress, max_pidd);  eeAddress+= sizeof(max_pidd);
-        EEPROM.put(eeAddress, p_acc);      eeAddress+= sizeof(p_acc);
-        EEPROM.put(eeAddress, f_acc_b);    eeAddress+= sizeof(f_acc_b);                 
+        write_memory();             
         
         lastSave = millis();
       }
@@ -740,6 +687,57 @@ void check_buzzer_mute() {
     }
 }
 
+void read_memory(){
+    int eeAddress=0;
+  EEPROM.get(0, last_cycle); eeAddress+= sizeof(unsigned long);
+  EEPROM.get(eeAddress, p_trim);    eeAddress+= sizeof(p_trim);
+  EEPROM.get(eeAddress, autopid);   eeAddress+= sizeof(autopid);
+  EEPROM.get(eeAddress, min_cd);    eeAddress+= sizeof(min_cd);
+  EEPROM.get(eeAddress, max_cd);    eeAddress+= sizeof(max_cd);
+  EEPROM.get(eeAddress, min_speed); eeAddress+= sizeof(min_speed);
+  EEPROM.get(eeAddress, max_speed); eeAddress+= sizeof(max_speed);
+  EEPROM.get(eeAddress, min_accel); eeAddress+= sizeof(min_accel);
+  EEPROM.get(eeAddress, max_accel); eeAddress+= sizeof(max_accel);
+  EEPROM.get(eeAddress, min_pidk);  eeAddress+= sizeof(min_pidk);
+  EEPROM.get(eeAddress, max_pidk);  eeAddress+= sizeof(max_pidk);
+  EEPROM.get(eeAddress, alarm_vt);  eeAddress+= sizeof(alarm_vt);
+  EEPROM.get(eeAddress, filter);    eeAddress+= sizeof(filter);
+  EEPROM.get(eeAddress, pfmin);     eeAddress+= sizeof(pfmin);
+  EEPROM.get(eeAddress, pfmax);     eeAddress+= sizeof(pfmax);
+  EEPROM.get(eeAddress, dpip_b);    eeAddress+= sizeof(dpip_b);
+  EEPROM.get(eeAddress, min_pidi);  eeAddress+= sizeof(min_pidi);
+  EEPROM.get(eeAddress, max_pidi);  eeAddress+= sizeof(max_pidi);  
+  EEPROM.get(eeAddress, min_pidd);  eeAddress+= sizeof(min_pidd);
+  EEPROM.get(eeAddress, max_pidd);  eeAddress+= sizeof(max_pidd);
+  EEPROM.get(eeAddress, p_acc);      eeAddress+= sizeof(p_acc);
+  EEPROM.get(eeAddress, f_acc_b);    eeAddress+= sizeof(f_acc_b);
+  }
+
+  void write_memory(){
+    int eeAddress=0;
+    EEPROM.put(0, last_cycle);        eeAddress+= sizeof(unsigned long);
+    EEPROM.put(eeAddress, p_trim);    eeAddress+= sizeof(p_trim);
+    EEPROM.put(eeAddress, autopid);   eeAddress+= sizeof(autopid);
+    EEPROM.put(eeAddress, min_cd);    eeAddress+= sizeof(min_cd);
+    EEPROM.put(eeAddress, max_cd);    eeAddress+= sizeof(max_cd);
+    EEPROM.put(eeAddress, min_speed); eeAddress+= sizeof(min_speed);
+    EEPROM.put(eeAddress, max_speed); eeAddress+= sizeof(max_speed);
+    EEPROM.put(eeAddress, min_accel); eeAddress+= sizeof(min_accel);
+    EEPROM.put(eeAddress, max_accel); eeAddress+= sizeof(max_accel);
+    EEPROM.put(eeAddress, min_pidk);  eeAddress+= sizeof(min_pidk);
+    EEPROM.put(eeAddress, max_pidk);  eeAddress+= sizeof(max_pidk);
+    EEPROM.put(eeAddress, alarm_vt);  eeAddress+= sizeof(alarm_vt);
+    EEPROM.put(eeAddress, filter);    eeAddress+= sizeof(filter);   
+    EEPROM.put(eeAddress, pfmin);     eeAddress+= sizeof(pfmin);
+    EEPROM.put(eeAddress, pfmax);     eeAddress+= sizeof(pfmax);
+    EEPROM.put(eeAddress, dpip_b);    eeAddress+= sizeof(dpip_b);
+    EEPROM.put(eeAddress, min_pidi);  eeAddress+= sizeof(min_pidi);
+    EEPROM.put(eeAddress, max_pidi);  eeAddress+= sizeof(max_pidi);  
+    EEPROM.put(eeAddress, min_pidd);  eeAddress+= sizeof(min_pidd);
+    EEPROM.put(eeAddress, max_pidd);  eeAddress+= sizeof(max_pidd);
+    EEPROM.put(eeAddress, p_acc);      eeAddress+= sizeof(p_acc);
+    EEPROM.put(eeAddress, f_acc_b);    eeAddress+= sizeof(f_acc_b);    
+    }
 
 void autotrim_flux(){
   
