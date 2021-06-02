@@ -10,7 +10,6 @@
 #endif
 
 
-
 #ifdef LCD_I2C
 extern LiquidCrystal_I2C lcd;
 //LiquidCrystal_I2C lcd(0x3F, 20, 4);
@@ -46,7 +45,7 @@ void lcd_clearxy(int x, int y,int pos=1);
 void lcd_selxy(int x, int y);
 void check_encoder();
 void display_lcd ();
-void init_display();
+void init_display(); //MQ: cambiar el nombre de esto para ser mas descriptivo (like init_menu())
 
 void check_updn_button(int pin, byte *var, bool incr_decr);
 void check_bck_state();

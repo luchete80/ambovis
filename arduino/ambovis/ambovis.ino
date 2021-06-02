@@ -15,14 +15,20 @@
 #include "src/Pressure_Sensor/Pressure_Sensor.h"  //LUCIANO: MPX5050DP
 #include <EEPROM.h>
 
+//MQ: local variables
 bool init_verror;
-byte Cdyn;
-bool autopid;
-bool filter;
-bool sleep_mode;
-bool put_to_sleep,wake_up;
 unsigned long print_bat_time;
 
+
+//MQ: extern variables
+byte Cdyn; //mechVentilation
+bool autopid; //mechVentilation
+bool filter; //mechVentilation
+bool sleep_mode; //defaults
+bool put_to_sleep,wake_up; //defaults
+
+
+//MQ: caracter asci de Back en la seleccion de la opcion
 byte _back[8] = {
   0b00100, //4
   0b01000, //8
@@ -35,18 +41,25 @@ byte _back[8] = {
 };
 
 // FOR ADS
+// MQ: Inicializacion para lectura de sensor ADS
 #include <Wire.h>
 #include <Adafruit_ADS1015.h>
 Adafruit_ADS1115 ads(0x48);
-float Voltage = 0.0;
+
+//MQ local variables
+float Voltage = 0.0; //MQ: voltaje de que?
 int vt;
-float _mlInsVol = 0;
-float _mlExsVol = 0;
-int _mllastInsVol, _mllastExsVol;
 unsigned long mute_count;
+int Compression_perc = 8; //80% //MQ: parece que no se usa!
 
-int Compression_perc = 8; //80%
+//MQ extern variables
+float _mlInsVol = 0; //MQ usado en display.cpp, definido en mechVentilation
+float _mlExsVol = 0; // MQ usado en display.cpp, definido en mechVentilation
+int _mllastInsVol, _mllastExsVol; //MQ def en mechVentilation, usado en display.cpp y menu.cpp
 
+
+//MQ: Inicializacion stepper de motor
+//MQ: Es necesario este bloque? dado que solo se usa Accel stepper
 #ifdef ACCEL_STEPPER
 AccelStepper *stepper = new AccelStepper(
   AccelStepper::DRIVER,
@@ -56,99 +69,133 @@ AccelStepper *stepper = new AccelStepper(
 FlexyStepper * stepper = new FlexyStepper();
 #endif
 
+//MQ: Inicializacion Alarma . Declarado en defaults, usado en display.cpp
 byte alarm_state = 0; //0: No alarm 1: peep 2: pip 3:both
+
+//MQ: Inicializacion de display LCD (menu)
 //////////////////////////
 // - EXTERNAL VARIABLES //
 //////////////////////////
 #ifdef LCD_I2C
-LiquidCrystal_I2C lcd(0x3F, 20, 4);
+LiquidCrystal_I2C lcd(0x3F, 20, 4); // MQ: inicializacion del LCD? LCD_I2C esta apagado (comentado) en defaults.h
 #else
-LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
+LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7); // MQ: este es el coidigo que etsa siendo usado. Los defs estan en pinout.h
 #endif
 
 //MUTE
+//MQ: Codigo de inicializacion para el buzzer 
+//MQ: local variables
 boolean last_mute,curr_mute;
-unsigned long time_mute;
-
+unsigned long time_mute; //MQ: parece que no se usa
 boolean buzzmuted;
 unsigned long timebuzz=0;
-bool isbuzzeron=false;
+bool isbuzzeron=false; //MQ: su uso esta comentado
 
+//MQ: Inicializacion display tft 
+Adafruit_ILI9341 tft=Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST); // MQ: los defs estan en pinout.h
 
-Adafruit_ILI9341 tft=Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
-
+//MQ: Inicializacion calculo presion
+//MQ local variables
 byte vcorr_count;
-byte p_trim = 100;
-float pressure_p;   //EXTERN!!
-float last_pressure_max, last_pressure_min, last_pressure_peep;
-float pressure_peep;
+byte p_trim = 100; //MQ usado en menu.cpp
+float pressure_p;   //EXTERN!! //MQ es usado en display.cpp
+float last_pressure_max, last_pressure_min; // MQ: usado en mechVentilation y menu.cpp,
 
+//MQ: extern variables
+float last_pressure_peep; // MQ: parece que no se usa, declarado en sensors.h
+float pressure_peep; // MQ: parece que no se usa, declarado en sensors.h
+
+//MQ: Modo ventilacion , parte de menu.
 byte vent_mode = VENTMODE_MAN; //0
 //Adafruit_BMP280 _pres1Sensor;
+
+//MQ local variables
+//MQ: Inicializacion para calculos de presion
 Pressure_Sensor _dpsensor;
 float verrp;
-float _flux,    flow_f;;
-//#ifdef FILTER_FLUX
 float _flux_fil[5];
-float _mlInsVol2;
+float _mlInsVol2; //MQ esto no se usa?
 float _flux_sum;
 byte flux_count;
-//#endif
-
-bool send_data = false;
-char tempstr[5], tempstr2[5];
-int curr_sel, old_curr_sel;
 float p_dpt;
 
+
+//MQ extern variables
+float _flux, flow_f; // MQ declarado en sensors.h
+bool send_data = false; //MQ defaults.h
+char tempstr[5], tempstr2[5]; //MQ en menu.h
+int curr_sel, old_curr_sel;
+
+
+//MQ local variables
 unsigned long lastReadSensor = 0;
 unsigned long lastShowSensor = 0;
 unsigned long lastSave = 0;
-bool display_needs_update = false;
-
+bool display_needs_update = false; //MQ: usado en mechVentilation
 State static lastState;
-bool show_changed_options = false; //Only for display
-bool update_options = false;
-
 unsigned long time_update_display = 20; //ms
 unsigned long last_update_display;
 
-extern float _mlInsVol, _mlExsVol;
-extern byte stepper_time = 50;
+
+//MQ extern variables
+bool show_changed_options = false; //Only for display // MQ declarado en menu.h
+bool update_options = false; //MQ declarado en menu.h
+
+//MQ: esto ya se declaro arriba, lo voy a comentar
+//extern float _mlInsVol, _mlExsVol;
+
+//MQ extern variables
+extern byte stepper_time = 50; // MQ: declarado en mechVentilation
+unsigned long last_vent_time;// MQ: declarado en mechVentilation
+byte cycle_pos; // MQ: declarado en mechVentilation
+
+
+//MQ: local variables
 unsigned long last_stepper_time;
-unsigned long last_vent_time;
-unsigned long time;
-byte cycle_pos;
 int16_t adc0;
+unsigned long time; // MQ: esto es local?
 
-int max_accel,min_accel;
-int max_speed, min_speed;
-int min_pidk,max_pidk;
-int min_pidi,max_pidi;
-int min_pidd,max_pidd;
-byte pfmin,pfmax;
-float pf_min,pf_max;
-float peep_fac;
+//MQ extern variables
+int max_accel,min_accel; //MQ mechVentilation
+int max_speed, min_speed; //MQ mechVentilation
+int min_pidk,max_pidk; //MQ mechVentilation
+int min_pidi,max_pidi; //MQ mechVentilation
+int min_pidd,max_pidd; //MQ mechVentilation
+byte pfmin,pfmax; //MQ mechVentilation
+float pf_min,pf_max; //MQ mechVentilation
+float peep_fac; //MQ mechVentilation
+int min_cd,max_cd; //MQ mechVentilation
+unsigned long last_cycle; //MQ mechVentilation
+unsigned int _timeoutIns,_timeoutEsp; //In ms //MQ mechVentilation
 
+//MQ: Probablemente este codigo comentado hay que borrar
 //min_pidk=250;
 //max_pidk=1000;
-int min_cd,max_cd;
+
+//MQ: parece que esto ya no se usa porque se lee de la EEPROM
 //max_cd=40;  //T MODIFY: READ FROM MEM
 //min_cd=10;
   
-unsigned long last_cycle;
 
-unsigned int _timeoutIns,_timeoutEsp; //In ms
-
-byte menu_number = 0;
+//MQ extern variables 
+byte menu_number = 0; //MQ declarada en menu.cpp
 //TODO: READ FROM EEPROM
-byte alarm_max_pressure = 35;
-byte alarm_peep_pressure = 5;
-byte isalarmvt_on;
-int alarm_vt = 200;
+byte alarm_max_pressure = 35; //MQ declarada en mechVentilation
+byte alarm_peep_pressure = 5; //MQ declarada en mechVentilation
+int alarm_vt = 200; //MQ declarada en mechVentilation
 
+//MQ local variables
+byte isalarmvt_on;
+
+//MQ: extern variables
 //MENU
-unsigned long lastButtonPress;
-float verror, verror_sum;
+unsigned long lastButtonPress; //MQ declarado en menu.h
+float verror; // MQ declarado en sensors.h
+
+//MQ local variables
+float verror_sum; 
+
+//MQ: estos comentarios sirven ?
 
 //FLUX IS -100 to +100, has to be added 100
 //ASSIMETRY IN MAX FLOW IS IN NEGATIVE (ORIGINAL CURVE)
@@ -159,41 +206,49 @@ float verror, verror_sum;
 float dp[] = { -3.074176245, -2.547210457, -2.087678384, -1.60054669, -1.216013465, -0.795599072, -0.630753349, -0.504544509, -0.365700986, -0.260808033, -0.176879848, -0.109004974, -0.05874157, -0.051474571, -0.043771552, -0.037061691, -0.029794693, -0.023012161, -0.017561913, -0.01441288, -0.012111664, -0.009325981, -0.007024765, -0.004602432, -0.002664566, 0.00090924, 0.00030358, 0, -0.000242233, -0.000837976, 0.001999305, 0.003937171, 0.006117271, 0.008176254, 0.011688636, 0.014830113, 0.020045692, 0.023566372, 0.028644966, 0.03312327, 0.039664506, 0.047781395, 0.052868293, 0.096530072, 0.151339196, 0.216332764, 0.295221736, 0.377891785, 0.491216024, 0.606462279, 0.877207832, 1.207061607, 1.563385753, 2.030351958, 2.444452733};
 byte po_flux[] = {0, 10, 20, 30, 40, 50, 55, 60, 65, 70, 75, 80, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 100, 100, 100, 100, 100, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 120, 125, 130, 135, 140, 145, 150, 160, 170, 180, 190, 200};
 
-bool change_pid_params=false;
-
+//MQ extern variables
+bool change_pid_params=false; //MQ defaults.h
 byte encoderPos = 1; //this variable stores our current value of encoder position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
 byte oldEncPos = 1; //stores the last encoder position value so we can compare to the current reading and see if it has changed (so we know when to print to the serial monitor)
-byte reading = 0; //somewhere to store the direct values we read from our interrupt pins before checking to see if we have moved a whole detent
+byte max_sel, min_sel; //According to current selection //MQ declarado en menu.h
+bool isitem_sel; // MQ declarado en menu.h
+byte old_menu_pos=0; // MQ declarado en menu.h
+byte old_menu_num=0; // MQ declarado en menu.h
 
-byte max_sel, min_sel; //According to current selection
+//MQ local variables
+byte reading = 0; //somewhere to store the direct values we read from our interrupt pins before checking to see if we have moved a whole detent //MQ parece que no se usa.
+//MQ: para qu sirve?
+float p_dpt0;
 
+//MQ: API definitions - functions
 void check_buzzer_mute();
 void autotrim_flux();
 void check_sleep_mode();  //Batt charge only
+//MQ: end API definitions
 
-bool isitem_sel;
-byte old_menu_pos=0;
-byte old_menu_num=0;
 
+//MQ: documentar este controlador
 AutoPID * pid;
 
-MechVentilation * ventilation;
-VentilationOptions_t options;
+//MQ extern variables
+MechVentilation * ventilation; //MQ declarado en mechVentilator
+VentilationOptions_t options; //MQ declarado en mechVentilator
 
-float p_dpt0;
 
-int bck_state ;     // current state of the button
-int last_bck_state ; // previous state of the button
-int startPressed ;    // the moment the button was pressed
-int endPressed ;      // the moment the button was released
-int holdTime ;        // how long the button was hold
-int idleTime ;        // how long the button was idle
+//MQ: Declaracion de variables para botonera
+//MQ extern variables
+int bck_state ;     // current state of the button //MQ en menu.h
+int last_bck_state ; // previous state of the button //MQ en menu.h
+int startPressed ;    // the moment the button was pressed //MQ en menu.h
+int endPressed ;      // the moment the button was released //MQ en menu.h
+int holdTime ;        // how long the button was hold //MQ en menu.h
+int idleTime ;        // how long the button was idle //MQ en menu.h
 
 void setup() {
   
   Serial.begin(115200);
   init_display();
-  isitem_sel=false;
+  isitem_sel=false; // MQ: Se usa?
 
     pinMode(TFT_SLEEP, OUTPUT); //Set buzzerPin as output
     digitalWrite(TFT_SLEEP,HIGH); //LOW, INVERTED
@@ -206,14 +261,16 @@ void setup() {
 
     digitalWrite(PIN_BUZZER,BUZZER_LOW); //LOW, INVERTED
         
-  // PID
-  pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
+  // PID 
+  //MQ: PID del sensor de presion. Configuracion inicial.
+  pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD); // MQ: algunos params definidos en MechVentilation y otros en default.h
   // if pressure is more than PID_BANGBANG below or above setpoint,
   // output will be set to min or max respectively
   pid -> setBangBang(PID_BANGBANG);
   // set PID update interval
   pid -> setTimeStep(PID_TS);
 
+  //MQ: Parece que son parametros default para accel stepper
   max_cd=40;  //T MODIFY: READ FROM MEM
   min_cd=10;
   min_speed = 250;  // x microsteps
@@ -232,15 +289,17 @@ void setup() {
   pinMode(PIN_MENU_EN, INPUT_PULLUP);
   pinMode(PIN_MENU_BCK, INPUT_PULLUP);
   pinMode(PIN_BAT_LEV, INPUT);
-  
+
+  //MQ: Por que primero se pone HIGH y luego LOW mas abajo?
   digitalWrite(PIN_EN, HIGH);
 
   // TODO: Añadir aquí la configuarcion inicial desde puerto serie
-  // **** Ventilation options
+  // **** Ventilation options 
+  // MQ: todos estos valores son default del menu
   options.respiratoryRate = DEFAULT_RPM;
   options.percInspEsp = 2; //1:1 to 1:4, is denom
   //options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
-  options.peakInspiratoryPressure = 20.;
+  options.peakInspiratoryPressure = 20.; //MQ: Habria que mover esto a default.h?
   options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
   options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
   options.hasTrigger = false;
@@ -264,7 +323,8 @@ void setup() {
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
-  writeLine(1, "RespirAR FIUBA test", 2);
+  //MQ: Estas son rutinas de menu.h
+  writeLine(1, "RespirAR FIUBA", 4);
   writeLine(2, "v1.1.1", 8);
   
   p_dpt0 = 0;
@@ -289,7 +349,7 @@ void setup() {
 //  Serial.print("dp (Flux) MPX Volt (mV) at p0: "); Serial.println(verror * 1000, 3);
 //  Serial.print("pressure  MPX Volt (mV) at p0: "); Serial.println(verrp * 1000, 3);
 
-  Serial.print("dp  error : "); Serial.println(-verror / (5.*0.09));
+//  Serial.print("dp  error : "); Serial.println(-verror / (5.*0.09));
   p_dpt0 = 0.20;
 
 
@@ -297,55 +357,54 @@ void setup() {
   ventilation -> start();
   ventilation -> update();
 
+  //MQ: Codigo para setear el motor en el cero
   //
         #ifdef ACCEL_STEPPER
           stepper->setSpeed(STEPPER_HOMING_SPEED);
           
         long initial_homing=-1;
-        //**** Esto controla el fin de carrera? es paar poner la posicion cero
-        
+        //MQ: Esto controla el fin de carrera? es paar poner la posicion cero
+        //MQ: No hubo llamada a pinMode() para PIN_ENDSTOP
         //// HOMING TODO: PASAR NUEVAMENTE ESTA VARIABLE A PRIVADA 
-          while (digitalRead(PIN_ENDSTOP)) {  // Make the Stepper move CCW until the switch is activated   
-            stepper->moveTo(initial_homing);  // Set the position to move to
-            initial_homing--;  // Decrease by 1 for next move if needed
-            stepper->run();  // Start moving the stepper
-            delay(5);
+        while (digitalRead(PIN_ENDSTOP)) {  // Make the Stepper move CCW until the switch is activated   
+           stepper->moveTo(initial_homing);  // Set the position to move to
+           initial_homing--;  // Decrease by 1 for next move if needed
+           stepper->run();  // Start moving the stepper
+           delay(5);
         }
-          stepper->setCurrentPosition(0);  // Set the current position as zero for now
-          initial_homing=1;
+        stepper->setCurrentPosition(0);  // Set the current position as zero for now
+        initial_homing=1;
         
-          while (!digitalRead(PIN_ENDSTOP)) { // Make the Stepper move CW until the switch is deactivated
-            stepper->moveTo(initial_homing);  
-            stepper->run();
-            initial_homing++;
-            delay(5);
+        while (!digitalRead(PIN_ENDSTOP)) { // Make the Stepper move CW until the switch is deactivated
+           stepper->moveTo(initial_homing);  
+           stepper->run();
+           initial_homing++;
+           delay(5);
          }
+         
          long position=stepper->currentPosition();
-         Serial.print("Position ");Serial.print(position);
+//         Serial.print("Position ");Serial.print(position);
          stepper->setCurrentPosition(STEPPER_LOWEST_POSITION);
          position=stepper->currentPosition();
-         Serial.print("Position ");Serial.print(position);
+//         Serial.print("Position ");Serial.print(position);
          
-         Serial.println("home end");
+//         Serial.println("home end");
          #endif
     //
-
+  //MQ: Fin del Codigo para setear el motor en el cero
+  
   //sensors -> readPressure();
   lcd.createChar(0, _back);//Custom chars
-  display_lcd();
+  display_lcd(); //MQ: display all the options 
 
   //ENCODER
   curr_sel = old_curr_sel = 1; //COMPRESSION
 
-  pinMode(PIN_ENC_SW, INPUT_PULLUP);
+  pinMode(PIN_ENC_SW, INPUT_PULLUP); 
 
-  lastReadSensor =   lastShowSensor = millis();
+  lastReadSensor = lastShowSensor = millis();
   lastState = ventilation->getState();
   last_update_display = millis();
-
-#ifdef DEBUG_UPDATE
-
-#endif
 
   //STEPPER
   last_stepper_time = millis();
@@ -357,7 +416,7 @@ void setup() {
   Timer1.attachInterrupt(timer1Isr);
   //Timer2.setPeriod(500000);
   //Timer2.attachInterrupt(timer2Isr);
-  Serial.println("Reading ROM");
+//  Serial.println("Reading ROM");
 #ifdef DEBUG_UPDATE
   Serial.print("Honey Volt at p0: "); Serial.println(analogRead(A0) / 1023.);
 #endif
@@ -388,9 +447,9 @@ void setup() {
   f_acc=(float)f_acc_b/10.;
   dpip=(float)dpip_b/10.;
   
-  Serial.print("Maxcd: ");Serial.println(max_cd);
+//  Serial.print("Maxcd: ");Serial.println(max_cd);
         
-  Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
+//  Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
   ventilation->setCycleNum(last_cycle);
 
     tft.begin();
@@ -411,7 +470,8 @@ void setup() {
     sleep_mode=false;
     put_to_sleep=false;
     wake_up=false;
-     Serial.println("Exiting setup");
+//    Serial.println("Exiting setup");
+    Serial.println("lastCycle, pressure, voltage ");
 }
 
 
@@ -422,16 +482,17 @@ void loop() {
 
 
 
-  if (!sleep_mode){
-    if (wake_up){
-      lcd.clear();
-      init_display();
-      display_lcd();
-    tft.fillScreen(ILI9341_BLACK);
-      wake_up=false;
+  if (!sleep_mode) {
+      if (wake_up){ // MQ: Cuando es true esta variable?
+         lcd.clear();
+         init_display();
+         display_lcd();
+         tft.fillScreen(ILI9341_BLACK);
+         wake_up=false;
       }
+      
       State state = ventilation->getState();
-      check_encoder();
+      check_encoder(); // MQ: Esto es del menu (lcd)
     
       time = millis();
       check_buzzer_mute();
@@ -464,8 +525,6 @@ void loop() {
         
         lastSave = millis();
       }
-
-      
     
       if ( time > lastShowSensor + TIME_SHOW ) {
 
@@ -658,7 +717,13 @@ void loop() {
       time = millis();
       check_bck_state();
   }
-
+        
+      Serial.print(last_cycle);
+      Serial.print(",");
+      Serial.print(pressure_p);
+      Serial.print(",");
+      Serial.println(Voltage);
+      
 //    #ifdef ACCEL_STEPPER
 //    stepper->run();
 //  #else
@@ -742,8 +807,3 @@ void check_buzzer_mute() {
         buzzmuted=false;
     }
 }
-
-
-void autotrim_flux(){
-  
-  }

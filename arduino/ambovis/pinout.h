@@ -8,10 +8,9 @@
 // Stepper homing
 #define PIN_ENDSTOP 5
 
-// Display
-
+// Display LCD
 #ifdef LCD_I2C
-#define I2C_DIR 0x3F
+#define I2C_DIR 0x3F //MQ: Pareciera qe esto no se usa
 #else
 #define PIN_LCD_RS 8
 #define PIN_LCD_EN 9

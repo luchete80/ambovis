@@ -74,7 +74,7 @@ void updateCounter() {
 }
 
 void init_display() {
-  #ifdef LCD_I2C
+  #ifdef LCD_I2C // MQ: esto esta apagado Podriaos borrar este IF
   lcd.begin(20, 4);  //I2C
 #else
   lcd.begin(20, 4); //NO I2C
@@ -566,7 +566,7 @@ void clear_n_sel(int menu){
     }//menu number 
 }
 
-void display_lcd ( ) {
+void display_lcd () {
     if (clear_all_display)
         lcd.clear();        
   clear_n_sel(menu_number);
