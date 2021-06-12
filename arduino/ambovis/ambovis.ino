@@ -41,7 +41,7 @@ byte _back[8] = {
 };
 
 // FOR ADS
-// MQ: Inicializacion para lectura de sensor ADS
+// MQ: Inicializacion para lectura del conv AD
 #include <Wire.h>
 #include <Adafruit_ADS1015.h>
 Adafruit_ADS1115 ads(0x48);
@@ -293,7 +293,7 @@ void setup() {
   //MQ: Por que primero se pone HIGH y luego LOW mas abajo?
   digitalWrite(PIN_EN, HIGH);
 
-  // TODO: Añadir aquí la configuarcion inicial desde puerto serie
+  // TODO: Añadir aquí la configuracion inicial desde puerto serie
   // **** Ventilation options 
   // MQ: todos estos valores son default del menu
   options.respiratoryRate = DEFAULT_RPM;
@@ -444,6 +444,7 @@ void setup() {
   EEPROM.get(eeAddress, p_acc);      eeAddress+= sizeof(p_acc);
   EEPROM.get(eeAddress, f_acc_b);    eeAddress+= sizeof(f_acc_b);
 
+
   f_acc=(float)f_acc_b/10.;
   dpip=(float)dpip_b/10.;
   
@@ -497,7 +498,8 @@ void loop() {
       time = millis();
       check_buzzer_mute();
       //Serial.print("Carga: ");Serial.println(analogRead(PIN_BAT_LEV));
-      
+
+      //MQ: only save what was updated
       if (millis() > lastSave + TIME_SAVE) {
         int eeAddress=0;
         EEPROM.put(0, last_cycle);        eeAddress+= sizeof(unsigned long);
@@ -522,10 +524,11 @@ void loop() {
         EEPROM.put(eeAddress, max_pidd);  eeAddress+= sizeof(max_pidd);
         EEPROM.put(eeAddress, p_acc);      eeAddress+= sizeof(p_acc);
         EEPROM.put(eeAddress, f_acc_b);    eeAddress+= sizeof(f_acc_b);                 
-        
+        Serial.printl("Saved values :");
         lastSave = millis();
       }
-    
+
+      //MQ: time to display tft
       if ( time > lastShowSensor + TIME_SHOW ) {
 
       #ifdef DEBUG_STEPPER
@@ -545,7 +548,7 @@ void loop() {
     
       }
     
-    
+      //MQ: time to read sensor
       if (time > lastReadSensor + TIME_SENSOR) {
     
         pressure_p = ( analogRead(A0) / (1023.) /*- verrp * 0.2 */ - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
@@ -563,10 +566,10 @@ void loop() {
         update_error();
     
         p_dpt -= verror + (float(p_trim) - 100.0) * 1e-3; //WITH TRIM
-        pos = findClosest(dp, 55, p_dpt);
+        pos = findClosest(dp, 55, p_dpt); 
         //flux should be shifted up (byte storage issue)
         _flux = po_flux[pos] - 100 + ( float (po_flux[pos + 1] - 100) - float (po_flux[pos] - 100) ) * ( p_dpt - float(dp[pos]) ) / (float)( dp[pos + 1] - dp[pos]);
-        _flux *= 16.6667;
+        _flux *= 16.6667; //MQ que es este valor? podemos ponerle nombre?
     
         if (filter) {
             flux_count++;    //Filter
