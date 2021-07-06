@@ -546,12 +546,15 @@ void loop() {
         display_needs_update = false;
       }
     
-//      if ( update_options ) {
-//        ventilation->change_config(options);
-//        update_options = false;
-//        //show_changed_options=true;
-//      }//
-    
+     if ( update_options ) {
+       ventilation->change_config(options);
+       update_options = false;
+       //show_changed_options=true;
+     }
+ 
+//////////////// CAUTION
+// // //		WITH LATEST HARDWARE; IF VENTILATION UPDATE IS IN THE MAIN LOOP LIKE THIS
+// // //		MENU ACTIONS INTERFERE WITH VENTILATION MECHANICS
 //      if ( millis () - last_vent_time > TIME_BASE ) {
 //        ventilation -> update();
 //      }
