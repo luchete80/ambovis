@@ -1,5 +1,5 @@
 #include "pinout.h"
-#include "MechVentilation.h"
+#include "src/TestingUtils/MechVentilatorSpy.h"
 #include "src/TimerOne/TimerOne.h"
 #include "src/TimerTwo/TimerTwo.h"
 
@@ -239,7 +239,7 @@ void setup() {
   options.tidalVolume = 300;
   options.percVolume = 100; //1 to 10
 
-  ventilation = new MechVentilation(
+  ventilation = new MechVentilatorSpy(
     stepper,
     pid,
     options
@@ -281,7 +281,7 @@ void setup() {
 //  Serial.print("dp (Flux) MPX Volt (mV) at p0: "); Serial.println(verror * 1000, 3);
 //  Serial.print("pressure  MPX Volt (mV) at p0: "); Serial.println(verrp * 1000, 3);
 
-  Serial.print("dp  error : "); Serial.println(-verror / (5.*0.09));
+//  Serial.print("dp  error : "); Serial.println(-verror / (5.*0.09));
   p_dpt0 = 0.20;
 
 
@@ -311,12 +311,12 @@ void setup() {
             delay(5);
          }
          long position=stepper->currentPosition();
-         Serial.print("Position ");Serial.print(position);
+//         Serial.print("Position ");Serial.print(position);
          stepper->setCurrentPosition(STEPPER_LOWEST_POSITION);
          position=stepper->currentPosition();
-         Serial.print("Position ");Serial.print(position);
+//         Serial.print("Position ");Serial.print(position);
          
-         Serial.println("home end");
+//         Serial.println("home end");
          #endif
     //
 
@@ -346,9 +346,9 @@ void setup() {
   Timer1.attachInterrupt(timer1Isr);
   Timer2.setPeriod(20000);
   Timer2.attachInterrupt(timer2Isr);
-  Serial.println("Reading ROM");
+//  Serial.println("Reading ROM");
 #ifdef DEBUG_UPDATE
-  Serial.print("Honey Volt at p0: "); Serial.println(analogRead(A0) / 1023.);
+//  Serial.print("Honey Volt at p0: "); Serial.println(analogRead(A0) / 1023.);
 #endif
   
   read_memory();
@@ -356,9 +356,9 @@ void setup() {
   f_acc=(float)f_acc_b/10.;
   dpip=(float)dpip_b/10.;
   
-  Serial.print("Maxcd: ");Serial.println(max_cd);
+//  Serial.print("Maxcd: ");Serial.println(max_cd);
         
-  Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
+//  Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
   ventilation->setCycleNum(last_cycle);
 
     tft.begin();
@@ -379,7 +379,7 @@ void setup() {
     sleep_mode=false;
     put_to_sleep=false;
     wake_up=false;
-     Serial.println("Exiting setup");
+//     Serial.println("Exiting setup");
 }
 
 
@@ -521,12 +521,12 @@ void loop() {
           float err = (float)(pressure_max - options.peakInspiratoryPressure) / options.peakInspiratoryPressure;
           errpid_prom += fabs(err);
           errpid_prom_sig += err;
-          Serial.println("Error PID: "); Serial.print(err, 5);
+//          Serial.println("Error PID: "); Serial.print(err, 5);
           ciclo_errpid++;
     
           if (ciclo_errpid > 4) {
             errpid_prom /= 5.; errpid_prom_sig /= 5.;
-            Serial.print(options.peakInspiratoryPressure); Serial.print(" "); Serial.print(errpid_prom, 5); Serial.print(" "); Serial.println(errpid_prom_sig, 5);
+//            Serial.print(options.peakInspiratoryPressure); Serial.print(" "); Serial.print(errpid_prom, 5); Serial.print(" "); Serial.println(errpid_prom_sig, 5);
             errpid_prom = 0.; errpid_prom_sig = 0.;
             ciclo_errpid = 0;
           }

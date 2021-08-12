@@ -1,0 +1,10 @@
+.DS_Store
+arduino/.DS_Store
+arduino/ambovis/.DS_Store
+arduino/ambovis/.idea/
+arduino/ambovis/CMakeLists.txt
+arduino/ambovis/cmake-build-debug/
+arduino/ambovis/src/.DS_Store
+arduino/ambovis/src/AutoPID/.DS_Store
+arduino/ambovis/src/TestingUtils/
+

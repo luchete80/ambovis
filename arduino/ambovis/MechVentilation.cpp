@@ -122,11 +122,11 @@ void MechVentilation::_setInspiratoryCycle(void) {
     //_timeoutIns = timeoutCycle * DEFAULT_POR_INSPIRATORIO / 100;
     _timeoutIns = timeoutCycle / (float(_percIE+1));
     _timeoutEsp = (timeoutCycle) - _timeoutIns;    
-  #ifdef DEBUG_UPDATE
-      Serial.print("Timeout Cycle");Serial.println(timeoutCycle);
-      Serial.print("_timeoutIns");Serial.println(_timeoutIns);
-      Serial.print("_timeoutEsp");Serial.println(_timeoutEsp);
-  #endif
+//  #ifdef DEBUG_UPDATE
+//      Serial.print("Timeout Cycle");Serial.println(timeoutCycle);
+//      Serial.print("_timeoutIns");Serial.println(_timeoutIns);
+//      Serial.print("_timeoutEsp");Serial.println(_timeoutEsp);
+//  #endif
     
 }
 
@@ -198,7 +198,7 @@ void MechVentilation :: update ( void )
         
         //adding_vol=true;
         //#ifdef DEBUG_UPDATE
-          Serial.println("INSUFLACION ");        
+        //Serial.println("INSUFLACION ");
         //#endif
   
         last_pressure_max=pressure_max;
@@ -241,7 +241,7 @@ void MechVentilation :: update ( void )
           _stepper->setTargetPositionInSteps(int (STEPPER_HIGHEST_POSITION*(float)_percVol/100.));
           _stepperSpeed=STEPPER_HIGHEST_POSITION*(float(_percVol)*0.01)/( (float)(_timeoutIns*0.001) * DEFAULT_FRAC_CYCLE_VCL_INSUFF);//En [ml/s]
         #ifdef DEBUG_UPDATE
-          Serial.print("Manual mode Timeout ins , speed: ");Serial.print(_timeoutIns);Serial.print(" ");Serial.println(_stepperSpeed);
+//          Serial.print("Manual mode Timeout ins , speed: ");Serial.print(_timeoutIns);Serial.print(" ");Serial.println(_stepperSpeed);
         #endif
           _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCEL_MAX);
           if (_stepperSpeed>STEPPER_SPEED_MAX)
@@ -356,11 +356,11 @@ void MechVentilation :: update ( void )
                 
                 
                 //#ifdef DEBUG_UPDATE
-                  Serial.println("ENDED TIME WHILE MOVING");
+                //Serial.println("ENDED TIME WHILE MOVING");
                 //#endif
             }
             else {
-              Serial.println("Motion Complete");
+            //  Serial.println("Motion Complete");
               }
             _setState(Init_Exsufflation);
             if (_recruitmentMode) {
@@ -468,8 +468,8 @@ void MechVentilation :: update ( void )
         _stepper->moveTo(STEPPER_LOWEST_POSITION);
       #ifdef DEBUG_STEPPER
       unsigned long reltime = ventilation->getMSecTimerCnt();
-      Serial.print("Exsuff. Rel Msec: ");Serial.print(reltime);Serial.print(", Abs: ");
-      Serial.println(time);
+//      Serial.print("Exsuff. Rel Msec: ");Serial.print(reltime);Serial.print(", Abs: ");
+//      Serial.println(time);
       #endif
         #else
         _stepper->setSpeedInStepsPerSecond(STEPPER_SPEED_EXSUFF);
@@ -549,8 +549,8 @@ void MechVentilation :: update ( void )
             //_startWasTriggeredByPatient = false;
       #ifdef DEBUG_STEPPER
       unsigned long reltime = ventilation->getMSecTimerCnt();
-      Serial.print("End Exsuff. Rel Msec: ");Serial.print(reltime);Serial.print(", Abs: ");
-      Serial.print(time);Serial.print(" Exsuff time: ");Serial.println(_timeoutEsp);
+//      Serial.print("End Exsuff. Rel Msec: ");Serial.print(reltime);Serial.print(", Abs: ");
+//      Serial.print(time);Serial.print(" Exsuff time: ");Serial.println(_timeoutEsp);
       #endif
       
             _msecTimerStartCycle=millis();
@@ -586,7 +586,7 @@ void MechVentilation :: update ( void )
             // error sensor reading
             _running = false;
             #if DEBUG_UPDATE
-            Serial.println("Sensor: FAILED");
+//            Serial.println("Sensor: FAILED");
             #endif
         }
 
@@ -612,7 +612,7 @@ void MechVentilation :: update ( void )
                     PIN_ENDSTOP) != true)
             {
 #if DEBUG_UPDATE
-                    Serial.println("Homing failed");
+//                    Serial.println("Homing failed");
 #endif
             } else{
               //_stepper->setCurrentPositionInSteps(int(STEPPER_HIGHEST_POSITION*0.12));
@@ -622,7 +622,7 @@ void MechVentilation :: update ( void )
         }
         else{
 #if DEBUG_UPDATE
-           Serial.println("No end stop detected.");
+//           Serial.println("No end stop detected.");
 #endif
         }
     

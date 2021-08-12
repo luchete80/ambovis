@@ -137,7 +137,7 @@ void check_bck_state(){
     } else {
        updateCounter(); // button state not changed. It runs in a loop.
        if (holdTime > 2000 && !change_sleep){
-        Serial.println("Activando Sleep Mode");
+//        Serial.println("Activando Sleep Mode");
         if (!sleep_mode){
             
             sleep_mode=true;
@@ -147,7 +147,7 @@ void check_bck_state(){
            wake_up=true;   
         }
         change_sleep=true;
-        Serial.print("Sleep Mode");Serial.println(sleep_mode);
+//        Serial.print("Sleep Mode");Serial.println(sleep_mode);
         }
     }
     last_bck_state = bck_state;
@@ -235,8 +235,8 @@ void check_encoder ( ) {
  //                     min_sel=200;max_sel=800;
                         encoderPos=oldEncPos=options.peakInspiratoryPressure;
                         min_sel=15;max_sel=30;
-                        Serial.print("pip: ");Serial.println(options.peakInspiratoryPressure);
-                        Serial.print("encoderpos: ");Serial.println(encoderPos);
+//                        Serial.print("pip: ");Serial.println(options.peakInspiratoryPressure);
+//                        Serial.print("encoderpos: ");Serial.println(encoderPos);
                     } else {//Manual
                       encoderPos=oldEncPos=options.percVolume;
                       min_sel=40;max_sel=100;            
@@ -384,7 +384,7 @@ void check_encoder ( ) {
                 else  if (menu_number == 1)   alarm_peep_pressure     = encoderPos;
                 else  if (menu_number == 2)   min_speed  = int((float)encoderPos*10.);
                 else if ( menu_number == 3 ){
-                    Serial.print("encoderPos: ");Serial.println(encoderPos);
+//                    Serial.print("encoderPos: ");Serial.println(encoderPos);
                     pfmin=encoderPos;
                     pf_min=(float)encoderPos/50.;
                     peep_fac = -(pf_max-pf_min)/15.*last_pressure_min + pf_max;
@@ -404,8 +404,8 @@ void check_encoder ( ) {
                 if ( menu_number == 0 ) {
                     if (vent_mode==VENTMODE_PCL){
                       options.peakInspiratoryPressure = encoderPos;
-                        Serial.print("pip: ");Serial.println(options.peakInspiratoryPressure);
-                        Serial.print("encoderpos: ");Serial.println(encoderPos);
+//                        Serial.print("pip: ");Serial.println(options.peakInspiratoryPressure);
+//                        Serial.print("encoderpos: ");Serial.println(encoderPos);
                       } else { //manual
                       options.percVolume = encoderPos;
                     }
@@ -457,8 +457,8 @@ void check_encoder ( ) {
             case 11:
                 if ( menu_number == 2 ){
                     max_pidi=int(encoderPos)*2;
-                    Serial.print("Max pid i:");Serial.println(max_pidi);
-                    Serial.print("Encoder pos:");Serial.println(encoderPos);
+//                    Serial.print("Max pid i:");Serial.println(max_pidi);
+//                    Serial.print("Encoder pos:");Serial.println(encoderPos);
                 }
                 break;
             case 12:
@@ -603,14 +603,14 @@ void display_lcd ( ) {
     writeLine(2, String(options.percInspEsp), 6);
   
     #ifdef DEBUG_UPDATE
-      Serial.print("Presion mostrada: ");Serial.println(pressure_max);
+//      Serial.print("Presion mostrada: ");Serial.println(pressure_max);
     #endif
     dtostrf(last_pressure_max, 2, 0, tempstr);
     writeLine(1, String(tempstr), 16);  
     
     #ifdef DEBUG_UPDATE
-      Serial.print("Max press conv: ");Serial.println(tempstr);
-      Serial.print("Min Max press");  Serial.print(pressure_min);Serial.print(" ");Serial.println(pressure_max);
+//      Serial.print("Max press conv: ");Serial.println(tempstr);
+//      Serial.print("Min Max press");  Serial.print(pressure_min);Serial.print(" ");Serial.println(pressure_max);
     #endif
       
     writeLine(2, "PEEP: ", 11);
