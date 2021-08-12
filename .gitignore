@@ -6,5 +6,5 @@ arduino/ambovis/CMakeLists.txt
 arduino/ambovis/cmake-build-debug/
 arduino/ambovis/src/.DS_Store
 arduino/ambovis/src/AutoPID/.DS_Store
-arduino/ambovis/src/TestingUtils/
+
 
