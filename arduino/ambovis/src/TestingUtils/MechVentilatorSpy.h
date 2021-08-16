@@ -6,7 +6,6 @@
 #define AMBOVIS_MECHVENTILATORSPY_H
 #include "../../MechVentilation.h"
 #include "MechVentilatorToOutput.h"
-#include "SerialValuePrinter.h"
 
 class MechVentilatorSpy: public MechVentilation {
 public:

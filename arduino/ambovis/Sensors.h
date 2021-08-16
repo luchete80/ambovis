@@ -9,6 +9,7 @@
 
 extern float pressure_max,pressure_min,pressure_peep;
 extern float pressure_p;  //DIFFERENTIALS!
+extern int16_t adc0;
 extern float last_pressure_max,last_pressure_min,last_pressure_peep;
 
           

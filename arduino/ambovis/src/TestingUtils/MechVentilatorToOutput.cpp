@@ -5,12 +5,16 @@
 #include "MechVentilatorToOutput.h"
 
 MechVentilatorToOutput::MechVentilatorToOutput() {
-    this->valuePrinter.print(this->getTitlesLine());
+    Serial.print(this->titlesLine);
 }
 
 void MechVentilatorToOutput::recordValues(Values& valuesToRecord) {
     String str;
     str += valuesToRecord.method;
+    str += ",";
+    str += valuesToRecord.pressure_p;
+    str += ",";
+    str += valuesToRecord.adc0;
     str += ",";
     str += valuesToRecord.respiratoryRate;
     str += ",";
@@ -23,10 +27,6 @@ void MechVentilatorToOutput::recordValues(Values& valuesToRecord) {
     str += valuesToRecord.cycle_position;
     str += ",";
     str += valuesToRecord.msecTimerCnt;
-    str += "\n";
-    this->valuePrinter.print(str);
-}
 
-String MechVentilatorToOutput::getTitlesLine() {
-    return this->titlesLine;
+    Serial.println(str);
 }

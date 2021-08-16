@@ -3,7 +3,7 @@
 #include "src/TimerOne/TimerOne.h"
 #include "src/TimerTwo/TimerTwo.h"
 
-#include "menu.h"
+#include "src/TestingUtils/MenuDisplay/MenuDisplaySpy.h"
 #include "display.h"
 
 #include "src/AutoPID/AutoPID.h"
@@ -78,7 +78,7 @@ float pressure_peep;
 
 byte vent_mode = VENTMODE_MAN; //0
 //Adafruit_BMP280 _pres1Sensor;
-Pressure_Sensor _dpsensor;
+Pressure_Sensor _dpsensor; //Not used
 float verrp;
 float _flux,    flow_f;;
 //#ifdef FILTER_FLUX
@@ -111,7 +111,7 @@ unsigned long last_stepper_time;
 unsigned long last_vent_time;
 unsigned long time;
 byte cycle_pos;
-int16_t adc0;
+int16_t adc0; //extern Sensors.h
 
 int max_accel,min_accel;
 int max_speed, min_speed;
@@ -173,6 +173,8 @@ AutoPID * pid;
 MechVentilation * ventilation;
 VentilationOptions_t options;
 
+MenuDisplaySpy menuDisplaySpy;
+
 float p_dpt0;
 
 int bck_state ;     // current state of the button
@@ -185,7 +187,7 @@ int idleTime ;        // how long the button was idle
 void setup() {
   
   Serial.begin(115200);
-  init_display();
+  menuDisplaySpy._init_display();
   isitem_sel=false;
 
     pinMode(TFT_SLEEP, OUTPUT); //Set buzzerPin as output
@@ -256,8 +258,8 @@ void setup() {
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
-  writeLine(1, "RespirAR FIUBA", 4);
-  writeLine(2, "v1.1.1", 8);
+  menuDisplaySpy._writeLine(1, "RespirAR FIUBA", 4);
+  menuDisplaySpy._writeLine(2, "v1.1.1", 8);
   
   p_dpt0 = 0;
   ads.begin();
@@ -321,7 +323,7 @@ void setup() {
     //
 
   //sensors -> readPressure();
-  display_lcd();
+  menuDisplaySpy._display_lcd();
 
   //ENCODER
   curr_sel = old_curr_sel = 1; //COMPRESSION
@@ -391,13 +393,13 @@ void loop() {
   if (!sleep_mode){
     if (wake_up){
       lcd.clear();
-      init_display();
-      display_lcd();
+      menuDisplaySpy._init_display();
+      menuDisplaySpy._display_lcd();
     tft.fillScreen(ILI9341_BLACK);
       wake_up=false;
       }
       State state = ventilation->getState();
-      check_encoder();
+      menuDisplaySpy._check_encoder();
    
       time = millis();
       check_buzzer_mute();
@@ -512,7 +514,7 @@ void loop() {
         
         last_cycle = ventilation->getCycleNum();
     
-        display_lcd();
+        menuDisplaySpy._display_lcd();
         update_display = true;
         last_update_display = time;
     
@@ -542,7 +544,7 @@ void loop() {
     
       if (display_needs_update) {
     
-        display_lcd();
+        menuDisplaySpy._display_lcd();
         display_needs_update = false;
       }
     
@@ -561,7 +563,7 @@ void loop() {
     
       //HERE changed_options flag is not updating until cycle hcanges
       if (show_changed_options && ((millis() - last_update_display) > time_update_display) ) {
-        display_lcd();  //WITHOUT CLEAR!
+        menuDisplaySpy._display_lcd();  //WITHOUT CLEAR!
         last_update_display = millis();
         show_changed_options = false;
       }
@@ -603,7 +605,7 @@ void loop() {
         print_bat_time=time;
       }
       time = millis();
-      check_bck_state();
+      menuDisplaySpy._check_bck_state();
   }
 
 //    #ifdef ACCEL_STEPPER

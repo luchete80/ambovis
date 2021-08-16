@@ -5,12 +5,6 @@
 #ifndef AMBOVIS_MECHVENTILATORTOOUTPUT_H
 #define AMBOVIS_MECHVENTILATORTOOUTPUT_H
 #include "Arduino.h"
-#include "string.h"
-#include <stddef.h>
-#include <stdint.h>
-#include "SerialValuePrinter.h"
-
-using namespace std;
 
 class MechVentilatorToOutput {
 
@@ -23,15 +17,15 @@ public:
         String state;
         unsigned int cycle_position;
         unsigned long msecTimerCnt;
+        float pressure_p;
+        int16_t adc0;
     } Values;
 
     MechVentilatorToOutput();
     void recordValues(Values& valuesToRecord);
-    String getTitlesLine();
 
 private:
-    SerialValuePrinter valuePrinter;
-    String titlesLine = "method,respiratoryRate, percInspEsp, inputPip, state, cycle_position, msecTimerCnt \n";
+    String titlesLine = "method, pressure, adc0, respiratoryRate, percInspEsp, inputPip, state, cycle_position, msecTimerCnt \n";
 
 };
 

@@ -3,6 +3,7 @@
 //
 
 #include "MechVentilatorSpy.h"
+#include "../../menu.h"
 
 MechVentilatorSpy::MechVentilatorSpy(AccelStepper *_stepper, AutoPID *pid, VentilationOptions_t options) :
 MechVentilation(_stepper, pid, options) {
@@ -34,6 +35,8 @@ void MechVentilatorSpy::stop() {
 MechVentilatorToOutput::Values MechVentilatorSpy::collectValues() {
     MechVentilatorToOutput::Values values;
     values.method = "not_defined";
+    values.pressure_p = pressure_p;
+    values.adc0 = adc0;
     values.state = this->getState();
     values.respiratoryRate = this->getRPM();
     values.percInspEsp = this->getIERel();
