@@ -6,7 +6,7 @@
 #include "../PrintUtils.h"
 
 MenuDisplayToOutput::MenuDisplayToOutput() {
-    Serial.print(this->titlesLine);
+    //Serial.print(this->titlesLine);	//This is printing garbage and then crashing 
 }
 
 void MenuDisplayToOutput::print(Params params) {

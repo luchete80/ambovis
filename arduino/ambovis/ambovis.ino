@@ -187,6 +187,8 @@ int idleTime ;        // how long the button was idle
 void setup() {
   
   Serial.begin(115200);
+
+  Serial.print ("Initializing display");
   menuDisplaySpy._init_display();
   isitem_sel=false;
 
@@ -241,6 +243,7 @@ void setup() {
   options.tidalVolume = 300;
   options.percVolume = 100; //1 to 10
 
+  Serial.println("Initializing Spy...");
   ventilation = new MechVentilatorSpy(
     stepper,
     pid,
@@ -288,6 +291,7 @@ void setup() {
 
 
   // configura la ventilación
+  Serial.print("Start");
   ventilation -> start();
   ventilation -> update();
 
