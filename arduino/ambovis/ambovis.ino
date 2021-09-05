@@ -107,8 +107,6 @@ unsigned long last_update_display;
 
 extern float _mlInsVol, _mlExsVol;
 extern byte stepper_time = 50;
-unsigned long last_stepper_time;
-unsigned long last_vent_time;
 unsigned long time;
 byte cycle_pos;
 int16_t adc0;
@@ -335,12 +333,6 @@ void setup() {
 #ifdef DEBUG_UPDATE
 
 #endif
-
-  //STEPPER
-  last_stepper_time = millis();
-  last_vent_time = millis();
-
-  //Serial.print(",0,50");
 
   Timer1.initialize(20);
   Timer1.attachInterrupt(timer1Isr);
