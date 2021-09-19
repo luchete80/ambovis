@@ -11,15 +11,13 @@
 #include <inttypes.h>
 #include "pinout.h"
 #include "defaults.h"
-#include "src/AutoPID/AutoPID.h"
 #include "Sensors.h"
 
-
-#ifdef ACCEL_STEPPER
+#ifndef FOR_TEST
 #include "src/AccelStepper/AccelStepper.h"
-#else
-#include "src/FlexyStepper/FlexyStepper.h"
+#include "src/AutoPID/AutoPID.h"
 #endif
+
 /** States of the mechanical ventilation. */
 enum State
 {
@@ -39,11 +37,6 @@ enum Alarm
     Alarm_No_Flux = 3
 };
 
-typedef struct {
-    float pip;
-    unsigned short timeoutIns;
-} Configuration_t;
-
 /**
  * This is the mechanical ventilation class.
  */
@@ -54,20 +47,15 @@ public:
 	 * @brief Construct a new Mech Ventilation object
 	 *
 	 * @param stepper
-	 * @param sensors
 	 * @param pid
 	 * @param options
 	 */
     MechVentilation(
-      #ifdef ACCEL_STEPPER
-        AccelStepper *_stepper,
-      #else
-        FlexyStepper *_stepper,
-      #endif
-        AutoPID *pid,
+        #ifndef FOR_TEST
+        AccelStepper *_stepper , AutoPID *pid,
+        #endif
         VentilationOptions_t options);
 
-    boolean getStartWasTriggeredByPatient();
     void setVentilationCyle_WaitTime(float speedExsufflation);
     /** Start mechanical ventilation. */
     void start(void);
@@ -75,49 +63,39 @@ public:
     void stop(void);
     void update(void);
 
-    /** Recruitment */
-    void activateRecruitment(void);
-    void deactivateRecruitment(void);
     byte _mode;
     /**
      * getters
      */
-    bool getSensorErrorDetected();
     uint8_t getRPM(void);
     short getExsuflationTime(void);
     short getInsuflationTime(void);
     short getPeakInspiratoryPressure(void);
     short getPeakEspiratoryPressure(void);
     State getState(void);
+    bool isRunning();
+    unsigned long getCycleNum(){return _cyclenum;};
+    const unsigned long getMSecTimerCnt()const {return _msecTimerCnt;}
+
+
     /**
      * setters
      */
     void setRPM(uint8_t rpm);
     void setPeakInspiratoryPressure(float pip);
     void setPeakEspiratoryPressure(float peep);
-
-    float getInsVol(void);
-
-    unsigned long getCycleNum(){return _cyclenum;};
     void setCycleNum(unsigned long cyc){_cyclenum=cyc;}
     void change_config(VentilationOptions_t);
+    void _setInspiratoryCycle(void);
 
 
-    //LUCIANO 
-    float getCurrentPressure();
-    const unsigned long & getMSecTimerCnt()const {return _msecTimerCnt;}
-    //
-    
 private:
     /** Initialization. */
     void _init(
-        #ifdef ACCEL_STEPPER
-        AccelStepper *_stepper,
-        #else
-        FlexyStepper *_stepper,
-        #endif
-        AutoPID *pid,
-        VentilationOptions_t options);
+            #ifndef FOR_TEST
+            AccelStepper *_stepper, AutoPID *pid,
+            #endif
+            VentilationOptions_t options);
 #if 0
     int _calculateInsuflationPosition (void);
 #endif
@@ -125,22 +103,12 @@ private:
     /** Set state. */
     void _setState(State state);
     void _setAlarm(Alarm alarm);
-#if 0
-    void _increaseInsuflationSpeed (byte factor);
-    void _decreaseInsuflationSpeed (byte factor);
-    void _increaseInsuflation (byte factor);
-    void _decreaseInsuflation (byte factor);
-#endif
-    void _setInspiratoryCycle(void);
 
-
+    #ifndef FOR_TEST
     /* Configuration parameters */
-    #ifdef ACCEL_STEPPER
     AccelStepper *_stepper;
-    #else
-    FlexyStepper *_stepper;
-    #endif
     AutoPID *_pid;
+    #endif
     /** Flow trigger activation. */
     bool _hasTrigger;
     /** Flow trigger value in litres per minute. */
@@ -152,17 +120,12 @@ private:
     short volatile _pip;
     /** Peak espiratory pressure */
     short _peep;
-    /** Recruitment */
-    bool volatile _recruitmentMode = false;
 
     byte _percIE;
     byte _percVol;  //MANUAL MODE, 1 TO 10
 
     short _tidalVol;
     bool wait_NoMove;
-
-    /* Configuration */
-    Configuration_t _nominalConfiguration;
 
     /* Internal state */
     /** Current state. */
@@ -172,7 +135,7 @@ private:
 
         /** Timer counter in seconds. */
     //Este tambien es mio
-   
+
     unsigned long _msecTimerCnt; //esteno necesita ser tan grande
     /**  Insufflation timeout in seconds. */
     unsigned long _cyclenum;    //Not important value, only for printing control
@@ -183,8 +146,6 @@ private:
     float _stepperAccel;
     
     bool _running = false;
-    bool _sensor_error_detected;
-    bool _startWasTriggeredByPatient = false;
     //float _currentFlow = 0.0;
     //float _currentVolume = 0.0;
     float timeoutCycle;

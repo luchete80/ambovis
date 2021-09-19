@@ -119,6 +119,9 @@ extern int PID_KP,PID_KI,PID_KD;
 #define SOLENOID_CLOSED 0
 #define SOLENOID_OPEN 1
 
+//TESTING
+#define TESTING_DISABLED 1
+
 class VentilationOptions_t {
 
   public:
