@@ -1,3 +1,4 @@
+#define FOR_TEST 1
 #include "pinout.h"
 #include "MechVentilation.h"
 #include "src/TimerOne/TimerOne.h"
@@ -107,6 +108,7 @@ unsigned long last_update_display;
 
 extern float _mlInsVol, _mlExsVol;
 extern byte stepper_time = 50;
+unsigned long last_vent_time;
 unsigned long time;
 byte cycle_pos;
 int16_t adc0;
@@ -120,12 +122,8 @@ byte pfmin,pfmax;
 float pf_min,pf_max;
 float peep_fac;
 
-//min_pidk=250;
-//max_pidk=1000;
 int min_cd,max_cd;
-//max_cd=40;  //T MODIFY: READ FROM MEM
-//min_cd=10;
-  
+
 unsigned long last_cycle;
 
 unsigned int _timeoutIns,_timeoutEsp; //In ms
@@ -334,6 +332,11 @@ void setup() {
 
 #endif
 
+  //STEPPER
+  last_vent_time = millis();
+
+  //Serial.print(",0,50");
+
   Timer1.initialize(20);
   Timer1.attachInterrupt(timer1Isr);
   Timer2.setPeriod(20000);
@@ -406,18 +409,8 @@ void loop() {
       if ( time > lastShowSensor + TIME_SHOW ) {
 
       #ifdef DEBUG_STEPPER
-//      unsigned long reltime = ventilation->getMSecTimerCnt();
-//      Serial.print("Rel Msec: ");Serial.print(reltime);Serial.print(", Abs: ");
-//      Serial.println(time);
       #endif
           lastShowSensor=time; 
-//           Serial.print(int(cycle_pos));Serial.print(",");
-//           Serial.print(Voltage,5);Serial.print(",");
-//           Serial.print(verror,3);Serial.print(",");
-//           Serial.print(p_dpt,5);Serial.print(",");
-//
-//           Serial.println(flow_f,2);
-
           tft_draw();
     
       }
@@ -630,8 +623,6 @@ void update_error() {
   }
   if (cycle_pos < 5 && init_verror) {
     verror = verror_sum / ((float)vcorr_count + 1.);
-    //Serial.print("Verror (mV) and count: ");Serial.print(verror*1000);Serial.print(",  ");Serial.println(vcorr_count);
-    //Serial.print("Verror (mV) and count: ");Serial.println(verror*1000);
     verror_sum = 0.;
     vcorr_count = 0;
     init_verror = false;

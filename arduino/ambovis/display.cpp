@@ -47,10 +47,13 @@ void tft_draw(void) {
     yflux[0]=yflux[1];yflux[1]=int(flow_f*0.035);
     yvt[0]=yvt[1];yvt[1]=int((_mlInsVol - _mlExsVol)*0.1);
 
-    
+    #if FOR_TEST
     tft.setRotation(1);
+    #endif
     if (valsreaded > 0)
+        #if FOR_TEST
         drawY2(ILI9341_GREEN);
+        #endif
     valsreaded+=1;
     
   	if (last_x<5 && !lcd_cleaned){
@@ -60,10 +63,11 @@ void tft_draw(void) {
     		    valsreaded_[i]=0;
         print_vols();
         print_bat();
+        #if FOR_TEST
         tft.setRotation(1);
         tft.fillRect(0,0,60,100, ILI9341_BLACK); //FOR ALARMS, UPPER RIRHT
         tft.fillRect(0, 240 , 320, 10, ILI9341_GREEN);//x,y,lengthx,lentgthy
-
+        #endif
 		} else {
 		    lcd_cleaned=false;
 		}
@@ -77,6 +81,7 @@ void tft_draw(void) {
 void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
 
   if ( rx[valsreaded] > rx[valsreaded-1] ) {//to avoid draw entire line to the begining at the end of the cycle
+      #if FOR_TEST
           for (int i=0;i<3;i++)
             tft.drawLine(axispos[i], 240-rx[valsreaded-1], axispos[i], 240-rx[valsreaded], ILI9341_DARKGREY);
             tft.fillRect(0, 240 - rx[valsreaded] - 10, 320, 10, ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
@@ -86,6 +91,7 @@ void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WIT
             tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_MAGENTA);
             tft.drawLine(axispos[2]-yvt[0],             240-rx[valsreaded-1], axispos[2]-yvt[1],            240-rx[valsreaded], ILI9341_BLUE);
 
+      #endif
   }
 }
 
@@ -95,10 +101,12 @@ void check_alarms(){
     if (alarm_state>9) {
         digitalWrite(RED_LED,HIGH);
         digitalWrite(GREEN_LED,LOW);
+        #if FOR_TEST
         tft.setRotation(0);
         tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
         tft.setCursor(150, 40);   
         tft.println("VT AL");
+        #endif
         state_r=alarm_state-10;
     } else {
         digitalWrite(RED_LED,LOW);  
@@ -110,21 +118,26 @@ void check_alarms(){
             digitalWrite(GREEN_LED,HIGH); digitalWrite(RED_LED,LOW);   }
           break;
         case PEEP_ALARM:
-          digitalWrite(GREEN_LED,LOW); digitalWrite(RED_LED,HIGH);  
+          digitalWrite(GREEN_LED,LOW); digitalWrite(RED_LED,HIGH);
+          #if FOR_TEST
           tft.setRotation(0);
           tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
           tft.setCursor(150, 20);   
           tft.println("PEEP AL");
+          #endif
         break;
         case PIP_ALARM:
-          digitalWrite(GREEN_LED,LOW); digitalWrite(RED_LED,HIGH);      
+          digitalWrite(GREEN_LED,LOW); digitalWrite(RED_LED,HIGH);
+          #if FOR_TEST
           tft.setRotation(0);
           tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
           tft.setCursor(150, 0);   
           tft.println("PIP AL");
+          #endif
       break;  
         case PEEP_PIP_ALARM:
-          digitalWrite(GREEN_LED,LOW); digitalWrite(RED_LED,HIGH);      
+          digitalWrite(GREEN_LED,LOW); digitalWrite(RED_LED,HIGH);
+          #if FOR_TEST
           tft.setRotation(0);
           tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
           tft.setCursor(150, 0);   
@@ -132,6 +145,7 @@ void check_alarms(){
           tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
           tft.setCursor(150, 20);   
           tft.println("PEEP AL");
+          #endif
       break;
       }
 }
@@ -139,10 +153,12 @@ void check_alarms(){
 void print_bat(){
     float level,level_perc;
     level=0.;
+    #if FOR_TEST
     tft.setRotation(0);
     //tft.fillRect(180,150,70,20, ILI9341_BLACK);//ONLY BAT LEVEL
-    tft.fillRect(180,250,70,50, ILI9341_BLACK);    float fac=0.0279;  //5./(1024.*0.175)
-    
+    tft.fillRect(180,250,70,50, ILI9341_BLACK);      //5./(1024.*0.175)
+    #endif
+    float fac=0.0279;
     //Vt > 24V   =>   PC = 100%
     //Vmin < Vt < 24V   =>   PC[%] = (Vt[V]-Vmin)/(24-Vmin)*100
     //Vt < Vmin   =>   PC = 0%
@@ -159,10 +175,11 @@ void print_bat(){
     dtostrf(level_perc, 2, 0, buffer);
     //dtostrf(level, 2, 1, buffer);
     //Serial.print("Bat level: ");Serial.println(level);
+    #if FOR_TEST
     tft.setCursor(130, 260);tft.println("Bat:");
     tft.setCursor(180, 260);tft.println(buffer);
     tft.setCursor(220, 260);tft.println("%");
-
+    #endif
     dtostrf(level, 1, 2, buffer);
     //Temporary
     //Serial.print("Bat level: ");Serial.println(level);
@@ -171,6 +188,7 @@ void print_bat(){
 
 }
 void print_vols(){
+    #if FOR_TEST
     tft.setRotation(0);
     tft.fillRect(180,160,70,80, ILI9341_BLACK);
     //itoa(integerFromPC[5], buffer, 10);
@@ -178,10 +196,11 @@ void print_vols(){
     tft.setCursor(150, 180);
     tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
     tft.println("Vi: ");tft.setCursor(190, 180);tft.println(buffer);
-
+    #endif
 
     
     itoa(_mllastExsVol, buffer, 10);
+    #if FOR_TEST
     tft.setCursor(150, 200);
     tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
     tft.println("Ve: ");tft.setCursor(190, 200);tft.println(buffer);
@@ -190,5 +209,6 @@ void print_vols(){
     tft.setCursor(150, 220);
     tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
     tft.println("VT: ");tft.setCursor(190, 220);tft.println(buffer);
+    #endif
  
   }

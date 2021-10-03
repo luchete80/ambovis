@@ -144,6 +144,8 @@ class VentilationOptions_t {
 #define VENTMODE_PCL 1
 #define VENTMODE_MAN 2
 
+#define FOR_TEST 1
+
 //general variables
 extern byte vent_mode;
 extern bool send_data;

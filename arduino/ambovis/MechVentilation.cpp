@@ -30,7 +30,7 @@ float f_acc;byte f_acc_b;
 byte  p_acc;
 
 MechVentilation::MechVentilation(
-        #ifndef FOR_TEST
+        #if FOR_TEST
             AccelStepper *stepper, AutoPID *pid, VentilationOptions_t options) {
             _init(stepper, pid, options);
         #else
@@ -109,11 +109,32 @@ void MechVentilation::_setInspiratoryCycle(void) {
     
 }
 
+
+
+void MechVentilation::activateRecruitment(void)
+{
+    _nominalConfiguration.pip = _pip;
+    _nominalConfiguration.timeoutIns = _timeoutIns;
+    _pip = DEFAULT_RECRUITMENT_PIP;
+    _timeoutIns = DEFAULT_RECRUITMENT_TIMEOUT;
+    _recruitmentMode = true;
+}
+
+void MechVentilation::deactivateRecruitment(void)
+{
+    _pip = _nominalConfiguration.pip;
+    _timeoutIns = _nominalConfiguration.timeoutIns;
+    _recruitmentMode = false;
+    _setState(Init_Exsufflation);
+}
+
 /**
  * It's called from timer1Isr
  */
 void MechVentilation :: update ( void )
 {
+    last_vent_time = millis();
+
     static int totalCyclesInThisState = 0;
     static int currentTime = 0;
     static int flowSetpoint = 0;
@@ -164,7 +185,7 @@ void MechVentilation :: update ( void )
         
         wait_NoMove=false;
 
-        #ifndef FOR_TEST
+        #if FOR_TEST
         /* Stepper control: set acceleration and end-position */
         _stepper->setSpeed(STEPPER_SPEED_MAX);
         _stepper->moveTo(-STEPPER_HIGHEST_POSITION);
@@ -184,7 +205,7 @@ void MechVentilation :: update ( void )
         // time expired
         if(_msecTimerCnt > _timeoutIns)
         {
-            #ifndef FOR_TEST
+            #if FOR_TEST
             if (_stepper->distanceToGo() != 0 )
             {
                 // motor not finished, force motor to stop in current position
@@ -202,26 +223,22 @@ void MechVentilation :: update ( void )
       _msecTimerStartCycle=millis();
         totalCyclesInThisState = _timeoutEsp / TIME_BASE;
 
-        #ifndef FOR_TEST
+        #if FOR_TEST
         /* Stepper control*/
         _stepper->setAcceleration(STEPPER_ACCEL_MAX);
         _stepper->setSpeed(STEPPER_SPEED_EXSUFF);
         _stepper->moveTo(STEPPER_LOWEST_POSITION);
-        #endif
-
         #ifdef DEBUG_STEPPER
         unsigned long reltime = ventilation->getMSecTimerCnt();
         Serial.print("Exsuff. Rel Msec: ");Serial.print(reltime);Serial.print(", Abs: ");
         Serial.println(time);
         #endif
 
-        #ifndef FOR_TEST
         _pid->reset();
         #endif
 
         /* Status update and reset timer, for next time */
         _setState(State_Exsufflation);
-
     }
     break;
     case State_Exsufflation:
@@ -230,7 +247,7 @@ void MechVentilation :: update ( void )
         {
 
         //////////////////// NEW //////////////////////////
-        #ifndef FOR_TEST
+        #if FOR_TEST
             if (_stepper->currentPosition()==STEPPER_LOWEST_POSITION)
             {
                 /// in steps. Positive is clockwise from the 0 position.
@@ -270,14 +287,14 @@ void MechVentilation :: update ( void )
 }//update
 
 void MechVentilation::_init(
-        #ifndef FOR_TEST
+        #if FOR_TEST
         AccelStepper *stepper, AutoPID *pid, VentilationOptions_t options)
         #else
         VentilationOptions_t options)
         #endif
 {
     /* Set configuration parameters */
-    #ifndef FOR_TEST
+    #if FOR_TEST
     _stepper = stepper;
     _pid = pid;
     #endif
@@ -312,6 +329,10 @@ void MechVentilation::_setState(State state)
 void MechVentilation::_setAlarm(Alarm alarm)
 {
     _currentAlarm = alarm;
+}
+
+float MechVentilation::getInsVol() {
+    return (_mllastInsVol+_mllastExsVol)/2.;
 }
 
 void MechVentilation::change_config(VentilationOptions_t options) {

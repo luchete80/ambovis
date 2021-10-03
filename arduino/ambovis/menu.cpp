@@ -1,4 +1,4 @@
-#include <arduino.h>
+#include <Arduino.h>
 #include "pinout.h"
 #include "menu.h"
 #include "MechVentilation.h"  //options
@@ -27,30 +27,10 @@ void updateState() {
       startPressed = time;
       idleTime = startPressed - endPressed;
       change_sleep=false;
-//      if (idleTime >= 500 && idleTime < 1000) {
-//          Serial.println("Button was idle for half a second");
-//      }
-//
-//      if (idleTime >= 1000) {
-//          Serial.println("Button was idle for one second or more"); 
-//      }
-
   // the button has been just released
   } else {
       endPressed = time;
       holdTime = endPressed - startPressed;
-
-//      if (holdTime >= 10 && holdTime < 1000) {
-//          Serial.println("Button was hold for half a second"); 
-//      }
-//      if (holdTime >= 500 && holdTime < 1000) {
-//          Serial.println("Button was hold for half a second"); 
-//      }
-//
-//      if (holdTime >= 1000) {
-//          Serial.println("Button was hold for one second or more"); 
-//      }
-
   }
 }
 
@@ -58,52 +38,51 @@ void updateCounter() {
   // the button is still pressed
   if (bck_state == LOW) {
       holdTime = time - startPressed;
-
-//      if (holdTime >= 1000) {
-//          Serial.println("Button is hold for more than a second"); 
-//      }
-
   // the button is still released
   } else {
       idleTime = time - endPressed;
-
-//      if (idleTime >= 1000) {
-//          Serial.println("Button is released for more than a second");  
-//      }
   }
 }
 
 void init_display() {
-  #ifdef LCD_I2C
-  lcd.begin(20, 4);  //I2C
-#else
-  lcd.begin(20, 4); //NO I2C
-#endif
-  //lcd.backlight();
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.createChar(0,back);
+    #if FOR_TEST
+    #ifdef LCD_I2C
+    lcd.begin(20, 4);  //I2C
+    #else
+    lcd.begin(20, 4); //NO I2C
+    #endif
+    //lcd.backlight();
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.createChar(0,back);
+    #endif
 }
 
-void writeLine(int line, String message = "", int offsetLeft = 0) {
-  lcd.setCursor(0, line);
-  lcd.print("");
-  lcd.setCursor(offsetLeft, line);
-  lcd.print(message);
+void writeLine(int line, String message, int offsetLeft) {
+    #if FOR_TEST
+    lcd.setCursor(0, line);
+    lcd.print("");
+    lcd.setCursor(offsetLeft, line);
+    lcd.print(message);
+    #endif
 }
 
-void lcd_clearxy(int x, int y,int pos=1) {
-  for (int i=0;i<pos;i++) {
-      lcd.setCursor(x+i, y);
-      lcd.print(" ");
-  }
+void lcd_clearxy(int x, int y,int pos) {
+    #if FOR_TEST
+    for (int i=0;i<pos;i++) {
+        lcd.setCursor(x+i, y);
+        lcd.print(" ");
+    }
+    #endif
 }
 void lcd_selxy(int x, int y) {
-  lcd.setCursor(x, y);
-  if (!isitem_sel)
-      lcd.print(">");
-  else 
-      lcd.write(byte(0));
+    #if FOR_TEST
+    lcd.setCursor(x, y);
+    if (!isitem_sel)
+        lcd.print(">");
+    else
+        lcd.write(byte(0));
+    #endif
 }
 
 void check_updn_button(int pin, byte *var, bool incr_decr) {
@@ -118,12 +97,8 @@ void check_updn_button(int pin, byte *var, bool incr_decr) {
     }
 }
 void check_bck_state(){
-      bck_state=digitalRead(PIN_MENU_BCK);         
-//    Serial.print("holdTime:");Serial.println(holdTime);
-//    Serial.print("change_sleep:");Serial.println(change_sleep);
-//    Serial.print("bck_state:");Serial.println(bck_state);
-//    Serial.print("sleep_mode:");Serial.println(sleep_mode);
-        
+
+    bck_state=digitalRead(PIN_MENU_BCK);
     if (bck_state != last_bck_state) { 
        updateState(); // button state changed. It runs only once.
         if (bck_state == LOW ) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
@@ -165,14 +140,6 @@ void check_encoder ( ) {
       isitem_sel=true; 
       lastButtonPress = time;
     }// if time > last button press
-
-// ORIGINAL BCK WITHOUT SLEEP MODE
-//    if (digitalRead(PIN_MENU_BCK) == LOW )  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
-//        if (time - lastButtonPress > 150) {
-//          pressed = 2;
-//          isitem_sel=false; 
-//          lastButtonPress = time;
-//        }// if time > last button press
 
     check_bck_state();
 
@@ -231,8 +198,6 @@ void check_encoder ( ) {
             case 4: 
                 if ( menu_number == 0 ) {
                     if ( vent_mode==VENTMODE_PCL){
- //                     encoderPos=oldEncPos=options.tidalVolume;
- //                     min_sel=200;max_sel=800;
                         encoderPos=oldEncPos=options.peakInspiratoryPressure;
                         min_sel=15;max_sel=30;
                         Serial.print("pip: ");Serial.println(options.peakInspiratoryPressure);
@@ -254,8 +219,6 @@ void check_encoder ( ) {
                 break;
                   case 5: 
                 if ( menu_number == 0 ) {
-//                    encoderPos=oldEncPos=options.peakInspiratoryPressure;
-//                    min_sel=15;max_sel=30;
                 } else if ( menu_number == 1 ) {//menu 0
                       min_sel=0;max_sel=1; 
                 } else if ( menu_number == 2 ){
@@ -368,7 +331,7 @@ void check_encoder ( ) {
            encoderPos=oldEncPos=max_sel; 
         } else if ( encoderPos < min_sel ) {
             encoderPos=oldEncPos=min_sel;
-          } else {
+        } else {
       
         oldEncPos = encoderPos;
 
@@ -569,7 +532,9 @@ void clear_n_sel(int menu){
 
 void display_lcd ( ) {
     if (clear_all_display)
-        lcd.clear();        
+        #if FOR_TEST
+        lcd.clear();
+        #endif
   clear_n_sel(menu_number);
   if (menu_number==0) {  
     lcd_clearxy(12,0,4);

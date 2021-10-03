@@ -1,5 +1,4 @@
 #line 2 "MechVentilationTestCases.ino"
-#define FOR_TEST 0
 #include "AUnit.h"
 #include <Arduino.h>
 #include "../../defaults.h"

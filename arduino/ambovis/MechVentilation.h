@@ -13,11 +13,10 @@
 #include "defaults.h"
 #include "Sensors.h"
 
-#ifndef FOR_TEST
+#if FOR_TEST
 #include "src/AccelStepper/AccelStepper.h"
 #include "src/AutoPID/AutoPID.h"
 #endif
-
 /** States of the mechanical ventilation. */
 enum State
 {
@@ -37,6 +36,11 @@ enum Alarm
     Alarm_No_Flux = 3
 };
 
+typedef struct {
+    float pip;
+    unsigned short timeoutIns;
+} Configuration_t;
+
 /**
  * This is the mechanical ventilation class.
  */
@@ -51,11 +55,12 @@ public:
 	 * @param options
 	 */
     MechVentilation(
-        #ifndef FOR_TEST
-        AccelStepper *_stepper , AutoPID *pid,
+        #if FOR_TEST
+        AccelStepper *_stepper, AutoPID *pid,
         #endif
         VentilationOptions_t options);
 
+    boolean getStartWasTriggeredByPatient();
     void setVentilationCyle_WaitTime(float speedExsufflation);
     /** Start mechanical ventilation. */
     void start(void);
@@ -63,10 +68,14 @@ public:
     void stop(void);
     void update(void);
 
+    /** Recruitment */
+    void activateRecruitment(void);
+    void deactivateRecruitment(void);
     byte _mode;
     /**
      * getters
      */
+    bool getSensorErrorDetected();
     uint8_t getRPM(void);
     short getExsuflationTime(void);
     short getInsuflationTime(void);
@@ -76,7 +85,7 @@ public:
     bool isRunning();
     unsigned long getCycleNum(){return _cyclenum;};
     const unsigned long getMSecTimerCnt()const {return _msecTimerCnt;}
-
+    float getInsVol(void);
 
     /**
      * setters
@@ -92,19 +101,16 @@ public:
 private:
     /** Initialization. */
     void _init(
-            #ifndef FOR_TEST
+            #if FOR_TEST
             AccelStepper *_stepper, AutoPID *pid,
             #endif
             VentilationOptions_t options);
-#if 0
-    int _calculateInsuflationPosition (void);
-#endif
 
     /** Set state. */
     void _setState(State state);
     void _setAlarm(Alarm alarm);
 
-    #ifndef FOR_TEST
+    #if FOR_TEST
     /* Configuration parameters */
     AccelStepper *_stepper;
     AutoPID *_pid;
@@ -120,12 +126,17 @@ private:
     short volatile _pip;
     /** Peak espiratory pressure */
     short _peep;
+    /** Recruitment */
+    bool volatile _recruitmentMode = false;
 
     byte _percIE;
     byte _percVol;  //MANUAL MODE, 1 TO 10
 
     short _tidalVol;
     bool wait_NoMove;
+
+    /* Configuration */
+    Configuration_t _nominalConfiguration;
 
     /* Internal state */
     /** Current state. */
@@ -155,6 +166,7 @@ extern unsigned int _timeoutIns;
 extern unsigned int _timeoutEsp;
     
 extern byte stepper_time;
+extern unsigned long last_vent_time;
 extern float _mlInsVol,_mlExsVol;
 extern int _mllastInsVol,_mllastExsVol;
 //_mlInsVol2;
