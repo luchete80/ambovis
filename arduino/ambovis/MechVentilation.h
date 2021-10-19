@@ -105,7 +105,6 @@ public:
 
     //LUCIANO 
     float getCurrentPressure();
-    const unsigned long & getMSecTimerCnt()const {return _msecTimerCnt;}
     //
     
 private:

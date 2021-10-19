@@ -82,7 +82,6 @@ void init_display() {
   //lcd.backlight();
   lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.createChar(0,back);
 }
 
 void writeLine(int line, String message = "", int offsetLeft = 0) {
@@ -160,7 +159,7 @@ void check_encoder ( ) {
   pressed=0;  //0 nothing , 1 enter, 2 bck
 
     if (digitalRead(PIN_MENU_EN) == LOW)  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
-    if (time - lastButtonPress > 50) {
+    if (time - lastButtonPress > 150) {
       pressed = 1;
       isitem_sel=true; 
       lastButtonPress = time;
