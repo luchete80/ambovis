@@ -143,7 +143,6 @@ class VentilationOptions_t {
 #define VENTMODE_VCL 0
 #define VENTMODE_PCL 1
 #define VENTMODE_MAN 2
-
 #define FOR_TEST 1
 
 //general variables

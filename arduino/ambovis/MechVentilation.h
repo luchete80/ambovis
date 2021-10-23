@@ -14,7 +14,11 @@
 #include "Sensors.h"
 
 #if FOR_TEST
+#ifdef ACCEL_STEPPER
 #include "src/AccelStepper/AccelStepper.h"
+#else
+#include "src/FlexyStepper/FlexyStepper.h"
+#endif
 #include "src/AutoPID/AutoPID.h"
 #endif
 /** States of the mechanical ventilation. */
@@ -56,7 +60,12 @@ public:
 	 */
     MechVentilation(
         #if FOR_TEST
-        AccelStepper *_stepper, AutoPID *pid,
+        #ifdef ACCEL_STEPPER
+        AccelStepper *_stepper,
+        #else
+        FlexyStepper *_stepper,
+        #endif
+        AutoPID *pid,
         #endif
         VentilationOptions_t options);
 
@@ -101,10 +110,15 @@ public:
 private:
     /** Initialization. */
     void _init(
-            #if FOR_TEST
-            AccelStepper *_stepper, AutoPID *pid,
-            #endif
-            VentilationOptions_t options);
+        #if FOR_TEST
+        #ifdef ACCEL_STEPPER
+        AccelStepper *_stepper,
+        #else
+        FlexyStepper *_stepper,
+        #endif
+        AutoPID *pid,
+        #endif //FOR_TEST
+        VentilationOptions_t options);
 
     /** Set state. */
     void _setState(State state);
@@ -112,9 +126,13 @@ private:
 
     #if FOR_TEST
     /* Configuration parameters */
+    #ifdef ACCEL_STEPPER
     AccelStepper *_stepper;
-    AutoPID *_pid;
+    #else
+    FlexyStepper *_stepper;
     #endif
+    AutoPID *_pid;
+    #endif //FOR_TEST
     /** Flow trigger activation. */
     bool _hasTrigger;
     /** Flow trigger value in litres per minute. */
@@ -157,6 +175,7 @@ private:
     float _stepperAccel;
     
     bool _running = false;
+    bool _sensor_error_detected;
     //float _currentFlow = 0.0;
     //float _currentVolume = 0.0;
     float timeoutCycle;

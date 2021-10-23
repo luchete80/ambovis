@@ -1,4 +1,3 @@
-#define FOR_TEST 1
 #include "pinout.h"
 #include "MechVentilation.h"
 #include "src/TimerOne/TimerOne.h"
