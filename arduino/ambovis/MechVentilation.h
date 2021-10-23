@@ -13,14 +13,14 @@
 #include "defaults.h"
 #include "Sensors.h"
 
-#if FOR_TEST
+#if TESTING_MODE_DISABLED
 #ifdef ACCEL_STEPPER
 #include "src/AccelStepper/AccelStepper.h"
 #else
 #include "src/FlexyStepper/FlexyStepper.h"
 #endif
 #include "src/AutoPID/AutoPID.h"
-#endif
+#endif //TESTING_MODE_DISABLED
 /** States of the mechanical ventilation. */
 enum State
 {
@@ -59,14 +59,14 @@ public:
 	 * @param options
 	 */
     MechVentilation(
-        #if FOR_TEST
+        #if TESTING_MODE_DISABLED
         #ifdef ACCEL_STEPPER
         AccelStepper *_stepper,
         #else
         FlexyStepper *_stepper,
         #endif
         AutoPID *pid,
-        #endif
+        #endif//TESTING_MODE_DISABLED
         VentilationOptions_t options);
 
     boolean getStartWasTriggeredByPatient();
@@ -111,21 +111,21 @@ public:
 private:
     /** Initialization. */
     void _init(
-        #if FOR_TEST
+        #if TESTING_MODE_DISABLED
         #ifdef ACCEL_STEPPER
         AccelStepper *_stepper,
         #else
         FlexyStepper *_stepper,
         #endif
         AutoPID *pid,
-        #endif //FOR_TEST
+        #endif //TESTING_MODE_DISABLED
         VentilationOptions_t options);
 
     /** Set state. */
     void _setState(State state);
     void _setAlarm(Alarm alarm);
 
-    #if FOR_TEST
+    #if TESTING_MODE_DISABLED
     /* Configuration parameters */
     #ifdef ACCEL_STEPPER
     AccelStepper *_stepper;
@@ -133,7 +133,7 @@ private:
     FlexyStepper *_stepper;
     #endif
     AutoPID *_pid;
-    #endif //FOR_TEST
+    #endif //TESTING_MODE_DISABLED
     /** Flow trigger activation. */
     bool _hasTrigger;
     /** Flow trigger value in litres per minute. */

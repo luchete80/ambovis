@@ -3,7 +3,7 @@
 
 #include "defaults.h"
 
-#if FOR_TEST
+#if TESTING_MODE_DISABLED
 #ifdef LCD_I2C
 #include "src/LiquidCrystal_I2C/LiquidCrystal_I2C.h"
 #else

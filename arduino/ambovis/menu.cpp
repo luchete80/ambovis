@@ -45,7 +45,7 @@ void updateCounter() {
 }
 
 void init_display() {
-    #if FOR_TEST
+    #if TESTING_MODE_DISABLED
     #ifdef LCD_I2C
     lcd.begin(20, 4);  //I2C
     #else
@@ -53,34 +53,34 @@ void init_display() {
     #endif
     lcd.clear();
     lcd.setCursor(0, 0);
-    #endif //FOR_TEST
+    #endif //TESTING_MODE_DISABLED
 }
 
 void writeLine(int line, String message, int offsetLeft) {
-    #if FOR_TEST
+    #if TESTING_MODE_DISABLED
     lcd.setCursor(0, line);
     lcd.print("");
     lcd.setCursor(offsetLeft, line);
     lcd.print(message);
-    #endif
+    #endif//TESTING_MODE_DISABLED
 }
 
 void lcd_clearxy(int x, int y,int pos) {
-    #if FOR_TEST
+    #if TESTING_MODE_DISABLED
     for (int i=0;i<pos;i++) {
         lcd.setCursor(x+i, y);
         lcd.print(" ");
     }
-    #endif
+    #endif //TESTING_MODE_DISABLED
 }
 void lcd_selxy(int x, int y) {
-    #if FOR_TEST
+    #if TESTING_MODE_DISABLED
     lcd.setCursor(x, y);
     if (!isitem_sel)
         lcd.print(">");
     else
         lcd.write(byte(0));
-    #endif
+    #endif //TESTING_MODE_DISABLED
 }
 
 void check_updn_button(int pin, byte *var, bool incr_decr) {
@@ -530,9 +530,9 @@ void clear_n_sel(int menu){
 
 void display_lcd ( ) {
     if (clear_all_display)
-        #if FOR_TEST
+        #if TESTING_MODE_DISABLED
         lcd.clear();
-        #endif
+        #endif //TESTING_MODE_DISABLED
   clear_n_sel(menu_number);
   if (menu_number==0) {  
     lcd_clearxy(12,0,4);
