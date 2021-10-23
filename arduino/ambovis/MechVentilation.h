@@ -81,6 +81,7 @@ public:
     void activateRecruitment(void);
     void deactivateRecruitment(void);
     byte _mode;
+
     /**
      * getters
      */
@@ -95,6 +96,7 @@ public:
     unsigned long getCycleNum(){return _cyclenum;};
     const unsigned long getMSecTimerCnt()const {return _msecTimerCnt;}
     float getInsVol(void);
+    float getCurrentPressure();
 
     /**
      * setters
@@ -105,7 +107,6 @@ public:
     void setCycleNum(unsigned long cyc){_cyclenum=cyc;}
     void change_config(VentilationOptions_t);
     void _setInspiratoryCycle(void);
-
 
 private:
     /** Initialization. */
