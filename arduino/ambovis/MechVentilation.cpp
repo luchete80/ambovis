@@ -272,8 +272,10 @@ void MechVentilation :: update ( void )
                         STEPPER_SPEED_MAX=float(Cdyn) * speed_m + speed_b;  //Originally was 250
                         STEPPER_ACC_INSUFFLATION=(accel_m*(float)Cdyn+accel_b); //WITHOUT MICROSTEPS (ALREADY DONE IN CALC)
       			    }
+                    #if FOR_TEST
                     _pid->setGains(PID_KP,PID_KI, PID_KD);
                     _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);
+                    #endif
                 }
             } else {//no autopid
                 PID_KP=700.01;
@@ -281,8 +283,10 @@ void MechVentilation :: update ( void )
                 PID_KD=100.01;
                 STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  600;
                 STEPPER_SPEED_MAX=14000;
+                #if FOR_TEST
                 _pid->setGains(PID_KP,PID_KI, PID_KD);
                 _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);
+                #endif
             }
         }//if pcl
 
@@ -292,13 +296,16 @@ void MechVentilation :: update ( void )
     {
         /* Stepper control: set end position */
         if (vent_mode==VENTMODE_VCL && _mlInsVol>_tidalVol){
+            #if FOR_TEST
             _stepper->setTargetPositionToStop();
+            #endif
             //_setState(Init_Exsufflation); NOT BEGIN TO INSUFFLATE!
             wait_NoMove=true;
           }
         // time expired
         if(_msecTimerCnt > _timeoutIns)
         {
+            #if FOR_TEST
             if (!_stepper->motionComplete()) //LUCIANO: NEW
             {
                 // motor not finished, force motor to stop in current position
@@ -309,6 +316,7 @@ void MechVentilation :: update ( void )
                   Serial.println("ENDED TIME WHILE MOVING");
                 #endif
             }
+            #endif //FOR_TEST
             _setState(Init_Exsufflation);
         }
         else //Time has not expired (State Insufflation)
@@ -375,11 +383,10 @@ void MechVentilation :: update ( void )
                     #endif //FOR_TEST
                 }//vent mode
 
-              //Serial.println("CUrrtime");Serial.println(_msecTimerCnt);
-              //Serial.println("timeout");Serial.println(_msecTimeoutInsufflation);
-  
-  //            if (_stepper->getCurrentPositionInSteps()==STEPPER_HIGHEST_POSITION)
-  //              _stepper->setTargetPositionToStop();
+                //Serial.println("CUrrtime");Serial.println(_msecTimerCnt);
+                //Serial.println("timeout");Serial.println(_msecTimeoutInsufflation);
+                //if (_stepper->getCurrentPositionInSteps()==STEPPER_HIGHEST_POSITION)
+                //    _stepper->setTargetPositionToStop();
             }//!Wait no move!
 
         }
