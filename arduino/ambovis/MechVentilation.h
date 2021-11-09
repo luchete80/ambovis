@@ -160,7 +160,7 @@ private:
 
     short _tidalVol;
     bool wait_NoMove;
-
+    bool ended_whilemov;
     /* Configuration */
     Configuration_t _nominalConfiguration;
 
@@ -224,4 +224,5 @@ extern int max_pidd,min_pidd;
 
 extern float f_acc;extern byte f_acc_b;
 extern byte p_acc;
+
 #endif /* INC_MECHANICAL_VENTILATION_H */
