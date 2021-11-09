@@ -2,6 +2,7 @@
 #include "MechVentilation.h"
 #include "src/TimerOne/TimerOne.h"
 #include "src/TimerTwo/TimerTwo.h"
+#include "src/TimerThree/TimerThree.h"
 
 #include "menu.h"
 #include "display.h"
@@ -342,10 +343,13 @@ void setup() {
 
   //Serial.print(",0,50");
 
-  Timer1.initialize(20);
+  Timer3.initialize(TIME_STEPPER_ISR_MICROS);
+  Timer3.attachInterrupt(timer3Isr);
+    
+  Timer1.initialize(TIME_BASE_MICROS);  //BEFORE WERE 20...
   Timer1.attachInterrupt(timer1Isr);
-  Timer2.setPeriod(20000);
-  Timer2.attachInterrupt(timer2Isr);
+  //Timer2.setPeriod(20000);
+  //Timer2.attachInterrupt(timer2Isr);
   Serial.println("Reading ROM");
 #ifdef DEBUG_UPDATE
   Serial.print("Honey Volt at p0: "); Serial.println(analogRead(A0) / 1023.);
@@ -616,13 +620,10 @@ void loop() {
 
 void timer1Isr(void)
 {
-  #ifdef ACCEL_STEPPER
-    stepper->run();
-  #else
-    stepper -> processMovement(); //LUCIANO
-    //Serial.print("Speed");Serial.println(_stepperSpeed);
-  #endif
+    ventilation->update();
+    //alarms->update(ventilation->getPeakInspiratoryPressure());
 }
+
 
 void update_error() {
   //UPDATING VERROR
@@ -646,11 +647,19 @@ void update_error() {
   }
 }
 
-void timer2Isr(void)
-{
-  ventilation -> update();
-}
+//void timer2Isr(void)
+//{
+//  ventilation -> update();
+//}
 
+void timer3Isr(void)
+{
+    #ifdef ACCEL_STEPPER
+    stepper->run();
+  #else
+    stepper -> processMovement(); //LUCIANO
+  #endif
+}
 //
 
 

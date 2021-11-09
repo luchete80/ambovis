@@ -16,7 +16,7 @@ int PID_KP=400.01;
 int PID_KI=20.01;
 int PID_KD=50.01;
 int STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  600;
-int STEPPER_SPEED_MAX=STEPPER_MICROSTEPS *  900;
+int STEPPER_SPEED_MAX=STEPPER_MICROSTEPS *  400;
 
 //static
 float speed_m,accel_m,speed_b,accel_b;
@@ -605,6 +605,8 @@ void MechVentilation :: update ( void )
             #if DEBUG_UPDATE
             //Serial.println("Attempting homing...");
             #endif
+//            bool moveToHomeInSteps(long directionTowardHome, 
+//  float speedInStepsPerSecond, long maxDistanceToMoveInSteps, int homeLimitSwitchPin)
             if (_stepper->moveToHomeInSteps(
                     STEPPER_HOMING_DIRECTION,
                     STEPPER_HOMING_SPEED,

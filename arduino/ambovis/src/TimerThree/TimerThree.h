@@ -150,6 +150,7 @@ class TimerThree
 	TIMSK3 = 0;
     }
     static void (*isrCallback)();
+    static void isrDefaultUnused();
 
   private:
     // properties
@@ -158,13 +159,21 @@ class TimerThree
 
 
 
-#elif defined(__arm__) && defined(CORE_TEENSY)
+#elif defined(__arm__) && defined(TEENSYDUINO) && (defined(KINETISK) || defined(KINETISL))
 
 #if defined(KINETISK)
 #define F_TIMER F_BUS
 #elif defined(KINETISL)
 #define F_TIMER (F_PLL/2)
 #endif
+
+// Use only 15 bit resolution.  From K66 reference manual, 45.5.7 page 1200:
+//   The CPWM pulse width (duty cycle) is determined by 2 x (CnV - CNTIN) and the
+//   period is determined by 2 x (MOD - CNTIN). See the following figure. MOD must be
+//   kept in the range of 0x0001 to 0x7FFF because values outside this range can produce
+//   ambiguous results.
+#undef TIMER3_RESOLUTION
+#define TIMER3_RESOLUTION 32768
 
   public:
     //****************************
@@ -175,6 +184,48 @@ class TimerThree
     }
     void setPeriod(unsigned long microseconds) __attribute__((always_inline)) {
 	const unsigned long cycles = (F_TIMER / 2000000) * microseconds;
+
+  /*
+  // This code does not work properly in all cases :(
+  // https://github.com/PaulStoffregen/TimerOne/issues/17 
+  if (cycles < TIMER3_RESOLUTION * 16) {
+    if (cycles < TIMER3_RESOLUTION * 4) {
+      if (cycles < TIMER3_RESOLUTION) {
+        clockSelectBits = 0;
+        pwmPeriod = cycles;
+      }else{
+        clockSelectBits = 1;
+        pwmPeriod = cycles >> 1;
+      }
+    }else{
+      if (cycles < TIMER3_RESOLUTION * 8) {
+        clockSelectBits = 3;
+        pwmPeriod = cycles >> 3;
+      }else{
+        clockSelectBits = 4;
+        pwmPeriod = cycles >> 4;
+      }
+    }
+  }else{
+    if (cycles > TIMER3_RESOLUTION * 64) {
+      if (cycles > TIMER3_RESOLUTION * 128) {
+        clockSelectBits = 7;
+        pwmPeriod = TIMER3_RESOLUTION - 1;
+      }else{
+        clockSelectBits = 7;
+        pwmPeriod = cycles >> 7;
+      }
+    }else{
+      if (cycles > TIMER3_RESOLUTION * 32) {
+        clockSelectBits = 6;
+        pwmPeriod = cycles >> 6;
+      }else{
+        clockSelectBits = 5;
+        pwmPeriod = cycles >> 5;
+      }
+    }
+  }
+  */
 	if (cycles < TIMER3_RESOLUTION) {
 		clockSelectBits = 0;
 		pwmPeriod = cycles;
@@ -210,6 +261,7 @@ class TimerThree
 		clockSelectBits = 7;
 		pwmPeriod = TIMER3_RESOLUTION - 1;
 	}
+
 	uint32_t sc = FTM2_SC;
 	FTM2_SC = 0;
 	FTM2_MOD = pwmPeriod;
@@ -231,7 +283,7 @@ class TimerThree
 	start();
     }
     void resume() __attribute__((always_inline)) {
-	FTM2_SC = (FTM1_SC & (FTM_SC_TOIE | FTM_SC_PS(7))) | FTM_SC_CPWMS | FTM_SC_CLKS(1);
+	FTM2_SC = (FTM2_SC & (FTM_SC_TOIE | FTM_SC_PS(7))) | FTM_SC_CPWMS | FTM_SC_CLKS(1);
     }
 
     //****************************
@@ -284,6 +336,7 @@ class TimerThree
 	NVIC_DISABLE_IRQ(IRQ_FTM2);
     }
     static void (*isrCallback)();
+    static void isrDefaultUnused();
 
   private:
     // properties
@@ -291,6 +344,130 @@ class TimerThree
     static unsigned char clockSelectBits;
 
 #undef F_TIMER
+
+#elif defined(__arm__) && defined(TEENSYDUINO) && defined(__IMXRT1062__)
+
+  public:
+    //****************************
+    //  Configuration
+    //****************************
+    void initialize(unsigned long microseconds=1000000) __attribute__((always_inline)) {
+	setPeriod(microseconds);
+    }
+    void setPeriod(unsigned long microseconds) __attribute__((always_inline)) {
+	uint32_t period = (float)F_BUS_ACTUAL * (float)microseconds * 0.0000005f;
+	uint32_t prescale = 0;
+	while (period > 32767) {
+		period = period >> 1;
+		if (++prescale > 7) {
+			prescale = 7;	// when F_BUS is 150 MHz, longest
+			period = 32767; // period is 55922 us (~17.9 Hz)
+			break;
+		}
+	}
+	//Serial.printf("setPeriod, period=%u, prescale=%u\n", period, prescale);
+	FLEXPWM2_FCTRL0 |= FLEXPWM_FCTRL0_FLVL(4); // logic high = fault
+	FLEXPWM2_FSTS0 = 0x0008; // clear fault status
+	FLEXPWM2_MCTRL |= FLEXPWM_MCTRL_CLDOK(4);
+	FLEXPWM2_SM2CTRL2 = FLEXPWM_SMCTRL2_INDEP;
+	FLEXPWM2_SM2CTRL = FLEXPWM_SMCTRL_HALF | FLEXPWM_SMCTRL_PRSC(prescale);
+	FLEXPWM2_SM2INIT = -period;
+	FLEXPWM2_SM2VAL0 = 0;
+	FLEXPWM2_SM2VAL1 = period;
+	FLEXPWM2_SM2VAL2 = 0;
+	FLEXPWM2_SM2VAL3 = 0;
+	FLEXPWM2_SM2VAL4 = 0;
+	FLEXPWM2_SM2VAL5 = 0;
+	FLEXPWM2_MCTRL |= FLEXPWM_MCTRL_LDOK(4) | FLEXPWM_MCTRL_RUN(4);
+	pwmPeriod = period;
+    }
+    //****************************
+    //  Run Control
+    //****************************
+    void start() __attribute__((always_inline)) {
+	stop();
+	// TODO: how to force counter back to zero?
+	resume();
+    }
+    void stop() __attribute__((always_inline)) {
+	FLEXPWM2_MCTRL &= ~FLEXPWM_MCTRL_RUN(4);
+    }
+    void restart() __attribute__((always_inline)) {
+	start();
+    }
+    void resume() __attribute__((always_inline)) {
+	FLEXPWM2_MCTRL |= FLEXPWM_MCTRL_RUN(4);
+    }
+
+    //****************************
+    //  PWM outputs
+    //****************************
+    void setPwmDuty(char pin, unsigned int duty) __attribute__((always_inline)) {
+	if (duty > 1023) duty = 1023;
+	int dutyCycle = (pwmPeriod * duty) >> 10;
+	//Serial.printf("setPwmDuty, period=%u\n", dutyCycle);
+	if (pin == TIMER3_A_PIN) {
+		FLEXPWM2_MCTRL |= FLEXPWM_MCTRL_CLDOK(4);
+		FLEXPWM2_SM2VAL5 = dutyCycle;
+		FLEXPWM2_SM2VAL4 = -dutyCycle;
+		FLEXPWM2_MCTRL |= FLEXPWM_MCTRL_LDOK(4);
+	} else if (pin == TIMER3_B_PIN) {
+		FLEXPWM2_MCTRL |= FLEXPWM_MCTRL_CLDOK(4);
+		FLEXPWM2_SM2VAL3 = dutyCycle;
+		FLEXPWM2_SM2VAL2 = -dutyCycle;
+		FLEXPWM2_MCTRL |= FLEXPWM_MCTRL_LDOK(4);
+	}
+    }
+    void pwm(char pin, unsigned int duty) __attribute__((always_inline)) {
+	setPwmDuty(pin, duty);
+	if (pin == TIMER3_A_PIN) {
+		FLEXPWM2_OUTEN |= FLEXPWM_OUTEN_PWMB_EN(4);
+		IOMUXC_SW_MUX_CTL_PAD_GPIO_B0_11 = 2; // pin 9 FLEXPWM2_PWM2_B
+	} else if (pin == TIMER3_B_PIN) {
+		FLEXPWM2_OUTEN |= FLEXPWM_OUTEN_PWMA_EN(4);
+		IOMUXC_SW_MUX_CTL_PAD_GPIO_B0_10 = 2; // pin 6 FLEXPWM2_PWM2_A
+	}
+    }
+    void pwm(char pin, unsigned int duty, unsigned long microseconds) __attribute__((always_inline)) {
+	if (microseconds > 0) setPeriod(microseconds);
+	pwm(pin, duty);
+    }
+    void disablePwm(char pin) __attribute__((always_inline)) {
+	if (pin == TIMER3_A_PIN) {
+		IOMUXC_SW_MUX_CTL_PAD_GPIO_B0_11 = 5; // pin 9 FLEXPWM2_PWM2_B
+		FLEXPWM2_OUTEN &= ~FLEXPWM_OUTEN_PWMB_EN(4);
+	} else if (pin == TIMER3_B_PIN) {
+		IOMUXC_SW_MUX_CTL_PAD_GPIO_B0_10 = 5; // pin 6 FLEXPWM2_PWM2_A
+		FLEXPWM2_OUTEN &= ~FLEXPWM_OUTEN_PWMA_EN(4);
+	}
+    }
+    //****************************
+    //  Interrupt Function
+    //****************************
+    void attachInterrupt(void (*f)()) __attribute__((always_inline)) {
+	isrCallback = f;
+	attachInterruptVector(IRQ_FLEXPWM2_2, &isr);
+	FLEXPWM2_SM2STS = FLEXPWM_SMSTS_RF;
+	FLEXPWM2_SM2INTEN = FLEXPWM_SMINTEN_RIE;
+	NVIC_ENABLE_IRQ(IRQ_FLEXPWM2_2);
+    }
+    void attachInterrupt(void (*f)(), unsigned long microseconds) __attribute__((always_inline)) {
+	if(microseconds > 0) setPeriod(microseconds);
+	attachInterrupt(f);
+    }
+    void detachInterrupt() __attribute__((always_inline)) {
+	NVIC_DISABLE_IRQ(IRQ_FLEXPWM2_2);
+	FLEXPWM2_SM2INTEN = 0;
+    }
+    static void isr(void);
+    static void (*isrCallback)();
+    static void isrDefaultUnused();
+
+  private:
+    // properties
+    static unsigned short pwmPeriod;
+    static unsigned char clockSelectBits;
+
 
 #endif
 };

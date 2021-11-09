@@ -20,7 +20,7 @@ TimerThree Timer3;              // preinstatiate
 
 unsigned short TimerThree::pwmPeriod = 0;
 unsigned char TimerThree::clockSelectBits = 0;
-void (*TimerThree::isrCallback)() = NULL;
+void (*TimerThree::isrCallback)() = TimerThree::isrDefaultUnused;
 
 // interrupt service routine that wraps a user defined function supplied by attachInterrupt
 #if defined(__AVR__)
@@ -29,7 +29,7 @@ ISR(TIMER3_OVF_vect)
   Timer3.isrCallback();
 }
 
-#elif defined(__arm__) && defined(CORE_TEENSY)
+#elif defined(__arm__) && defined(TEENSYDUINO) && (defined(KINETISK) || defined(KINETISL))
 void ftm2_isr(void)
 {
   uint32_t sc = FTM2_SC;
@@ -41,5 +41,15 @@ void ftm2_isr(void)
   Timer3.isrCallback();
 }
 
+#elif defined(__arm__) && defined(TEENSYDUINO) && defined(__IMXRT1062__)
+void TimerThree::isr(void)
+{
+  FLEXPWM2_SM2STS = FLEXPWM_SMSTS_RF;
+  Timer3.isrCallback();
+}
+
 #endif
 
+void TimerThree::isrDefaultUnused()
+{
+}
