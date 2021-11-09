@@ -4,7 +4,7 @@
 #include "Arduino.h"
 //#define LCD_I2C 1 //IT DOES NOT WORK WITH ENCODER
 //Connections and Debug Defs
-//#define ACCEL_STEPPER 1
+#define ACCEL_STEPPER 1
 //#define DEBUG_PID 1
 //#define DEBUG_UPDATE  1
 #define DEBUG_STEPPER     1
@@ -49,11 +49,11 @@
 //#define STEPPER_HIGHEST_POSITION    (STEPPER_MICROSTEPS *   100)   // Steps
 #define STEPPER_LOWEST_POSITION     (-5)   // Steps
 #define STEPPER_HIGHEST_POSITION    ( 183 * STEPPER_MICROSTEPS)   //270º ,2500 for 270º, 2850 for 220º, 2930 for 330º
-#define STEPPER_SPEED_DEFAULT       (400)   // Steps/s
+#define STEPPER_SPEED_DEFAULT       (STEPPER_MICROSTEPS *  1200)   // Steps/s
 extern int STEPPER_SPEED_MAX;       //(14000)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
-#define STEPPER_ACCEL_MAX           (3000 * STEPPER_MICROSTEPS)
+#define STEPPER_ACCEL_MAX           (1500 * STEPPER_MICROSTEPS)
 #define STEPPER_SPEED_MAX_VCL       (75 * STEPPER_MICROSTEPS)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
-#define STEPPER_SPEED_EXSUFF        (250 * STEPPER_MICROSTEPS)
+#define STEPPER_SPEED_EXSUFF        (450 * STEPPER_MICROSTEPS)
 //#define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  2000)   // Steps/s2
 
 // Valores por defecto
