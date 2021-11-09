@@ -77,14 +77,14 @@ void tft_draw(void) {
 void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
 
   if ( rx[valsreaded] > rx[valsreaded-1] ) {//to avoid draw entire line to the begining at the end of the cycle
-          for (int i=0;i<2;i++)
+          for (int i=0;i<3;i++)
             tft.drawLine(axispos[i], 240-rx[valsreaded-1], axispos[i], 240-rx[valsreaded], ILI9341_DARKGREY);
             tft.fillRect(0, 240 - rx[valsreaded] - 10, 320, 10, ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
             //tft.fillRect(0, 240 - rx[valsreaded-1] + 1, 320, rx[valsreaded]-rx[valsreaded-1], ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
             
             tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
             tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_MAGENTA);
-            //tft.drawLine(axispos[2]-yvt[0],             240-rx[valsreaded-1], axispos[2]-yvt[1],            240-rx[valsreaded], ILI9341_BLUE);
+            tft.drawLine(axispos[2]-yvt[0],             240-rx[valsreaded-1], axispos[2]-yvt[1],            240-rx[valsreaded], ILI9341_BLUE);
 
   }
 }
@@ -141,23 +141,23 @@ void print_bat(){
     level=0.;
     tft.setRotation(0);
     //tft.fillRect(180,150,70,20, ILI9341_BLACK);//ONLY BAT LEVEL
-    tft.fillRect(180,250,70,50, ILI9341_BLACK);    float fac=0.026;  //5./(1024.*0.175)
+    tft.fillRect(180,250,70,50, ILI9341_BLACK);    float fac=0.0279;  //5./(1024.*0.175)
     
     //Vt > 24V   =>   PC = 100%
     //Vmin < Vt < 24V   =>   PC[%] = (Vt[V]-Vmin)/(24-Vmin)*100
     //Vt < Vmin   =>   PC = 0%
-    for (int i=0;i<20;i++){
+    for (int i=0;i<40;i++){
         level+=float(analogRead(PIN_BAT_LEV));
         //Serial.println(analogRead(PIN_BAT_LEV));
         }
-    level*=fac/20.;
+    level*=fac/40.;
     if (level > 24.0) level_perc =100.;
     else {
         if (level > 22.0) level_perc = (level - 22.)/(24.-22.0) * 100.;
         else              level_perc =0.;
       }
-    //dtostrf(level_perc, 2, 0, buffer);
-    dtostrf(level, 2, 1, buffer);
+    dtostrf(level_perc, 2, 0, buffer);
+    //dtostrf(level, 2, 1, buffer);
     //Serial.print("Bat level: ");Serial.println(level);
     tft.setCursor(130, 260);tft.println("Bat:");
     tft.setCursor(180, 260);tft.println(buffer);
