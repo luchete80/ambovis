@@ -29,6 +29,7 @@ byte dpip_b;
 
 float f_acc;byte f_acc_b;
 byte  p_acc;
+bool ended_whilemov;
 
 MechVentilation::MechVentilation(
         #ifdef ACCEL_STEPPER
@@ -322,7 +323,8 @@ void MechVentilation :: update ( void )
 //      }
 //      }//if pcl
 
-    ended_whilemov = false;
+    curr_ended_whilemov = false;
+
     }// INIT INSUFFLATION
     break;
     case State_Insufflation:
@@ -348,6 +350,7 @@ void MechVentilation :: update ( void )
             if (!_stepper->motionComplete()) //LUCIANO: NEW
             #endif
             {
+                curr_ended_whilemov = true;
                 // motor not finished, force motor to stop in current position
                 //_stepper->setTargetPositionInSteps(_stepper->getCurrentPositionInSteps());
                 //MODIFIED
@@ -357,9 +360,9 @@ void MechVentilation :: update ( void )
 //                _stepper->setTargetPositionToStop();
 //                #endif
                 
-                
+//                
                 //#ifdef DEBUG_UPDATE
-                //Serial.println("ENDED TIME WHILE MOVING");
+                Serial.println("ENDED TIME WHILE MOVING");
                 //#endif
             }
             else {
@@ -369,7 +372,7 @@ void MechVentilation :: update ( void )
             if (_recruitmentMode) {
                 deactivateRecruitment();
             }
-            ended_whilemov = true;
+
         }
 //        else //Time has not expired (State Insufflation)
 //        {
@@ -452,6 +455,9 @@ void MechVentilation :: update ( void )
     break;
     case Init_Exsufflation:
     {
+      ended_whilemov = curr_ended_whilemov;
+      Serial.println("ended_whilemov: " + String(ended_whilemov ));
+      
       _msecTimerStartCycle=millis();
       //Serial.print("Current pressure");Serial.println(_currentPressure);
       

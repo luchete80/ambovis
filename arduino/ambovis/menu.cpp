@@ -345,7 +345,7 @@ void check_encoder ( ) {
                   menu_number=0;
               }
           } else if (menu_number == 2) {
-             if (curr_sel > 12) {
+             if (curr_sel > 2) {
               encoderPos=1;
               menu_number=3; 
              } else if ( encoderPos < 1) {
@@ -357,7 +357,7 @@ void check_encoder ( ) {
               encoderPos=1;
               menu_number=0; 
              } else if ( encoderPos < 1) {
-                  encoderPos=12;
+                  encoderPos=2;
                   menu_number=2;
               }
           }
@@ -518,15 +518,15 @@ void clear_n_sel(int menu){
             lcd_selxy(12,2);break;
       }
     } else if (menu==2) {  
-      lcd_clearxy(0,0);lcd_clearxy(6,0);lcd_clearxy(12,0);
-      lcd_clearxy(0,1);lcd_clearxy(6,1);lcd_clearxy(12,1);
+      lcd_clearxy(0,0);lcd_clearxy(9,0);
+      lcd_clearxy(0,1);lcd_clearxy(6,1);
       lcd_clearxy(0,2);
       lcd_clearxy(0,3);
       switch(curr_sel){
           case 1: 
             lcd_selxy(0,0);break;//PIP
           case 2: 
-            lcd_selxy(6,0);break;//PEEP
+            lcd_selxy(9,0);break;//PEEP
           case 3:
             lcd_selxy(12,0);break;
           case 4: 
@@ -658,27 +658,10 @@ void display_lcd ( ) {
     for (int i=0;i<3;i++){
         lcd_clearxy(3,i,3); lcd_clearxy(9,i,3);lcd_clearxy(15,i,3);
       }
-//        
-//    writeLine(0, "a:" + String(min_cd), 1); 
-//    writeLine(1, "s:" + String(max_cd), 1); 
-//    
-//    writeLine(0, "v:" + String(min_speed), 7); 
-//    writeLine(1, "V:" + String(max_speed), 7);
-//
-//    writeLine(0, "a:" + String(min_accel), 13); 
-//    writeLine(1, "A:" + String(max_accel), 13);
-//
-//    writeLine(2, "p:" + String(min_pidk), 1); 
-//    writeLine(3, "P:" + String(max_pidk), 1); 
-//    
-//    writeLine(2, "i:" + String(min_pidi), 7); 
-//    writeLine(3, "I:" + String(max_pidi), 7);
-//
-//    writeLine(2, "d:" + String(min_pidd), 13); 
-//    writeLine(3, "D:" + String(max_pidd), 13);
 
     writeLine(0, "a:" + String(STEPPER_ACCEL_MAX), 1); 
-    writeLine(1, "s:" + String(STEPPER_SPEED_MAX), 1); 
+    writeLine(0, "s:" + String(STEPPER_SPEED_MAX), 10); 
+    writeLine(1, "fs:" + String(STEPPER_SPEED_MAX), 1);     
     
   } else if (menu_number ==3 ){//PID Config 2
     lcd_clearxy(3,0,2); lcd_clearxy(9,0,3);lcd_clearxy(15,0,3);

@@ -53,13 +53,21 @@ void tft_draw(void) {
         drawY2(ILI9341_GREEN);
     valsreaded+=1;
     
-  	if (last_x<5 && !lcd_cleaned){
+  	if (last_x<10 && !lcd_cleaned){//NO PONER UN VALOR MENOR QUE 10
     		lcd_cleaned=true;
     		valsreaded=0;
     		for (int i=0;i<3;i++) 
     		    valsreaded_[i]=0;
         print_vols();
         print_bat();
+
+        tft.fillRect(150,280,70,50, ILI9341_RED);    
+        if (ended_whilemov){
+          tft.setCursor(150, 300);tft.println("ENDErr");
+        }
+        else {
+          tft.setCursor(150, 300);tft.println("ENDOk");    
+        }
         tft.setRotation(1);
         tft.fillRect(0,0,60,100, ILI9341_BLACK); //FOR ALARMS, UPPER RIRHT
         tft.fillRect(0, 240 , 320, 10, ILI9341_GREEN);//x,y,lengthx,lentgthy
@@ -77,14 +85,13 @@ void tft_draw(void) {
 void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
 
   if ( rx[valsreaded] > rx[valsreaded-1] ) {//to avoid draw entire line to the begining at the end of the cycle
-          for (int i=0;i<3;i++)
+          for (int i=0;i<2;i++)
             tft.drawLine(axispos[i], 240-rx[valsreaded-1], axispos[i], 240-rx[valsreaded], ILI9341_DARKGREY);
             tft.fillRect(0, 240 - rx[valsreaded] - 10, 320, 10, ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
             //tft.fillRect(0, 240 - rx[valsreaded-1] + 1, 320, rx[valsreaded]-rx[valsreaded-1], ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
             
             tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
             tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_MAGENTA);
-            tft.drawLine(axispos[2]-yvt[0],             240-rx[valsreaded-1], axispos[2]-yvt[1],            240-rx[valsreaded], ILI9341_BLUE);
 
   }
 }

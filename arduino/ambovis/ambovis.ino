@@ -258,7 +258,7 @@ void setup() {
   digitalWrite(PIN_EN, LOW);
 
   writeLine(1, "RespirAR FIUBA", 4);
-  writeLine(2, "v1.1.1", 8);
+  writeLine(2, "v2.0.1", 8);
   
   p_dpt0 = 0;
   ads.begin();
@@ -396,7 +396,7 @@ void loop() {
     if (wake_up){
       lcd.clear();
       init_display();
-      display_lcd();
+      display_lcd();    //TODO: Pass mech vent as argument in display
     tft.fillScreen(ILI9341_BLACK);
       wake_up=false;
       }
