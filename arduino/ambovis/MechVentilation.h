@@ -97,6 +97,8 @@ public:
     const unsigned long getMSecTimerCnt()const {return _msecTimerCnt;}
     float getInsVol(void);
     float getCurrentPressure();
+    float getTimeoutCycle();
+    float getStepperSpeed() {return _stepperSpeed;}
 
     /**
      * setters
@@ -106,7 +108,6 @@ public:
     void setPeakEspiratoryPressure(float peep);
     void setCycleNum(unsigned long cyc){_cyclenum=cyc;}
     void change_config(VentilationOptions_t);
-    void _setInspiratoryCycle(void);
 
 private:
     /** Initialization. */
@@ -124,6 +125,8 @@ private:
     /** Set state. */
     void _setState(State state);
     void _setAlarm(Alarm alarm);
+
+    void _setInspiratoryCycle(void);
 
     #if TESTING_MODE_DISABLED
     /* Configuration parameters */
@@ -162,14 +165,12 @@ private:
     State _currentState = State_Homing;
     Alarm _currentAlarm = No_Alarm;
 
-
-        /** Timer counter in seconds. */
+    /** Timer counter in seconds. */
     //Este tambien es mio
 
     unsigned long _msecTimerCnt; //esteno necesita ser tan grande
     /**  Insufflation timeout in seconds. */
     unsigned long _cyclenum;    //Not important value, only for printing control
-    
 
     /** Stepper speed. Steps per seconds. */
     float _stepperSpeed;

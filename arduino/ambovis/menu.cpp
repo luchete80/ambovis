@@ -94,7 +94,7 @@ void check_updn_button(int pin, byte *var, bool incr_decr) {
       }// if time > last button press
     }
 }
-void check_bck_state(){
+void check_bck_state() {
 
     bck_state=digitalRead(PIN_MENU_BCK);
     if (bck_state != last_bck_state) { 
