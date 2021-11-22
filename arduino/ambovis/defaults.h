@@ -128,7 +128,7 @@ class VentilationOptions_t {
 #define VENTMODE_PCL 1
 #define VENTMODE_MAN 2
 
-#define TESTING_MODE_DISABLED 0
+#define TESTING_MODE_DISABLED 1
 
 //general variables
 extern byte vent_mode;

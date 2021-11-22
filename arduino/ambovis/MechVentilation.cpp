@@ -345,10 +345,10 @@ void MechVentilation :: update ( void )
                   Serial.println("ENDED TIME WHILE MOVING");
                 //#endif
             }
-            #endif //TESTING_MODE_DISABLED
             else {
-              Serial.println("Motion Complete");
-              }
+                Serial.println("Motion Complete");
+            }
+            #endif //TESTING_MODE_DISABLED
             _setState(Init_Exsufflation);
         }
 //        else //Time has not expired (State Insufflation)
