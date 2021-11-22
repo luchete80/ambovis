@@ -35,26 +35,24 @@
 // Sensores
 #define ENABLED_SENSOR_VOLUME 1
 #if ENABLED_SENSOR_VOLUME
-//#define ENABLED_SENSOR_VOLUME_SFM3300 1
 #endif
 
 
 #define STEPPER_MICROSTEPS 4
 #define STEPPER_STEPS_PER_REVOLUTION 200
 #define STEPPER_MICROSTEPS_PER_REVOLUTION (STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS)
-//#define STEPPER_DIR 1
 #define STEPPER_HOMING_DIRECTION    (1)
 #define STEPPER_HOMING_SPEED        (STEPPER_MICROSTEPS * 600)   // Steps/s
-//#define STEPPER_LOWEST_POSITION     (STEPPER_MICROSTEPS *  -100)   // Steps
-//#define STEPPER_HIGHEST_POSITION    (STEPPER_MICROSTEPS *   100)   // Steps
 #define STEPPER_LOWEST_POSITION     (-5)   // Steps
 #define STEPPER_HIGHEST_POSITION    ( 183 * STEPPER_MICROSTEPS)   //270º ,2500 for 270º, 2850 for 220º, 2930 for 330º
 #define STEPPER_SPEED_DEFAULT       (STEPPER_MICROSTEPS *  1200)   // Steps/s
-extern int STEPPER_SPEED_MAX;       //(14000)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_ACCEL_MAX           (1500 * STEPPER_MICROSTEPS)
 #define STEPPER_SPEED_MAX_VCL       (75 * STEPPER_MICROSTEPS)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_SPEED_EXSUFF        (450 * STEPPER_MICROSTEPS)
-//#define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  2000)   // Steps/s2
+#define STEPPER_ACC_INSUFFLATION    (STEPPER_MICROSTEPS *  1500)
+#define STEPPER_SPEED_MAX           (STEPPER_MICROSTEPS *  1500)
+
+
 
 // Valores por defecto
 #define DEFAULT_HEIGHT 170 // cm
@@ -94,7 +92,9 @@ extern int STEPPER_SPEED_MAX;       //(14000)   // Steps/s  //THIS IS FOR 1600 s
 #define PID_MIN -20000 // TODO: check direction implementation
 #define PID_MAX 20000
 
-extern int PID_KP,PID_KI,PID_KD;
+#define PID_KP  400.01
+#define PID_KI  20.01
+#define PID_KD  50.01
 
 #define PID_TS TIME_BASE
 #define PID_BANGBANG 8
@@ -128,7 +128,7 @@ class VentilationOptions_t {
 #define VENTMODE_PCL 1
 #define VENTMODE_MAN 2
 
-#define TESTING_MODE_DISABLED 0
+#define TESTING_MODE_DISABLED 1
 
 //general variables
 extern byte vent_mode;

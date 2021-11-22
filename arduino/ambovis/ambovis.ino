@@ -84,7 +84,6 @@ float verrp;
 float _flux,    flow_f;;
 //#ifdef FILTER_FLUX
 float _flux_fil[5];
-float _mlInsVol2;
 float _flux_sum;
 byte flux_count;
 //#endif
@@ -178,11 +177,18 @@ int endPressed ;      // the moment the button was released
 int holdTime ;        // how long the button was hold
 int idleTime ;        // how long the button was idle
 
+//Shared with Mech and Menu
+float f_acc;
+byte f_acc_b;
+byte  p_acc;
+float dpip;
+byte dpip_b;
+
 void setup() {
   
-  Serial.begin(115200);
-  init_display();
-  isitem_sel=false;
+    Serial.begin(115200);
+    init_display();
+    isitem_sel=false;
 
     pinMode(TFT_SLEEP, OUTPUT); //Set buzzerPin as output
     digitalWrite(TFT_SLEEP,HIGH); //LOW, INVERTED
@@ -195,34 +201,34 @@ void setup() {
 
     digitalWrite(PIN_BUZZER,BUZZER_LOW); //LOW, INVERTED
         
-  // PID
-  pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
-  // if pressure is more than PID_BANGBANG below or above setpoint,
-  // output will be set to min or max respectively
-  pid -> setBangBang(PID_BANGBANG);
-  // set PID update interval
-  pid -> setTimeStep(PID_TS);
+    // PID
+    pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
+    // if pressure is more than PID_BANGBANG below or above setpoint,
+    // output will be set to min or max respectively
+    pid -> setBangBang(PID_BANGBANG);
+    // set PID update interval
+    pid -> setTimeStep(PID_TS);
 
-  max_cd=40;  //T MODIFY: READ FROM MEM
-  min_cd=10;
-  min_speed = 250;  // x microsteps
-  max_speed = 750;  // x Microsteps, originally 16000 (with 16 ms = 750)
-  max_accel = 600;
-  min_accel = 200;
-  change_pid_params=true; //To calculate at first time
+    max_cd=40;  //T MODIFY: READ FROM MEM
+    min_cd=10;
+    min_speed = 250;  // x microsteps
+    max_speed = 750;  // x Microsteps, originally 16000 (with 16 ms = 750)
+    max_accel = 600;
+    min_accel = 200;
+    change_pid_params=true; //To calculate at first time
   
-  // Parte motor
-  pinMode(PIN_MUTE, INPUT_PULLUP);
-  pinMode(PIN_POWEROFF, INPUT);
-  pinMode(PIN_EN, OUTPUT);
+    // Parte motor
+    pinMode(PIN_MUTE, INPUT_PULLUP);
+    pinMode(PIN_POWEROFF, INPUT);
+    pinMode(PIN_EN, OUTPUT);
 
-  pinMode(PIN_MENU_UP, INPUT_PULLUP);
-  pinMode(PIN_MENU_DN, INPUT_PULLUP);
-  pinMode(PIN_MENU_EN, INPUT_PULLUP);
-  pinMode(PIN_MENU_BCK, INPUT_PULLUP);
-  pinMode(PIN_BAT_LEV, INPUT);
-  
-  digitalWrite(PIN_EN, HIGH);
+    pinMode(PIN_MENU_UP, INPUT_PULLUP);
+    pinMode(PIN_MENU_DN, INPUT_PULLUP);
+    pinMode(PIN_MENU_EN, INPUT_PULLUP);
+    pinMode(PIN_MENU_BCK, INPUT_PULLUP);
+    pinMode(PIN_BAT_LEV, INPUT);
+
+    digitalWrite(PIN_EN, HIGH);
 
   // TODO: Añadir aquí la configuarcion inicial desde puerto serie
   options.respiratoryRate = DEFAULT_RPM;
@@ -243,12 +249,6 @@ void setup() {
 
   delay(100);
 
-  //  Serial.println("Tiempo del ciclo (seg):" + String(ventilation -> getExsuflationTime() + ventilation -> getInsuflationTime()));
-  //  Serial.println("Tiempo inspiratorio (mseg):" + String(ventilation -> getInsuflationTime()));
-  //  Serial.println("Tiempo espiratorio (mseg):" + String(ventilation -> getExsuflationTime()));
-
-  // TODO: Esperar aqui a iniciar el arranque desde el serial
-
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
@@ -259,23 +259,6 @@ void setup() {
   ads.begin();
   verror = 0;
   float verrp = 0.;
-//  for (int i = 0; i < 10; i++) {
-//    adc0 = ads.readADC_SingleEnded(0);
-//    Voltage = (adc0 * 0.1875) * 0.001; //VOLT!
-//    Serial.print("Voltage dp: "); Serial.println(Voltage, 3);
-//    verror += ( Voltage - 5.0 * 0.04 ); //IF VOUT IS: Vo=VS(0.09*P0.04) +/- ERR
-//    //vo=vs(0.09 dp +0.04)+/-verr
-//    p_dpt0 += 0.5 * (( Voltage /* 5.0/V_SUPPLY_HONEY */ - 0.1 * 4.8/* - corr_fs */) / (0.8 * 4.8) * DEFAULT_PSI_TO_CM_H20 * 2. - DEFAULT_PSI_TO_CM_H20);
-//    verrp += (analogRead(A0) * 5. / 1024. - 5.*0.04);
-//    Serial.print("Voltage p: "); Serial.println(analogRead(A0));
-//    delay(10);
-//  }
-//
-//  verror /= 10.; //
-//  verrp /= 10.;
-//  p_dpt0 /= 10.0;
-//  Serial.print("dp (Flux) MPX Volt (mV) at p0: "); Serial.println(verror * 1000, 3);
-//  Serial.print("pressure  MPX Volt (mV) at p0: "); Serial.println(verrp * 1000, 3);
 
   Serial.print("dp  error : "); Serial.println(-verror / (5.*0.09));
   p_dpt0 = 0.20;
@@ -285,7 +268,6 @@ void setup() {
   ventilation -> start();
   ventilation -> update();
 
-  //
         #ifdef ACCEL_STEPPER
           stepper->setSpeed(STEPPER_HOMING_SPEED);
           

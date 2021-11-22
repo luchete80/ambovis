@@ -1,33 +1,8 @@
 #include "MechVentilation.h"
 
-int currentWaitTriggerTime = 0;
-int currentStopInsufflationTime = 0;
-float currentFlow = 0;
-
 float pressure_max;
 float pressure_min;
-
-static int highest_man_pos;
-unsigned long _msecTimerStartCycle;
-
 byte Cdyn_pass[3];
-
-int PID_KP=400.01;
-int PID_KI=20.01;
-int PID_KD=50.01;
-int STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  1500;
-int STEPPER_SPEED_MAX=STEPPER_MICROSTEPS *  1500;
-
-//static
-float speed_m,accel_m,speed_b,accel_b;
-float pidk_m,pidk_b;
-float pidi_m,pidi_b;
-float pidd_m,pidd_b;
-float dpip;
-byte dpip_b;
-
-float f_acc;byte f_acc_b;
-byte  p_acc;
 
 MechVentilation::MechVentilation(
         #if TESTING_MODE_DISABLED
@@ -109,14 +84,8 @@ float MechVentilation::getTimeoutCycle() {
 
 void MechVentilation::_setInspiratoryCycle(void) {
     timeoutCycle = ((float)60) * 1000.0f / ((float)_rpm); // Tiempo de ciclo en msegundos
-    //_timeoutIns = timeoutCycle * DEFAULT_POR_INSPIRATORIO / 100;
     _timeoutIns = timeoutCycle / (float(_percIE+1));
     _timeoutEsp = (timeoutCycle) - _timeoutIns;
-	#ifdef DEBUG_UPDATE
-      Serial.print("Timeout Cycle");Serial.println(timeoutCycle);
-      Serial.print("_timeoutIns");Serial.println(_timeoutIns);
-      Serial.print("_timeoutEsp");Serial.println(_timeoutEsp);
-	#endif
 }
 
 void MechVentilation::activateRecruitment(void)
@@ -159,20 +128,12 @@ void MechVentilation :: update ( void )
     switch (_currentState) {
     case Init_Insufflation:
     {
-
-        //Filter vars
-        #ifdef FLUX_FILTER
-        flux_filter_time=millis();
-        flux_count=0;
-        #endif
-
         last_pressure_max=pressure_max;
         last_pressure_min=pressure_min;
         pressure_max=0;
         pressure_min=60;
 
         // Close Solenoid Valve
-
         totalCyclesInThisState = (_timeoutIns) / TIME_BASE;
 
         _msecTimerStartCycle=millis();  //Luciano
@@ -185,7 +146,6 @@ void MechVentilation :: update ( void )
         _mllastInsVol=int(_mlInsVol);
         _mllastExsVol=int(fabs(_mlExsVol));
         
-        //_mlInsVol2=0;
         _mlInsVol=0.;
         _mlExsVol=0.;
         
