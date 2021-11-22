@@ -109,6 +109,10 @@ public:
     void setCycleNum(unsigned long cyc){_cyclenum=cyc;}
     void change_config(VentilationOptions_t);
 
+    //LUCIANO 
+    float getCurrentPressure();
+    const unsigned long & getMSecTimerCnt()const {return _msecTimerCnt;}
+    //
 private:
     /** Initialization. */
     void _init(

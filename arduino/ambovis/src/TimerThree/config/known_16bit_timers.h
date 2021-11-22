@@ -39,7 +39,7 @@
   #define TIMER1_B_PIN   4
   #define TIMER1_ICP_PIN 4
 
-// Teensy 3.1
+// Teensy 3.1 / Teensy 3.2
 //
 #elif defined(__MK20DX256__)
   #define TIMER1_A_PIN   3
@@ -48,7 +48,17 @@
   #define TIMER3_A_PIN   32
   #define TIMER3_B_PIN   25
   #define TIMER3_ICP_PIN 32
-
+  
+// Teensy 3.5 / Teensy 3.6
+//
+#elif defined(__MK64FX512__) || defined(__MK66FX1M0__)
+  #define TIMER1_A_PIN   3
+  #define TIMER1_B_PIN   4
+  #define TIMER1_ICP_PIN 4
+  #define TIMER3_A_PIN   29
+  #define TIMER3_B_PIN   30
+  #define TIMER3_ICP_PIN 29
+  
 // Teensy-LC
 //
 #elif defined(__MKL26Z64__)
@@ -59,12 +69,19 @@
   #define TIMER3_B_PIN   4
   #define TIMER3_ICP_PIN 4
 
+// Teensy 4.0
+//
+#elif defined(__IMXRT1062__)
+  #define TIMER1_A_PIN   7
+  #define TIMER1_B_PIN   8
+  #define TIMER3_A_PIN   9
+  #define TIMER3_B_PIN   6
+
 // Arduino Mega
 //
 #elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
   #define TIMER1_A_PIN   11
   #define TIMER1_B_PIN   12
-  #define TIMER1_C_PIN   13
   #define TIMER3_A_PIN   5
   #define TIMER3_B_PIN   2
   #define TIMER3_C_PIN   3
