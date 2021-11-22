@@ -78,7 +78,7 @@ test(mech_ventilation_update_from_Init_Insufflation_to_State_Insufflation) {
 
     //stepperSpeed = STEPPER_HIGHEST_POSITION*(float(_percVol)*0.01)/( (float)(_timeoutIns*0.001) * DEFAULT_FRAC_CYCLE_VCL_INSUFF);
     float roundStepperSpeed = roundf(mechV->getStepperSpeed() * 100) / 100;
-    assertEqual(roundStepperSpeed, float(844.11));
+    assertEqual(roundStepperSpeed, float(4800.00));
 }
 
 test(mech_ventilation_update_from_State_Insufflation_to_State_Exsufflation) {
