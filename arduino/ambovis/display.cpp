@@ -53,15 +53,15 @@ void tft_draw(void) {
         drawY2(ILI9341_GREEN);
     valsreaded+=1;
     
-  	if (last_x<10 && !lcd_cleaned){//NO PONER UN VALOR MENOR QUE 10
+  	if (last_x>117 && !lcd_cleaned){//NO PONER UN VALOR MENOR QUE 10
     		lcd_cleaned=true;
     		valsreaded=0;
-    		for (int i=0;i<3;i++) 
+    		for (int i=0;i<2;i++) 
     		    valsreaded_[i]=0;
         print_vols();
         print_bat();
 
-        tft.fillRect(150,280,70,50, ILI9341_RED);    
+        tft.fillRect(180,280,70,50, ILI9341_RED);    
         if (ended_whilemov){
           tft.setCursor(150, 300);tft.println("ENDErr");
         }
