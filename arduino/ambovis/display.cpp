@@ -1,6 +1,8 @@
 #include "display.h"
 #include "MechVentilation.h"
 
+#define MAX_CURVES_Y    200
+#define LEGEND_Y        260 //Begining of the legend on Y AXIS
 bool lcd_cleaned=false;
 
 unsigned long time_last_show=0;
@@ -86,8 +88,8 @@ void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WIT
 
   if ( rx[valsreaded] > rx[valsreaded-1] ) {//to avoid draw entire line to the begining at the end of the cycle
           for (int i=0;i<2;i++)
-            tft.drawLine(axispos[i], 240-rx[valsreaded-1], axispos[i], 240-rx[valsreaded], ILI9341_DARKGREY);
-            tft.fillRect(0, 240 - rx[valsreaded] - 10, 320, 10, ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
+            tft.drawLine(axispos[i], 240-rx[valsreaded-1], axispos[i], 240-rx[valsreaded], ILI9341_DARKGREY); //X AXIS 
+            tft.fillRect(0, 240 - rx[valsreaded] - 10, MAX_CURVES_Y, 10, ILI9341_BLACK);                                //CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
             //tft.fillRect(0, 240 - rx[valsreaded-1] + 1, 320, rx[valsreaded]-rx[valsreaded-1], ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
             
             tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
@@ -177,11 +179,11 @@ void print_bat(){
     //tft.setCursor(180, 280);tft.println(buffer);
 
 }
-#define LEGEND_Y    270
+
 void print_vols(){
     
     tft.setRotation(0);
-    tft.fillRect(0,LEGEND_Y,70,80, ILI9341_RED); //Here x is the first value (in the less width dimension)
+    tft.fillRect(40,LEGEND_Y,70,50, ILI9341_RED); //Here x is the first value (in the less width dimension)
 
     itoa(_mllastInsVol, buffer, 10);
     tft.setCursor(0, LEGEND_Y); //Before: 150,180 at right 
