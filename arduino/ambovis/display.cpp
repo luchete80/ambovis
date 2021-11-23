@@ -177,25 +177,23 @@ void print_bat(){
     //tft.setCursor(180, 280);tft.println(buffer);
 
 }
+#define LEGEND_Y    270
 void print_vols(){
+    
     tft.setRotation(0);
-    tft.fillRect(180,160,70,80, ILI9341_BLACK);
-    //itoa(integerFromPC[5], buffer, 10);
+    tft.fillRect(0,LEGEND_Y,70,80, ILI9341_RED); //Here x is the first value (in the less width dimension)
+
     itoa(_mllastInsVol, buffer, 10);
-    tft.setCursor(150, 180);
+    tft.setCursor(0, LEGEND_Y); //Before: 150,180 at right 
     tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
-    tft.println("Vi: ");tft.setCursor(190, 180);tft.println(buffer);
-
-
+    tft.println("Vi: ");tft.setCursor(40, LEGEND_Y);tft.println(buffer); //Before 190,180
     
     itoa(_mllastExsVol, buffer, 10);
-    tft.setCursor(150, 200);
-    tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
-    tft.println("Ve: ");tft.setCursor(190, 200);tft.println(buffer);
+    tft.setCursor(0, LEGEND_Y + 20);
+    tft.println("Ve: ");tft.setCursor(40, LEGEND_Y + 20);tft.println(buffer);
     
     itoa((_mllastInsVol + _mllastExsVol)/2, buffer, 10);
-    tft.setCursor(150, 220);
-    tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
-    tft.println("VT: ");tft.setCursor(190, 220);tft.println(buffer);
+    tft.setCursor(0, LEGEND_Y + 40);
+    tft.println("VT: ");tft.setCursor(40, LEGEND_Y + 40);tft.println(buffer);
  
   }
