@@ -14,7 +14,7 @@ char receivedChars[numChars]; // an array to store the received data
 int last_t;
 int integerFromPC [5];
 float floatFromPC = 0.0;
-int axispos[]={100,170,300}; //from each graph
+int axispos[]={100,170,300}; //from each graph, from 0 to 320 (display height, IN PORTRAIT MODE)
 byte state_r;
 int buzzer=3; //pin
 
@@ -54,15 +54,18 @@ void tft_draw(void) {
     if (valsreaded > 0)
         drawY2(ILI9341_GREEN);
     valsreaded+=1;
-    
-  	if (last_x>117 && !lcd_cleaned){//NO PONER UN VALOR MENOR QUE 10
+
+//ORIGINAL
+//  	if (last_x>117 && !lcd_cleaned){
+    if (last_x>117 && !lcd_cleaned){//NO PONER UN VALOR MENOR QUE 10
     		lcd_cleaned=true;
     		valsreaded=0;
     		for (int i=0;i<2;i++) 
     		    valsreaded_[i]=0;
         print_vols();
         print_bat();
-
+        drawing_cycle = !drawing_cycle;
+        Serial.println("Drawing cycle: " + String(drawing_cycle));
         tft.fillRect(180,280,70,50, ILI9341_RED);    
         if (ended_whilemov){
           tft.setCursor(150, 300);tft.println("ENDErr");
@@ -84,16 +87,31 @@ void tft_draw(void) {
     
 }//loop
 
-void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
+// ORIGINAL WITH 1 cycle
+//void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
+//
+//  if ( rx[valsreaded] > rx[valsreaded-1] ) {//to avoid draw entire line to the begining at the end of the cycle
+//          for (int i=0;i<2;i++)
+//            tft.drawLine(axispos[i], 240-rx[valsreaded-1], axispos[i], 240-rx[valsreaded], ILI9341_DARKGREY);           //X AXIS 
+//            tft.fillRect(0, 240 - rx[valsreaded] - 10, MAX_CURVES_Y, 10, ILI9341_BLACK);                                //CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
+//            
+//            tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
+//            tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_MAGENTA);
+//
+//  }
+//}
 
+
+void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
+  int x_start = 240 - (int) drawing_cycle * 120;
   if ( rx[valsreaded] > rx[valsreaded-1] ) {//to avoid draw entire line to the begining at the end of the cycle
-          for (int i=0;i<2;i++)
-            tft.drawLine(axispos[i], 240-rx[valsreaded-1], axispos[i], 240-rx[valsreaded], ILI9341_DARKGREY); //X AXIS 
-            tft.fillRect(0, 240 - rx[valsreaded] - 10, MAX_CURVES_Y, 10, ILI9341_BLACK);                                //CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
-            //tft.fillRect(0, 240 - rx[valsreaded-1] + 1, 320, rx[valsreaded]-rx[valsreaded-1], ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
-            
-            tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
-            tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_MAGENTA);
+    for (int i=0;i<2;i++)
+      tft.drawLine(axispos[i], x_start - rx[valsreaded-1], axispos[i], x_start - rx[valsreaded], ILI9341_DARKGREY);           //X AXIS 
+    tft.fillRect(0, x_start - rx[valsreaded] - 10, MAX_CURVES_Y, 10, ILI9341_BLACK);                                //CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
+
+    
+    tft.drawLine(axispos[0]- ry[valsreaded-1], x_start - rx[valsreaded-1], axispos[0] - ry[valsreaded],   x_start - rx[valsreaded], color);
+    tft.drawLine(axispos[1]- yflux[0],         x_start - rx[valsreaded-1], axispos[1] - yflux[1],         x_start - rx[valsreaded], ILI9341_MAGENTA);
 
   }
 }
@@ -183,7 +201,7 @@ void print_bat(){
 void print_vols(){
     
     tft.setRotation(0);
-    tft.fillRect(40,LEGEND_Y,70,50, ILI9341_RED); //Here x is the first value (in the less width dimension)
+    tft.fillRect(40,LEGEND_Y,40,80, ILI9341_RED); //Here x is the first value (in the less width dimension)
 
     itoa(_mllastInsVol, buffer, 10);
     tft.setCursor(0, LEGEND_Y); //Before: 150,180 at right 

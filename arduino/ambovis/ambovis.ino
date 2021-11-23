@@ -24,6 +24,7 @@ bool sleep_mode;
 bool put_to_sleep,wake_up;
 unsigned long print_bat_time;
 
+bool drawing_cycle = 0;//TOD: Move to class member
 
 // FOR ADS
 #include <Wire.h>
