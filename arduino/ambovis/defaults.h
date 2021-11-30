@@ -120,6 +120,14 @@ class VentilationOptions_t {
   ~VentilationOptions_t(){}
 };
 
+typedef struct {
+    byte vent_mode;
+    bool sleep_mode;
+    bool put_to_sleep;
+    bool wake_up;
+    bool display_needs_update;
+} SystemState;
+
 #define MODE_VOL_CTL 0
 #define MODE_VOL_CTL 1
 #define MODE_MANUAL  2
@@ -131,15 +139,11 @@ class VentilationOptions_t {
 #define TESTING_MODE_DISABLED 1
 
 //general variables
-extern byte vent_mode;
-extern bool send_data;
-extern bool sleep_mode;
+//extern byte vent_mode;
+//extern bool sleep_mode;
 
-extern byte alarm_state;
-
-extern bool put_to_sleep,wake_up;
 //PID LIMITS
-extern bool change_pid_params;
+//extern bool change_pid_params;
 extern unsigned long time;
 
 #endif // DEFAULTS_H

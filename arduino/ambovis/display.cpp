@@ -38,14 +38,16 @@ int yflux[2];
 int yvt[2];
 char buffer[10];
 
-void tft_draw(void) {
+void tft_draw(byte alarm_state, SensorParams sensorParams) {
     //Serial.println(cycle_pos);Serial.println(ry[valsreaded]);
-    last_x=cycle_pos;
-    rx[valsreaded]=cycle_pos;
-    ry[valsreaded]=pressure_p*2.;     
+    last_x = cycle_pos;
+    rx[valsreaded] = cycle_pos;
+    ry[valsreaded] = sensorParams.pressure_p * 2.;
 
-    yflux[0]=yflux[1];yflux[1]=int(flow_f*0.035);
-    yvt[0]=yvt[1];yvt[1]=int((_mlInsVol - _mlExsVol)*0.1);
+    yflux[0]=yflux[1];
+    yflux[1]=int(sensorParams.flow_f * 0.035);
+    yvt[0]=yvt[1];
+    yvt[1]=int((_mlInsVol - _mlExsVol)*0.1);
 
     #if TESTING_MODE_DISABLED
     tft.setRotation(1);
@@ -54,11 +56,11 @@ void tft_draw(void) {
     #endif//TESTING_MODE_DISABLED
     valsreaded+=1;
     
-  	if (last_x<5 && !lcd_cleaned){
-    		lcd_cleaned=true;
-    		valsreaded=0;
-    		for (int i=0;i<3;i++) 
-    		    valsreaded_[i]=0;
+  	if (last_x<5 && !lcd_cleaned) {
+  	    lcd_cleaned=true;
+  	    valsreaded=0;
+  	    for (int i=0;i<3;i++)
+  	        valsreaded_[i]=0;
         print_vols();
         print_bat();
         #if TESTING_MODE_DISABLED
@@ -66,13 +68,11 @@ void tft_draw(void) {
         tft.fillRect(0,0,60,100, ILI9341_BLACK); //FOR ALARMS, UPPER RIRHT
         tft.fillRect(0, 240 , 320, 10, ILI9341_GREEN);//x,y,lengthx,lentgthy
         #endif //TESTING_MODE_DISABLED
-		} else {
-		    lcd_cleaned=false;
-		}
+  	} else {
+  	    lcd_cleaned=false;
+  	}
 
-
-    
-    check_alarms();
+    check_alarms(alarm_state);
     
 }//loop
 
@@ -92,7 +92,7 @@ void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WIT
   }
 }
 
-void check_alarms(){
+void check_alarms(byte alarm_state) {
   
       //Serial.println(state_r);
     if (alarm_state>9) {

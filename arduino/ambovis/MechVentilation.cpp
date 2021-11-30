@@ -1,7 +1,7 @@
 #include "MechVentilation.h"
 
-float pressure_max;
-float pressure_min;
+//float pressure_max;
+//float pressure_min;
 byte Cdyn_pass[3];
 
 MechVentilation::MechVentilation(
@@ -108,8 +108,8 @@ void MechVentilation::deactivateRecruitment(void)
 /**
  * It's called from timer1Isr
  */
-void MechVentilation :: update ( void )
-{
+void MechVentilation :: update (SystemState& systemState, SensorParams& sensorParams) {
+
     last_vent_time = millis();
 
     static int totalCyclesInThisState = 0;
@@ -128,10 +128,10 @@ void MechVentilation :: update ( void )
     switch (_currentState) {
     case Init_Insufflation:
     {
-        last_pressure_max=pressure_max;
-        last_pressure_min=pressure_min;
-        pressure_max=0;
-        pressure_min=60;
+        sensorParams.last_pressure_max = sensorParams.pressure_max;
+        sensorParams.last_pressure_min = sensorParams.pressure_min;
+        sensorParams.pressure_max = 0;
+        sensorParams.pressure_min = 60;
 
         // Close Solenoid Valve
         totalCyclesInThisState = (_timeoutIns) / TIME_BASE;
@@ -141,7 +141,7 @@ void MechVentilation :: update ( void )
         for(int i=0;i<2;i++) {
             Cdyn_pass[i]=Cdyn_pass[i+1];
         }
-        Cdyn_pass[2]=_mllastInsVol/(last_pressure_max-last_pressure_min);
+        Cdyn_pass[2]=_mllastInsVol/(sensorParams.last_pressure_max - sensorParams.last_pressure_min);
         Cdyn = (Cdyn_pass[0]+Cdyn_pass[1]+Cdyn_pass[2])/3.;
         _mllastInsVol=int(_mlInsVol);
         _mllastExsVol=int(fabs(_mlExsVol));
@@ -165,7 +165,7 @@ void MechVentilation :: update ( void )
         _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_INSUFFLATION);
         #endif //TESTING_MODE_DISABLED
 
-        if (vent_mode!=VENTMODE_MAN)  {//VCL && PCL
+        if (systemState.vent_mode!=VENTMODE_MAN)  {//VCL && PCL
             #if TESTING_MODE_DISABLED
             _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
             #endif //TESTING_MODE_DISABLED
@@ -197,7 +197,7 @@ void MechVentilation :: update ( void )
         _setState(State_Insufflation);
 
         currentTime = millis();
-        display_needs_update=true;
+        systemState.display_needs_update = true;
 
     }// INIT INSUFFLATION
     break;

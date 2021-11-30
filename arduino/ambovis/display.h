@@ -2,6 +2,7 @@
 #define _DISPLAY_H_
 
 #include "pinout.h"
+#include "Sensors.h"
 #include "defaults.h"
 #if TESTING_MODE_DISABLED
 #include "Adafruit_GFX.h"
@@ -27,7 +28,7 @@ extern Adafruit_ILI9341 tft; //= Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 
 void drawY2(uint16_t color);
 void print_bat();
-void tft_draw();
+void tft_draw(byte alarm_state, SensorParams sensorParams);
 void print_vols();
-void check_alarms();
+void check_alarms(byte alarm_state);
 #endif

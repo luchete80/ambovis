@@ -75,7 +75,7 @@ public:
     void start(void);
     /** Stop mechanical ventilation. */
     void stop(void);
-    void update(void);
+    void update(SystemState& systemState, SensorParams& sensorParams);
 
     /** Recruitment */
     void activateRecruitment(void);
@@ -187,15 +187,12 @@ private:
 extern unsigned int _timeoutIns;
 extern unsigned int _timeoutEsp;
     
-extern byte stepper_time;
 extern unsigned long last_vent_time;
 extern float _mlInsVol,_mlExsVol;
 extern int _mllastInsVol,_mllastExsVol;
 //extern float _stepperSpeed;
 extern float pressure_sec,psec_max,last_psec_max;
 
-extern bool display_needs_update;
-extern byte flux_count;
 extern unsigned long flux_filter_time;
 extern float flux_sum;
 extern VentilationOptions_t options;
