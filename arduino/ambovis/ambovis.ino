@@ -16,6 +16,8 @@
 #include "src/Pressure_Sensor/Pressure_Sensor.h"  //LUCIANO: MPX5050DP
 #include <EEPROM.h>
 
+#define CALIB_CYCLES  5
+
 bool init_verror;
 byte Cdyn;
 bool autopid;
@@ -143,7 +145,7 @@ int alarm_vt = 200;
 
 //MENU
 unsigned long lastButtonPress;
-float verror, verror_sum;
+float verror, verror_sum, verror_sum_outcycle;  //verror sum is intra cycle, verror_sum_outcycle is inter-cycle
 
 //FLUX IS -100 to +100, has to be added 100
 //ASSIMETRY IN MAX FLOW IS IN NEGATIVE (ORIGINAL CURVE)
@@ -175,7 +177,6 @@ AutoPID * pid;
 MechVentilation * ventilation;
 VentilationOptions_t options;
 
-float p_dpt0;
 
 int bck_state ;     // current state of the button
 int last_bck_state ; // previous state of the button
@@ -227,6 +228,7 @@ void setup() {
   pinMode(PIN_MENU_EN, INPUT_PULLUP);
   pinMode(PIN_MENU_BCK, INPUT_PULLUP);
   pinMode(PIN_BAT_LEV, INPUT);
+  pinMode(PIN_MPX_LEV, INPUT);
 
   digitalWrite(PIN_EN, HIGH);
 
@@ -261,30 +263,30 @@ void setup() {
   writeLine(1, "RespirAR FIUBA", 4);
   writeLine(2, "v2.0.1", 8);
 
-  p_dpt0 = 0;
+
   ads.begin();
-  verror = 0;
-  float verrp = 0.;
-  //  for (int i = 0; i < 10; i++) {
-  //    adc0 = ads.readADC_SingleEnded(0);
-  //    Voltage = (adc0 * 0.1875) * 0.001; //VOLT!
-  //    Serial.print("Voltage dp: "); Serial.println(Voltage, 3);
-  //    verror += ( Voltage - 5.0 * 0.04 ); //IF VOUT IS: Vo=VS(0.09*P0.04) +/- ERR
-  //    //vo=vs(0.09 dp +0.04)+/-verr
-  //    p_dpt0 += 0.5 * (( Voltage /* 5.0/V_SUPPLY_HONEY */ - 0.1 * 4.8/* - corr_fs */) / (0.8 * 4.8) * DEFAULT_PSI_TO_CM_H20 * 2. - DEFAULT_PSI_TO_CM_H20);
-  //    verrp += (analogRead(A0) * 5. / 1024. - 5.*0.04);
-  //    Serial.print("Voltage p: "); Serial.println(analogRead(A0));
-  //    delay(10);
-  //  }
-  //
-  //  verror /= 10.; //
-  //  verrp /= 10.;
-  //  p_dpt0 /= 10.0;
-  //  Serial.print("dp (Flux) MPX Volt (mV) at p0: "); Serial.println(verror * 1000, 3);
+  verror = verror_sum = 0;
+  verror_sum_outcycle = 0;
+//  float verrp = 0.;
+//    for (int i = 0; i < 100; i++) {
+//      adc0 = ads.readADC_SingleEnded(0);
+//      Voltage = (adc0 * 0.1875) * 0.001; //VOLT!
+//      Serial.print("Voltage dp: "); Serial.println(Voltage, 3);
+//      verror += ( Voltage - 5.0 * 0.04 ); //IF VOUT IS: Vo=VS(0.09*P0.04) +/- ERR
+//      verrp += (analogRead(A0) * 5. / 1024. - 5.*0.04);
+//      Serial.print("Voltage p: "); Serial.println(analogRead(A0));
+//      Serial.print("Carga: ");Serial.println(analogRead(PIN_BAT_LEV));
+//      delay(10);
+//    }
+//  //
+//  verror /= 100.; //
+
+  
+  Serial.print("dp (Flux) MPX Volt (mV) at p0: "); Serial.println(verror * 1000, 3);
   //  Serial.print("pressure  MPX Volt (mV) at p0: "); Serial.println(verrp * 1000, 3);
 
   Serial.print("dp  error : "); Serial.println(-verror / (5.*0.09));
-  p_dpt0 = 0.20;
+  
 
 
   // configura la ventilación
@@ -384,6 +386,9 @@ void setup() {
   sleep_mode = false;
   put_to_sleep = false;
   wake_up = false;
+
+  //Serial.println("Vcc & Out MPX: " + String(analogRead(PIN_MPX_LEV)) + String(", ") + String(Voltage));
+  
   Serial.println("Exiting setup");
 }
 
@@ -391,8 +396,17 @@ void setup() {
 bool update_display = false;
 byte pos;
 
+/////////////// CALIBRATION
+bool  calibration_run = true;
+int   start_cyle = last_cycle;  //Used for calibration
+byte  calib_cycle = 0;
 void loop() {
-
+    //Serial.print("Carga MPX: ");Serial.println(analogRead(PIN_MPX_LEV));
+  analogReference(INTERNAL1V1); // use AREF for reference voltage
+  float vlevel = float(analogRead(PIN_MPX_LEV))/1024.*1.1*4.9166;
+  Serial.println("Vcc & Out MPX: " + String(vlevel) + String(", ") + String(Voltage));
+  analogReference(DEFAULT);
+  
   if (!sleep_mode) {
     if (wake_up) {
       lcd.clear();
@@ -446,13 +460,11 @@ void loop() {
       adc0 = ads.readADC_SingleEnded(0);
       Voltage = (adc0 * 0.1875) * 0.001; //Volts
 
-      p_dpt = ( Voltage /*- verror*/ - 0.20 ) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
+      p_dpt = ( Voltage - verror - 0.20 ) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
       //ORIGINAL CON ERROR NEN TENSION
-      // p_dpt = ( Voltage - 0.20 -verror ) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20 + (float(p_trim) - 100.0) * 1e-3 - verror; //WITH TRIM
-      //p_dpt = ( Voltage - 0.20 - verror - 0.004) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM  //ADDED TRIM
-      update_error();
-
-      p_dpt -= verror + (float(p_trim) - 100.0) * 1e-3; //WITH TRIM
+      //update_error();
+      //p_dpt -= verror + (float(p_trim) - 100.0) * 1e-3; //WITH TRIM
+      
       pos = findClosest(dp, 55, p_dpt);
       //flux should be shifted up (byte storage issue)
       _flux = po_flux[pos] - 100 + ( float (po_flux[pos + 1] - 100) - float (po_flux[pos] - 100) ) * ( p_dpt - float(dp[pos]) ) / (float)( dp[pos + 1] - dp[pos]);
@@ -490,6 +502,10 @@ void loop() {
       }
     }//Read Sensor
 
+    if (calibration_run) {
+      update_error_once();
+    }
+    
     if (alarm_vt) {
 
     }
@@ -543,6 +559,22 @@ void loop() {
       } else {
         digitalWrite(YELLOW_LED, LOW);
       }
+
+      if (calibration_run) {
+      //NEW, CALIBRATION
+       Serial.println("Calibration iter, cycle, verror, sum: " + String(vcorr_count) + ", " + 
+                                                                  String(calib_cycle) + ", " + 
+                                                                  String(verror) + ", " + 
+                                                                  String(verror_sum_outcycle));
+        calib_cycle ++;
+        verror_sum_outcycle += verror;
+        if (calib_cycle >= CALIB_CYCLES ){
+          calibration_run = false;
+          verror = verror_sum_outcycle / CALIB_CYCLES;
+          Serial.println("Calibration verror: " + String(verror));
+      }
+    }
+    
     }//change cycle
 
     if (display_needs_update) {
@@ -619,34 +651,46 @@ void loop() {
 
 }//LOOP
 
-void timer1Isr(void)
-{
+void timer1Isr(void) {
   ventilation->update();
   //alarms->update(ventilation->getPeakInspiratoryPressure());
 }
 
-
-void update_error() {
-  //UPDATING VERROR
-  if (cycle_pos > 100) {
-    if (vcorr_count < 20) {
+void update_error_once() { //THIS UPDATES ONCE AFTER SEVERAL CYCLES WITHOUT NET FLUX
+  if (cycle_pos > 110) {
       vcorr_count += 1.;
       verror_sum += ( Voltage - 0.2 ); //-5*0.04
-      verror_sum += p_dpt; //Si el error es de presion
-      //verror+=Voltage;
       init_verror = true;
     }
-    //Serial.print("Verror (mV) and count: ");Serial.print(verror_sum*1000);Serial.print(",  ");Serial.println(vcorr_count);
-  }
-  if (cycle_pos < 5 && init_verror) {
+
+  if (cycle_pos < 10 && init_verror) {
     verror = verror_sum / ((float)vcorr_count + 1.);
-    //Serial.print("Verror (mV) and count: ");Serial.print(verror*1000);Serial.print(",  ");Serial.println(vcorr_count);
-    //Serial.print("Verror (mV) and count: ");Serial.println(verror*1000);
     verror_sum = 0.;
     vcorr_count = 0;
     init_verror = false;
   }
 }
+
+//void update_error() {
+//  //UPDATING VERROR
+//  if (cycle_pos > 100) {
+//    if (vcorr_count < 20) {
+//      vcorr_count += 1.;
+//      verror_sum += ( Voltage - 0.2 ); //-5*0.04
+//      verror_sum += p_dpt; //Si el error es de presion
+//      //verror+=Voltage;
+//      init_verror = true;
+//    }
+//  }
+//  if (cycle_pos < 5 && init_verror) {
+//    verror = verror_sum / ((float)vcorr_count + 1.);
+//    //Serial.print("Verror (mV) and count: ");Serial.print(verror*1000);Serial.print(",  ");Serial.println(vcorr_count);
+//    //Serial.print("Verror (mV) and count: ");Serial.println(verror*1000);
+//    verror_sum = 0.;
+//    vcorr_count = 0;
+//    init_verror = false;
+//  }
+//}
 
 //void timer2Isr(void)
 //{
