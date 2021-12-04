@@ -169,7 +169,7 @@ private:
     State _currentState = State_Homing;
     Alarm _currentAlarm = No_Alarm;
 
-
+    bool curr_ended_whilemov;
         /** Timer counter in seconds. */
     //Este tambien es mio
    
@@ -224,4 +224,7 @@ extern int max_pidd,min_pidd;
 
 extern float f_acc;extern byte f_acc_b;
 extern byte p_acc;
+
+extern bool ended_whilemov;
+    
 #endif /* INC_MECHANICAL_VENTILATION_H */

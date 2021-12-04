@@ -15,8 +15,9 @@ byte Cdyn_pass[3];
 int PID_KP=400.01;
 int PID_KI=20.01;
 int PID_KD=50.01;
-int STEPPER_ACC_INSUFFLATION=STEPPER_MICROSTEPS *  1500;
-int STEPPER_SPEED_MAX=STEPPER_MICROSTEPS *  1500;
+int STEPPER_ACC_INSUFFLATION = STEPPER_MICROSTEPS * 1500;
+int STEPPER_SPEED_MAX        = STEPPER_MICROSTEPS * 1500;
+int STEPPER_ACCEL_MAX        = STEPPER_MICROSTEPS * 1500;
 
 //static
 float speed_m,accel_m,speed_b,accel_b;
@@ -28,6 +29,7 @@ byte dpip_b;
 
 float f_acc;byte f_acc_b;
 byte  p_acc;
+bool ended_whilemov;
 
 MechVentilation::MechVentilation(
         #ifdef ACCEL_STEPPER
@@ -228,7 +230,7 @@ void MechVentilation :: update ( void )
         #ifdef ACCEL_STEPPER
         _stepper->setSpeed(STEPPER_SPEED_MAX);
         _stepper->moveTo(-STEPPER_HIGHEST_POSITION);
-        _stepper->setAcceleration(STEPPER_ACC_INSUFFLATION);
+        _stepper->setAcceleration(STEPPER_ACCEL_MAX);
         #else
         // Note: this can only be called when the motor is stopped
         //IMPORTANT FROM https://github.com/Stan-Reifel/FlexyStepper/blob/master/Documentation.md
@@ -239,8 +241,8 @@ void MechVentilation :: update ( void )
           _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
         else { //MANUAL MODE
           _stepper->setTargetPositionInSteps(int (STEPPER_HIGHEST_POSITION*(float)_percVol/100.));
-          _stepperSpeed=STEPPER_HIGHEST_POSITION*(float(_percVol)*0.01)/( (float)(_timeoutIns*0.001) * DEFAULT_FRAC_CYCLE_VCL_INSUFF);//En [ml/s]
-          Serial.println("Speed: " + String(_stepperSpeed));
+          _stepperSpeed = 1.1 * STEPPER_HIGHEST_POSITION*(float(_percVol)*0.01)/( (float)(_timeoutIns*0.001) * DEFAULT_FRAC_CYCLE_VCL_INSUFF);//En [ml/s]
+          
         #ifdef DEBUG_UPDATE
           Serial.print("Manual mode Timeout ins , speed: ");Serial.print(_timeoutIns);Serial.print(" ");Serial.println(_stepperSpeed);
         #endif
@@ -321,6 +323,8 @@ void MechVentilation :: update ( void )
 //      }
 //      }//if pcl
 
+    curr_ended_whilemov = false;
+
     }// INIT INSUFFLATION
     break;
     case State_Insufflation:
@@ -346,6 +350,7 @@ void MechVentilation :: update ( void )
             if (!_stepper->motionComplete()) //LUCIANO: NEW
             #endif
             {
+                curr_ended_whilemov = true;
                 // motor not finished, force motor to stop in current position
                 //_stepper->setTargetPositionInSteps(_stepper->getCurrentPositionInSteps());
                 //MODIFIED
@@ -355,9 +360,9 @@ void MechVentilation :: update ( void )
 //                _stepper->setTargetPositionToStop();
 //                #endif
                 
-                
+//                
                 //#ifdef DEBUG_UPDATE
-                  Serial.println("ENDED TIME WHILE MOVING");
+                Serial.println("ENDED TIME WHILE MOVING");
                 //#endif
             }
             else {
@@ -367,6 +372,7 @@ void MechVentilation :: update ( void )
             if (_recruitmentMode) {
                 deactivateRecruitment();
             }
+
         }
 //        else //Time has not expired (State Insufflation)
 //        {
@@ -449,6 +455,9 @@ void MechVentilation :: update ( void )
     break;
     case Init_Exsufflation:
     {
+      ended_whilemov = curr_ended_whilemov;
+      Serial.println("ended_whilemov: " + String(ended_whilemov ));
+      
       _msecTimerStartCycle=millis();
       //Serial.print("Current pressure");Serial.println(_currentPressure);
       
