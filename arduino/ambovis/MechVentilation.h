@@ -161,13 +161,10 @@ private:
     Configuration_t _nominalConfiguration;
 
     /* Internal state */
-    /** Current state. */
     State _currentState = State_Homing;
     Alarm _currentAlarm = No_Alarm;
 
     /** Timer counter in seconds. */
-    //Este tambien es mio
-
     unsigned long _msecTimerCnt; //esteno necesita ser tan grande
     /**  Insufflation timeout in seconds. */
     unsigned long _cyclenum;    //Not important value, only for printing control
@@ -178,10 +175,14 @@ private:
     
     bool _running = false;
     bool _sensor_error_detected;
-    //float _currentFlow = 0.0;
-    //float _currentVolume = 0.0;
     float timeoutCycle;
     unsigned long _msecTimerStartCycle;
+    //
+    int PID_KP = 400.01;
+    int PID_KI = 20.01;
+    int PID_KD = 50.01;
+    int STEPPER_ACC_INSUFFLATION = STEPPER_MICROSTEPS *  600;
+    int STEPPER_SPEED_MAX = 14000;
 };
 
 extern unsigned int _timeoutIns;

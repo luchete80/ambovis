@@ -49,9 +49,6 @@
 #define STEPPER_ACCEL_MAX           (1500 * STEPPER_MICROSTEPS)
 #define STEPPER_SPEED_MAX_VCL       (75 * STEPPER_MICROSTEPS)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_SPEED_EXSUFF        (450 * STEPPER_MICROSTEPS)
-#define STEPPER_ACC_INSUFFLATION    (STEPPER_MICROSTEPS *  1500)
-#define STEPPER_SPEED_MAX           (STEPPER_MICROSTEPS *  1500)
-
 
 
 // Valores por defecto
@@ -91,10 +88,6 @@
 // PID settings and gains
 #define PID_MIN -20000 // TODO: check direction implementation
 #define PID_MAX 20000
-
-#define PID_KP  400.01
-#define PID_KI  20.01
-#define PID_KD  50.01
 
 #define PID_TS TIME_BASE
 #define PID_BANGBANG 8
@@ -138,12 +131,7 @@ typedef struct {
 
 #define TESTING_MODE_DISABLED 1
 
-//general variables
-//extern byte vent_mode;
-//extern bool sleep_mode;
-
-//PID LIMITS
-//extern bool change_pid_params;
+extern bool change_pid_params;
 extern unsigned long time;
 
 #endif // DEFAULTS_H
