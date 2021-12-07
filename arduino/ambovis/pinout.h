@@ -50,6 +50,7 @@
 
 #define PIN_BAT_LEV     A1
 #define PIN_MPX_LEV     A2
+#define PIN_PRESSURE    A3
 
 // IF ARDUINO UNO
 //#define PIN_ENC_CL  2
