@@ -277,16 +277,16 @@ void setup() {
   vcorr_count = 0;
   
   float verrp = 0.;
-//  vsupply_0 = 0.;
-//    for (int i = 0; i < 100; i++) {
-//
-//      vsupply_0 += float(analogRead(PIN_MPX_LEV))/1024.*1.1*VOLTAGE_CONV;
-//      delay(10);
-//    }
-//  vsupply_0 /= 100.; //
+  vsupply_0 = 0.;
+    for (int i = 0; i < 100; i++) {
+
+      vsupply_0 += float(analogRead(PIN_MPX_LEV))/1024.*1.1*VOLTAGE_CONV;
+      delay(10);
+    }
+  vsupply_0 /= 100.; //
   
   Serial.println("Vsupply_0: " + String (vsupply_0));
-  vfactor = 5./vsupply_0; //
+  //vfactor = 5./vsupply_0; //
   
   Serial.print("dp (Flux) MPX Volt (mV) at p0: "); Serial.println(verror * 1000, 3);
   //  Serial.print("pressure  MPX Volt (mV) at p0: "); Serial.println(verrp * 1000, 3);
@@ -412,7 +412,7 @@ byte pos;
 bool  calibration_run = true;
 int   start_cyle = last_cycle;  //Used for calibration
 byte  calib_cycle = 0;
-
+float vs;
 ////////////////////////////////////////
 ////////////// MAIN LOOP ///////////////
 ////////////////////////////////////////
@@ -475,7 +475,7 @@ void loop() {
       vlevel = float(analogRead(PIN_MPX_LEV))/1024.*1.1*VOLTAGE_CONV;
 
       // Is like 1/vs
-      float vs = vlevel * vfactor; 
+      vs = vlevel /** vfactor*/; 
       
       adc0 = ads.readADC_SingleEnded(0);
       Voltage = (adc0 * 0.1875) * 0.001; //Volts
@@ -484,7 +484,7 @@ void loop() {
       //p_dpt = ( Voltage /*- verror */- vzero - 0.20 ) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
 
       //With constant correction
-      p_dpt = ( Voltage/vs - vzero - 0.20 ) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
+      p_dpt = ( (Voltage - vzero)/vs   - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
       
       pos = findClosest(dp, 55, p_dpt);
       //flux should be shifted up (byte storage issue)
@@ -525,7 +525,7 @@ void loop() {
 
     if (calibration_run) {
       vcorr_count += 1.;
-      verror_sum += ( Voltage - 0.2 ); //-5*0.04
+      verror_sum += ( Voltage - 0.04 * vs); //-5*0.04
       Serial.println("Calibration sum: "+ String(verror_sum));
       //update_error_once();
     } else { //This sums the feed error
@@ -601,7 +601,8 @@ void loop() {
         if (calib_cycle >= CALIB_CYCLES ){
           calibration_run = false;
           vzero = verror_sum_outcycle / float(CALIB_CYCLES);
-          Serial.println("Calibration verror: " + String(verror));
+          Serial.println("Calibration verror: " + String(vzero));
+
       }
     } else {
         verror = verror_sum / float(vcorr_count);
