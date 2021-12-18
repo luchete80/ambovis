@@ -164,7 +164,8 @@ private:
     State _currentState = State_Homing;
     Alarm _currentAlarm = No_Alarm;
 
-    /** Timer counter in seconds. */
+    bool curr_ended_whilemov;
+        /** Timer counter in seconds. */
     unsigned long _msecTimerCnt; //esteno necesita ser tan grande
     /**  Insufflation timeout in seconds. */
     unsigned long _cyclenum;    //Not important value, only for printing control
@@ -177,12 +178,6 @@ private:
     bool _sensor_error_detected;
     float timeoutCycle;
     unsigned long _msecTimerStartCycle;
-    //
-    int PID_KP = 400.01;
-    int PID_KI = 20.01;
-    int PID_KD = 50.01;
-    int STEPPER_ACC_INSUFFLATION = STEPPER_MICROSTEPS *  600;
-    int STEPPER_SPEED_MAX = 14000;
 };
 
 extern unsigned int _timeoutIns;
@@ -215,4 +210,7 @@ extern int max_pidd,min_pidd;
 
 extern float f_acc;extern byte f_acc_b;
 extern byte p_acc;
+
+extern bool ended_whilemov;
+    
 #endif /* INC_MECHANICAL_VENTILATION_H */

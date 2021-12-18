@@ -105,14 +105,14 @@ void check_encoder(MenuState& menuState, SystemState& systemState, SensorParams&
                     min_sel=20;max_sel=50;
                     menuState.encoderPos = menuState.oldEncPos = alarm_max_pressure;
                 } else if ( menuState.menu_number == 2 ) {
-                    menuState.encoderPos = min_cd;
-                    min_sel=0;max_sel=max_cd;
+                    menuState.encoderPos = STEPPER_ACCEL_MAX/200;
+                    min_sel=0;max_sel=8000;
                 } else if ( menuState.menu_number == 3 ) {
                     menuState.encoderPos = dpip_b;
                     min_sel=10;max_sel=40;
                 }
                 break;
-            case 2: 
+            case 2:
                 if ( menuState.menu_number == 0 ) {
                     menuState.encoderPos = menuState.oldEncPos = options.respiratoryRate;
                     min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
@@ -120,8 +120,8 @@ void check_encoder(MenuState& menuState, SystemState& systemState, SensorParams&
                     min_sel=5;max_sel=30;
                     menuState.encoderPos = menuState.oldEncPos = alarm_peep_pressure;
                 } else if ( menuState.menu_number == 2 ){
-                    menuState.encoderPos=min_speed/10;
-                    min_sel=10;max_sel=100;
+                    menuState.encoderPos=STEPPER_SPEED_MAX/200;
+                    min_sel=10;max_sel=8000;
                 } else if ( menuState.menu_number == 3 ){
                     menuState.encoderPos=pfmin=50.*pf_min;
                     min_sel=0;max_sel=99;
@@ -275,7 +275,9 @@ void check_encoder(MenuState& menuState, SystemState& systemState, SensorParams&
             } else if ( menuState.encoderPos < min_sel ) {
                 menuState.encoderPos = menuState.oldEncPos = min_sel;
             } else {
+
                 menuState.oldEncPos = menuState.encoderPos;
+
                 switch (menuState.curr_sel) {
                 case 1:
                     if ( menuState.menu_number == 0 ) {
@@ -283,7 +285,7 @@ void check_encoder(MenuState& menuState, SystemState& systemState, SensorParams&
                     } else if ( menuState.menu_number == 1 ) {
                         alarm_max_pressure = menuState.encoderPos;
                     } else if ( menuState.menu_number == 2 ) {
-                        min_cd = int(menuState.encoderPos);
+                        STEPPER_ACCEL_MAX  = int((float)menuState.encoderPos*200.);
                     } else if ( menuState.menu_number == 3 ) {
                         dpip_b = menuState.encoderPos;
                         dpip = float(menuState.encoderPos)/10.;
@@ -295,7 +297,7 @@ void check_encoder(MenuState& menuState, SystemState& systemState, SensorParams&
                     } else if ( menuState.menu_number == 1 ) {
                         alarm_peep_pressure = menuState.encoderPos;
                     } else if ( menuState.menu_number == 2 ) {
-                        min_speed = int((float)menuState.encoderPos*10.);
+                        STEPPER_SPEED_MAX  = int((float)menuState.encoderPos*200.);
                     } else if ( menuState.menu_number == 3 ) {
                         Serial.print("encoderPos: ");Serial.println(menuState.encoderPos);
                         pfmin = menuState.encoderPos;
@@ -354,6 +356,7 @@ void check_encoder(MenuState& menuState, SystemState& systemState, SensorParams&
                         max_accel  = int((float)menuState.encoderPos*10.);
                     }
                     break;
+
                 case 7:
                     if ( menuState.menu_number == 2 ) {
                         min_pidk = menuState.encoderPos*10;
@@ -386,13 +389,15 @@ void check_encoder(MenuState& menuState, SystemState& systemState, SensorParams&
                         max_pidd = menuState.encoderPos*2;
                     }
                     break;
+
                 }//switch
                 menuState.show_changed_options = true;
                 menuState.update_options = true;
             }//Valid range
 
             menuState.old_curr_sel = menuState.curr_sel;
-
+            if (menuState.menu_number==2)
+                change_pid_params=true;
         }//oldEncPos != encoderPos and valid between range
     }
 }
@@ -406,23 +411,19 @@ void clear_n_sel(int menu, int curr_selection, bool item_sel, byte ventilationMo
         lcd_clearxy(8,1);
         switch(curr_selection) {
             case 1:
-                lcd_selxy(0, 0, item_sel);
-                break;
+                lcd_selxy(0, 0, item_sel);break;
             case 2:
-                lcd_selxy(0, 1, item_sel);
-                break;
+                lcd_selxy(0, 1, item_sel);break;
             case 3:
-                lcd_selxy(0, 2, item_sel);
-                break;
+                lcd_selxy(0, 2, item_sel);break;
             case 4:
                 if ( ventilationMode==VENTMODE_VCL || ventilationMode==VENTMODE_PCL) {
                     lcd_selxy(8, 1, item_sel);//pcl
                 } else {
                     lcd_selxy(9, 0, item_sel);
                 }
-                break;
         }
-    } else if ( menu == 1 ) {
+    } else if (menu == 1) {
         lcd_clearxy(0,0);
         lcd_clearxy(0,1);
         lcd_clearxy(12,2);
@@ -450,11 +451,9 @@ void clear_n_sel(int menu, int curr_selection, bool item_sel, byte ventilationMo
         }
     } else if ( menu == 2 ) {
         lcd_clearxy(0,0);
-        lcd_clearxy(6,0);
-        lcd_clearxy(12,0);
+        lcd_clearxy(9,0);
         lcd_clearxy(0,1);
         lcd_clearxy(6,1);
-        lcd_clearxy(12,1);
         lcd_clearxy(0,2);
         lcd_clearxy(0,3);
         switch(curr_selection) {
@@ -462,7 +461,7 @@ void clear_n_sel(int menu, int curr_selection, bool item_sel, byte ventilationMo
                 lcd_selxy(0, 0, item_sel);
                 break;//PIP
             case 2:
-                lcd_selxy(6, 0, item_sel);
+                lcd_selxy(9, 0, item_sel);
                 break;//PEEP
             case 3:
                 lcd_selxy(12, 0, item_sel);
@@ -489,7 +488,7 @@ void clear_n_sel(int menu, int curr_selection, bool item_sel, byte ventilationMo
                 lcd_selxy(0, 3, item_sel);
                 break;
             case 11:
-                lcd_selxy(6,3, item_sel);
+                lcd_selxy(6, 3, item_sel);
                 break;
             case 12:
                 lcd_selxy(12, 3, item_sel);
@@ -521,7 +520,7 @@ void clear_n_sel(int menu, int curr_selection, bool item_sel, byte ventilationMo
                 lcd_selxy(7, 2, item_sel);
                 break;
         }
-    }//menu number 
+    }//menu number
 }
 
 void display_lcd(MenuState& menuState, byte ventilationMode, SensorParams& sensorParams) {
@@ -618,36 +617,21 @@ void display_lcd(MenuState& menuState, byte ventilationMode, SensorParams& senso
             writeLine(3, "OFF", 6);
         }
 
-        writeLine(3, "C:", 10);
-        writeLine(3, String(last_cycle), 12);
-
+    writeLine(3, "C:", 10);
+    writeLine(3, String(last_cycle), 12);
     } else if ( menuState.menu_number == 2 ) {//PID
 
-        for (int i=0 ; i<3 ; i++) {
+        for (int i=0;i<3;i++){
            lcd_clearxy(3,i,3);
            lcd_clearxy(9,i,3);
            lcd_clearxy(15,i,3);
         }
+
+        writeLine(0, "a:" + String(STEPPER_ACCEL_MAX), 1);
+        writeLine(0, "s:" + String(STEPPER_SPEED_MAX), 10);
+        writeLine(1, "fs:" + String(STEPPER_SPEED_MAX), 1);
         
-        writeLine(0, "c:" + String(min_cd), 1);
-        writeLine(1, "C:" + String(max_cd), 1);
-    
-        writeLine(0, "v:" + String(min_speed), 7);
-        writeLine(1, "V:" + String(max_speed), 7);
-
-        writeLine(0, "a:" + String(min_accel), 13);
-        writeLine(1, "A:" + String(max_accel), 13);
-
-        writeLine(2, "p:" + String(min_pidk), 1);
-        writeLine(3, "P:" + String(max_pidk), 1);
-    
-        writeLine(2, "i:" + String(min_pidi), 7);
-        writeLine(3, "I:" + String(max_pidi), 7);
-
-        writeLine(2, "d:" + String(min_pidd), 13);
-        writeLine(3, "D:" + String(max_pidd), 13);
-
-    } else if ( menuState.menu_number == 3 ) {//PID Config 2
+  } else if ( menuState.menu_number == 3 ) {//PID Config 2
         lcd_clearxy(3,0,2);
         lcd_clearxy(9,0,3);
         lcd_clearxy(15,0,3);
@@ -685,14 +669,11 @@ void updateState(MenuState& menuState) {
     }
 }
 
-
 void updateCounter(MenuState& menuState) {
     // the button is still pressed
     if (menuState.bck_state == LOW) {
         menuState.holdTime = time - menuState.startPressed;
         // the button is still released
-    } else {
-//        menuState.idleTime = time - menuState.endPressed;
     }
 }
 

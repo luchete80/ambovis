@@ -45,8 +45,9 @@
 #define STEPPER_HOMING_SPEED        (STEPPER_MICROSTEPS * 600)   // Steps/s
 #define STEPPER_LOWEST_POSITION     (-5)   // Steps
 #define STEPPER_HIGHEST_POSITION    ( 183 * STEPPER_MICROSTEPS)   //270º ,2500 for 270º, 2850 for 220º, 2930 for 330º
-#define STEPPER_SPEED_DEFAULT       (STEPPER_MICROSTEPS *  1200)   // Steps/s
-#define STEPPER_ACCEL_MAX           (1500 * STEPPER_MICROSTEPS)
+#define STEPPER_SPEED_DEFAULT       (STEPPER_MICROSTEPS *  1500)   // Steps/s
+extern int STEPPER_SPEED_MAX;       //(14000)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
+extern int STEPPER_ACCEL_MAX;       //(1500 * STEPPER_MICROSTEPS)
 #define STEPPER_SPEED_MAX_VCL       (75 * STEPPER_MICROSTEPS)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_SPEED_EXSUFF        (450 * STEPPER_MICROSTEPS)
 
@@ -88,6 +89,8 @@
 // PID settings and gains
 #define PID_MIN -20000 // TODO: check direction implementation
 #define PID_MAX 20000
+
+extern int PID_KP,PID_KI,PID_KD;
 
 #define PID_TS TIME_BASE
 #define PID_BANGBANG 8

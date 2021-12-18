@@ -3,6 +3,13 @@
 //float pressure_max;
 //float pressure_min;
 byte Cdyn_pass[3];
+int PID_KP = 400.01;
+int PID_KI = 20.01;
+int PID_KD = 50.01;
+int STEPPER_ACC_INSUFFLATION = STEPPER_MICROSTEPS * 1500;
+int STEPPER_SPEED_MAX        = STEPPER_MICROSTEPS * 1500;
+int STEPPER_ACCEL_MAX        = STEPPER_MICROSTEPS * 1500;
+bool ended_whilemov;
 
 MechVentilation::MechVentilation(
         #if TESTING_MODE_DISABLED
@@ -153,8 +160,9 @@ void MechVentilation :: update (SystemState& systemState, SensorParams& sensorPa
 
         #ifdef ACCEL_STEPPER
         #if TESTING_MODE_DISABLED
-        _stepper->setSpeed(STEPPER_SPEED_DEFAULT);
-        _stepper->moveTo(STEPPER_HIGHEST_POSITION);
+        _stepper->setSpeed(STEPPER_SPEED_MAX);
+        _stepper->moveTo(-STEPPER_HIGHEST_POSITION);
+        _stepper->setAcceleration(STEPPER_ACCEL_MAX);
         #endif //TESTING_MODE_DISABLED
         #else
         // Note: this can only be called when the motor is stopped
@@ -174,16 +182,15 @@ void MechVentilation :: update (SystemState& systemState, SensorParams& sensorPa
             #if TESTING_MODE_DISABLED
             _stepper->setTargetPositionInSteps(absPositionInSteps);
             #endif //TESTING_MODE_DISABLED
+            _stepperSpeed = 1.1 * STEPPER_HIGHEST_POSITION*(float(_percVol)*0.01)/( (float)(_timeoutIns*0.001) * DEFAULT_FRAC_CYCLE_VCL_INSUFF);//En [ml/s]
 
-            _stepperSpeed=STEPPER_HIGHEST_POSITION*(float(_percVol)*0.01)/( (float)(_timeoutIns*0.001) * DEFAULT_FRAC_CYCLE_VCL_INSUFF);//En [ml/s]
-            #ifdef DEBUG_UPDATE
-                Serial.print("Manual mode Timeout ins , speed: ");Serial.print(_timeoutIns);Serial.print(" ");Serial.println(_stepperSpeed);
-            #endif
-            #if TESTING_MODE_DISABLED
-            _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCEL_MAX);
-            #endif //TESTING_MODE_DISABLED
-
-            if (_stepperSpeed>STEPPER_SPEED_MAX) {
+        #ifdef DEBUG_UPDATE
+          Serial.print("Manual mode Timeout ins , speed: ");Serial.print(_timeoutIns);Serial.print(" ");Serial.println(_stepperSpeed);
+        #endif
+        #if TESTING_MODE_DISABLED
+          _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCEL_MAX);
+        #endif //TESTING_MODE_DISABLED
+          if (_stepperSpeed>STEPPER_SPEED_MAX){
                 _stepperSpeed=STEPPER_SPEED_MAX;
             }
             #if TESTING_MODE_DISABLED
@@ -192,91 +199,91 @@ void MechVentilation :: update (SystemState& systemState, SensorParams& sensorPa
         }
         #endif //ACCEL_STEPPER
 
-        #if TESTING_MODE_DISABLED
-        _pid->reset();
-        #endif //TESTING_MODE_DISABLED
+//        _pid->reset();
 
         /* Status update, reset timer, for next time, and reset PID integrator to zero */
         _setState(State_Insufflation);
 
         currentTime = millis();
         systemState.display_needs_update = true;
+//
+//        if (systemState.vent_mode == VENTMODE_PCL) {
+//            float speed_m;
+//            float accel_m;
+//            float speed_b;
+//            float accel_b;
+//            float pidk_m;
+//            float pidk_b;
+//            float pidi_m;
+//            float pidi_b;
+//            float pidd_m;
+//            float pidd_b;
+//
+//            if (autopid) {
+//                if (change_pid_params) {
+//                    speed_m = (float)STEPPER_MICROSTEPS*float(max_speed-min_speed)/float(max_cd-min_cd);
+//                    speed_b = (float)STEPPER_MICROSTEPS*(float)max_speed-speed_m*(float)max_cd;
+//                    accel_m = (float)STEPPER_MICROSTEPS*float(max_accel-min_accel)/float(max_cd-min_cd);
+//                    accel_b = (float)STEPPER_MICROSTEPS*(float)max_accel-accel_m*(float)max_cd;
+//                    pidk_m = (float)(max_pidk-min_pidk)/float(max_cd-min_cd);
+//                    pidk_b = (float)max_pidk - pidk_m*(float)max_cd;
+//
+//                    pidi_m = (float)(max_pidi-min_pidi)/float(max_cd-min_cd);
+//                    pidi_b = (float)max_pidi - pidi_m*(float)max_cd;
+//                    pidd_m = (float)(max_pidd-min_pidd)/float(max_cd-min_cd);
+//                    pidd_b = (float)max_pidd - pidd_m*(float)max_cd;
+//
+//                    change_pid_params=false;
+//                }
+//
+//                if ( abs ( sensorParams.last_pressure_max - _pip) > dpip ) {
+//                    if ( Cdyn < min_cd ) {
+//                        PID_KP = min_pidk * peep_fac; //Orig 250
+//                        STEPPER_SPEED_MAX = STEPPER_MICROSTEPS * min_speed;	//Originally 4000
+//                        STEPPER_ACC_INSUFFLATION = STEPPER_MICROSTEPS * min_accel;
+//                    } else if ( Cdyn > max_cd ) {
+//                        PID_KP = max_pidk*peep_fac; //orig 1000
+//                        STEPPER_SPEED_MAX = STEPPER_MICROSTEPS * max_speed; //Originally 12000
+//                        if ( _pip > p_acc ) {
+//                            STEPPER_ACC_INSUFFLATION = STEPPER_MICROSTEPS * max_accel * f_acc;//But the limit is calculated with range from 200 to 700
+//                        } else {
+//                            STEPPER_ACC_INSUFFLATION = STEPPER_MICROSTEPS * max_accel;
+//                        }
+//                    } else {
+//                        PID_KP = ( pidk_m*(float)Cdyn + pidk_b)*peep_fac;
+//                        STEPPER_SPEED_MAX = float(Cdyn) * speed_m + speed_b;  //Originally was 250
+//                        STEPPER_ACC_INSUFFLATION = (accel_m*(float)Cdyn+accel_b); //WITHOUT MICROSTEPS (ALREADY DONE IN CALC)
+//                    }
+//                    #if TESTING_MODE_DISABLED
+//                    _pid->setGains(PID_KP,PID_KI, PID_KD);
+//                    _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);
+//                    #endif //TESTING_MODE_DISABLED
+//                }
+//            } else {//no autopid
+//                PID_KP=700.01;
+//                PID_KI=20.01;
+//                PID_KD=100.01;
+//                STEPPER_ACC_INSUFFLATION = STEPPER_MICROSTEPS *  600;
+//                STEPPER_SPEED_MAX=14000;
+//                #if TESTING_MODE_DISABLED
+//                _pid->setGains(PID_KP,PID_KI, PID_KD);
+//                _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);
+//                #endif //TESTING_MODE_DISABLED
+//            }
+//        }
 
-        if (systemState.vent_mode == VENTMODE_PCL) {
-            float speed_m;
-            float accel_m;
-            float speed_b;
-            float accel_b;
-            float pidk_m;
-            float pidk_b;
-            float pidi_m;
-            float pidi_b;
-            float pidd_m;
-            float pidd_b;
-
-            if (autopid) {
-                if (change_pid_params) {
-                    speed_m = (float)STEPPER_MICROSTEPS*float(max_speed-min_speed)/float(max_cd-min_cd);
-                    speed_b = (float)STEPPER_MICROSTEPS*(float)max_speed-speed_m*(float)max_cd;
-                    accel_m = (float)STEPPER_MICROSTEPS*float(max_accel-min_accel)/float(max_cd-min_cd);
-                    accel_b = (float)STEPPER_MICROSTEPS*(float)max_accel-accel_m*(float)max_cd;
-                    pidk_m = (float)(max_pidk-min_pidk)/float(max_cd-min_cd);
-                    pidk_b = (float)max_pidk - pidk_m*(float)max_cd;
-
-                    pidi_m = (float)(max_pidi-min_pidi)/float(max_cd-min_cd);
-                    pidi_b = (float)max_pidi - pidi_m*(float)max_cd;
-                    pidd_m = (float)(max_pidd-min_pidd)/float(max_cd-min_cd);
-                    pidd_b = (float)max_pidd - pidd_m*(float)max_cd;
-
-                    change_pid_params=false;
-                }
-
-                if ( abs ( sensorParams.last_pressure_max - _pip) > dpip ) {
-                    if ( Cdyn < min_cd ) {
-                        PID_KP = min_pidk * peep_fac; //Orig 250
-                        STEPPER_SPEED_MAX = STEPPER_MICROSTEPS * min_speed;	//Originally 4000
-                        STEPPER_ACC_INSUFFLATION = STEPPER_MICROSTEPS * min_accel;
-                    } else if ( Cdyn > max_cd ) {
-                        PID_KP = max_pidk*peep_fac; //orig 1000
-                        STEPPER_SPEED_MAX = STEPPER_MICROSTEPS * max_speed; //Originally 12000
-                        if ( _pip > p_acc ) {
-                            STEPPER_ACC_INSUFFLATION = STEPPER_MICROSTEPS * max_accel * f_acc;//But the limit is calculated with range from 200 to 700
-                        } else {
-                            STEPPER_ACC_INSUFFLATION = STEPPER_MICROSTEPS * max_accel;
-                        }
-                    } else {
-                        PID_KP = ( pidk_m*(float)Cdyn + pidk_b)*peep_fac;
-                        STEPPER_SPEED_MAX = float(Cdyn) * speed_m + speed_b;  //Originally was 250
-                        STEPPER_ACC_INSUFFLATION = (accel_m*(float)Cdyn+accel_b); //WITHOUT MICROSTEPS (ALREADY DONE IN CALC)
-                    }
-                    #if TESTING_MODE_DISABLED
-                    _pid->setGains(PID_KP,PID_KI, PID_KD);
-                    _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);
-                    #endif //TESTING_MODE_DISABLED
-                }
-            } else {//no autopid
-                PID_KP=700.01;
-                PID_KI=20.01;
-                PID_KD=100.01;
-                STEPPER_ACC_INSUFFLATION = STEPPER_MICROSTEPS *  600;
-                STEPPER_SPEED_MAX=14000;
-                #if TESTING_MODE_DISABLED
-                _pid->setGains(PID_KP,PID_KI, PID_KD);
-                _pid->setOutputRange(-STEPPER_SPEED_MAX,STEPPER_SPEED_MAX);
-                #endif //TESTING_MODE_DISABLED
-            }
-        }
+    curr_ended_whilemov = false;
 
     }// INIT INSUFFLATION
     break;
     case State_Insufflation:
     {
-        if ( systemState.vent_mode == VENTMODE_VCL && _mlInsVol > _tidalVol) {
-            #if TESTING_MODE_DISABLED
-            _stepper->setTargetPositionToStop();
-            #endif //TESTING_MODE_DISABLED
-            wait_NoMove=true;
-        }
+//        if ( systemState.vent_mode == VENTMODE_VCL && _mlInsVol > _tidalVol) {
+//            #if TESTING_MODE_DISABLED
+//            _stepper->setTargetPositionToStop();
+//            #endif //TESTING_MODE_DISABLED
+//            wait_NoMove=true;
+//        }
         // time expired
         if( _msecTimerCnt > _timeoutIns ) {
             #if TESTING_MODE_DISABLED
@@ -286,19 +293,24 @@ void MechVentilation :: update (SystemState& systemState, SensorParams& sensorPa
             if (!_stepper->motionComplete()) //LUCIANO: NEW
             #endif
             {
+                curr_ended_whilemov = true;
                 Serial.println("ENDED TIME WHILE MOVING");
             }
             else {
-                Serial.println("Motion Complete");
+              Serial.println("Motion Complete");
             }
             #endif //TESTING_MODE_DISABLED
             _setState(Init_Exsufflation);
+
         }
     }
     break;
     case Init_Exsufflation:
     {
-        _msecTimerStartCycle=millis();
+      ended_whilemov = curr_ended_whilemov;
+      Serial.println("ended_whilemov: " + String(ended_whilemov ));
+      
+      _msecTimerStartCycle=millis();
         totalCyclesInThisState = _timeoutEsp / TIME_BASE;
 
         /* Stepper control*/
@@ -311,7 +323,7 @@ void MechVentilation :: update (SystemState& systemState, SensorParams& sensorPa
         _stepper->setSpeedInStepsPerSecond(STEPPER_SPEED_EXSUFF);
         _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCEL_MAX);//EXSUFF NO SE UTILIZA MAS; ES LA MAXIMA
         _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
-         #endif
+        #endif
         _pid->reset();
         #endif// TESTING_MODE_DISABLED
 
@@ -330,6 +342,7 @@ void MechVentilation :: update (SystemState& systemState, SensorParams& sensorPa
             if (_stepper->getCurrentPositionInSteps()==STEPPER_LOWEST_POSITION)
             #endif
             {
+
                 _setState(Init_Insufflation);
                 _msecTimerStartCycle=millis();
                 _cyclenum++;  //THIS ALWAYS SGOULD BE PRESENT

@@ -1,6 +1,8 @@
 #include "display.h"
 #include "MechVentilation.h"
 
+#define MAX_CURVES_Y    200
+#define LEGEND_Y        260 //Begining of the legend on Y AXIS
 bool lcd_cleaned=false;
 
 unsigned long time_last_show=0;
@@ -12,7 +14,7 @@ char receivedChars[numChars]; // an array to store the received data
 int last_t;
 int integerFromPC [5];
 float floatFromPC = 0.0;
-int axispos[]={100,170,300}; //from each graph
+int axispos[]={100,170,300}; //from each graph, from 0 to 320 (display height, IN PORTRAIT MODE)
 byte state_r;
 int buzzer=3; //pin
 
@@ -55,15 +57,23 @@ void tft_draw(byte alarm_state, SensorParams sensorParams) {
         drawY2(ILI9341_GREEN);
     #endif//TESTING_MODE_DISABLED
     valsreaded+=1;
-    
-  	if (last_x<5 && !lcd_cleaned) {
-  	    lcd_cleaned=true;
-  	    valsreaded=0;
-  	    for (int i=0;i<3;i++)
-  	        valsreaded_[i]=0;
+    if (last_x>117 && !lcd_cleaned){//NO PONER UN VALOR MENOR QUE 10
+    		lcd_cleaned=true;
+    		valsreaded=0;
+    		for (int i=0;i<2;i++) 
+    		    valsreaded_[i]=0;
         print_vols();
         print_bat();
+        drawing_cycle = !drawing_cycle;
+        Serial.println("Drawing cycle: " + String(drawing_cycle));
         #if TESTING_MODE_DISABLED
+        tft.fillRect(180,280,70,50, ILI9341_RED);    
+        if (ended_whilemov){
+          tft.setCursor(150, 300);tft.println("ENDErr");
+        }
+        else {
+          tft.setCursor(150, 300);tft.println("ENDOk");    
+        }
         tft.setRotation(1);
         tft.fillRect(0,0,60,100, ILI9341_BLACK); //FOR ALARMS, UPPER RIRHT
         tft.fillRect(0, 240 , 320, 10, ILI9341_GREEN);//x,y,lengthx,lentgthy
@@ -77,14 +87,15 @@ void tft_draw(byte alarm_state, SensorParams sensorParams) {
 }//loop
 
 void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
-
+  int x_start = 240 - (int) drawing_cycle * 120;
   if ( rx[valsreaded] > rx[valsreaded-1] ) {//to avoid draw entire line to the begining at the end of the cycle
-      #if TESTING_MODE_DISABLED
-      for (int i=0;i<3;i++)
-            tft.drawLine(axispos[i], 240-rx[valsreaded-1], axispos[i], 240-rx[valsreaded], ILI9341_DARKGREY);
-      tft.fillRect(0, 240 - rx[valsreaded] - 10, 320, 10, ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
-      //tft.fillRect(0, 240 - rx[valsreaded-1] + 1, 320, rx[valsreaded]-rx[valsreaded-1], ILI9341_BLACK);//CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
+    #if TESTING_MODE_DISABLED
+    for (int i=0;i<2;i++)
+      tft.drawLine(axispos[i], x_start - rx[valsreaded-1], axispos[i], x_start - rx[valsreaded], ILI9341_DARKGREY);           //X AXIS 
+    tft.fillRect(0, x_start - rx[valsreaded] - 10, MAX_CURVES_Y, 10, ILI9341_BLACK);                                //CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
 
+    tft.drawLine(axispos[0]- ry[valsreaded-1], x_start - rx[valsreaded-1], axispos[0] - ry[valsreaded],   x_start - rx[valsreaded], color);
+    tft.drawLine(axispos[1]- yflux[0],         x_start - rx[valsreaded-1], axispos[1] - yflux[1],         x_start - rx[valsreaded], ILI9341_MAGENTA);
       tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
       tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_MAGENTA);
       tft.drawLine(axispos[2]-yvt[0],             240-rx[valsreaded-1], axispos[2]-yvt[1],            240-rx[valsreaded], ILI9341_BLUE);
@@ -185,28 +196,26 @@ void print_bat(){
     //tft.setCursor(180, 280);tft.println(buffer);
 
 }
+
 void print_vols(){
     #if TESTING_MODE_DISABLED
     tft.setRotation(0);
-    tft.fillRect(180,160,70,80, ILI9341_BLACK);
-    //itoa(integerFromPC[5], buffer, 10);
-    itoa(_mllastInsVol, buffer, 10);
-    tft.setCursor(150, 180);
-    tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
-    tft.println("Vi: ");tft.setCursor(190, 180);tft.println(buffer);
-    #endif //TESTING_MODE_DISABLED
+    tft.fillRect(40,LEGEND_Y,40,80, ILI9341_RED); //Here x is the first value (in the less width dimension)
 
+    itoa(_mllastInsVol, buffer, 10);
+    tft.setCursor(0, LEGEND_Y); //Before: 150,180 at right 
+    tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
+    tft.println("Vi: ");tft.setCursor(40, LEGEND_Y);tft.println(buffer); //Before 190,180
+    #endif //TESTING_MODE_DISABLED
     
     itoa(_mllastExsVol, buffer, 10);
     #if TESTING_MODE_DISABLED
-    tft.setCursor(150, 200);
-    tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
-    tft.println("Ve: ");tft.setCursor(190, 200);tft.println(buffer);
+    tft.setCursor(0, LEGEND_Y + 20);
+    tft.println("Ve: ");tft.setCursor(40, LEGEND_Y + 20);tft.println(buffer);
     
     itoa((_mllastInsVol + _mllastExsVol)/2, buffer, 10);
-    tft.setCursor(150, 220);
-    tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
-    tft.println("VT: ");tft.setCursor(190, 220);tft.println(buffer);
+    tft.setCursor(0, LEGEND_Y + 40);
+    tft.println("VT: ");tft.setCursor(40, LEGEND_Y + 40);tft.println(buffer);
     #endif //TESTING_MODE_DISABLED
- 
+
   }
