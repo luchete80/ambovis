@@ -193,6 +193,9 @@ void setup() {
   pinMode(TFT_SLEEP, OUTPUT); //Set buzzerPin as output
   digitalWrite(TFT_SLEEP, HIGH); //LOW, INVERTED
 
+  pinMode(LCD_SLEEP, OUTPUT); //Set buzzerPin as output
+  digitalWrite(LCD_SLEEP, HIGH); //LOW, INVERTED
+  
   pinMode(PIN_BUZZER, OUTPUT); //Set buzzerPin as output
   pinMode(GREEN_LED,  OUTPUT); //Set buzzerPin as output
   pinMode(BCK_LED,    OUTPUT); //Set buzzerPin as output
@@ -393,6 +396,9 @@ byte pos;
 
 void loop() {
 
+
+  digitalWrite(LCD_SLEEP, HIGH); //LOW, INVERTED
+
   if (!sleep_mode) {
     if (wake_up) {
       lcd.clear();
@@ -490,6 +496,19 @@ void loop() {
       }
     }//Read Sensor
 
+<<<<<<< Updated upstream
+=======
+    if (calibration_run) {
+      vcorr_count += 1.;
+      verror_sum += ( Voltage - 0.04 * vs); //-5*0.04
+      //Serial.println("Calibration sum: "+ String(verror_sum));
+      //update_error_once();
+    } else { //This sums the feed error
+        verror_sum += vlevel;       // -5*0.04
+        vcorr_count += 1.;
+      }
+    
+>>>>>>> Stashed changes
     if (alarm_vt) {
 
     }
