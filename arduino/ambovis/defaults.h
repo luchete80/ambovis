@@ -140,7 +140,6 @@ extern bool put_to_sleep,wake_up;
 extern bool change_pid_params;
 extern unsigned long time;
 
-
 // 5v to 1.1v dividiver, in order to use 1.1 arduino vref (more stable)
 // Vo = V1 x R2/(R1 + R2)
 // -----X
@@ -153,6 +152,7 @@ extern unsigned long time;
 #define VOLTAGE_CONV   4.916666
 #define USING_1v1_4PRESS
 #define TIME_VOLTAGE_SENSOR 50                // msec
+
 #define VMIN_MPX            4.5               //For battery charge reference
 //Battery level voltage dividers
 #define BATDIV_R1           1200

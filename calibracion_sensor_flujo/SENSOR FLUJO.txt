@@ -1,0 +1,25 @@
+https://forum.arduino.cc/t/stability-of-internal-analogue-reference-with-varying-supply-voltage-vcc/188287/9
+
+
+Access 5v ref via code
+https://forum.arduino.cc/t/access-vref-5v-value-via-code/911137
+
+measuring Vcc 2
+https://forum.arduino.cc/t/measuring-the-source-voltage-using-internal-1-1v-reference/576886/8
+
+http://www.skillbank.co.uk/arduino/measure.htm
+
+
+
+Its Vcc power (~5v or 3.3V) = can vary from day to day, with changes in load etc
+
+the Internal 1.1V = is not precise but stable. Once you know what it is, you can program a gain parameter to compensate for its inaccuracy.
+Or if you use @johnwasser's code and know the 5V Vcc voltage, you can deduce the value of the 1.1V ref. Now you can use the Vcc as a reference (so you can measure up to~5V) and compensate for its current value by measuring the (now known) 1.1V ref.
+
+Purchase an accurate and stable external reference.
+
+
+1 - Si se inicia un cerado al principio sin girar el motor, luego cuando empieza a girar el cero esta muy por abajo, 
+	probablemente baje la tension al arrancar este.
+	
+2 - 

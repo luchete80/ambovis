@@ -64,6 +64,12 @@ void tft_draw(void) {
     		    valsreaded_[i]=0;
         print_vols();
         print_bat();
+        
+        dtostrf(vlevel, 1, 2, buffer);
+        tft.setCursor(100, 80);tft.println("Vmpx:");
+        tft.fillRect(180,80,50,50, ILI9341_BLUE);
+        tft.setCursor(180, 80);tft.println(buffer);
+        
         drawing_cycle = !drawing_cycle;
         Serial.println("Drawing cycle: " + String(drawing_cycle));
         tft.fillRect(180,280,70,50, ILI9341_RED);    
