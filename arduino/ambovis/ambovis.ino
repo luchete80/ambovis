@@ -20,8 +20,6 @@ bool init_verror;
 byte Cdyn;
 bool autopid;
 bool filter;
-//bool sleep_mode;
-//bool put_to_sleep, wake_up;
 unsigned long print_bat_time;
 
 bool drawing_cycle = 0;//TOD: Move to class member
@@ -200,10 +198,6 @@ void setup() {
   );
 
   delay(100);
-
-  //  Serial.println("Tiempo del ciclo (seg):" + String(ventilation -> getExsuflationTime() + ventilation -> getInsuflationTime()));
-  //  Serial.println("Tiempo inspiratorio (mseg):" + String(ventilation -> getInsuflationTime()));
-  //  Serial.println("Tiempo espiratorio (mseg):" + String(ventilation -> getExsuflationTime()));
 
   // TODO: Esperar aqui a iniciar el arranque desde el serial
 

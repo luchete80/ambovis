@@ -96,10 +96,7 @@ void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WIT
 
     tft.drawLine(axispos[0]- ry[valsreaded-1], x_start - rx[valsreaded-1], axispos[0] - ry[valsreaded],   x_start - rx[valsreaded], color);
     tft.drawLine(axispos[1]- yflux[0],         x_start - rx[valsreaded-1], axispos[1] - yflux[1],         x_start - rx[valsreaded], ILI9341_MAGENTA);
-      tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
-      tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_MAGENTA);
-      tft.drawLine(axispos[2]-yvt[0],             240-rx[valsreaded-1], axispos[2]-yvt[1],            240-rx[valsreaded], ILI9341_BLUE);
-      #endif//TESTING_MODE_DISABLED
+    #endif//TESTING_MODE_DISABLED
   }
 }
 
