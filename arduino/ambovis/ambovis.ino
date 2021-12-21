@@ -397,7 +397,7 @@ byte pos;
 void loop() {
 
 
-  digitalWrite(LCD_SLEEP, HIGH); //LOW, INVERTED
+  //digitalWrite(LCD_SLEEP, HIGH); //LOW, INVERTED
 
   if (!sleep_mode) {
     if (wake_up) {
@@ -496,19 +496,17 @@ void loop() {
       }
     }//Read Sensor
 
-<<<<<<< Updated upstream
-=======
-    if (calibration_run) {
-      vcorr_count += 1.;
-      verror_sum += ( Voltage - 0.04 * vs); //-5*0.04
-      //Serial.println("Calibration sum: "+ String(verror_sum));
-      //update_error_once();
-    } else { //This sums the feed error
-        verror_sum += vlevel;       // -5*0.04
-        vcorr_count += 1.;
-      }
+//    if (calibration_run) {
+//      vcorr_count += 1.;
+//      verror_sum += ( Voltage - 0.04 * vs); //-5*0.04
+//      //Serial.println("Calibration sum: "+ String(verror_sum));
+//      //update_error_once();
+//    } else { //This sums the feed error
+//        verror_sum += vlevel;       // -5*0.04
+//        vcorr_count += 1.;
+//      }
     
->>>>>>> Stashed changes
+
     if (alarm_vt) {
 
     }
