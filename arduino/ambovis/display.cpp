@@ -64,6 +64,12 @@ void tft_draw(void) {
     		    valsreaded_[i]=0;
         print_vols();
         print_bat();
+        
+        dtostrf(vlevel, 1, 2, buffer);
+        tft.setCursor(100, 80);tft.println("Vmpx:");
+        tft.fillRect(180,80,50,50, ILI9341_BLUE);
+        tft.setCursor(180, 80);tft.println(buffer);
+        
         drawing_cycle = !drawing_cycle;
         Serial.println("Drawing cycle: " + String(drawing_cycle));
         tft.fillRect(180,280,70,50, ILI9341_RED);    
@@ -168,7 +174,10 @@ void print_bat(){
     level=0.;
     tft.setRotation(0);
     //tft.fillRect(180,150,70,20, ILI9341_BLACK);//ONLY BAT LEVEL
-    tft.fillRect(180,250,70,50, ILI9341_BLACK);    float fac=0.0279;  //5./(1024.*0.175)
+    //TODO: Make this calcs at setup
+    float fdiv = (float)BATDIV_R2/(float)(BATDIV_R1 + BATDIV_R2);
+    Serial.print("fdiv: ");Serial.println(fdiv);
+    tft.fillRect(180,250,70,50, ILI9341_BLACK);    float fac=5.0/(1024.0*fdiv);  //5./(1024.*0.175)
     
     //Vt > 24V   =>   PC = 100%
     //Vmin < Vt < 24V   =>   PC[%] = (Vt[V]-Vmin)/(24-Vmin)*100
@@ -185,7 +194,7 @@ void print_bat(){
       }
     dtostrf(level_perc, 2, 0, buffer);
     //dtostrf(level, 2, 1, buffer);
-    //Serial.print("Bat level: ");Serial.println(level);
+    Serial.print("Bat level: ");Serial.println(level);
     tft.setCursor(130, 260);tft.println("Bat:");
     tft.setCursor(180, 260);tft.println(buffer);
     tft.setCursor(220, 260);tft.println("%");

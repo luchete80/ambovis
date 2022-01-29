@@ -33,6 +33,7 @@
 #define TFT_DC 		49
 #define TFT_RST 	48
 #define TFT_SLEEP 40
+#define LCD_SLEEP 42
 
 #define PIN_POWEROFF    43
 #define BCK_LED         44
@@ -49,7 +50,8 @@
 #define PIN_MENU_BCK    32
 
 #define PIN_BAT_LEV     A1
-
+#define PIN_MPX_LEV     A2
+#define PIN_PRESSURE    A3
 
 // IF ARDUINO UNO
 //#define PIN_ENC_CL  2
