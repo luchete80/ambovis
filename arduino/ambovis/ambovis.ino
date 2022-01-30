@@ -22,8 +22,8 @@ bool init_verror;
 byte Cdyn;
 bool autopid;
 bool filter;
-bool sleep_mode;
-bool put_to_sleep, wake_up;
+//bool sleep_mode;
+//bool put_to_sleep, wake_up;
 unsigned long print_bat_time;
 
 bool drawing_cycle = 0;//TOD: Move to class member
@@ -74,6 +74,8 @@ bool isbuzzeron = false;
 
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 
+SystemState systemState;
+
 byte vcorr_count;
 byte p_trim = 100;
 float pressure_p;   //EXTERN!!
@@ -100,7 +102,6 @@ float p_dpt;
 unsigned long lastReadSensor = 0;
 unsigned long lastShowSensor = 0;
 unsigned long lastSave = 0;
-bool display_needs_update = false;
 
 State static lastState;
 bool show_changed_options = false; //Only for display
@@ -125,12 +126,7 @@ int min_pidd, max_pidd;
 byte pfmin, pfmax;
 float pf_min, pf_max;
 float peep_fac;
-
-//min_pidk=250;
-//max_pidk=1000;
 int min_cd, max_cd;
-//max_cd=40;  //T MODIFY: READ FROM MEM
-//min_cd=10;
 
 unsigned long last_cycle;
 
@@ -261,16 +257,12 @@ void setup() {
 
   delay(100);
 
-  //  Serial.println("Tiempo del ciclo (seg):" + String(ventilation -> getExsuflationTime() + ventilation -> getInsuflationTime()));
-  //  Serial.println("Tiempo inspiratorio (mseg):" + String(ventilation -> getInsuflationTime()));
-  //  Serial.println("Tiempo espiratorio (mseg):" + String(ventilation -> getExsuflationTime()));
-
   // TODO: Esperar aqui a iniciar el arranque desde el serial
 
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
-  writeLine(1, "RespirAR FIUBA", 4);
+  writeLine(1, "RespirAR FIUBA - MIR", 4);
   writeLine(2, "v2.0.1", 8);
 
 
@@ -295,12 +287,16 @@ void setup() {
   //  Serial.print("pressure  MPX Volt (mV) at p0: "); Serial.println(verrp * 1000, 3);
 
   Serial.print("dp  error : "); Serial.println(-verror / (5.*0.09));
-  
 
+  systemState.vent_mode = VENTMODE_MAN; //0
+  systemState.sleep_mode = false;
+  systemState.put_to_sleep = false;
+  systemState.wake_up = false;
+  systemState.display_needs_update = false;
 
   // configura la ventilación
   ventilation -> start();
-  ventilation -> update();
+  ventilation -> update(systemState);
 
   //
 #ifdef ACCEL_STEPPER
@@ -331,10 +327,9 @@ void setup() {
 
   Serial.println("home end");
 #endif
-  //
 
   //sensors -> readPressure();
-  display_lcd();
+  display_lcd(systemState);
 
   //ENCODER
   curr_sel = old_curr_sel = 1; //COMPRESSION
@@ -392,16 +387,11 @@ void setup() {
   pf_max = (float)pfmax / 50.;
   peep_fac = -(pf_max - pf_min) / 15.*last_pressure_min + pf_max;
 
-  sleep_mode = false;
-  put_to_sleep = false;
-  wake_up = false;
+//  sleep_mode = false;
+//  put_to_sleep = false;
+//  wake_up = false;
 
-  //Serial.println("Vcc & Out MPX: " + String(analogRead(PIN_MPX_LEV)) + String(", ") + String(Voltage));
-
-  
-
-  
-  Serial.println("Exiting setup");
+//  Serial.println("Exiting setup");
   
 
 
@@ -423,16 +413,16 @@ void loop() {
 
   //digitalWrite(LCD_SLEEP, HIGH); //LOW, INVERTED
 
-  if (!sleep_mode) {
-    if (wake_up) {
+  if (!systemState.sleep_mode) {
+      if (systemState.wake_up) {
       lcd.clear();
       init_display();
-      display_lcd();    //TODO: Pass mech vent as argument in display
+      display_lcd(systemState);    //TODO: Pass mech vent as argument in display
       tft.fillScreen(ILI9341_BLACK);
-      wake_up = false;
+      systemState.wake_up = false;
     }
     State state = ventilation->getState();
-    check_encoder();
+    check_encoder(systemState);
 
     time = millis();
     check_buzzer_mute();
@@ -566,12 +556,12 @@ void loop() {
 
       last_cycle = ventilation->getCycleNum();
 
-      display_lcd();
+      display_lcd(systemState);
       update_display = true;
       last_update_display = time;
 
 #ifdef DEBUG_PID
-      if (vent_mode = VENTMODE_PCL) {
+      if (systemState.vent_mode = VENTMODE_PCL) {
         float err = (float)(pressure_max - options.peakInspiratoryPressure) / options.peakInspiratoryPressure;
         errpid_prom += fabs(err);
         errpid_prom_sig += err;
@@ -617,10 +607,10 @@ void loop() {
     
     }//change cycle
 
-    if (display_needs_update) {
+    if (systemState.display_needs_update) {
 
-      display_lcd();
-      display_needs_update = false;
+      display_lcd(systemState);
+      systemState.display_needs_update = false;
     }
 
     if ( update_options ) {
@@ -638,7 +628,7 @@ void loop() {
 
     //HERE changed_options flag is not updating until cycle hcanges
     if (show_changed_options && ((millis() - last_update_display) > time_update_display) ) {
-      display_lcd();  //WITHOUT CLEAR!
+      display_lcd(systemState);  //WITHOUT CLEAR!
       last_update_display = millis();
       show_changed_options = false;
     }
@@ -666,10 +656,10 @@ void loop() {
 
     //! sleep_mode
   } else {
-    if (put_to_sleep) {
+    if (systemState.put_to_sleep) {
       tft.fillScreen(ILI9341_BLACK);
       digitalWrite(PIN_LCD_EN, HIGH);
-      put_to_sleep = false;
+      systemState.put_to_sleep = false;
       print_bat_time = time;
       print_bat();
       digitalWrite(PIN_BUZZER, !BUZZER_LOW); //Buzzer inverted
@@ -680,7 +670,7 @@ void loop() {
       print_bat_time = time;
     }
     time = millis();
-    check_bck_state();
+    check_bck_state(systemState);
   }
 
   //    #ifdef ACCEL_STEPPER
@@ -692,7 +682,7 @@ void loop() {
 }//LOOP
 
 void timer1Isr(void) {
-  ventilation->update();
+  ventilation->update(systemState);
   //alarms->update(ventilation->getPeakInspiratoryPressure());
 }
 

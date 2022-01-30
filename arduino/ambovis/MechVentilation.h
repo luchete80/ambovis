@@ -14,12 +14,14 @@
 #include "src/AutoPID/AutoPID.h"
 #include "Sensors.h"
 
-
+#if TESTING_MODE_DISABLED
 #ifdef ACCEL_STEPPER
 #include "src/AccelStepper/AccelStepper.h"
 #else
 #include "src/FlexyStepper/FlexyStepper.h"
 #endif
+#include "src/AutoPID/AutoPID.h"
+#endif //TESTING_MODE_DISABLED
 /** States of the mechanical ventilation. */
 enum State
 {
@@ -54,17 +56,18 @@ public:
 	 * @brief Construct a new Mech Ventilation object
 	 *
 	 * @param stepper
-	 * @param sensors
 	 * @param pid
 	 * @param options
 	 */
     MechVentilation(
-      #ifdef ACCEL_STEPPER
+        #if TESTING_MODE_DISABLED
+        #ifdef ACCEL_STEPPER
         AccelStepper *_stepper,
-      #else
+        #else
         FlexyStepper *_stepper,
-      #endif
+        #endif
         AutoPID *pid,
+        #endif//TESTING_MODE_DISABLED
         VentilationOptions_t options);
 
     boolean getStartWasTriggeredByPatient();
@@ -73,7 +76,7 @@ public:
     void start(void);
     /** Stop mechanical ventilation. */
     void stop(void);
-    void update(void);
+    void update(SystemState& systemState);
 
     /** Recruitment */
     void activateRecruitment(void);
@@ -89,51 +92,42 @@ public:
     short getPeakInspiratoryPressure(void);
     short getPeakEspiratoryPressure(void);
     State getState(void);
+    bool isRunning();
+    unsigned long getCycleNum(){return _cyclenum;};
+    const unsigned long getMSecTimerCnt()const {return _msecTimerCnt;}
+    float getInsVol(void);
+    float getCurrentPressure();
+    float getTimeoutCycle();
+    float getStepperSpeed() {return _stepperSpeed;}
+
     /**
      * setters
      */
     void setRPM(uint8_t rpm);
     void setPeakInspiratoryPressure(float pip);
     void setPeakEspiratoryPressure(float peep);
-
-    float getInsVol(void);
-
-    unsigned long getCycleNum(){return _cyclenum;};
     void setCycleNum(unsigned long cyc){_cyclenum=cyc;}
     void change_config(VentilationOptions_t);
 
-
-    //LUCIANO 
-    float getCurrentPressure();
-    const unsigned long & getMSecTimerCnt()const {return _msecTimerCnt;}
-    //
-    
 private:
     /** Initialization. */
     void _init(
+        #if TESTING_MODE_DISABLED
         #ifdef ACCEL_STEPPER
         AccelStepper *_stepper,
         #else
         FlexyStepper *_stepper,
         #endif
         AutoPID *pid,
+        #endif //TESTING_MODE_DISABLED
         VentilationOptions_t options);
-#if 0
-    int _calculateInsuflationPosition (void);
-#endif
 
     /** Set state. */
     void _setState(State state);
     void _setAlarm(Alarm alarm);
-#if 0
-    void _increaseInsuflationSpeed (byte factor);
-    void _decreaseInsuflationSpeed (byte factor);
-    void _increaseInsuflation (byte factor);
-    void _decreaseInsuflation (byte factor);
-#endif
     void _setInspiratoryCycle(void);
 
-
+    #if TESTING_MODE_DISABLED
     /* Configuration parameters */
     #ifdef ACCEL_STEPPER
     AccelStepper *_stepper;
@@ -141,6 +135,7 @@ private:
     FlexyStepper *_stepper;
     #endif
     AutoPID *_pid;
+    #endif //TESTING_MODE_DISABLED
     /** Flow trigger activation. */
     bool _hasTrigger;
     /** Flow trigger value in litres per minute. */
@@ -171,8 +166,6 @@ private:
 
     bool curr_ended_whilemov;
         /** Timer counter in seconds. */
-    //Este tambien es mio
-   
     unsigned long _msecTimerCnt; //esteno necesita ser tan grande
     /**  Insufflation timeout in seconds. */
     unsigned long _cyclenum;    //Not important value, only for printing control
@@ -188,21 +181,20 @@ private:
     //float _currentFlow = 0.0;
     //float _currentVolume = 0.0;
     float timeoutCycle;
+    unsigned long _msecTimerStartCycle;
 };
 
 extern unsigned int _timeoutIns;
 extern unsigned int _timeoutEsp;
     
-extern byte stepper_time;
+//extern byte stepper_time;
 extern unsigned long last_vent_time;
 extern float _mlInsVol,_mlExsVol;
 extern int _mllastInsVol,_mllastExsVol;
-//_mlInsVol2;
-//extern float _stepperSpeed;
 extern float pressure_sec,psec_max,last_psec_max;
-extern unsigned long _msecTimerStartCycle; //CADA semiciclo
-extern bool display_needs_update;
-extern byte flux_count;
+//extern unsigned long _msecTimerStartCycle; //CADA semiciclo
+//extern bool display_needs_update;
+//extern byte flux_count;
 extern unsigned long flux_filter_time;
 extern float flux_sum;
 extern VentilationOptions_t options;

@@ -117,7 +117,7 @@ void check_updn_button(int pin, byte *var, bool incr_decr) {
       }// if time > last button press
     }
 }
-void check_bck_state(){
+void check_bck_state(SystemState& systemState){
       bck_state=digitalRead(PIN_MENU_BCK);         
 //    Serial.print("holdTime:");Serial.println(holdTime);
 //    Serial.print("change_sleep:");Serial.println(change_sleep);
@@ -138,23 +138,23 @@ void check_bck_state(){
        updateCounter(); // button state not changed. It runs in a loop.
        if (holdTime > 2000 && !change_sleep){
         Serial.println("Activando Sleep Mode");
-        if (!sleep_mode){
+        if (!systemState.sleep_mode){
             
-            sleep_mode=true;
-            put_to_sleep=true;
+            systemState.sleep_mode=true;
+            systemState.put_to_sleep=true;
         } else {
-           sleep_mode=false;
-           wake_up=true;   
+            systemState.sleep_mode=false;
+            systemState.wake_up=true;
         }
         change_sleep=true;
-        Serial.print("Sleep Mode");Serial.println(sleep_mode);
+        Serial.print("Sleep Mode");Serial.println(systemState.sleep_mode);
         }
     }
     last_bck_state = bck_state;
   
   }
   
-void check_encoder ( ) {
+void check_encoder (SystemState& systemState) {
   check_updn_button(PIN_MENU_DN,&encoderPos,true);   //Increment
   check_updn_button(PIN_MENU_UP,&encoderPos,false);  //Decrement
   pressed=0;  //0 nothing , 1 enter, 2 bck
@@ -174,7 +174,7 @@ void check_encoder ( ) {
 //          lastButtonPress = time;
 //        }// if time > last button press
 
-    check_bck_state();
+    check_bck_state(systemState);
 
     if (pressed > 0) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
       if (!isitem_sel) {
@@ -186,7 +186,7 @@ void check_encoder ( ) {
             case 1: 
              if ( menu_number == 0 ) {
                     min_sel=1;max_sel=2;
-                    encoderPos=oldEncPos=vent_mode;
+                    encoderPos=oldEncPos=systemState.vent_mode;
                 } else if ( menu_number == 1 ) {
                     min_sel=20;max_sel=50;
                     encoderPos=oldEncPos=alarm_max_pressure;            
@@ -232,7 +232,7 @@ void check_encoder ( ) {
             break;
             case 4: 
                 if ( menu_number == 0 ) {
-                    if ( vent_mode==VENTMODE_PCL){
+                    if ( systemState.vent_mode==VENTMODE_PCL){
  //                     encoderPos=oldEncPos=options.tidalVolume;
  //                     min_sel=200;max_sel=800;
                         encoderPos=oldEncPos=options.peakInspiratoryPressure;
@@ -362,7 +362,7 @@ void check_encoder ( ) {
               }
           }
           clear_all_display=true;
-          display_lcd();
+          display_lcd(systemState);
     } else {//inside a particular selection
      
       //if (curr_sel != 0) {
@@ -376,7 +376,7 @@ void check_encoder ( ) {
 
             switch (curr_sel) {
               case 1:
-                if ( menu_number == 0 )     vent_mode           = encoderPos;
+                if ( menu_number == 0 )     systemState.vent_mode           = encoderPos;
                 else if (menu_number == 1)  alarm_max_pressure  = encoderPos;
                 else if (menu_number == 2)  {STEPPER_ACCEL_MAX  = int((float)encoderPos*200.);}
                 else if (menu_number == 3)  {dpip_b = encoderPos; dpip  = float(encoderPos)/10.;}
@@ -404,7 +404,7 @@ void check_encoder ( ) {
                 break;
               case 4:
                 if ( menu_number == 0 ) {
-                    if (vent_mode==VENTMODE_PCL){
+                    if (systemState.vent_mode==VENTMODE_PCL){
                       options.peakInspiratoryPressure = encoderPos;
                         Serial.print("pip: ");Serial.println(options.peakInspiratoryPressure);
                         Serial.print("encoderpos: ");Serial.println(encoderPos);
@@ -481,7 +481,7 @@ void check_encoder ( ) {
   }
 }
 
-void clear_n_sel(int menu){
+void clear_n_sel(int menu, SystemState& systemState){
     if (menu==0) {  
         lcd_clearxy(0,0);
         lcd_clearxy(0,1);lcd_clearxy(9,0);
@@ -494,7 +494,7 @@ void clear_n_sel(int menu){
               case 3:
                 lcd_selxy(0,2);break;
               case 4: 
-                if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL)  lcd_selxy(8,1);//pcl
+                if ( systemState.vent_mode==VENTMODE_VCL || systemState.vent_mode==VENTMODE_PCL)  lcd_selxy(8,1);//pcl
                 else                                                      lcd_selxy(9,0);
 //              case 5: 
 //                lcd_selxy(8,1);break;
@@ -569,16 +569,16 @@ void clear_n_sel(int menu){
     }//menu number 
 }
 
-void display_lcd ( ) {
+void display_lcd (SystemState& systemState) {
     if (clear_all_display)
         lcd.clear();        
-  clear_n_sel(menu_number);
+  clear_n_sel(menu_number, systemState);
   if (menu_number==0) {  
     lcd_clearxy(12,0,4);
     lcd_clearxy(5,1,3); lcd_clearxy(14,1,2);
     lcd_clearxy(5,2,2); lcd_clearxy(13,2,2);
   
-    switch (vent_mode){
+    switch (systemState.vent_mode){
       case VENTMODE_VCL:
         writeLine(0, "MOD:VCV", 1); writeLine(0, "V:" + String(options.tidalVolume), 10);    
         writeLine(1, "PIP: -", 9);
