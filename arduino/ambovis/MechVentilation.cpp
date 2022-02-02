@@ -92,7 +92,6 @@ State MechVentilation::getState(void)
 void MechVentilation::setRPM(uint8_t rpm)
 {
     _rpm = rpm;
-    _setInspiratoryCycle();
 }
 
 void MechVentilation::setPeakInspiratoryPressure(float pip)
@@ -118,23 +117,6 @@ void MechVentilation::_setInspiratoryCycle(void) {
       Serial.print("_timeoutEsp");Serial.println(_timeoutEsp);
   #endif
     
-}
-
-void MechVentilation::activateRecruitment(void)
-{
-    _nominalConfiguration.pip = _pip;
-    _nominalConfiguration.timeoutIns = _timeoutIns;
-    _pip = DEFAULT_RECRUITMENT_PIP;
-    _timeoutIns = DEFAULT_RECRUITMENT_TIMEOUT;
-    _recruitmentMode = true;
-}
-
-void MechVentilation::deactivateRecruitment(void)
-{
-    _pip = _nominalConfiguration.pip;
-    _timeoutIns = _nominalConfiguration.timeoutIns;
-    _recruitmentMode = false;
-    _setState(Init_Exsufflation);
 }
 
 /**
@@ -185,8 +167,6 @@ void MechVentilation :: update (SystemState& systemState) {
 
         _mlInsVol=0.;
         _mlExsVol=0.;
-        
-        wait_NoMove=false;
 
         #ifdef ACCEL_STEPPER
         #if TESTING_MODE_DISABLED
@@ -331,10 +311,6 @@ void MechVentilation :: update (SystemState& systemState) {
             }
             #endif //TESTING_MODE_DISABLED
             _setState(Init_Exsufflation);
-            if (_recruitmentMode) {
-                deactivateRecruitment();
-            }
-
         }
 //        else //Time has not expired (State Insufflation)
 //        {
@@ -583,11 +559,11 @@ void MechVentilation::_init(
     _rpm = options.respiratoryRate;
     _pip = options.peakInspiratoryPressure;
     _peep = options.peakEspiratoryPressure;
-    _tidalVol=options.tidalVolume;
     _percIE= options.percInspEsp;
     _percVol=options.percVolume;
     
     setRPM(_rpm);
+    _setInspiratoryCycle();
     _hasTrigger = options.hasTrigger;
     if (_hasTrigger)
     {
@@ -619,11 +595,6 @@ void MechVentilation::_setState(State state)
     _currentState = state;
 }
 
-void MechVentilation::_setAlarm(Alarm alarm)
-{
-    _currentAlarm = alarm;
-}
-
 float MechVentilation::getInsVol() {
     return (_mllastInsVol+_mllastExsVol)/2.;
 }
@@ -632,10 +603,8 @@ void MechVentilation::change_config(VentilationOptions_t options) {
     _rpm = options.respiratoryRate;
     _pip = options.peakInspiratoryPressure;
     _peep = options.peakEspiratoryPressure;
-    _tidalVol=options.tidalVolume;
     _percIE= options.percInspEsp;
     setRPM(_rpm); //Include set inspiratory cycle
+    _setInspiratoryCycle();
     _percVol=options.percVolume;
-
-    _mode = options.modeCtl;
 }

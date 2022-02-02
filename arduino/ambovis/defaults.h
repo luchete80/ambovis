@@ -147,7 +147,6 @@ extern byte alarm_state;
 
 //extern bool put_to_sleep,wake_up;
 //PID LIMITS
-extern bool change_pid_params;
 extern unsigned long time;
 
 // 5v to 1.1v dividiver, in order to use 1.1 arduino vref (more stable)

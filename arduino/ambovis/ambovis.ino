@@ -22,8 +22,6 @@ bool init_verror;
 byte Cdyn;
 bool autopid;
 bool filter;
-//bool sleep_mode;
-//bool put_to_sleep, wake_up;
 unsigned long print_bat_time;
 
 bool drawing_cycle = 0;//TOD: Move to class member
@@ -71,7 +69,6 @@ boolean buzzmuted;
 unsigned long timebuzz = 0;
 bool isbuzzeron = false;
 
-
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 
 SystemState systemState;
@@ -83,16 +80,13 @@ float last_pressure_max, last_pressure_min, last_pressure_peep;
 float pressure_peep;
 
 byte vent_mode = VENTMODE_MAN; //0
-//Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
 float verrp;
 float _flux,    flow_f;;
-//#ifdef FILTER_FLUX
 float _flux_fil[5];
 float _mlInsVol2;
 float _flux_sum;
 byte flux_count;
-//#endif
 
 bool send_data = false;
 char tempstr[5], tempstr2[5];
@@ -103,7 +97,6 @@ unsigned long lastReadSensor = 0;
 unsigned long lastShowSensor = 0;
 unsigned long lastSave = 0;
 
-State static lastState;
 bool show_changed_options = false; //Only for display
 bool update_options = false;
 
@@ -111,7 +104,6 @@ unsigned long time_update_display = 20; //ms
 unsigned long last_update_display;
 
 extern float _mlInsVol, _mlExsVol;
-extern byte stepper_time = 50;
 unsigned long last_stepper_time;
 unsigned long last_vent_time;
 unsigned long time;
@@ -152,7 +144,6 @@ float verror, verror_sum, verror_sum_outcycle, vzero;  //verror sum is intra cyc
 float dp[] = { -3.074176245, -2.547210457, -2.087678384, -1.60054669, -1.216013465, -0.795599072, -0.630753349, -0.504544509, -0.365700986, -0.260808033, -0.176879848, -0.109004974, -0.05874157, -0.051474571, -0.043771552, -0.037061691, -0.029794693, -0.023012161, -0.017561913, -0.01441288, -0.012111664, -0.009325981, -0.007024765, -0.004602432, -0.002664566, 0.00090924, 0.00030358, 0, -0.000242233, -0.000837976, 0.001999305, 0.003937171, 0.006117271, 0.008176254, 0.011688636, 0.014830113, 0.020045692, 0.023566372, 0.028644966, 0.03312327, 0.039664506, 0.047781395, 0.052868293, 0.096530072, 0.151339196, 0.216332764, 0.295221736, 0.377891785, 0.491216024, 0.606462279, 0.877207832, 1.207061607, 1.563385753, 2.030351958, 2.444452733};
 byte po_flux[] = {0, 10, 20, 30, 40, 50, 55, 60, 65, 70, 75, 80, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 100, 100, 100, 100, 100, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 120, 125, 130, 135, 140, 145, 150, 160, 170, 180, 190, 200};
 
-bool change_pid_params = false;
 
 byte encoderPos = 1; //this variable stores our current value of encoder position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
 byte oldEncPos = 1; //stores the last encoder position value so we can compare to the current reading and see if it has changed (so we know when to print to the serial monitor)
@@ -160,9 +151,12 @@ byte reading = 0; //somewhere to store the direct values we read from our interr
 
 byte max_sel, min_sel; //According to current selection
 
+//Declare functions
 void check_buzzer_mute();
-void autotrim_flux();
-void check_sleep_mode();  //Batt charge only
+void calculateVSupply_0();
+#ifdef ACCEL_STEPPER
+void initStepperToHome(AccelStepper* accelStepper);
+#endif
 
 bool isitem_sel;
 byte old_menu_pos = 0;
@@ -173,7 +167,6 @@ AutoPID * pid;
 MechVentilation * ventilation;
 VentilationOptions_t options;
 
-
 int bck_state ;     // current state of the button
 int last_bck_state ; // previous state of the button
 int startPressed ;    // the moment the button was pressed
@@ -182,7 +175,6 @@ int holdTime ;        // how long the button was hold
 int idleTime ;        // how long the button was idle
 
 // CALIBRATION: TODO: MAKE A CLASS
-float vsupply, vsupply_0;
 float vlevel,vfactor;
 
 void setup() {
@@ -222,7 +214,6 @@ void setup() {
   max_speed = 750;  // x Microsteps, originally 16000 (with 16 ms = 750)
   max_accel = 600;
   min_accel = 200;
-  change_pid_params = true; //To calculate at first time
 
   // Parte motor
   pinMode(PIN_MUTE, INPUT_PULLUP);
@@ -241,7 +232,6 @@ void setup() {
   // TODO: Añadir aquí la configuarcion inicial desde puerto serie
   options.respiratoryRate = DEFAULT_RPM;
   options.percInspEsp = 2; //1:1 to 1:4, is denom
-  //options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
   options.peakInspiratoryPressure = 20.;
   options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
   options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
@@ -265,28 +255,14 @@ void setup() {
   writeLine(1, "RespirAR FIUBA - MIR", 4);
   writeLine(2, "v2.0.1", 8);
 
-
   ads.begin();
-  verror = verror_sum = verror_sum_outcycle = 0.;
   //TODO: Put all this inside a calib class
+  verror = verror_sum = verror_sum_outcycle = 0.;
   vcorr_count = 0;
   
-  float verrp = 0.;
-  vsupply_0 = 0.;
-    for (int i = 0; i < 100; i++) {
-
-      vsupply_0 += float(analogRead(PIN_MPX_LEV))/1024.*1.1*VOLTAGE_CONV;
-      delay(10);
-    }
-  vsupply_0 /= 100.; //
-  
-  Serial.println("Vsupply_0: " + String (vsupply_0));
-  //vfactor = 5./vsupply_0; //
+  calculateVSupply_0();
   
   Serial.print("dp (Flux) MPX Volt (mV) at p0: "); Serial.println(verror * 1000, 3);
-  //  Serial.print("pressure  MPX Volt (mV) at p0: "); Serial.println(verrp * 1000, 3);
-
-  Serial.print("dp  error : "); Serial.println(-verror / (5.*0.09));
 
   systemState.vent_mode = VENTMODE_MAN; //0
   systemState.sleep_mode = false;
@@ -298,37 +274,10 @@ void setup() {
   ventilation -> start();
   ventilation -> update(systemState);
 
-  //
-#ifdef ACCEL_STEPPER
-  stepper->setSpeed(STEPPER_HOMING_SPEED);
+  #ifdef ACCEL_STEPPER
+  initAccelStepperToHome(stepper);
+  #endif
 
-  long initial_homing = -1;
-  //// HOMING TODO: PASAR NUEVAMENTE ESTA VARIABLE A PRIVADA
-  while (digitalRead(PIN_ENDSTOP)) {  // Make the Stepper move CCW until the switch is activated
-    stepper->moveTo(initial_homing);  // Set the position to move to
-    initial_homing--;  // Decrease by 1 for next move if needed
-    stepper->run();  // Start moving the stepper
-    delay(5);
-  }
-  stepper->setCurrentPosition(0);  // Set the current position as zero for now
-  initial_homing = 1;
-
-  while (!digitalRead(PIN_ENDSTOP)) { // Make the Stepper move CW until the switch is deactivated
-    stepper->moveTo(initial_homing);
-    stepper->run();
-    initial_homing++;
-    delay(5);
-  }
-  long position = stepper->currentPosition();
-  Serial.print("Position "); Serial.print(position);
-  stepper->setCurrentPosition(STEPPER_LOWEST_POSITION);
-  position = stepper->currentPosition();
-  Serial.print("Position "); Serial.print(position);
-
-  Serial.println("home end");
-#endif
-
-  //sensors -> readPressure();
   display_lcd(systemState);
 
   //ENCODER
@@ -336,45 +285,30 @@ void setup() {
 
   pinMode(PIN_ENC_SW, INPUT_PULLUP);
 
-  lastReadSensor =   lastShowSensor = millis();
-  lastState = ventilation->getState();
-  last_update_display = millis();
-
-#ifdef DEBUG_UPDATE
-
-#endif
-
-  //STEPPER
-  last_stepper_time = millis();
-  last_vent_time = millis();
-
-  //Serial.print(",0,50");
+  lastReadSensor = lastShowSensor = last_update_display = last_stepper_time = last_vent_time = millis();
 
   Timer3.initialize(TIME_STEPPER_ISR_MICROS);
   Timer3.attachInterrupt(timer3Isr);
 
   Timer1.initialize(TIME_BASE_MICROS);  //BEFORE WERE 20...
   Timer1.attachInterrupt(timer1Isr);
-  //Timer2.setPeriod(20000);
-  //Timer2.attachInterrupt(timer2Isr);
-  Serial.println("Reading ROM");
-#ifdef DEBUG_UPDATE
+
+  #ifdef DEBUG_UPDATE
   Serial.print("Honey Volt at p0: "); Serial.println(analogRead(A0) / 1023.);
-#endif
+  #endif
 
   read_memory();
 
   f_acc = (float)f_acc_b / 10.;
   dpip = (float)dpip_b / 10.;
 
-  Serial.print("Maxcd: "); Serial.println(max_cd);
+//  Serial.print("Maxcd: "); Serial.println(max_cd);
 
-  Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
+//  Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
   ventilation->setCycleNum(last_cycle);
 
   tft.begin();
   tft.fillScreen(ILI9341_BLACK);
-
 
   digitalWrite(BCK_LED, LOW);
   buzzmuted = false;
@@ -387,25 +321,12 @@ void setup() {
   pf_max = (float)pfmax / 50.;
   peep_fac = -(pf_max - pf_min) / 15.*last_pressure_min + pf_max;
 
-//  sleep_mode = false;
-//  put_to_sleep = false;
-//  wake_up = false;
-
-//  Serial.println("Exiting setup");
-  
-
-
 }
-
-
-bool update_display = false;
-byte pos;
 
 /////////////// CALIBRATION
 bool  calibration_run = true;
-int   start_cyle = last_cycle;  //Used for calibration
+int   last_cycle;  //Used for calibration
 byte  calib_cycle = 0;
-float vs;
 ////////////////////////////////////////
 ////////////// MAIN LOOP ///////////////
 ////////////////////////////////////////
@@ -420,8 +341,8 @@ void loop() {
       display_lcd(systemState);    //TODO: Pass mech vent as argument in display
       tft.fillScreen(ILI9341_BLACK);
       systemState.wake_up = false;
-    }
-    State state = ventilation->getState();
+      }
+//    State state = ventilation->getState();
     check_encoder(systemState);
 
     time = millis();
@@ -470,7 +391,7 @@ void loop() {
       vlevel = float(analogRead(PIN_MPX_LEV))/1024.*1.1*VOLTAGE_CONV;
 
       // Is like 1/vs
-      vs = vlevel /** vfactor*/; 
+      float vs = vlevel /** vfactor*/;
       
       adc0 = ads.readADC_SingleEnded(0);
       Voltage = (adc0 * 0.1875) * 0.001; //Volts
@@ -480,8 +401,8 @@ void loop() {
 
       //With constant correction
       p_dpt = ( (Voltage - vzero)/vs   - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
-      
-      pos = findClosest(dp, 55, p_dpt);
+
+      byte pos = findClosest(dp, 55, p_dpt);
       //flux should be shifted up (byte storage issue)
       _flux = po_flux[pos] - 100 + ( float (po_flux[pos + 1] - 100) - float (po_flux[pos] - 100) ) * ( p_dpt - float(dp[pos]) ) / (float)( dp[pos + 1] - dp[pos]);
       _flux *= 16.6667;
@@ -557,7 +478,6 @@ void loop() {
       last_cycle = ventilation->getCycleNum();
 
       display_lcd(systemState);
-      update_display = true;
       last_update_display = time;
 
 #ifdef DEBUG_PID
@@ -826,6 +746,43 @@ void write_memory() {
   EEPROM.put(eeAddress, f_acc_b);    eeAddress += sizeof(f_acc_b);
 }
 
-void autotrim_flux() {
+void calculateVSupply_0() {
+    float vsupply_0 = 0.;
+    for (int i = 0; i < 100; i++) {
+        vsupply_0 += float(analogRead(PIN_MPX_LEV))/1024.*1.1*VOLTAGE_CONV;
+        delay(10);
+    }
+    vsupply_0 /= 100.; //
 
+    Serial.println("Vsupply_0: " + String (vsupply_0));
+    //vfactor = 5./vsupply_0; //
+};
+
+#ifdef ACCEL_STEPPER
+void initAccelStepperToHome(AccelStepper * accelStepper) {
+
+    accelStepper->setSpeed(STEPPER_HOMING_SPEED);
+
+    long initial_homing = -1;
+    while (digitalRead(PIN_ENDSTOP)) {  // Make the Stepper move CCW until the switch is activated
+        accelStepper->moveTo(initial_homing);  // Set the position to move to
+        initial_homing--;  // Decrease by 1 for next move if needed
+        accelStepper->run();  // Start moving the stepper
+        delay(5);
+    }
+    accelStepper->setCurrentPosition(0);  // Set the current position as zero for now
+    initial_homing = 1;
+
+    while (!digitalRead(PIN_ENDSTOP)) { // Make the Stepper move CW until the switch is deactivated
+        accelStepper->moveTo(initial_homing);
+        accelStepper->run();
+        initial_homing++;
+        delay(5);
+    }
+    long position = accelStepper->currentPosition();
+    Serial.print("Position for Home"); Serial.print(position);
+    accelStepper->setCurrentPosition(STEPPER_LOWEST_POSITION);
+    position = accelStepper->currentPosition();
+    Serial.print("Ending home position "); Serial.print(position);
 }
+#endif

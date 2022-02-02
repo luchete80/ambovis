@@ -70,22 +70,15 @@ public:
         #endif//TESTING_MODE_DISABLED
         VentilationOptions_t options);
 
-    boolean getStartWasTriggeredByPatient();
-    void setVentilationCyle_WaitTime(float speedExsufflation);
     /** Start mechanical ventilation. */
     void start(void);
     /** Stop mechanical ventilation. */
     void stop(void);
     void update(SystemState& systemState);
 
-    /** Recruitment */
-    void activateRecruitment(void);
-    void deactivateRecruitment(void);
-    byte _mode;
     /**
      * getters
      */
-    bool getSensorErrorDetected();
     uint8_t getRPM(void);
     short getExsuflationTime(void);
     short getInsuflationTime(void);
@@ -96,7 +89,6 @@ public:
     unsigned long getCycleNum(){return _cyclenum;};
     const unsigned long getMSecTimerCnt()const {return _msecTimerCnt;}
     float getInsVol(void);
-    float getCurrentPressure();
     float getTimeoutCycle();
     float getStepperSpeed() {return _stepperSpeed;}
 
@@ -124,7 +116,6 @@ private:
 
     /** Set state. */
     void _setState(State state);
-    void _setAlarm(Alarm alarm);
     void _setInspiratoryCycle(void);
 
     #if TESTING_MODE_DISABLED
@@ -153,31 +144,21 @@ private:
     byte _percIE;
     byte _percVol;  //MANUAL MODE, 1 TO 10
 
-    short _tidalVol;
-    bool wait_NoMove;
-
-    /* Configuration */
-    Configuration_t _nominalConfiguration;
-
     /* Internal state */
     /** Current state. */
     State _currentState = State_Homing;
-    Alarm _currentAlarm = No_Alarm;
 
     bool curr_ended_whilemov;
         /** Timer counter in seconds. */
     unsigned long _msecTimerCnt; //esteno necesita ser tan grande
     /**  Insufflation timeout in seconds. */
     unsigned long _cyclenum;    //Not important value, only for printing control
-    
 
     /** Stepper speed. Steps per seconds. */
     float _stepperSpeed;
-    float _stepperAccel;
-    
+
     bool _running = false;
     bool _sensor_error_detected;
-    bool _startWasTriggeredByPatient = false;
     //float _currentFlow = 0.0;
     //float _currentVolume = 0.0;
     float timeoutCycle;
@@ -186,15 +167,11 @@ private:
 
 extern unsigned int _timeoutIns;
 extern unsigned int _timeoutEsp;
-    
-//extern byte stepper_time;
+
 extern unsigned long last_vent_time;
 extern float _mlInsVol,_mlExsVol;
 extern int _mllastInsVol,_mllastExsVol;
 extern float pressure_sec,psec_max,last_psec_max;
-//extern unsigned long _msecTimerStartCycle; //CADA semiciclo
-//extern bool display_needs_update;
-//extern byte flux_count;
 extern unsigned long flux_filter_time;
 extern float flux_sum;
 extern VentilationOptions_t options;
