@@ -538,6 +538,8 @@ void loop() {
 //
     if (calibration_run) {
       vcorr_count += 1.;
+      //According to datasheet
+      //vout = vs(0.09*P + 0.04) +/ERR
       verror_sum += ( Voltage - 0.04 * vs); //-5*0.04
       //Serial.println("Calibration sum: "+ String(verror_sum));
     } else { //This sums the feed error
@@ -701,27 +703,6 @@ void timer1Isr(void) {
   ventilation->update();
   //alarms->update(ventilation->getPeakInspiratoryPressure());
 }
-
-//void update_error() {
-//  //UPDATING VERROR
-//  if (cycle_pos > 100) {
-//    if (vcorr_count < 20) {
-//      vcorr_count += 1.;
-//      verror_sum += ( Voltage - 0.2 ); //-5*0.04
-//      verror_sum += p_dpt; //Si el error es de presion
-//      //verror+=Voltage;
-//      init_verror = true;
-//    }
-//  }
-//  if (cycle_pos < 5 && init_verror) {
-//    verror = verror_sum / ((float)vcorr_count + 1.);
-//    //Serial.print("Verror (mV) and count: ");Serial.print(verror*1000);Serial.print(",  ");Serial.println(vcorr_count);
-//    //Serial.print("Verror (mV) and count: ");Serial.println(verror*1000);
-//    verror_sum = 0.;
-//    vcorr_count = 0;
-//    init_verror = false;
-//  }
-//}
 
 //void timer2Isr(void)
 //{
