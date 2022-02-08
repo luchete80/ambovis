@@ -182,11 +182,12 @@ void print_bat(){
     //Vt > 24V   =>   PC = 100%
     //Vmin < Vt < 24V   =>   PC[%] = (Vt[V]-Vmin)/(24-Vmin)*100
     //Vt < Vmin   =>   PC = 0%
-    for (int i=0;i<40;i++){
+    unsigned short count = 5;
+    for (int i=0;i<count;i++){
         level+=float(analogRead(PIN_BAT_LEV));
         //Serial.println(analogRead(PIN_BAT_LEV));
         }
-    level*=fac/40.;
+    level*=fac/count.;
     if (level > 24.0) level_perc =100.;
     else {
         if (level > 22.0) level_perc = (level - 22.)/(24.-22.0) * 100.;

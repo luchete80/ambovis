@@ -1,8 +1,16 @@
 CONEXIONES AGREGADAS
 -------------------------------------------
-1. DIVISOR DE TENSION DE R1: 120OHMS, R2, 470 OHMS
-
+BATERIA
+1. DIVISOR DE TENSION R1: 1200 y R2: 220 OHMS () (relacion 0.1549)
+SENSORES 
+2. DIVISOR DE TENSION DE R1: 120OHMS, R2, 470 OHMS EN A2 (FLUJO)
+3. DIVISOR DE TENSION IGUAL AL ANTERIOR DE LA SALIDA DEL PIN 1 DE PRESION A A3
 En teoria los niveles de tension no caerian en modo linea  (ya que el regulador estabiliza los 5v).
+
+CORRECCION PARA PROTOTIPOS DEFINITIVOS: 
+--------------------------------------------------------------------------
+SE DEBERA COLOCAR EL VALOR REAL DE RESISTENCIAS 
+MEDIDAS Y NO SU VALOR NOMINAL EN EL CODIGO FUENTE.
 
 Se define (en pinout) el nuevo pin de entrada (para baterias)
 #define PIN_MPX_LEV     A2
@@ -39,6 +47,7 @@ La diferencia es que ahora no fluctua EN BATERIAS al caer la tension.
 
 MEDICION DE PRESION
 -------------------------------------
+
 Se definio en preprocesador la variable (en defaults.h)
 USING_1v1_4PRESS
       #ifdef USING_1v1_4PRESS
@@ -56,21 +65,13 @@ vlevel = float(analogRead(PIN_MPX_LEV))/1024.*1.1*VOLTAGE_CONV;
 https://www.arduino.cc/reference/en/language/functions/analog-io/analogreference/
 
 Arduino megaAVR Boards (Uno WiFi Rev2)
-
 DEFAULT: a built-in 0.55V reference
-
 INTERNAL: a built-in 0.55V reference
-
 VDD: Vdd of the ATmega4809. 5V on the Uno WiFi Rev2
-
 INTERNAL0V55: a built-in 0.55V reference
-
 INTERNAL1V1: a built-in 1.1V reference
-
 INTERNAL1V5: a built-in 1.5V reference
-
 INTERNAL2V5: a built-in 2.5V reference
-
 INTERNAL4V3: a built-in 4.3V reference
-
 EXTERNAL: the voltage applied to the AREF pin (0 to 5V only) is used as the reference
+

@@ -473,7 +473,7 @@ void loop() {
       // P = ( vout/vs - 0.04 )/0.09 So, vout/vs if 
       //IF vs = 5V     
       #ifdef USING_1v1_4PRESS
-      pressure_p = ( analogRead(PIN_PRESSURE) / (1023.)/*- verrp * 0.2 */ - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010      
+      pressure_p = ( analogRead(PIN_PRESSURE)/ (1023.)/*- verrp * 0.2 */ - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010      
       #else //Original, pressure sensor connected to A0
       pressure_p = ( analogRead(A0) / (1023.) /*- verrp * 0.2 */ - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
       #endif
@@ -496,7 +496,7 @@ void loop() {
       
       //With zero (see above) dp 
       //vzero = Vo - 0.04*vs
-      p_dpt = ( (Voltage /*- vzero*/)/vs   - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
+      p_dpt = ( (Voltage - vzero)/vs   - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
       
       pos = findClosest(dp, 55, p_dpt);
       //flux should be shifted up (byte storage issue)
@@ -541,7 +541,7 @@ void loop() {
       //According to datasheet
       //vout = vs(0.09*P + 0.04) +/ERR
       verror_sum += ( Voltage - 0.04 * vs); //-5*0.04
-      //Serial.println("Calibration sum: "+ String(verror_sum));
+      Serial.println("Calibration sum: "+ String(verror_sum));
     } else { //This sums the feed error
         verror_sum += vlevel;       // -5*0.04
         vcorr_count += 1.;
