@@ -600,7 +600,7 @@ void loop() {
       //NEW, CALIBRATION
         verror = verror_sum / float(vcorr_count);
         
-       Serial.println("Calibration iter, cycle, verror, sum: " + String(vcorr_count) + ", " + 
+       Serial.println("Calibration iter, cycle, vzero, sum: " + String(vcorr_count) + ", " + 
                                                                   String(calib_cycle) + ", " + 
                                                                   String(verror) + ", " + 
                                                                   String(verror_sum_outcycle));
@@ -610,7 +610,7 @@ void loop() {
         if (calib_cycle >= CALIB_CYCLES ){
           calibration_run = false;
           vzero = verror_sum_outcycle / float(CALIB_CYCLES);
-          Serial.println("Calibration verror: " + String(vzero));
+          Serial.println("Calibration vzero: " + String(vzero));
 
       }
     } else {
