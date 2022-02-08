@@ -193,8 +193,9 @@ void setup() {
 
   Serial.begin(115200);
   
-//  analogReference(INTERNAL1V1); // use AREF for reference voltage
-    analogReference(DEFAULT);
+  //analogReference(INTERNAL1V1); // use AREF for reference voltage
+  analogReference(INTERNAL1V1); // use AREF for reference voltage
+
   init_display();
   isitem_sel = false;
 
@@ -455,11 +456,11 @@ void loop() {
 #endif
       lastShowSensor = time;
       //           Serial.print(int(cycle_pos));Serial.print(",");
-      //           Serial.print(Voltage,5);Serial.print(",");
+      //           Serial.println(Voltage,5);Serial.print(",");
       //           Serial.print(verror,3);Serial.print(",");
       //           Serial.print(p_dpt,5);Serial.print(",");
       //
-                 Serial.println(flow_f,2);
+      //           Serial.println(flow_f,2);
 
       tft_draw();
 
@@ -487,8 +488,10 @@ void loop() {
 
       //ORIGINAL. 0.45 = 0.09 x 5V and 0.2 = 0.04 x 5V
       //p_dpt = ( Voltage /*- verror */- vzero - 0.20 ) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
-
-      //With constant correction
+      //BEFORE VERSION 2.0.1
+      //p_dpt = ( Voltage /*- verror */        - 0.20 ) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20; 
+      
+      //With zero correction
       p_dpt = ( (Voltage - vzero)/vs   - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
       
       pos = findClosest(dp, 55, p_dpt);
@@ -529,15 +532,15 @@ void loop() {
     }//Read Sensor
 
 //
-//    if (calibration_run) {
-//      vcorr_count += 1.;
-//      verror_sum += ( Voltage - 0.04 * vs); //-5*0.04
-//      Serial.println("Calibration sum: "+ String(verror_sum));
-//      //update_error_once();
-//    } else { //This sums the feed error
-//        verror_sum += vlevel;       // -5*0.04
-//        vcorr_count += 1.;
-//      }
+    if (calibration_run) {
+      vcorr_count += 1.;
+      verror_sum += ( Voltage - 0.04 * vs); //-5*0.04
+      //Serial.println("Calibration sum: "+ String(verror_sum));
+      //update_error_once();
+    } else { //This sums the feed error
+        verror_sum += vlevel;       // -5*0.04
+        vcorr_count += 1.;
+      }
     
     if (alarm_vt) {
 

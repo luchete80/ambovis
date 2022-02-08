@@ -1,14 +1,41 @@
+CONEXIONES AGREGADAS
+-------------------------------------------
+1. DIVISOR DE TENSION DE R1: 120OHMS, R2, 470 OHMS
+
+En teoria los niveles de tension no caerian en modo linea  (ya que el regulador estabiliza los 5v).
 
 Se define (en pinout) el nuevo pin de entrada (para baterias)
 #define PIN_MPX_LEV     A2
 
-En defaults
-#define VMIN_MPX            4.5               //For battery charge reference
+CAMBIOS EN DEFAULTS.H
+----------------------------------------
 
+// 5v to 1.1v dividiver, in order to use 1.1 arduino vref (more stable)
+// Vo = V1 x R2/(R1 + R2)
+// -----X
+//     R1
+// V1   X----- 
+//     R2  Vo
+// -----X-----
+//R1: 120, R2: 470
+// Amp: (120 + 470)/120 = 4.9166666
+#define VOLTAGE_CONV   4.916666
+#define USING_1v1_4PRESS
+#define TIME_VOLTAGE_SENSOR 50                // msec
+
+
+MEDIDAS DE NIVEL DE TENSION (NECESARIO PARA FLUJO Y BATERIAS)
+---------------------------------------------------
+
+      vlevel = float(analogRead(PIN_MPX_LEV))/1024.*1.1*VOLTAGE_CONV;
+
+      // Is like 1/vs
+      vs = vlevel /** vfactor*/; 
 
 MEDICION DE FLUJO 
 ------------------------	  
-
+En la medicion de flujo no cambia nada en los niveles ni en las cuentas, ya que este sensor sigue alimentado por 5V. 
+La diferencia es que ahora no fluctua EN BATERIAS al caer la tension.
 
 MEDICION DE PRESION
 -------------------------------------
