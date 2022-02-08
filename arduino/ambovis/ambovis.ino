@@ -193,8 +193,8 @@ void setup() {
 
   Serial.begin(115200);
   
-  analogReference(INTERNAL1V1); // use AREF for reference voltage
-    
+//  analogReference(INTERNAL1V1); // use AREF for reference voltage
+    analogReference(DEFAULT);
   init_display();
   isitem_sel = false;
 
@@ -459,7 +459,7 @@ void loop() {
       //           Serial.print(verror,3);Serial.print(",");
       //           Serial.print(p_dpt,5);Serial.print(",");
       //
-      //           Serial.println(flow_f,2);
+                 Serial.println(flow_f,2);
 
       tft_draw();
 

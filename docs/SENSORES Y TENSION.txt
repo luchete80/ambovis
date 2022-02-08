@@ -1,0 +1,49 @@
+
+Se define (en pinout) el nuevo pin de entrada (para baterias)
+#define PIN_MPX_LEV     A2
+
+En defaults
+#define VMIN_MPX            4.5               //For battery charge reference
+
+
+MEDICION DE FLUJO 
+------------------------	  
+
+
+MEDICION DE PRESION
+-------------------------------------
+Se definio en preprocesador la variable (en defaults.h)
+USING_1v1_4PRESS
+      #ifdef USING_1v1_4PRESS
+      pressure_p = ( analogRead(PIN_PRESSURE) / (1023.)/*- verrp * 0.2 */ - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010      
+      #else //Original, pressure sensor connected to A0
+      pressure_p = ( analogRead(A0) / (1023.) /*- verrp * 0.2 */ - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
+      #endif
+
+MEDICION DE BATERIAS
+--------------------------------------
+vlevel = float(analogRead(PIN_MPX_LEV))/1024.*1.1*VOLTAGE_CONV;
+
+
+
+https://www.arduino.cc/reference/en/language/functions/analog-io/analogreference/
+
+Arduino megaAVR Boards (Uno WiFi Rev2)
+
+DEFAULT: a built-in 0.55V reference
+
+INTERNAL: a built-in 0.55V reference
+
+VDD: Vdd of the ATmega4809. 5V on the Uno WiFi Rev2
+
+INTERNAL0V55: a built-in 0.55V reference
+
+INTERNAL1V1: a built-in 1.1V reference
+
+INTERNAL1V5: a built-in 1.5V reference
+
+INTERNAL2V5: a built-in 2.5V reference
+
+INTERNAL4V3: a built-in 4.3V reference
+
+EXTERNAL: the voltage applied to the AREF pin (0 to 5V only) is used as the reference
