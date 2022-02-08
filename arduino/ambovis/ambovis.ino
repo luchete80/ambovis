@@ -485,14 +485,18 @@ void loop() {
       
       adc0 = ads.readADC_SingleEnded(0);
       Voltage = (adc0 * 0.1875) * 0.001; //Volts
-
+      //DATASHEET:
+      // Vo = Vs (  
       //ORIGINAL. 0.45 = 0.09 x 5V and 0.2 = 0.04 x 5V
+       //According to datasheet
+      //vout = vs(0.09*P + 0.04) +/ERR
       //p_dpt = ( Voltage /*- verror */- vzero - 0.20 ) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
       //BEFORE VERSION 2.0.1
       //p_dpt = ( Voltage /*- verror */        - 0.20 ) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20; 
       
-      //With zero correction
-      p_dpt = ( (Voltage - vzero)/vs   - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
+      //With zero (see above) dp 
+      //vzero = Vo - 0.04*vs
+      p_dpt = ( (Voltage /*- vzero*/)/vs   - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
       
       pos = findClosest(dp, 55, p_dpt);
       //flux should be shifted up (byte storage issue)
@@ -536,7 +540,6 @@ void loop() {
       vcorr_count += 1.;
       verror_sum += ( Voltage - 0.04 * vs); //-5*0.04
       //Serial.println("Calibration sum: "+ String(verror_sum));
-      //update_error_once();
     } else { //This sums the feed error
         verror_sum += vlevel;       // -5*0.04
         vcorr_count += 1.;
@@ -600,7 +603,7 @@ void loop() {
       //NEW, CALIBRATION
         verror = verror_sum / float(vcorr_count);
         
-       Serial.println("Calibration iter, cycle, vzero, sum: " + String(vcorr_count) + ", " + 
+       Serial.println("Calibration iter, cycle, verror, sum: " + String(vcorr_count) + ", " + 
                                                                   String(calib_cycle) + ", " + 
                                                                   String(verror) + ", " + 
                                                                   String(verror_sum_outcycle));
@@ -610,7 +613,7 @@ void loop() {
         if (calib_cycle >= CALIB_CYCLES ){
           calibration_run = false;
           vzero = verror_sum_outcycle / float(CALIB_CYCLES);
-          Serial.println("Calibration vzero: " + String(vzero));
+          Serial.println("Calibration verror: " + String(vzero));
 
       }
     } else {
@@ -697,21 +700,6 @@ void loop() {
 void timer1Isr(void) {
   ventilation->update();
   //alarms->update(ventilation->getPeakInspiratoryPressure());
-}
-
-void update_error_once() { //THIS UPDATES ONCE AFTER SEVERAL CYCLES WITHOUT NET FLUX
-  if (cycle_pos > 110) {
-      vcorr_count += 1.;
-      verror_sum += ( Voltage - 0.2 ); //-5*0.04
-      init_verror = true;
-    }
-
-  if (cycle_pos < 10 && init_verror) {
-    verror = verror_sum / ((float)vcorr_count + 1.);
-    verror_sum = 0.;
-    vcorr_count = 0;
-    init_verror = false;
-  }
 }
 
 //void update_error() {
