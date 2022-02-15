@@ -155,8 +155,8 @@ extern unsigned long time;
 
 #define VMIN_MPX            4.5               //For battery charge reference
 //Battery level voltage dividers
-#define BATDIV_R1           1200
-#define BATDIV_R2           220
+#define BATDIV_R1           12000
+#define BATDIV_R2           470
 extern float vlevel;
 
 

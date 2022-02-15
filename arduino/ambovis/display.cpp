@@ -177,7 +177,9 @@ void print_bat(){
     //TODO: Make this calcs at setup
     float fdiv = (float)BATDIV_R2/(float)(BATDIV_R1 + BATDIV_R2);
     Serial.print("fdiv: ");Serial.println(fdiv);
-    tft.fillRect(180,250,70,50, ILI9341_BLACK);    float fac=5.0/(1024.0*fdiv);  //5./(1024.*0.175)
+    tft.fillRect(180,250,70,50, ILI9341_BLACK);    
+    
+    float fac=1.1/(1024.0*fdiv);  //5./(1024.*0.175)
     
     //Vt > 24V   =>   PC = 100%
     //Vmin < Vt < 24V   =>   PC[%] = (Vt[V]-Vmin)/(24-Vmin)*100
