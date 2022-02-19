@@ -137,11 +137,9 @@ typedef struct {
 #define VENTMODE_MAN 2
 
 #define TESTING_MODE_DISABLED 1
+#define CALIB_CYCLES 5
 
 //general variables
-//extern byte vent_mode;
-extern bool send_data;
-//extern bool sleep_mode;
 
 extern byte alarm_state;
 

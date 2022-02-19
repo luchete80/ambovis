@@ -33,10 +33,10 @@ extern int idleTime ;        // how long the button was idle
 extern int curr_sel, old_curr_sel;
 extern byte encoderPos; //this variable stores our current value of encoder position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
 extern byte oldEncPos; //stores the last encoder position value so we can compare to the current reading and see if it has changed (so we know when to print to the serial monitor)
-extern byte old_menu_pos,old_menu_num;
+//extern byte old_menu_pos,old_menu_num;
 extern bool show_changed_options; //Only for display
 extern bool update_options;
-extern char tempstr[5],tempstr2[5];
+extern char tempstr[5];
 extern byte menu_number;
 extern byte p_trim;
 
