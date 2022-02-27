@@ -168,7 +168,6 @@ private:
 extern unsigned int _timeoutIns;
 extern unsigned int _timeoutEsp;
 
-extern unsigned long last_vent_time;
 extern float _mlInsVol,_mlExsVol;
 extern int _mllastInsVol,_mllastExsVol;
 extern float pressure_sec,psec_max,last_psec_max;

@@ -53,10 +53,4 @@
 #define PIN_MPX_LEV     A2
 #define PIN_PRESSURE    A3
 
-// IF ARDUINO UNO
-//#define PIN_ENC_CL  2
-//#define PIN_ENC_DIR 3
-
-
-
 #endif // ENCODER_H

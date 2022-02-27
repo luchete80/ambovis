@@ -74,7 +74,7 @@ void updateCounter() {
 }
 
 void init_display() {
-  #ifdef LCD_I2C
+#ifdef LCD_I2C
   lcd.begin(20, 4);  //I2C
 #else
   lcd.begin(20, 4); //NO I2C

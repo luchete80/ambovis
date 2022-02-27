@@ -14,8 +14,6 @@
 
 #define BMP_I2C 1  //Pressure Sensor
 
-//#define PRUEBAS 1 // testing over arduino without sensors
-
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE                 20                                          // msec
 #define TIME_BASE_MICROS         (TIME_BASE * 1000) // microsec PID refresh (for ISR)
@@ -23,14 +21,15 @@
 
 #define TIME_SENSOR 10                // msec
 #define TIME_SHOW 	50                  //IF OLED DISPLAY IS USED FASTER THAN 50ms GIVES ERRORS IN THE PLOTS 
-#define TIME_SAVE 	5000
+#define TIME_SAVE 	5000    // msec
 #define TIME_BUZZER 500
 #define TIME_MUTE   60000             //msec
 
 #define TIME_SEND_CONFIGURATION 2000 // msec
-#define V_HONEY_P0 	0.49874F //Analog/1023
-
+#define TIME_UPDATE_DISPLAY 20 //ms
+#define TIME_PRINT_BAT 5000
 #define TIME_BUZZER 500
+#define V_HONEY_P0 	0.49874F //Analog/1023
 
 // Sensores
 #define ENABLED_SENSOR_VOLUME 1
@@ -42,7 +41,6 @@
 #define STEPPER_MICROSTEPS 4
 #define STEPPER_STEPS_PER_REVOLUTION 200
 #define STEPPER_MICROSTEPS_PER_REVOLUTION (STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS)
-//#define STEPPER_DIR 1
 #define STEPPER_HOMING_DIRECTION    (1)
 #define STEPPER_HOMING_SPEED        (STEPPER_MICROSTEPS * 600)   // Steps/s
 //#define STEPPER_LOWEST_POSITION     (STEPPER_MICROSTEPS *  -100)   // Steps
@@ -94,7 +92,10 @@ extern int STEPPER_ACCEL_MAX;       //(1500 * STEPPER_MICROSTEPS)
 #define PID_MIN -20000 // TODO: check direction implementation
 #define PID_MAX 20000
 
-extern int PID_KP,PID_KI,PID_KD;
+//extern int PID_KP,PID_KI,PID_KD;
+#define PID_KP 400.01
+#define PID_KI 20.01
+#define PID_KD 50.01
 
 #define PID_TS TIME_BASE
 #define PID_BANGBANG 8
