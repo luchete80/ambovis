@@ -580,10 +580,9 @@ void loop() {
 //        verror = verror_sum / float(vcorr_count);
 //        vcorr_count = verror_sum = 0.;
 //      }
-    
-    }//change cycle
 
-    calibrate(calibration_run, verror_sum, vcorr_count, calib_cycle, verror_sum_outcycle, vzero);
+        calibrate(calibration_run, verror_sum, vcorr_count, calib_cycle, verror_sum_outcycle, vzero);
+    }//change cycle
 
     if (systemState.display_needs_update) {
         display_lcd(systemState);
