@@ -2,8 +2,8 @@
 // Created by Mirian Quinteros on 26/02/2022.
 //
 
-#ifndef LOOPTIMEACTIONS_H
-#define LOOPTIMEACTIONS_H
+#ifndef SENSOR_READ_H
+#define SENSOR_READ_H
 
 #include "defaults.h"
 #include "DpFluxCalculator.h"
@@ -72,4 +72,4 @@ SensorProcessedData updateProcessedSensorData(SensorData sensorData, bool filter
     return newSensorProcessedData;
 }
 
-#endif //LOOPTIMEACTIONS_H
+#endif //SENSOR_READ_H
