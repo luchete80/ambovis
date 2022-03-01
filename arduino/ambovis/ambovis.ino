@@ -1,11 +1,16 @@
 #include "pinout.h"
+#include "Utils.h"
 #include "MechVentilation.h"
+#include "DpFluxCalculator.h"
 #include "src/TimerOne/TimerOne.h"
 #include "src/TimerTwo/TimerTwo.h"
 #include "src/TimerThree/TimerThree.h"
 
 #include "menu.h"
 #include "display.h"
+#include "SensorRead.h"
+#include "AlarmValidation.h"
+#include "CalibrationUtils.h"
 
 #include "src/AutoPID/AutoPID.h"
 #ifdef ACCEL_STEPPER
@@ -32,8 +37,6 @@ bool drawing_cycle = 0;//TOD: Move to class member
 #include <Wire.h>
 #include <Adafruit_ADS1015.h>
 Adafruit_ADS1115 ads(0x48);           //Conversor AD para leer mejor el flujo a partir de la presion
-float Voltage = 0.0;
-int vt;
 float _mlInsVol = 0;
 float _mlExsVol = 0;
 int _mllastInsVol, _mllastExsVol;
@@ -86,11 +89,11 @@ byte vent_mode = VENTMODE_MAN; //0
 //Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
 float verrp;
-float _flux,    flow_f;;
+float _flux, flow_f;
 //#ifdef FILTER_FLUX
 float _flux_fil[5];
 float _mlInsVol2;
-float _flux_sum;
+
 byte flux_count;
 //#endif
 
@@ -116,7 +119,6 @@ unsigned long last_stepper_time;
 unsigned long last_vent_time;
 unsigned long time;
 byte cycle_pos;
-int16_t adc0;
 
 int max_accel, min_accel;
 int max_speed, min_speed;
@@ -143,15 +145,6 @@ int alarm_vt = 200;
 unsigned long lastButtonPress;
 float verror, verror_sum, verror_sum_outcycle, vzero;  //verror sum is intra cycle, verror_sum_outcycle is inter-cycle
 
-//FLUX IS -100 to +100, has to be added 100
-//ASSIMETRY IN MAX FLOW IS IN NEGATIVE (ORIGINAL CURVE)
-//float dp[]={-2.444452733,-2.030351958,-1.563385753,-1.207061607,-0.877207832,-0.606462279,-0.491216024,-0.377891785,-0.295221736,-0.216332764,-0.151339196,-0.096530072,-0.052868293,-0.047781395,-0.039664506,-0.03312327,-0.028644966,-0.023566372,-0.020045692,-0.014830113,-0.011688636,-0.008176254,-0.006117271,-0.003937171,-0.001999305,-0.00090924,-0.00030358,0,0.000242233,0.000837976,0.002664566,0.004602432,0.007024765,0.009325981,0.012111664,0.01441288,0.017561913,0.023012161,0.029794693,0.037061691,0.043771552,0.051474571,0.05874157,0.109004974,0.176879848,0.260808033,0.365700986,0.504544509,0.630753349,0.795599072,1.216013465,1.60054669,2.087678384,2.547210457,3.074176245};
-//byte po_flux[]={0,10,20,30,40,50,55,60,65,70,75,80,85,86,87,88,89,90,91,92,93,94,95,96,97,100,100,100,100,100,103,104,105,106,107,108,109,110,111,112,113,114,115,120,125,130,135,140,145,150,160,170,180,190,200};
-
-//MAX FLUX IS IN ISPIRING POSITIVE (1st quad)
-float dp[] = { -3.074176245, -2.547210457, -2.087678384, -1.60054669, -1.216013465, -0.795599072, -0.630753349, -0.504544509, -0.365700986, -0.260808033, -0.176879848, -0.109004974, -0.05874157, -0.051474571, -0.043771552, -0.037061691, -0.029794693, -0.023012161, -0.017561913, -0.01441288, -0.012111664, -0.009325981, -0.007024765, -0.004602432, -0.002664566, 0.00090924, 0.00030358, 0, -0.000242233, -0.000837976, 0.001999305, 0.003937171, 0.006117271, 0.008176254, 0.011688636, 0.014830113, 0.020045692, 0.023566372, 0.028644966, 0.03312327, 0.039664506, 0.047781395, 0.052868293, 0.096530072, 0.151339196, 0.216332764, 0.295221736, 0.377891785, 0.491216024, 0.606462279, 0.877207832, 1.207061607, 1.563385753, 2.030351958, 2.444452733};
-byte po_flux[] = {0, 10, 20, 30, 40, 50, 55, 60, 65, 70, 75, 80, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 100, 100, 100, 100, 100, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 120, 125, 130, 135, 140, 145, 150, 160, 170, 180, 190, 200};
-
 bool change_pid_params = false;
 
 byte encoderPos = 1; //this variable stores our current value of encoder position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
@@ -161,7 +154,6 @@ byte reading = 0; //somewhere to store the direct values we read from our interr
 byte max_sel, min_sel; //According to current selection
 
 void check_buzzer_mute();
-void autotrim_flux();
 void check_sleep_mode();  //Batt charge only
 
 bool isitem_sel;
@@ -387,25 +379,12 @@ void setup() {
   pf_max = (float)pfmax / 50.;
   peep_fac = -(pf_max - pf_min) / 15.*last_pressure_min + pf_max;
 
-//  sleep_mode = false;
-//  put_to_sleep = false;
-//  wake_up = false;
-
-//  Serial.println("Exiting setup");
-  
-
-
 }
-
-
-bool update_display = false;
-byte pos;
 
 /////////////// CALIBRATION
 bool  calibration_run = true;
-int   start_cyle = last_cycle;  //Used for calibration
 byte  calib_cycle = 0;
-float vs;
+
 ////////////////////////////////////////
 ////////////// MAIN LOOP ///////////////
 ////////////////////////////////////////
@@ -415,222 +394,212 @@ void loop() {
 
   if (!systemState.sleep_mode) {
       if (systemState.wake_up) {
-      lcd.clear();
-      init_display();
-      display_lcd(systemState);    //TODO: Pass mech vent as argument in display
-      tft.fillScreen(ILI9341_BLACK);
-      systemState.wake_up = false;
-    }
+          lcd.clear();
+          init_display();
+          display_lcd(systemState);    //TODO: Pass mech vent as argument in display
+          tft.fillScreen(ILI9341_BLACK);
+          systemState.wake_up = false;
+      }
     State state = ventilation->getState();
     check_encoder(systemState);
 
     time = millis();
     check_buzzer_mute();
-    //Serial.print("Carga: ");Serial.println(analogRead(PIN_BAT_LEV));
 
     if (millis() > lastSave + TIME_SAVE) {
       write_memory();
-
       lastSave = millis();
     }
 
-
-
     if ( time > lastShowSensor + TIME_SHOW ) {
-
-#ifdef DEBUG_STEPPER
-      //      unsigned long reltime = ventilation->getMSecTimerCnt();
-      //      Serial.print("Rel Msec: ");Serial.print(reltime);Serial.print(", Abs: ");
-      //      Serial.println(time);
-#endif
-      lastShowSensor = time;
-      //           Serial.print(int(cycle_pos));Serial.print(",");
-      //           Serial.print(Voltage,5);Serial.print(",");
-      //           Serial.print(verror,3);Serial.print(",");
-      //           Serial.print(p_dpt,5);Serial.print(",");
-      //
-      //           Serial.println(flow_f,2);
-
-      tft_draw();
-
+        #ifdef DEBUG_STEPPER
+        //      unsigned long reltime = ventilation->getMSecTimerCnt();
+        //      Serial.print("Rel Msec: ");Serial.print(reltime);Serial.print(", Abs: ");
+        //      Serial.println(time);
+        #endif
+        lastShowSensor = time;
+        //           Serial.print(int(cycle_pos));Serial.print(",");
+        //           Serial.print(Voltage,5);Serial.print(",");
+        //           Serial.print(verror,3);Serial.print(",");
+        //           Serial.print(p_dpt,5);Serial.print(",");
+        //           Serial.println(flow_f,2);
+        tft_draw();
     }
-
 
     if (time > lastReadSensor + TIME_SENSOR) {
-      //According to datasheet
-      //vout = vs(0.09*P + 0.04) +/ERR
-      // P = ( vout/vs - 0.04 )/0.09 So, vout/vs if 
-      //IF vs = 5V     
-      #ifdef USING_1v1_4PRESS
-      pressure_p = ( analogRead(PIN_PRESSURE) / (1023.)/*- verrp * 0.2 */ - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010      
-      #else //Original, pressure sensor connected to A0
-      pressure_p = ( analogRead(A0) / (1023.) /*- verrp * 0.2 */ - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
-      #endif
+//      //According to datasheet
+//      //vout = vs(0.09*P + 0.04) +/ERR
+//      // P = ( vout/vs - 0.04 )/0.09 So, vout/vs if
+//      //IF vs = 5V
+//      #ifdef USING_1v1_4PRESS
+//      pressure_p = ( analogRead(PIN_PRESSURE) / (1023.)/*- verrp * 0.2 */ - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
+//      #else //Original, pressure sensor connected to A0
+//      pressure_p = ( analogRead(A0) / (1023.) /*- verrp * 0.2 */ - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
+//      #endif
+//
+//      vlevel = float(analogRead(PIN_MPX_LEV))/1024.*1.1*VOLTAGE_CONV;
+        int16_t pressureFromPin = analogRead(PIN_PRESSURE);
+        int16_t mpxLevelFromPin = analogRead(PIN_MPX_LEV);
+        int16_t adc0 = ads.readADC_SingleEnded(0);
+//      float voltage = (adc0 * 0.1875) * 0.001; //Volts
+//
+//      //With constant correction
+//      p_dpt = ( (voltage - vzero)/vlevel - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
+//
+//      _flux = findFlux(p_dpt);
+        SensorData sensorData = readSensorData(pressureFromPin, mpxLevelFromPin, adc0, vzero);
+        //copy results to extern variables to keep compatibility
+        pressure_p = sensorData.pressure_p;
+        vlevel = sensorData.vlevel;
+        p_dpt = sensorData.p_dpt;
+        _flux = sensorData.flux;
 
-      vlevel = float(analogRead(PIN_MPX_LEV))/1024.*1.1*VOLTAGE_CONV;
+//      if (filter) {
+//        flux_count++;    //Filter
+//        for (int i = 0; i < 4; i++) {
+//          _flux_fil[i] = _flux_fil[i + 1];
+//        }
+//        _flux_fil[4] = _flux;
+//        float _flux_sum = 0.;
+//        for (int i = 0; i < 5; i++) {
+//            _flux_sum += _flux_fil[i];
+//        }
+//
+//        flow_f = _flux_sum / 5.;
+//      } else {
+//        flow_f = _flux;
+//      }
+//
+//      if (_flux > 0) {
+//        _mlInsVol += flow_f * float((millis() - lastReadSensor)) * 0.001; //flux in l and time in msec, results in ml
+//      } else {
+//        _mlExsVol -= flow_f * float((millis() - lastReadSensor)) * 0.001; //flux in l and time in msec, results in ml
+//      }
+//
+//      lastReadSensor = millis();
+//
+//      //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
+//      if (pressure_p > pressure_max) {
+//        pressure_max = pressure_p;
+//      }
+//      if (pressure_p < pressure_min) {
+//        pressure_min = pressure_p;
+//      }
+        SensorProcessedData oldData;
+        copyFloatArray(_flux_fil, oldData.flux_fil, 5);
+        oldData.mlInsVol = _mlInsVol;
+        oldData.mlExsVol = _mlExsVol;
+        oldData.pressure_min = pressure_min;
+        oldData.pressure_max = pressure_max;
 
-      // Is like 1/vs
-      vs = vlevel /** vfactor*/; 
-      
-      adc0 = ads.readADC_SingleEnded(0);
-      Voltage = (adc0 * 0.1875) * 0.001; //Volts
+        float time = millis();
+        SensorProcessedData processedData = updateProcessedSensorData(sensorData, filter, time, lastReadSensor, oldData);
 
-      //ORIGINAL. 0.45 = 0.09 x 5V and 0.2 = 0.04 x 5V
-      //p_dpt = ( Voltage /*- verror */- vzero - 0.20 ) / 0.45 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
+        flow_f = processedData.flow_f;
+        copyFloatArray(processedData.flux_fil, _flux_fil , 5);
+        _mlInsVol = processedData.mlInsVol;
+        _mlExsVol = processedData.mlExsVol;
+        pressure_min = processedData.pressure_min;
+        pressure_max = processedData.pressure_max;
 
-      //With constant correction
-      p_dpt = ( (Voltage - vzero)/vs   - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
-      
-      pos = findClosest(dp, 55, p_dpt);
-      //flux should be shifted up (byte storage issue)
-      _flux = po_flux[pos] - 100 + ( float (po_flux[pos + 1] - 100) - float (po_flux[pos] - 100) ) * ( p_dpt - float(dp[pos]) ) / (float)( dp[pos + 1] - dp[pos]);
-      _flux *= 16.6667;
+        lastReadSensor = time;
 
-      if (filter) {
-        flux_count++;    //Filter
-        for (int i = 0; i < 4; i++) {
-          _flux_fil[i] = _flux_fil[i + 1];
-        }
-        _flux_fil[4] = _flux;
-        _flux_sum = 0.;
-        for (int i = 0; i < 5; i++)
-          _flux_sum += _flux_fil[i];
-
-        flow_f = _flux_sum / 5.;
-      } else {
-        flow_f = _flux;
-      }
-
-      if (_flux > 0) {
-        _mlInsVol += flow_f * float((millis() - lastReadSensor)) * 0.001; //flux in l and time in msec, results in ml
-      } else {
-        _mlExsVol -= flow_f * float((millis() - lastReadSensor)) * 0.001; //flux in l and time in msec, results in ml
-      }
-
-      lastReadSensor = millis();
-
-      //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
-      if (pressure_p > pressure_max) {
-        pressure_max = pressure_p;
-      }
-      if (pressure_p < pressure_min) {
-        pressure_min = pressure_p;
-      }
     }//Read Sensor
 
-//
-//    if (calibration_run) {
-//      vcorr_count += 1.;
-//      verror_sum += ( Voltage - 0.04 * vs); //-5*0.04
-//      Serial.println("Calibration sum: "+ String(verror_sum));
-//      //update_error_once();
-//    } else { //This sums the feed error
-//        verror_sum += vlevel;       // -5*0.04
-//        vcorr_count += 1.;
+    if ( ventilation->getCycleNum() != last_cycle ) {
+      int vt = (_mllastInsVol + _mllastInsVol) / 2; // check with Luciano
+//      if (vt < alarm_vt)  isalarmvt_on = 1;
+//      else              isalarmvt_on = 0;
+//      byte isalarmvt_on = vt < alarm_vt ? 1 : 0;
+//      if ( last_pressure_max > alarm_max_pressure + 1 ) {
+//        if ( last_pressure_min < alarm_peep_pressure - 1) {
+//          if (!isalarmvt_on)  alarm_state = 3;
+//          else                alarm_state = 13;
+//        } else {
+//          if (!isalarmvt_on)  alarm_state = 2;
+//          else                alarm_state = 12;
+//        }
+//      } else {
+//        if ( last_pressure_min < alarm_peep_pressure - 1 ) {
+//          if (!isalarmvt_on) alarm_state = 1;
+//          else               alarm_state = 11;
+//        } else {
+//          if (!isalarmvt_on)  alarm_state = 0;
+//          else                alarm_state = 10;
+//        }
 //      }
-    
-    if (alarm_vt) {
-
-    }
-    if ( ventilation -> getCycleNum () != last_cycle ) {
-      vt = (_mllastInsVol + _mllastInsVol) / 2;
-      if (vt < alarm_vt)  isalarmvt_on = 1;
-      else              isalarmvt_on = 0;
-      if ( last_pressure_max > alarm_max_pressure + 1 ) {
-        if ( last_pressure_min < alarm_peep_pressure - 1) {
-          if (!isalarmvt_on)  alarm_state = 3;
-          else                alarm_state = 13;
-        } else {
-          if (!isalarmvt_on)  alarm_state = 2;
-          else                alarm_state = 12;
-        }
-      } else {
-        if ( last_pressure_min < alarm_peep_pressure - 1 ) {
-          if (!isalarmvt_on) alarm_state = 1;
-          else               alarm_state = 11;
-        } else {
-          if (!isalarmvt_on)  alarm_state = 0;
-          else                alarm_state = 10;
-        }
-      }
+      alarm_state = getAlarmState(vt, alarm_vt, last_pressure_max, last_pressure_min, alarm_max_pressure, alarm_peep_pressure);
 
       last_cycle = ventilation->getCycleNum();
 
       display_lcd(systemState);
-      update_display = true;
+
       last_update_display = time;
 
-#ifdef DEBUG_PID
-      if (systemState.vent_mode = VENTMODE_PCL) {
-        float err = (float)(pressure_max - options.peakInspiratoryPressure) / options.peakInspiratoryPressure;
-        errpid_prom += fabs(err);
-        errpid_prom_sig += err;
-        Serial.println("Error PID: "); Serial.print(err, 5);
-        ciclo_errpid++;
-
-        if (ciclo_errpid > 4) {
-          errpid_prom /= 5.; errpid_prom_sig /= 5.;
-          Serial.print(options.peakInspiratoryPressure); Serial.print(" "); Serial.print(errpid_prom, 5); Serial.print(" "); Serial.println(errpid_prom_sig, 5);
-          errpid_prom = 0.; errpid_prom_sig = 0.;
-          ciclo_errpid = 0;
-        }
-      }
-#endif
+//#ifdef DEBUG_PID TODO: is not defined
+//      if (systemState.vent_mode = VENTMODE_PCL) {
+//        float err = (float)(pressure_max - options.peakInspiratoryPressure) / options.peakInspiratoryPressure;
+//        errpid_prom += fabs(err);
+//        errpid_prom_sig += err;
+//        Serial.println("Error PID: "); Serial.print(err, 5);
+//        ciclo_errpid++;
+//
+//        if (ciclo_errpid > 4) {
+//          errpid_prom /= 5.; errpid_prom_sig /= 5.;
+//          Serial.print(options.peakInspiratoryPressure); Serial.print(" "); Serial.print(errpid_prom, 5); Serial.print(" "); Serial.println(errpid_prom_sig, 5);
+//          errpid_prom = 0.; errpid_prom_sig = 0.;
+//          ciclo_errpid = 0;
+//        }
+//      }
+//#endif
       if (digitalRead(PIN_POWEROFF)) {
-        digitalWrite(YELLOW_LED, HIGH);
-        //Serial.println("Yellow high");
+          digitalWrite(YELLOW_LED, HIGH);
       } else {
-        digitalWrite(YELLOW_LED, LOW);
+          digitalWrite(YELLOW_LED, LOW);
       }
 
-      if (calibration_run) {
-      //NEW, CALIBRATION
-        verror = verror_sum / float(vcorr_count);
-        
-       Serial.println("Calibration iter, cycle, verror, sum: " + String(vcorr_count) + ", " + 
-                                                                  String(calib_cycle) + ", " + 
-                                                                  String(verror) + ", " + 
-                                                                  String(verror_sum_outcycle));
-        vcorr_count = verror_sum = 0.;
-        calib_cycle ++;
-        verror_sum_outcycle += verror;
-        if (calib_cycle >= CALIB_CYCLES ){
-          calibration_run = false;
-          vzero = verror_sum_outcycle / float(CALIB_CYCLES);
-          Serial.println("Calibration verror: " + String(vzero));
-
-      }
-    } else {
-        verror = verror_sum / float(vcorr_count);
-        vcorr_count = verror_sum = 0.;
-      }
+      // TODO: looks like this always is zero
+//      if (calibration_run) {
+//      //NEW, CALIBRATION
+//        verror = verror_sum / float(vcorr_count);
+//
+//        Serial.println("Calibration iter, cycle, verror, sum: " + String(vcorr_count) + ", " +
+//                                                                  String(calib_cycle) + ", " +
+//                                                                  String(verror) + ", " +
+//                                                                  String(verror_sum_outcycle));
+//        vcorr_count = verror_sum = 0.;
+//        calib_cycle ++;
+//        verror_sum_outcycle += verror;
+//        if (calib_cycle >= CALIB_CYCLES ){
+//          calibration_run = false;
+//          vzero = verror_sum_outcycle / float(CALIB_CYCLES);
+//          Serial.println("Calibration verror: " + String(vzero));
+//
+//        }
+//      } else {
+//        verror = verror_sum / float(vcorr_count);
+//        vcorr_count = verror_sum = 0.;
+//      }
     
     }//change cycle
 
-    if (systemState.display_needs_update) {
+    calibrate(calibration_run, verror_sum, vcorr_count, calib_cycle, verror_sum_outcycle, vzero);
 
-      display_lcd(systemState);
-      systemState.display_needs_update = false;
+    if (systemState.display_needs_update) {
+        display_lcd(systemState);
+        systemState.display_needs_update = false;
     }
 
     if ( update_options ) {
-      ventilation->change_config(options);
-      update_options = false;
-      //show_changed_options=true;
+        ventilation->change_config(options);
+        update_options = false;
     }
-
-    //////////////// CAUTION
-    // // //		WITH LATEST HARDWARE; IF VENTILATION UPDATE IS IN THE MAIN LOOP LIKE THIS
-    // // //		MENU ACTIONS INTERFERE WITH VENTILATION MECHANICS
-    //      if ( millis () - last_vent_time > TIME_BASE ) {
-    //        ventilation -> update();
-    //      }
 
     //HERE changed_options flag is not updating until cycle hcanges
     if (show_changed_options && ((millis() - last_update_display) > time_update_display) ) {
-      display_lcd(systemState);  //WITHOUT CLEAR!
-      last_update_display = millis();
-      show_changed_options = false;
+        display_lcd(systemState);  //WITHOUT CLEAR!
+        last_update_display = millis();
+        show_changed_options = false;
     }
 
     //        if (alarm_state > 0) {
@@ -673,59 +642,12 @@ void loop() {
     check_bck_state(systemState);
   }
 
-  //    #ifdef ACCEL_STEPPER
-  //    stepper->run();
-  //  #else
-  //    stepper -> processMovement(); //LUCIANO
-  //  #endif
-
 }//LOOP
 
 void timer1Isr(void) {
   ventilation->update(systemState);
   //alarms->update(ventilation->getPeakInspiratoryPressure());
 }
-
-void update_error_once() { //THIS UPDATES ONCE AFTER SEVERAL CYCLES WITHOUT NET FLUX
-  if (cycle_pos > 110) {
-      vcorr_count += 1.;
-      verror_sum += ( Voltage - 0.2 ); //-5*0.04
-      init_verror = true;
-    }
-
-  if (cycle_pos < 10 && init_verror) {
-    verror = verror_sum / ((float)vcorr_count + 1.);
-    verror_sum = 0.;
-    vcorr_count = 0;
-    init_verror = false;
-  }
-}
-
-//void update_error() {
-//  //UPDATING VERROR
-//  if (cycle_pos > 100) {
-//    if (vcorr_count < 20) {
-//      vcorr_count += 1.;
-//      verror_sum += ( Voltage - 0.2 ); //-5*0.04
-//      verror_sum += p_dpt; //Si el error es de presion
-//      //verror+=Voltage;
-//      init_verror = true;
-//    }
-//  }
-//  if (cycle_pos < 5 && init_verror) {
-//    verror = verror_sum / ((float)vcorr_count + 1.);
-//    //Serial.print("Verror (mV) and count: ");Serial.print(verror*1000);Serial.print(",  ");Serial.println(vcorr_count);
-//    //Serial.print("Verror (mV) and count: ");Serial.println(verror*1000);
-//    verror_sum = 0.;
-//    vcorr_count = 0;
-//    init_verror = false;
-//  }
-//}
-
-//void timer2Isr(void)
-//{
-//  ventilation -> update();
-//}
 
 void timer3Isr(void)
 {
@@ -734,22 +656,6 @@ void timer3Isr(void)
 #else
   stepper -> processMovement(); //LUCIANO
 #endif
-}
-//
-
-
-int findClosest(float arr[], int n, float target) {
-  int i = 0, j = n - 1, mid = 0;
-  while ( j - i > 1 ) {
-    mid = (i + j) / 2;
-    if (target < arr[mid]) {
-      j = mid;
-    } else {       // If target is greater than mid
-      i = mid;
-    }
-    //Serial.print("i,j: ");Serial.print(i);Serial.print(",");Serial.println(j);
-  }
-  return i;
 }
 
 boolean debounce(boolean last, int pin) {
@@ -826,6 +732,3 @@ void write_memory() {
   EEPROM.put(eeAddress, f_acc_b);    eeAddress += sizeof(f_acc_b);
 }
 
-void autotrim_flux() {
-
-}

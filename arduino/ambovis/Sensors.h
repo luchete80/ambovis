@@ -15,6 +15,6 @@ extern float last_pressure_max,last_pressure_min,last_pressure_peep;
 extern float _flux,flow_f;
 //extern Adafruit_BMP280 _pres1Sensor;
 
-extern float verror;
+//extern float verror;
 
 #endif
