@@ -94,7 +94,6 @@ float _flux, flow_f;
 float _flux_fil[5];
 float _mlInsVol2;
 
-byte flux_count;
 //#endif
 
 bool send_data = false;
@@ -502,7 +501,7 @@ void loop() {
         pressure_min = processedData.pressure_min;
         pressure_max = processedData.pressure_max;
 
-        lastReadSensor = time;
+        lastReadSensor = millis();
 
     }//Read Sensor
 
