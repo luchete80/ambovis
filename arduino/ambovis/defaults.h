@@ -128,10 +128,6 @@ typedef struct {
     bool display_needs_update;
 } SystemState;
 
-#define MODE_VOL_CTL 0
-#define MODE_VOL_CTL 1
-#define MODE_MANUAL  2
-
 #define VENTMODE_VCL 0
 #define VENTMODE_PCL 1
 #define VENTMODE_MAN 2
@@ -168,6 +164,17 @@ extern unsigned long time;
 #define BATDIV_R1           1200
 #define BATDIV_R2           220
 extern float vlevel;
-
+int AMBOVIS_LOW LOW
+int AMBOVIS_HIGH HIGH
+byte back[8] = {
+        0b00100,
+        0b01000,
+        0b11111,
+        0b01001,
+        0b00101,
+        0b00001,
+        0b00001,
+        0b11111
+};
 
 #endif // DEFAULTS_H
