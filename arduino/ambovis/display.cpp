@@ -1,7 +1,8 @@
 #include "display.h"
 #include "MechVentilation.h"
 
-#define MAX_CURVES_Y    200
+#define MIN_CURVES_Y    60
+#define MAX_CURVES_Y    180
 #define LEGEND_Y        260 //Begining of the legend on Y AXIS
 bool lcd_cleaned=false;
 
@@ -14,7 +15,7 @@ char receivedChars[numChars]; // an array to store the received data
 int last_t;
 int integerFromPC [5];
 float floatFromPC = 0.0;
-int axispos[]={100,170,300}; //from each graph, from 0 to 320 (display height, IN PORTRAIT MODE)
+int axispos[]={130,200}; //from each graph, from 0 to 320 (display height, IN PORTRAIT MODE)
 byte state_r;
 int buzzer=3; //pin
 
@@ -119,7 +120,7 @@ void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WIT
   if ( rx[valsreaded] > rx[valsreaded-1] ) {//to avoid draw entire line to the begining at the end of the cycle
     for (int i=0;i<2;i++)
       tft.drawLine(axispos[i], x_start - rx[valsreaded-1], axispos[i], x_start - rx[valsreaded], ILI9341_DARKGREY);           //X AXIS 
-    tft.fillRect(0, x_start - rx[valsreaded] - 10, MAX_CURVES_Y, 10, ILI9341_BLACK);                                //CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
+    tft.fillRect(MIN_CURVES_Y, x_start - rx[valsreaded] - 10, MAX_CURVES_Y, 10, ILI9341_BLUE);                                       //CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
 
     
     tft.drawLine(axispos[0]- ry[valsreaded-1], x_start - rx[valsreaded-1], axispos[0] - ry[valsreaded],   x_start - rx[valsreaded], color);
