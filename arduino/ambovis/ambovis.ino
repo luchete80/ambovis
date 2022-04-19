@@ -30,8 +30,13 @@ bool drawing_cycle = 0;//TOD: Move to class member
 
 // FOR ADS
 #include <Wire.h>
-#include <Adafruit_ADS1015.h>
-Adafruit_ADS1115 ads(0x48);           //Conversor AD para leer mejor el flujo a partir de la presion
+//OLD
+//#include <Adafruit_ADS1015.h>
+//Adafruit_ADS1115 ads(0x48);           //Conversor AD para leer mejor el flujo a partir de la presion
+//NEW
+#include <Adafruit_ADS1X15.h>           //Currently is 
+Adafruit_ADS1115 ads;
+
 float Voltage = 0.0;
 int vt;
 float _mlInsVol = 0;

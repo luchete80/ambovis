@@ -64,6 +64,12 @@ void tft_draw(void) {
     		    valsreaded_[i]=0;
         print_vols();
         print_bat();
+
+        //TODO: DO IT ONLY WHEN CHANGE!
+        tft.fillRect(10,10,150,15, ILI9341_BLUE); 
+        if (digitalRead(PIN_POWEROFF)){
+          tft.setCursor(10, 10);tft.println("CORTE ENERGIA");         
+        }
         
         dtostrf(vlevel, 1, 2, buffer);
         tft.setCursor(100, 80);tft.println("Vmpx:");
