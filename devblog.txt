@@ -1,0 +1,4 @@
+20220419 - Se bajan los grafico XY, se coloca leyenda de corte de energia
+20220420 - Se coloca aviso de desconexion para calibracion y pantalla con evolucion de calibracion    
+           (aun falta pantalla inicial(puede ser en el setup antes de la calibracion)
+           
