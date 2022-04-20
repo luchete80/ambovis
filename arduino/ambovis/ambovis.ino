@@ -301,7 +301,22 @@ void setup() {
   //  Serial.print("pressure  MPX Volt (mV) at p0: "); Serial.println(verrp * 1000, 3);
 
   Serial.print("dp  error : "); Serial.println(-verror / (5.*0.09));
-  
+
+
+  delay(3000);
+  bool fin = false;
+  lcd.clear();
+  writeLine(1, "Desconecte flujo", 0);
+  writeLine(2, "y presione ok ", 0);
+
+  lastButtonPress = millis();
+  while (!fin){
+    if (digitalRead(PIN_MENU_EN) == LOW)  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
+    if (millis() - lastButtonPress > 50) {
+      fin = true;
+      lastButtonPress = millis();
+    }// if time > last button press  
+  }
 
 
   // configura la ventilación
@@ -579,10 +594,16 @@ void loop() {
 
       last_cycle = ventilation->getCycleNum();
 
-      display_lcd();
-      update_display = true;
-      last_update_display = time;
-
+      if (!calibration_run){
+        display_lcd();
+        update_display = true;
+        last_update_display = time;
+      } else {
+          lcd.clear();
+          writeLine(1, "Calibracion flujo", 0);
+          writeLine(2, "Ciclo: " + String(calib_cycle+1) + "/" + String(CALIB_CYCLES), 0);
+      }
+      
 #ifdef DEBUG_PID
       if (vent_mode = VENTMODE_PCL) {
         float err = (float)(pressure_max - options.peakInspiratoryPressure) / options.peakInspiratoryPressure;
@@ -630,12 +651,13 @@ void loop() {
     
     }//change cycle
 
-    if (display_needs_update) {
-
-      display_lcd();
-      display_needs_update = false;
+    if (!calibration_run) {
+      if (display_needs_update) {
+        display_lcd();
+        display_needs_update = false;
+      }
     }
-
+  
     if ( update_options ) {
       ventilation->change_config(options);
       update_options = false;
@@ -650,10 +672,12 @@ void loop() {
     //      }
 
     //HERE changed_options flag is not updating until cycle hcanges
-    if (show_changed_options && ((millis() - last_update_display) > time_update_display) ) {
-      display_lcd();  //WITHOUT CLEAR!
-      last_update_display = millis();
-      show_changed_options = false;
+    if (!calibration_run){
+      if (show_changed_options && ((millis() - last_update_display) > time_update_display) ) {
+        display_lcd();  //WITHOUT CLEAR!
+        last_update_display = millis();
+        show_changed_options = false;
+      }
     }
 
     //        if (alarm_state > 0) {
