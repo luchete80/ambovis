@@ -310,6 +310,7 @@ void setup() {
 
   options.respiratoryRate = bpm;
   options.percInspEsp = i_e; //1:1 to 1:4, is denom
+  vent_mode = VENTMODE_MAN;
 
   /////////////////// CALIBRACION /////////////////////////////////////
   bool fin = false;
