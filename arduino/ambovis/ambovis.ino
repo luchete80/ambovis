@@ -302,8 +302,16 @@ void setup() {
 
   Serial.print("dp  error : "); Serial.println(-verror / (5.*0.09));
 
+  ////// ANTES DE CONFIGURAR LA VENTILACION Y CHEQUEAR EL FIN DE CARRERA INICIO LOS MENUES
+  bool init=false;
+  byte bpm = DEFAULT_RPM;
+  byte i_e = 2;
+  Menu_inic menuini(&vent_mode, &bpm, &i_e);
 
-  delay(3000);
+  options.respiratoryRate = bpm;
+  options.percInspEsp = i_e; //1:1 to 1:4, is denom
+
+  /////////////////// CALIBRACION /////////////////////////////////////
   bool fin = false;
   lcd.clear();
   writeLine(1, "Desconecte flujo", 0);
@@ -319,11 +327,14 @@ void setup() {
   }
 
 
+
+
+  /////
   // configura la ventilación
   ventilation -> start();
   ventilation -> update();
 
-  //
+  ////
 #ifdef ACCEL_STEPPER
   stepper->setSpeed(STEPPER_HOMING_SPEED);
 
@@ -418,14 +429,9 @@ void setup() {
   wake_up = false;
 
   //Serial.println("Vcc & Out MPX: " + String(analogRead(PIN_MPX_LEV)) + String(", ") + String(Voltage));
-
-  
-
-  
+    
   Serial.println("Exiting setup");
-  
-
-
+  //TODO: CALIBRATION RUN ALSO SHOULD BE HERE
 }
 
 
@@ -620,7 +626,7 @@ void loop() {
         }
       }
 #endif
-      if (digitalRead(PIN_POWEROFF)) {
+      if (digitalRead(!PIN_POWEROFF)) {
         digitalWrite(YELLOW_LED, HIGH);
         //Serial.println("Yellow high");
       } else {
