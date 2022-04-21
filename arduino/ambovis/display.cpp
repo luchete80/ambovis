@@ -122,10 +122,10 @@ void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WIT
       tft.drawLine(axispos[i], x_start - rx[valsreaded-1], axispos[i], x_start - rx[valsreaded], ILI9341_DARKGREY);           //X AXIS 
     tft.fillRect(MIN_CURVES_Y, x_start - rx[valsreaded] - 10, MAX_CURVES_Y, 10, ILI9341_BLUE);                                       //CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
 
-    if      (ry[valsreaded-1] > MAX_CURVES_Y) ry[valsreaded-1] = MAX_CURVES_Y;
-    else if (ry[valsreaded-1] < MIN_CURVES_Y) ry[valsreaded-1] = MIN_CURVES_Y;
-    if      (ry[valsreaded] > MAX_CURVES_Y)   ry[valsreaded] = MAX_CURVES_Y;
-    else if (ry[valsreaded] < MIN_CURVES_Y)   ry[valsreaded] = MIN_CURVES_Y;
+//    if      (ry[valsreaded-1] > MAX_CURVES_Y) ry[valsreaded-1] = MAX_CURVES_Y;
+//    else if (ry[valsreaded-1] < MIN_CURVES_Y) ry[valsreaded-1] = MIN_CURVES_Y;
+//    if      (ry[valsreaded] > MAX_CURVES_Y)   ry[valsreaded] = MAX_CURVES_Y;
+//    else if (ry[valsreaded] < MIN_CURVES_Y)   ry[valsreaded] = MIN_CURVES_Y;
 
     tft.drawLine(axispos[0]- ry[valsreaded-1], x_start - rx[valsreaded-1], axispos[0] - ry[valsreaded],   x_start - rx[valsreaded], color);
     tft.drawLine(axispos[1]- yflux[0],         x_start - rx[valsreaded-1], axispos[1] - yflux[1],         x_start - rx[valsreaded], ILI9341_MAGENTA);

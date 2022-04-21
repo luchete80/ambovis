@@ -1,4 +1,6 @@
 20220419 - Se bajan los grafico XY, se coloca leyenda de corte de energia
 20220420 - Se coloca aviso de desconexion para calibracion y pantalla con evolucion de calibracion    
            (aun falta pantalla inicial(puede ser en el setup antes de la calibracion)
-           
+20220421 - Se agrega pantalla inicial al menu con seleccion
+         - Se descubre que el pin de corte de energia de la placa esta mal
+         - Diferentes valores de nivel de bateria medidos y mostrados (25 vs 21)
