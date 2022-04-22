@@ -50,12 +50,9 @@ void write_memory();
 int Compression_perc = 8; //80%
 
 #ifdef ACCEL_STEPPER
-AccelStepper *stepper = new AccelStepper(
-  AccelStepper::DRIVER,
-  PIN_STEPPER_STEP,
-  PIN_STEPPER_DIRECTION);
+AccelStepper *stepper; 
 #else
-FlexyStepper * stepper = new FlexyStepper();
+FlexyStepper * stepper;
 #endif
 
 byte alarm_state = 0; //0: No alarm 1: peep 2: pip 3:both
@@ -321,6 +318,15 @@ void setup() {
     }// if time > last button press  
   }
 
+
+#ifdef ACCEL_STEPPER
+stepper = new AccelStepper(
+  AccelStepper::DRIVER,
+  PIN_STEPPER_STEP,
+  PIN_STEPPER_DIRECTION);
+#else
+stepper = new FlexyStepper();
+#endif
 
   ventilation = new MechVentilation(
     stepper,
