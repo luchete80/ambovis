@@ -259,12 +259,6 @@ void setup() {
   options.tidalVolume = 300;
   options.percVolume = 100; //1 to 10
 
-  ventilation = new MechVentilation(
-    stepper,
-    pid,
-    options
-  );
-
   delay(100);
 
   //  Serial.println("Tiempo del ciclo (seg):" + String(ventilation -> getExsuflationTime() + ventilation -> getInsuflationTime()));
@@ -328,6 +322,11 @@ void setup() {
   }
 
 
+  ventilation = new MechVentilation(
+    stepper,
+    pid,
+    options
+  );
 
 
   /////
