@@ -4,3 +4,6 @@
 20220421 - Se agrega pantalla inicial al menu con seleccion
          - Se descubre que el pin de corte de energia de la placa esta mal
          - Diferentes valores de nivel de bateria medidos y mostrados (25 vs 21)
+20220428 - Se corrigen los divisores de tension de la bateria en el default.h
+           ya que habian sido cambiados a 1.1V (Soin de 470 y 12k).
+           HAY UN INCONVENIENTE CON A1. Se pasa el sensor a A4.

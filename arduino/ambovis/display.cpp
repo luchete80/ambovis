@@ -186,9 +186,9 @@ void print_bat(){
     tft.setRotation(0);
     //tft.fillRect(180,150,70,20, ILI9341_BLACK);//ONLY BAT LEVEL
     //TODO: Make this calcs at setup
-    float fdiv = (float)BATDIV_R2/(float)(BATDIV_R1 + BATDIV_R2);
+    float fdiv = (float)(BATDIV_R1 + BATDIV_R2)/(float)BATDIV_R2;
     Serial.print("fdiv: ");Serial.println(fdiv);
-    tft.fillRect(180,250,70,50, ILI9341_BLACK);    float fac=5.0/(1024.0*fdiv);  //5./(1024.*0.175)
+    tft.fillRect(180,250,70,50, ILI9341_BLACK);    float fac=1.1/1024.*fdiv;  //5./(1024.*0.175)
     
     //Vt > 24V   =>   PC = 100%
     //Vmin < Vt < 24V   =>   PC[%] = (Vt[V]-Vmin)/(24-Vmin)*100
@@ -196,7 +196,7 @@ void print_bat(){
     unsigned short count = 5;
     for (int i=0;i<count;i++){
         level+=float(analogRead(PIN_BAT_LEV));
-        //Serial.println(analogRead(PIN_BAT_LEV));
+        Serial.println(analogRead(PIN_BAT_LEV));
         }
     level*=fac/count;
     if (level > 24.0) level_perc =100.;
@@ -210,7 +210,7 @@ void print_bat(){
     Serial.print("Bat level: ");Serial.println(level);
     tft.setCursor(130, 260);tft.println("Bat:");
     tft.setCursor(180, 260);tft.println(buffer);
-    tft.setCursor(220, 260);tft.println("%");
+    //tft.setCursor(220, 260);tft.println("%");
 
     dtostrf(level, 1, 2, buffer);
     //Temporary
