@@ -164,17 +164,7 @@ extern unsigned long time;
 #define BATDIV_R1           1200
 #define BATDIV_R2           220
 extern float vlevel;
-int AMBOVIS_LOW LOW
-int AMBOVIS_HIGH HIGH
-byte back[8] = {
-        0b00100,
-        0b01000,
-        0b11111,
-        0b01001,
-        0b00101,
-        0b00001,
-        0b00001,
-        0b11111
-};
+#define AMBOVIS_LOW LOW
+#define AMBOVIS_HIGH HIGH
 
 #endif // DEFAULTS_H
