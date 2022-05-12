@@ -12,7 +12,6 @@
 #include "pinout.h"
 #include "defaults.h"
 #include "src/AutoPID/AutoPID.h"
-#include "Sensors.h"
 
 #if TESTING_MODE_DISABLED
 #ifdef ACCEL_STEPPER
@@ -218,5 +217,12 @@ extern float f_acc;extern byte f_acc_b;
 extern byte p_acc;
 
 extern bool ended_whilemov;
+
+//moved from Sensors headers
+extern float pressure_max,pressure_min,pressure_peep;
+extern float pressure_p;  //DIFFERENTIALS!
+extern float last_pressure_max,last_pressure_min,last_pressure_peep;
+extern float _flux,flow_f;
+extern float verror;
     
 #endif /* INC_MECHANICAL_VENTILATION_H */

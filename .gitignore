@@ -4,5 +4,6 @@ arduino/ambovis/CMakeLists.txt
 arduino/ambovis/cmake-build-debug/
 arduino/EpoxyDuino
 arduino/libs
+arduino/Paracambiarpornuevmenu/.idea/
 *.out
 *.o
