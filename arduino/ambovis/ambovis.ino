@@ -309,6 +309,7 @@ void setup() {
   writeLine(1, "Desconecte flujo", 0);
   writeLine(2, "y presione ok ", 0);
 
+  delay (1000); //Otherwise low enter button readed
   lastButtonPress = millis();
   while (!fin){
     if (digitalRead(PIN_MENU_EN) == LOW)  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
@@ -632,9 +633,9 @@ void loop() {
         }
       }
 #endif
-      if (digitalRead(!PIN_POWEROFF)) {
+      if (!digitalRead(PIN_POWEROFF)) {
         digitalWrite(YELLOW_LED, HIGH);
-        //Serial.println("Yellow high");
+        Serial.println("Poweroff");
       } else {
         digitalWrite(YELLOW_LED, LOW);
       }
@@ -654,6 +655,7 @@ void loop() {
           calibration_run = false;
           vzero = verror_sum_outcycle / float(CALIB_CYCLES);
           Serial.println("Calibration verror: " + String(vzero));
+          lcd.clear();
 
       }
     } else {

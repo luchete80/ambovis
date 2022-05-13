@@ -50,7 +50,7 @@ void tft_draw(void) {
     yflux[0]=yflux[1];yflux[1]=int(flow_f*0.035);
     yvt[0]=yvt[1];yvt[1]=int((_mlInsVol - _mlExsVol)*0.1);
 
-    
+
     tft.setRotation(1);
     if (valsreaded > 0)
         drawY2(ILI9341_GREEN);
@@ -60,15 +60,17 @@ void tft_draw(void) {
 //  	if (last_x>117 && !lcd_cleaned){
     if (last_x>117 && !lcd_cleaned){//NO PONER UN VALOR MENOR QUE 10
     		lcd_cleaned=true;
+       //tft.fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
+
     		valsreaded=0;
     		for (int i=0;i<2;i++) 
     		    valsreaded_[i]=0;
         print_vols();
         print_bat();
-
+        
         //TODO: DO IT ONLY WHEN CHANGE!
-        tft.fillRect(10,10,150,15, ILI9341_BLUE); 
-        if (digitalRead(!PIN_POWEROFF)){
+        tft.fillRect(10,10,150,15, ILI9341_BLACK); 
+        if (!digitalRead(PIN_POWEROFF)){
           tft.setCursor(10, 10);tft.println("CORTE ENERGIA");         
         }
         
@@ -79,7 +81,7 @@ void tft_draw(void) {
         
         drawing_cycle = !drawing_cycle;
         Serial.println("Drawing cycle: " + String(drawing_cycle));
-        tft.fillRect(180,280,70,50, ILI9341_RED);    
+        tft.fillRect(180,280,70,50, ILI9341_BLACK);    
         if (ended_whilemov){
           tft.setCursor(150, 300);tft.println("ENDErr");
         }
@@ -121,9 +123,13 @@ void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WIT
     for (int i=0;i<2;i++)
       tft.drawLine(axispos[i], x_start - rx[valsreaded-1], axispos[i], x_start - rx[valsreaded], ILI9341_DARKGREY);           //X AXIS 
     tft.fillRect(MIN_CURVES_Y, x_start - rx[valsreaded] - 10, MAX_CURVES_Y, 10, ILI9341_BLUE);                                       //CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
-
+//
+    Serial.print("ry[valsreaded-1]");Serial.println(ry[valsreaded-1]);
+    Serial.print("ry[valsreaded]");Serial.println(ry[valsreaded]);
 //    if      (ry[valsreaded-1] > MAX_CURVES_Y) ry[valsreaded-1] = MAX_CURVES_Y;
-//    else if (ry[valsreaded-1] < MIN_CURVES_Y) ry[valsreaded-1] = MIN_CURVES_Y;
+//    else if (ry[valsreaded-1] < 0) ry[valsreaded-1] = 0;
+//    if      (ry[valsreaded] > MAX_CURVES_Y) ry[valsreaded] = MAX_CURVES_Y;
+//    else if (ry[valsreaded] < 0)            ry[valsreaded] = 0;
 //    if      (ry[valsreaded] > MAX_CURVES_Y)   ry[valsreaded] = MAX_CURVES_Y;
 //    else if (ry[valsreaded] < MIN_CURVES_Y)   ry[valsreaded] = MIN_CURVES_Y;
 
