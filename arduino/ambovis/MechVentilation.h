@@ -11,7 +11,6 @@
 #include <inttypes.h>
 #include "pinout.h"
 #include "defaults.h"
-#include "src/AutoPID/AutoPID.h"
 #include "Sensors.h"
 
 #if TESTING_MODE_DISABLED
@@ -40,11 +39,6 @@ enum Alarm
     Alarm_Underpressure = 2,
     Alarm_No_Flux = 3
 };
-
-typedef struct {
-    float pip;
-    unsigned short timeoutIns;
-} Configuration_t;
 
 /**
  * This is the mechanical ventilation class.
@@ -80,24 +74,15 @@ public:
      * getters
      */
     uint8_t getRPM(void);
-    short getExsuflationTime(void);
-    short getInsuflationTime(void);
-    short getPeakInspiratoryPressure(void);
-    short getPeakEspiratoryPressure(void);
-    State getState(void);
     bool isRunning();
     unsigned long getCycleNum(){return _cyclenum;};
     const unsigned long getMSecTimerCnt()const {return _msecTimerCnt;}
     float getInsVol(void);
-    float getTimeoutCycle();
-    float getStepperSpeed() {return _stepperSpeed;}
 
     /**
      * setters
      */
     void setRPM(uint8_t rpm);
-    void setPeakInspiratoryPressure(float pip);
-    void setPeakEspiratoryPressure(float peep);
     void setCycleNum(unsigned long cyc){_cyclenum=cyc;}
     void change_config(VentilationOptions_t);
 
@@ -127,20 +112,8 @@ private:
     #endif
     AutoPID *_pid;
     #endif //TESTING_MODE_DISABLED
-    /** Flow trigger activation. */
-    bool _hasTrigger;
-    /** Flow trigger value in litres per minute. */
-    float _triggerThreshold;
-    /**  Insufflation timeout in seconds. */
     /** Breaths per minute */
     uint8_t _rpm;
-    /** Peak inspiratory pressure */
-    short volatile _pip;
-    /** Peak espiratory pressure */
-    short _peep;
-    /** Recruitment */
-    bool volatile _recruitmentMode = false;
-
     byte _percIE;
     byte _percVol;  //MANUAL MODE, 1 TO 10
 
@@ -149,32 +122,23 @@ private:
     State _currentState = State_Homing;
 
     bool curr_ended_whilemov;
-        /** Timer counter in seconds. */
+    /** Timer counter in seconds. */
     unsigned long _msecTimerCnt; //esteno necesita ser tan grande
     /**  Insufflation timeout in seconds. */
     unsigned long _cyclenum;    //Not important value, only for printing control
-
     /** Stepper speed. Steps per seconds. */
     float _stepperSpeed;
-
     bool _running = false;
     bool _sensor_error_detected;
-    //float _currentFlow = 0.0;
-    //float _currentVolume = 0.0;
     float timeoutCycle;
     unsigned long _msecTimerStartCycle;
 };
 
 extern unsigned int _timeoutIns;
 extern unsigned int _timeoutEsp;
-
 extern float _mlInsVol,_mlExsVol;
 extern int _mllastInsVol,_mllastExsVol;
-extern float pressure_sec,psec_max,last_psec_max;
-extern unsigned long flux_filter_time;
-extern float flux_sum;
 extern VentilationOptions_t options;
-extern MechVentilation * ventilation;
 extern unsigned long last_cycle;
 extern byte alarm_max_pressure,alarm_peep_pressure;
 extern int alarm_vt;
@@ -185,14 +149,14 @@ extern bool filter;
 extern byte pfmin,pfmax;
 extern float peep_fac;
 extern float pf_min,pf_max;
-extern float dpip;extern byte dpip_b;
+extern float dpip;
+extern byte dpip_b;
 extern int max_accel,min_accel,max_speed,min_speed,max_cd,min_cd,max_pidk,min_pidk;
 extern int max_pidi,min_pidi;
 extern int max_pidd,min_pidd;
-
-extern float f_acc;extern byte f_acc_b;
+extern float f_acc;
+extern byte f_acc_b;
 extern byte p_acc;
-
 extern bool ended_whilemov;
     
 #endif /* INC_MECHANICAL_VENTILATION_H */

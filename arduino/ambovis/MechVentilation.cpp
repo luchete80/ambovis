@@ -1,8 +1,5 @@
 #include "MechVentilation.h"
 
-//float pressure_max;
-//float pressure_min;
-
 byte Cdyn_pass[3];
 
 int STEPPER_ACC_INSUFFLATION = STEPPER_MICROSTEPS * 1500;
@@ -10,10 +7,6 @@ int STEPPER_SPEED_MAX        = STEPPER_MICROSTEPS * 1500;
 int STEPPER_ACCEL_MAX        = STEPPER_MICROSTEPS * 1500;
 
 //static
-float speed_m,accel_m,speed_b,accel_b;
-float pidk_m,pidk_b;
-float pidi_m,pidi_b;
-float pidd_m,pidd_b;
 float dpip;
 byte dpip_b;
 
@@ -56,46 +49,10 @@ uint8_t MechVentilation::getRPM(void)
 {
     return _rpm;
 }
-short MechVentilation::getExsuflationTime(void)
-{
-    return _timeoutEsp;
-}
-short MechVentilation::getInsuflationTime(void)
-{
-    return _timeoutIns;
-}
-
-short MechVentilation::getPeakInspiratoryPressure(void)
-{
-    return _pip;
-}
-
-short MechVentilation::getPeakEspiratoryPressure(void)
-{
-    return _peep;
-}
-
-State MechVentilation::getState(void)
-{
-    return _currentState;
-}
 
 void MechVentilation::setRPM(uint8_t rpm)
 {
     _rpm = rpm;
-}
-
-void MechVentilation::setPeakInspiratoryPressure(float pip)
-{
-    _pip = pip;
-}
-
-void MechVentilation::setPeakEspiratoryPressure(float peep) {
-    _peep = peep;
-}
-
-float MechVentilation::getTimeoutCycle() {
-    return timeoutCycle;
 }
 
 void MechVentilation::_setInspiratoryCycle(void) {
@@ -107,7 +64,6 @@ void MechVentilation::_setInspiratoryCycle(void) {
       Serial.print("_timeoutIns");Serial.println(_timeoutIns);
       Serial.print("_timeoutEsp");Serial.println(_timeoutEsp);
   #endif
-    
 }
 
 /**
@@ -487,22 +443,9 @@ void MechVentilation::_init(
     _pid = pid;
     #endif //TESTING_MODE_DISABLED
     _rpm = options.respiratoryRate;
-    _pip = options.peakInspiratoryPressure;
-    _peep = options.peakEspiratoryPressure;
     _percIE= options.percInspEsp;
     _percVol=options.percVolume;
-    
-    setRPM(_rpm);
     _setInspiratoryCycle();
-    _hasTrigger = options.hasTrigger;
-    if (_hasTrigger)
-    {
-        _triggerThreshold = options.triggerThreshold;
-    }
-    else
-    {
-        _triggerThreshold = FLT_MAX;
-    }
 
     /* Initialize internal state */
     _currentState = State_Homing;
@@ -531,10 +474,7 @@ float MechVentilation::getInsVol() {
 
 void MechVentilation::change_config(VentilationOptions_t options) {
     _rpm = options.respiratoryRate;
-    _pip = options.peakInspiratoryPressure;
-    _peep = options.peakEspiratoryPressure;
-    _percIE= options.percInspEsp;
-    setRPM(_rpm); //Include set inspiratory cycle
+    _percIE = options.percInspEsp;
     _setInspiratoryCycle();
     _percVol=options.percVolume;
 }
