@@ -1,42 +1,20 @@
 #include "display.h"
-#include "MechVentilation.h"
 
 #define MIN_CURVES_Y    60
 #define MAX_CURVES_Y    180
 #define LEGEND_Y        260 //Begining of the legend on Y AXIS
+
 bool lcd_cleaned=false;
-
-unsigned long time_last_show=0;
-
-char a[10],b[10];
-
-const byte numChars = 32;
-char receivedChars[numChars]; // an array to store the received data
-int last_t;
-int integerFromPC [5];
-float floatFromPC = 0.0;
 int axispos[]={130,200}; //from each graph, from 0 to 320 (display height, IN PORTRAIT MODE)
 byte state_r;
-int buzzer=3; //pin
 
 enum _state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
 
-_state state;
-
-char recvChar;
-char endMarker = '>';
-boolean newData = false;
 byte valsreaded=0;
 int valsreaded_[3];
 byte last_x=0;
 
-
-int count=0;
-byte escala=32;
-byte x[128],y[64];
-
 byte rx[128],ry[128];
-int  ry2[128];
 int yflux[2];
 int yvt[2];
 char buffer[10];
@@ -57,7 +35,6 @@ void tft_draw(void) {
     valsreaded+=1;
 
 //ORIGINAL
-//  	if (last_x>117 && !lcd_cleaned){
     if (last_x>117 && !lcd_cleaned){//NO PONER UN VALOR MENOR QUE 10
     		lcd_cleaned=true;
        //tft.fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)

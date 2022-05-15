@@ -21,14 +21,10 @@
 #define PIN_LCD_D7 13
 #endif
 
-// #define PIN_BME_CS2  4  // sensor de presion 2
 #define PIN_ENC_CL  18
 #define PIN_ENC_DIR 19
 #define PIN_ENC_SW  4
 
-//#define TFT_CLK 	13 FIXED (HW)
-//#define TFT_MISO 	12 FIXED (HW)
-//#define TFT_MOSI 	11
 #define TFT_CS 		53
 #define TFT_DC 		49
 #define TFT_RST 	48
@@ -52,11 +48,5 @@
 #define PIN_BAT_LEV     A4
 #define PIN_MPX_LEV     A2
 #define PIN_PRESSURE    A3
-
-// IF ARDUINO UNO
-//#define PIN_ENC_CL  2
-//#define PIN_ENC_DIR 3
-
-
 
 #endif // ENCODER_H

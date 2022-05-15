@@ -12,8 +12,7 @@
 #include "pinout.h"
 #include "defaults.h"
 #include "src/AutoPID/AutoPID.h"
-#include "Sensors.h"
-
+#include "src/Pressure_Sensor/Pressure_Sensor.h"
 
 #ifdef ACCEL_STEPPER
 #include "src/AccelStepper/AccelStepper.h"
@@ -170,7 +169,7 @@ private:
     Alarm _currentAlarm = No_Alarm;
 
     bool curr_ended_whilemov;
-        /** Timer counter in seconds. */
+    /** Timer counter in seconds. */
     //Este tambien es mio
    
     unsigned long _msecTimerCnt; //esteno necesita ser tan grande
@@ -185,8 +184,6 @@ private:
     bool _running = false;
     bool _sensor_error_detected;
     bool _startWasTriggeredByPatient = false;
-    //float _currentFlow = 0.0;
-    //float _currentVolume = 0.0;
     float timeoutCycle;
 };
 
@@ -226,5 +223,12 @@ extern float f_acc;extern byte f_acc_b;
 extern byte p_acc;
 
 extern bool ended_whilemov;
+
+// From sensors header
+extern float pressure_max,pressure_min,pressure_peep;
+extern float pressure_p;  //DIFFERENTIALS!
+extern float last_pressure_max,last_pressure_min,last_pressure_peep;
+extern float _flux,flow_f;
+extern float verror;
     
 #endif /* INC_MECHANICAL_VENTILATION_H */
