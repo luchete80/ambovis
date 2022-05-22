@@ -1,7 +1,8 @@
 #include "display.h"
 #include "MechVentilation.h"
 
-#define MAX_CURVES_Y    200
+#define MIN_CURVES_Y    60
+#define MAX_CURVES_Y    180
 #define LEGEND_Y        260 //Begining of the legend on Y AXIS
 bool lcd_cleaned=false;
 
@@ -14,7 +15,7 @@ char receivedChars[numChars]; // an array to store the received data
 int last_t;
 int integerFromPC [5];
 float floatFromPC = 0.0;
-int axispos[]={100,170,300}; //from each graph, from 0 to 320 (display height, IN PORTRAIT MODE)
+int axispos[]={130,200}; //from each graph, from 0 to 320 (display height, IN PORTRAIT MODE)
 byte state_r;
 int buzzer=3; //pin
 
@@ -49,7 +50,7 @@ void tft_draw(void) {
     yflux[0]=yflux[1];yflux[1]=int(flow_f*0.035);
     yvt[0]=yvt[1];yvt[1]=int((_mlInsVol - _mlExsVol)*0.1);
 
-    
+
     tft.setRotation(1);
     if (valsreaded > 0)
         drawY2(ILI9341_GREEN);
@@ -65,6 +66,12 @@ void tft_draw(void) {
         print_vols();
         print_bat();
         
+        //TODO: DO IT ONLY WHEN CHANGE!
+        tft.fillRect(10,10,150,15, ILI9341_BLACK);
+        if (!digitalRead(PIN_POWEROFF)){
+          tft.setCursor(10, 10);tft.println("CORTE ENERGIA");
+        }
+
         dtostrf(vlevel, 1, 2, buffer);
         tft.setCursor(100, 80);tft.println("Vmpx:");
         tft.fillRect(180,80,50,50, ILI9341_BLUE);
@@ -72,7 +79,7 @@ void tft_draw(void) {
         
         drawing_cycle = !drawing_cycle;
         Serial.println("Drawing cycle: " + String(drawing_cycle));
-        tft.fillRect(180,280,70,50, ILI9341_RED);    
+        tft.fillRect(180,280,70,50, ILI9341_BLACK);
         if (ended_whilemov){
           tft.setCursor(150, 300);tft.println("ENDErr");
         }
@@ -93,32 +100,17 @@ void tft_draw(void) {
     
 }//loop
 
-// ORIGINAL WITH 1 cycle
-//void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
-//
-//  if ( rx[valsreaded] > rx[valsreaded-1] ) {//to avoid draw entire line to the begining at the end of the cycle
-//          for (int i=0;i<2;i++)
-//            tft.drawLine(axispos[i], 240-rx[valsreaded-1], axispos[i], 240-rx[valsreaded], ILI9341_DARKGREY);           //X AXIS 
-//            tft.fillRect(0, 240 - rx[valsreaded] - 10, MAX_CURVES_Y, 10, ILI9341_BLACK);                                //CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
-//            
-//            tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
-//            tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_MAGENTA);
-//
-//  }
-//}
-
-
 void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
   int x_start = 240 - (int) drawing_cycle * 120;
   if ( rx[valsreaded] > rx[valsreaded-1] ) {//to avoid draw entire line to the begining at the end of the cycle
     for (int i=0;i<2;i++)
       tft.drawLine(axispos[i], x_start - rx[valsreaded-1], axispos[i], x_start - rx[valsreaded], ILI9341_DARKGREY);           //X AXIS 
-    tft.fillRect(0, x_start - rx[valsreaded] - 10, MAX_CURVES_Y, 10, ILI9341_BLACK);                                //CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
-
-    
+    tft.fillRect(MIN_CURVES_Y, x_start - rx[valsreaded] - 10, MAX_CURVES_Y, 10, ILI9341_BLUE);                                       //CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
+//
+    Serial.print("ry[valsreaded-1]");Serial.println(ry[valsreaded-1]);
+    Serial.print("ry[valsreaded]");Serial.println(ry[valsreaded]);
     tft.drawLine(axispos[0]- ry[valsreaded-1], x_start - rx[valsreaded-1], axispos[0] - ry[valsreaded],   x_start - rx[valsreaded], color);
     tft.drawLine(axispos[1]- yflux[0],         x_start - rx[valsreaded-1], axispos[1] - yflux[1],         x_start - rx[valsreaded], ILI9341_MAGENTA);
-
   }
 }
 
@@ -175,29 +167,31 @@ void print_bat(){
     tft.setRotation(0);
     //tft.fillRect(180,150,70,20, ILI9341_BLACK);//ONLY BAT LEVEL
     //TODO: Make this calcs at setup
-    float fdiv = (float)BATDIV_R2/(float)(BATDIV_R1 + BATDIV_R2);
+    float fdiv = (float)(BATDIV_R1 + BATDIV_R2)/(float)BATDIV_R2;
     Serial.print("fdiv: ");Serial.println(fdiv);
-    tft.fillRect(180,250,70,50, ILI9341_BLACK);    float fac=5.0/(1024.0*fdiv);  //5./(1024.*0.175)
+    tft.fillRect(180,250,70,50, ILI9341_BLACK);    float fac=1.1/1024.*fdiv;  //5./(1024.*0.175)
     
     //Vt > 24V   =>   PC = 100%
     //Vmin < Vt < 24V   =>   PC[%] = (Vt[V]-Vmin)/(24-Vmin)*100
     //Vt < Vmin   =>   PC = 0%
-    for (int i=0;i<40;i++){
+    unsigned short count = 5;
+    for (int i=0;i<count;i++){
         level+=float(analogRead(PIN_BAT_LEV));
-        //Serial.println(analogRead(PIN_BAT_LEV));
+        Serial.println(analogRead(PIN_BAT_LEV));
         }
-    level*=fac/40.;
+    level*=fac/count;
     if (level > 24.0) level_perc =100.;
     else {
         if (level > 22.0) level_perc = (level - 22.)/(24.-22.0) * 100.;
         else              level_perc =0.;
       }
-    dtostrf(level_perc, 2, 0, buffer);
+    //dtostrf(level_perc, 2, 0, buffer);
+    dtostrf(level, 2, 1, buffer); //DEBUG
     //dtostrf(level, 2, 1, buffer);
     Serial.print("Bat level: ");Serial.println(level);
     tft.setCursor(130, 260);tft.println("Bat:");
     tft.setCursor(180, 260);tft.println(buffer);
-    tft.setCursor(220, 260);tft.println("%");
+    //tft.setCursor(220, 260);tft.println("%");
 
     dtostrf(level, 1, 2, buffer);
     //Temporary

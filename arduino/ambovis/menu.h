@@ -53,4 +53,32 @@ void check_bck_state(SystemState& systemState);
 
 extern bool isitem_sel;
 
+class Menu{
+
+  byte cant_opciones_mod;
+  byte opciones_mod[3];
+
+  public:
+
+  Menu(){};
+  ~Menu(){};
+
+
+  };
+
+class Menu_inic:public Menu{
+  byte _mod,_bpm,_i_e;
+  unsigned long last_update_display;
+  bool fin=false;
+  bool switching_menus;
+  int m_curr_sel;
+  public:
+    Menu_inic(byte *mode, byte *bpm, byte *i_e, SystemState& systemState);
+    void clear_n_sel( int menu );
+    void Menu_inic::check_encoder (SystemState& systemState );
+    void Menu_inic::display_lcd ();
+    void check_bck_state(SystemState& systemState);
+
+};
+
 #endif

@@ -682,3 +682,244 @@ void display_lcd (SystemState& systemState) {
   clear_all_display=false;
 
 }
+
+
+
+//////////////////////////////////////
+/////// MENU INICIAL /////////////////
+//////////////////////////////////////
+
+Menu_inic::Menu_inic(byte *mode, byte *bpm, byte *i_e, SystemState& systemState){
+    _mod=*mode;_bpm=*bpm;_i_e=*i_e;
+    clear_all_display=false;
+    fin=false;
+    menu_number=0;
+    lcd.clear();
+
+    lastButtonPress=0;
+    m_curr_sel=1;
+    display_lcd();
+    last_update_display=millis();
+    while (!fin){
+        Serial.println("Inside loop");
+        this->check_encoder(systemState);
+        time=millis();
+        if (show_changed_options && ((millis() - last_update_display) > 50) ) {
+            display_lcd();  //WITHOUT CLEAR!
+            last_update_display = millis();
+            show_changed_options = false;
+        }
+    }
+    isitem_sel=false;
+    m_curr_sel=old_curr_sel=1;
+    Serial.println("bpm "+String(*bpm));
+    *mode=_mod;*bpm=_bpm;*i_e=_i_e;
+    switching_menus = false;
+
+}
+
+
+void Menu_inic::check_encoder (SystemState& systemState) {
+    check_updn_button(PIN_MENU_DN,&encoderPos,true);   //Increment
+    check_updn_button(PIN_MENU_UP,&encoderPos,false);  //Decrement
+    Serial.println("Encoder Pos: " +String( encoderPos) );
+    pressed=0;  //0 nothing , 1 enter, 2 bck
+    if (digitalRead(PIN_MENU_EN) == LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
+        if (time - lastButtonPress > 150) {
+            pressed = 1;
+            isitem_sel=true;
+            lastButtonPress = time;
+
+        }// if time > last button press
+    }
+    check_bck_state(systemState);
+
+    if (pressed > 0) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6)
+      if (!isitem_sel) {
+        m_curr_sel=oldEncPos=encoderPos=old_curr_sel;
+        Serial.println("Item sel, curr_sel"+String(m_curr_sel));
+      }
+
+      if (isitem_sel) {
+          switch (m_curr_sel){
+            case 1:
+             if ( menu_number == 0 ) {
+                    min_sel=1;max_sel=2;
+                    encoderPos=oldEncPos=systemState.vent_mode;
+                }
+            break;
+            case 2:
+                if ( menu_number == 0 ) {
+                    encoderPos=oldEncPos=_bpm;
+                    min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
+                }
+            break;
+            case 3:
+              if ( menu_number == 0 ) {
+                  encoderPos=oldEncPos=options.percInspEsp;
+                  min_sel=1;max_sel=3;
+              } else if ( menu_number == 1 ) {
+                    encoderPos=byte(0.1*float(alarm_vt));
+                    min_sel=10;max_sel=50;//vt
+              } else if ( menu_number == 2 ) {
+                    encoderPos=min_accel/10;
+                    min_sel=10;max_sel=100;
+              } else if ( menu_number == 3 ){
+                        encoderPos=pfmax=50.*pf_max;
+                        min_sel=0;max_sel=99;
+                    }
+            break;
+            case 4:
+                if ( menu_number == 0 ) {
+                    fin=true;
+                }
+                break;
+      }
+
+        }//if switch select
+          show_changed_options = true;
+          update_options = true;
+  }//If selection
+
+  if (oldEncPos != encoderPos) {
+    show_changed_options = true;
+
+    if (!isitem_sel) { //Selecting position
+          m_curr_sel=encoderPos;
+          encoderPos=oldEncPos=m_curr_sel;
+
+          if ( menu_number == 0 ) {
+              if (encoderPos > 4) {
+                  encoderPos=4;
+                  //menu_number+=1;
+              } else if ( encoderPos < 1) {
+                  encoderPos=1;
+                  //menu_number=3;
+              }
+          }
+          clear_all_display=true;
+          display_lcd();
+    } else {//inside a particular selection
+
+      //if (curr_sel != 0) {
+        if ( encoderPos > max_sel ) {
+           encoderPos=oldEncPos=max_sel;
+        } else if ( encoderPos < min_sel ) {
+            encoderPos=oldEncPos=min_sel;
+          } else {
+
+        oldEncPos = encoderPos;
+
+            switch (m_curr_sel) {
+              case 1:
+                if ( menu_number == 0 )       { _mod = encoderPos; }
+                break;
+              case 2:
+                if ( menu_number == 0 )       { _bpm = encoderPos; }
+                break;
+              case 3:
+                if ( menu_number == 0 )       { _i_e = encoderPos; }
+
+                break;
+              case 4:
+                if ( menu_number == 0 ) {
+
+                }
+                break;
+
+            }//switch
+            show_changed_options = true;
+            update_options=true;
+          }//Valid range
+
+        old_curr_sel = curr_sel;
+
+    }//oldEncPos != encoderPos and valid between range
+  }
+}
+
+void Menu_inic::clear_n_sel(int menu){
+    if (menu==0) {
+        lcd_clearxy(0,0);
+        lcd_clearxy(0,1);lcd_clearxy(9,0);
+        lcd_clearxy(0,2);lcd_clearxy(8,1);
+         switch(m_curr_sel){
+              case 1:
+                lcd_selxy(0,1);break;
+              case 2:
+                lcd_selxy(0,2);break;
+              case 3:
+                lcd_selxy(0,3);break;
+              case 4:
+                lcd_selxy(9,3);break;//pcl
+            }
+     }
+}
+
+void Menu_inic::display_lcd () {
+
+  if (clear_all_display)
+        lcd.clear();
+  clear_n_sel(menu_number);
+  if (menu_number==0) {
+    lcd_clearxy(6,1,3);
+    lcd_clearxy(6,2,2);
+    lcd_clearxy(6,3,2);
+
+    writeLine(0, "INGRESE PARAMS", 3);
+    writeLine(1, "MOD: ",1);
+
+    Serial.println("modo: "+String(_mod));
+    if ( _mod == VENTMODE_MAN ) {
+        writeLine(1, "MAN", 6);
+    }
+    else if ( _mod == VENTMODE_PCL ) {
+        writeLine(1, "PCL", 6);
+    }
+    writeLine(2, "BPM: " + String(_bpm), 1);
+    writeLine(3, "IE:  1:" + String(_i_e), 1);
+    writeLine(3, "FIN: ", 13);
+
+  }
+  clear_all_display=false;
+
+}
+
+void Menu_inic::check_bck_state(SystemState& systemState){
+      bck_state=digitalRead(PIN_MENU_BCK);
+
+    if (bck_state != last_bck_state) {
+       updateState(); // button state changed. It runs only once.
+        if (bck_state == LOW ) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6)
+            if (time - lastButtonPress > 150) {
+
+                  pressed = 2;
+                  lastButtonPress = time;
+                  if (isitem_sel){
+                      isitem_sel=false;
+                  } else {
+                      switching_menus=true;
+                  }
+
+            }// if time > last button press
+        } else {  //Button released
+          }
+    } else {
+       updateCounter(); // button state not changed. It runs in a loop.
+       if (holdTime > 2000 && !change_sleep){
+        Serial.println("Activando Sleep Mode");
+        if (!systemState.sleep_mode){
+
+            systemState.sleep_mode=true;
+            systemState.put_to_sleep=true;
+        } else {
+           systemState.sleep_mode=false;
+           systemState.wake_up=true;
+        }
+        change_sleep=true;
+        Serial.print("Sleep Mode");Serial.println(systemState.sleep_mode);
+        }
+    }
+    last_bck_state = bck_state;
+
+  }

@@ -139,13 +139,9 @@ typedef struct {
 #define TESTING_MODE_DISABLED 1
 
 //general variables
-//extern byte vent_mode;
 extern bool send_data;
-//extern bool sleep_mode;
-
 extern byte alarm_state;
 
-//extern bool put_to_sleep,wake_up;
 //PID LIMITS
 extern bool change_pid_params;
 extern unsigned long time;
@@ -165,8 +161,8 @@ extern unsigned long time;
 
 #define VMIN_MPX            4.5               //For battery charge reference
 //Battery level voltage dividers
-#define BATDIV_R1           1200
-#define BATDIV_R2           220
+#define BATDIV_R1           12000
+#define BATDIV_R2           470
 extern float vlevel;
 
 
