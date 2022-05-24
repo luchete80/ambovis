@@ -213,6 +213,9 @@ void setup() {
   pinMode(YELLOW_LED, OUTPUT); //Set buzzerPin as output
   pinMode(RED_LED, OUTPUT); //Set buzzerPin as output
 
+  pinMode(PIN_STEPPER, OUTPUT);
+  digitalWrite(PIN_STEPPER, LOW);
+
   digitalWrite(PIN_BUZZER, BUZZER_LOW); //LOW, INVERTED
 
   // PID
@@ -439,6 +442,8 @@ stepper = new FlexyStepper();
     
   Serial.println("Exiting setup");
   //TODO: CALIBRATION RUN ALSO SHOULD BE HERE
+
+  digitalWrite(PIN_STEPPER, HIGH);
 }
 
 
