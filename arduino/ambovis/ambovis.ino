@@ -323,6 +323,7 @@ void setup() {
   }
 
 
+digitalWrite(PIN_STEPPER, HIGH);
 #ifdef ACCEL_STEPPER
 stepper = new AccelStepper(
   AccelStepper::DRIVER,
@@ -443,7 +444,6 @@ stepper = new FlexyStepper();
   Serial.println("Exiting setup");
   //TODO: CALIBRATION RUN ALSO SHOULD BE HERE
 
-  digitalWrite(PIN_STEPPER, HIGH);
 }
 
 
