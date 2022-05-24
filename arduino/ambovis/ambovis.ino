@@ -324,6 +324,7 @@ void setup() {
 
 
 digitalWrite(PIN_STEPPER, HIGH);
+delay(1000);
 #ifdef ACCEL_STEPPER
 stepper = new AccelStepper(
   AccelStepper::DRIVER,
