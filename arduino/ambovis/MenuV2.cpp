@@ -23,14 +23,14 @@ void writeLine(Menu& menu, int line, String message = "", int offsetLeft = 0) {
     menu.lcd.print(message);
 }
 
-void clearDigits(Menu& menu, int x, int y, int pos=1) {
-    for (int i=0; i<pos; i++) {
-        menu.lcd.setCursor(x+i, y);
+void clearDigits(Menu& menu, Pos pos) {
+    for (int i=0; i< pos.off; i++) {
+        menu.lcd.setCursor(pos.x+i, pos.y);
         menu.lcd.print(" ");
     }
 }
-void printBackDigit(Menu& menu, int x, int y) {
-    menu.lcd.setCursor(x, y);
+void printBackDigit(Menu& menu, Pos pos) {
+    menu.lcd.setCursor(pos.x, pos.y);
     menu.lcd.write(byte(0));
 }
 
@@ -40,7 +40,7 @@ void printDigits(Menu& menu, Pos pos, String s) {
 }
 
 void displayMainMenu(Menu& menu) {
-    printDigits(menu, menu.menuState.cursor.start, ">");
+    printDigits(menu, menu.menuState.cursor.cursorDisplay.cursor, ">");
     writeLine(menu, 0, "Seleccione un menu", 1);
     writeLine(menu, 1, "Parametros Principales", 1);
     writeLine(menu, 2, "Alarmas", 1);
@@ -48,77 +48,125 @@ void displayMainMenu(Menu& menu) {
     writeLine(menu, 4, "Ajustes PID 1", 1);
 }
 
+String getValueToDisplay(int code, VariableParameters& parameters, MenuState& menuState) {
+    bool useEditedParam = menuState.cursor.code == code && menuState.isEditingParam;
+    int value;
+    char tempstr[5];
+    switch (code) {
+        case PARAMETER:
+        case ALARM:
+        case SETTINGS:
+        case PID_SETTINGS:
+            return String("");
+        case MODE_OPT:
+            value = useEditedParam ? menuState.editedParameter : parameters.vent_mode;
+            return value == 0 ? String("MAN") : String("PCL");
+        case PERC_V_OPT:
+            value = useEditedParam ? menuState.editedParameter : parameters.percVolume;
+            return String(value);
+        case BPM_OPT:
+            value = useEditedParam ? menuState.editedParameter : parameters.respiratoryRate;
+            return String(value);
+        case IE_OPT:
+            value = useEditedParam ? menuState.editedParameter : parameters.percInspEsp;
+            return String(value);
+        case PIP_OPT:
+            value = useEditedParam ? menuState.editedParameter : parameters.peakInspiratoryPressure;
+            return String(value);
+        case PIP_ALARM_OPT:
+            value = useEditedParam ? menuState.editedParameter : parameters.alarm_max_pressure;
+            return String(value);
+        case PEEP_ALARM_OPT:
+            value = useEditedParam ? menuState.editedParameter : parameters.alarm_peep_pressure;
+            return String(value);
+        case VT_ALARM_OPT:
+            value = useEditedParam ? menuState.editedParameter : parameters.alarm_peep_pressure;
+            return String(value);
+        case TRIM_OPT:
+            value = useEditedParam ? menuState.editedParameter : parameters.p_trim;
+            dtostrf((float(value-100)), 2, 0, tempstr);
+            return String(tempstr) + String("e-3");
+        case FIL_OPT:
+            value = useEditedParam ? menuState.editedParameter : parameters.fil;
+            return value == 0 ? String("OFF") : String("ON");
+        case AUTO_OPT:
+            value = useEditedParam ? menuState.editedParameter : parameters.autopid;
+            return value == 0 ? String("OFF") : String("ON");
+        case CD_OPT:
+            value = useEditedParam ? menuState.editedParameter : parameters.cd_opt;
+            dtostrf(value*1.01972, 2, 1, tempstr);
+            return String(tempstr);
+        case DP_OPT:
+            value = useEditedParam ? menuState.editedParameter : parameters.dp_opt;
+            return String(value);
+    }
+}
+
+void printCursor(Menu& menu, CursorDisplay& cursorDisplay, VariableParameters & parameters) {
+    String valueToDisplay = getValueToDisplay(cursorDisplay.code, parameters, menu.menuState);
+    clearDigits(menu, cursorDisplay.cursor);
+    clearDigits(menu, cursorDisplay.value);
+    if (menu.menuState.cursor.code == cursorDisplay.code) {
+        if (menu.menuState.isEditingParam) {
+            printBackDigit(menu, cursorDisplay.cursor);
+        } else {
+            printDigits(menu, cursorDisplay.cursor, ">");
+        }
+    }
+    writeLine(menu, cursorDisplay.cursor.y, cursorDisplay.label, 1);
+    printDigits(menu, cursorDisplay.value, valueToDisplay);
+}
+
 void displaySensorValues(int line, Menu& menu, VariableParameters& parameters) {
-    writeLine(menu, line, "PIP:-", 1);
-    //    dtostrf(last_pressure_min, 2, 0, tempstr);
-    writeLine(menu, line, "PEEP:12.1", 12);
-    //    dtostrf((_mllastInsVol + _mllastExsVol)/2.*options.respiratoryRate*0.001, 2, 1, tempstr);
-    writeLine(menu, line, "VM:11.5", 20);
+    char tempstr[5];
+    writeLine(menu, line, "PIP:", 1);
+    dtostrf(parameters.last_pressure_min, 2, 0, tempstr);
+    writeLine(menu, line, "PEEP:", 12);
+    dtostrf((parameters._mllastInsVol + parameters._mllastExsVol)/2.*parameters.respiratoryRate*0.001, 2, 1, tempstr);
+    writeLine(menu, line, "VM:", 20);
 }
 
 void displayParametersSettings(Menu& menu, VariableParameters& parameters) {
     writeLine(menu, 0, "Parametros Principales", 1);
 
-    printDigits(menu, menu.menuState.cursor.start, ">");
-
     if (parameters.vent_mode == VENTMODE_PCL) {
-        writeLine(menu, 1, "MOD:", 1);
-        printDigits(menu, C_P1.valuePos, getPrintableParameter(C_P1.code, menu.menuState, parameters));
-        writeLine(menu, 1, "PIP:", 4);
-        printDigits(menu, C_P5.valuePos, getPrintableParameter(C_P5.code, menu.menuState, parameters));
+        printCursor(menu, CD_P1, parameters);
+        printCursor(menu, CD_P5, parameters);
     } else if (parameters.vent_mode == VENTMODE_MAN ) {
-        writeLine(menu, 1, "MOD: VCV", 1);
-        printDigits(menu, C_P1.valuePos, getPrintableParameter(C_P1.code, menu.menuState, parameters));
-        writeLine(menu, 1, "%V:", 4);
-        printDigits(menu, C_P2.valuePos, getPrintableParameter(C_P2.code, menu.menuState, parameters));
-        writeLine(menu, 1, "(Vt):", 8);
+        printCursor(menu, CD_P1, parameters);
+        printCursor(menu, CD_P2, parameters);
     }
-    writeLine(menu, 2, "BPM:", 1);
-    printDigits(menu, C_P3.valuePos, getPrintableParameter(C_P3.code, menu.menuState, parameters));
-    writeLine(menu, 2, "IE:", 4);
-    printDigits(menu, C_P4.valuePos, getPrintableParameter(C_P4.code, menu.menuState, parameters));
-    writeLine(menu, 2, "ti:", 8);
+    printCursor(menu, CD_P3, parameters);
+    printCursor(menu, CD_P4, parameters);
+
     displaySensorValues(3, menu, parameters);
 }
 
 void displayAlarmSettings(Menu& menu, VariableParameters& parameters) {
     writeLine(menu, 0, "Alarmas", 1);
-    writeLine(menu, 1, "PIP:", 1);
-    writeLine(menu, 1, "PEEP:", 6);
-    writeLine(menu, 2, "VT:", 1);
-    writeLine(menu, 2, "VM:", 6);
-    writeLine(menu, 3, "AMBU:", 1);
-    writeLine(menu, 3, "CIC:", 6);
+    printCursor(menu, CD_AL1, parameters);
+    printCursor(menu, CD_AL2, parameters);
+    printCursor(menu, CD_AL3, parameters);
 }
 
 void displaySettings(Menu& menu, VariableParameters& parameters) {
     writeLine(menu, 0, "Ajustes", 1);
-    writeLine(menu, 1, "Trim", 1);
-    writeLine(menu, 2, "FIL:", 1);
-    writeLine(menu, 3, "AUTO:", 1);
-    writeLine(menu, 3, "CD:", 6);
+    printCursor(menu, CD_S1, parameters);
+    printCursor(menu, CD_S2, parameters);
+    printCursor(menu, CD_S3, parameters);
+    printCursor(menu, CD_S4, parameters);
 }
 
 void displayPIDSettings(Menu& menu, VariableParameters& parameters) {
     writeLine(menu, 0, "Ajustes PID", 1);
-    writeLine(menu, 1, "DP", 1);
-    writeLine(menu, 2, "f:", 1);
-    writeLine(menu, 2, "F:", 6);
-    writeLine(menu, 3, "Pa:", 1);
-    writeLine(menu, 3, "Fa:", 6);
+    printCursor(menu, CD_PS1, parameters);
+    printCursor(menu, CD_PS2, parameters);
+    printCursor(menu, CD_PS3, parameters);
+    printCursor(menu, CD_PS4, parameters);
+    printCursor(menu, CD_PS5, parameters);
 }
 
-void displayEditedValue(Menu& menu, VariableParameters& parameters) {
-    clearDigits(menu, menu.menuState.cursor.start.x, menu.menuState.cursor.start.y);
-    clearDigits(menu, menu.menuState.cursor.valuePos.x, menu.menuState.cursor.valuePos.y);
-    printBackDigit(menu, menu.menuState.cursor.start.x, menu.menuState.cursor.start.y);
-    printDigits(menu, menu.menuState.cursor.valuePos, getPrintableParameter(menu.menuState.cursor.code, menu.menuState, parameters));
-}
-
-void refreshDisplay(Menu& menu, VariableParameters& parameters, bool shouldClearDisplay) {
-    if (shouldClearDisplay) {
-        menu.lcd.clear();
-    }
+void printMenu(Menu& menu, VariableParameters& parameters) {
     if ( menu.menuState.menu == MAIN ) { //All the titles
         displayMainMenu(menu);
     } else if ( menu.menuState.menu == PARAMETER ) {
@@ -132,23 +180,24 @@ void refreshDisplay(Menu& menu, VariableParameters& parameters, bool shouldClear
     }
 }
 
+void displayMenu(Menu& menu, VariableParameters& parameters) {
+    if (menu.menuState.changedMenu) {
+        menu.lcd.clear();
+        printMenu(menu, parameters);
+    } else {
+        printCursor(menu, menu.menuState.cursor.cursorDisplay, parameters);
+    }
+}
+
 void checkEncoder(Menu& menu, VariableParameters& parameters, unsigned long time) {
-
     checkKeyboard(menu.keyboardState, time);
-
     bool somethingChanged = menu.keyboardState.lastKeyPressedTime - time > 500;
-
     checkKeyboardActions(menu.keyboardState, menu.menuState, parameters);
 
-    if (menu.menuState.changedMenu) {
-        refreshDisplay(menu, parameters, true);
-        menu.menuState.changedMenu = false;
-    } else {
-        if (menu.menuState.isEditingParam) {
-            displayEditedValue(menu, parameters);
-        }
-        if (somethingChanged) {
-            refreshDisplay(menu, parameters, false);
+    if (somethingChanged) {
+        displayMenu(menu, parameters);
+        if (menu.menuState.changedMenu) {
+            menu.menuState.changedMenu = false;
         }
     }
 }

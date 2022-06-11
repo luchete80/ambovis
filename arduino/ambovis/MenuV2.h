@@ -16,7 +16,5 @@ typedef struct {
 void initDisplay(Menu& menu);
 void writeLine(Menu& menu, int line, String message = "", int offsetLeft = 0);
 void checkEncoder(Menu& menu, VariableParameters& parameters, long time);
-void refreshDisplay(Menu& menu, VariableParameters& parameters, bool shouldClearDisplay);
-
-
+void printMenu(Menu& menu, VariableParameters& parameters);
 #endif

@@ -7,8 +7,8 @@
 
 #include "MenuDataTypes.h"
 
-Cursor getCursorByCode(int cursorCode) {
-    switch (cursorCode) {
+Cursor getMenuCursor(int menu) {
+    switch (menu) {
         case PARAMETER:
             return C_PARAMS;
         case ALARM:
@@ -17,44 +17,6 @@ Cursor getCursorByCode(int cursorCode) {
             return C_SETTINGS;
         case PID_SETTINGS:
             return C_PID_SETTINGS;
-        case MODE_OPT:
-            return C_P1;
-        case PERC_V_OPT:
-            return C_P2;
-        case BPM_OPT:
-            return C_P3;
-        case IE_OPT:
-            return C_P4;
-        case PIP_OPT:
-            return C_P5;
-        case PIP_ALARM_OPT:
-            return C_AL1;
-        case PEEP_ALARM_OPT:
-            return C_AL2;
-        case VT_ALARM_OPT:
-            return C_AL3;
-        case VM_ALARM_OPT:
-            return C_AL4;
-        case AMBU_ALARM_OPT:
-            return C_AL5;
-        case TRIM_OPT:
-            return C_S1;
-        case FIL_OPT:
-            return C_S2;
-        case AUTO_OPT:
-            return C_S3;
-        case CD_OPT:
-            return C_S4;
-        case DP_OPT:
-            return C_PS1;
-        case F_OPT:
-            return C_PS2;
-        case FF_OPT:
-            return C_PS3;
-        case PA_OPT:
-            return C_PS4;
-        case FA_OPT:
-            return C_PS5;
     }
 }
 
@@ -86,19 +48,15 @@ int* getValueToEdit(int code, VariableParameters& parameters) {
         case PIP_OPT:
             return &parameters.peakInspiratoryPressure;
         case PIP_ALARM_OPT:
-            return &parameters.alarm_vt;
+            return &parameters.alarm_max_pressure;
         case PEEP_ALARM_OPT:
             return &parameters.alarm_peep_pressure;
         case VT_ALARM_OPT:
             return &parameters.alarm_vt;
-        case VM_ALARM_OPT:
-            return &parameters.alarm_vt;
-        case AMBU_ALARM_OPT:
-            return &parameters.dpip_b;
         case TRIM_OPT:
             return &parameters.p_trim;
         case FIL_OPT:
-            return &parameters.ff_opt; // filter is boolean
+            return &parameters.fil;
         case AUTO_OPT:
             return &parameters.autopid;
         case CD_OPT:
@@ -106,9 +64,9 @@ int* getValueToEdit(int code, VariableParameters& parameters) {
         case DP_OPT:
             return &parameters.dp_opt;
         case F_OPT:
-            return &parameters.f_acc;
+            return &parameters.f_min;
         case FF_OPT:
-            return &parameters.ff_opt;
+            return &parameters.f_max;
         case PA_OPT:
             return &parameters.pa_opt;
         case FA_OPT:
@@ -132,27 +90,15 @@ int validate(int val, int min, int max) {
     }
 }
 
-String getPrintableParameter(int paramCode, MenuState& menuState, VariableParameters& parameters) {
-    if (menuState.cursor.code == paramCode) {
-        if (menuState.isEditingParam) {
-            return String(menuState.editedParameter);
-        } else {
-            return String(*getValueToEdit(menuState.cursor.code, parameters));
-        }
-    } else {
-        return String(*getValueToEdit(paramCode, parameters));
-    }
-}
-
 void checkKeyboardActions(KeyboardState& keyboardState, MenuState& menuState, VariableParameters& variables) {
     if (menuState.menu == MAIN) {
         if (keyboardState.ok) {
-            menuState.menu = getOption(MAIN, keyboardState.count).code;
+            menuState.menu = getOption(menuState.menu, keyboardState.count).code;
             menuState.changedMenu = true;
             menuState.cursor = getOption(menuState.menu, 0);
             resetKeyboardState(keyboardState);
         } else {
-            keyboardState.count = validate(keyboardState.count, 0, SIZE_MENU -1);
+            keyboardState.count = validate(keyboardState.count, 0, SIZE_MENU - 1);
             menuState.cursor = getOption(MAIN, keyboardState.count);
         }
     } else {
@@ -181,7 +127,7 @@ void checkKeyboardActions(KeyboardState& keyboardState, MenuState& menuState, Va
                 menuState.changedMenu = true;
                 resetKeyboardState(keyboardState);
             } else {
-                Cursor menuCursor = getCursorByCode(menuState.menu);
+                Cursor menuCursor = getMenuCursor(menuState.menu);
                 keyboardState.count = validate(keyboardState.count, menuCursor.min, menuCursor.max);
                 menuState.cursor = getOption(menuState.menu, keyboardState.count);
             }
