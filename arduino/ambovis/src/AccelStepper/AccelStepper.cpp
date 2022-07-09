@@ -13,7 +13,7 @@ void dump(uint8_t* p, int l)
 
     for (i = 0; i < l; i++)
     {
-	Serial.print(p[i], HEX);
+//	Serial.print(p[i], HEX);
 	Serial.print(" ");
     }
     Serial.println("");

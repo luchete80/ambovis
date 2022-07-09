@@ -4,34 +4,6 @@
 
 #include "MenuSelector.h"
 
-//Cursor getMenuCursor(int menu) {
-//    switch (menu) {
-//        case PARAMETER:
-//            return C_PARAMS;
-//        case ALARM:
-//            return C_ALARMS;
-//        case SETTINGS:
-//            return C_SETTINGS;
-//        case PID_SETTINGS:
-//            return C_PID_SETTINGS;
-//    }
-//}
-
-//Cursor getOption(int menu, int i) {
-//    switch (menu) {
-//        case MAIN:
-//            return MAIN_MENU[i];
-//        case PARAMETER:
-//            return PARAM_MENU[i];
-//        case ALARM:
-//            return ALARM_MENU[i];
-//        case SETTINGS:
-//            return SETTINGS_MENU[i];
-//        case PID_SETTINGS:
-//            return PID_SETTINGS_MENU[i];
-//    }
-//}
-
 int getCursorCode(int menu, int i) {
     switch (menu) {
         case MAIN:
@@ -126,9 +98,9 @@ int validate(int val, int cursorCode) {
         case TRIM_OPT:
             min = 70; max = 100; break;
         case FIL_OPT:
-            min = 70; max = 100; break;
+            min = 0; max = 1; break;
         case AUTO_OPT:
-            min = 70; max = 100; break;
+            min = 0; max = 1; break;
         case CD_OPT:
             min = 70; max = 100; break;
         case DP_OPT:
@@ -154,12 +126,14 @@ int validate(int val, int cursorCode) {
 void checkKeyboardActions(KeyboardState& keyboardState, MenuState& menuState, VariableParameters& variables) {
     if (menuState.menu == MAIN) {
         if (keyboardState.ok) {
-            menuState.menu = getCursorCode(MAIN, keyboardState.count);
+            menuState.menu = menuState.cursorCode;
             menuState.changedMenu = true;
+            menuState.previousCursorCode = menuState.cursorCode;
             menuState.cursorCode = getCursorCode(menuState.menu, 0);
             resetKeyboardState(keyboardState);
         } else {
             keyboardState.count = validate(keyboardState.count, MAIN);
+            menuState.previousCursorCode = menuState.cursorCode;
             menuState.cursorCode = getCursorCode(MAIN, keyboardState.count);
         }
     } else {
@@ -168,9 +142,11 @@ void checkKeyboardActions(KeyboardState& keyboardState, MenuState& menuState, Va
                 *getValueToEdit(menuState.cursorCode, variables) = menuState.editedParameter;
                 menuState.isEditingParam = false;
                 resetKeyboardState(keyboardState);
+                keyboardState.count = keyboardState.previousCount;
             } else if (keyboardState.back) {
                 menuState.isEditingParam = false;
                 resetKeyboardState(keyboardState);
+                keyboardState.count = keyboardState.previousCount;
             } else {
                 int newValue = menuState.editedParameter + keyboardState.count;
                 newValue = validate(newValue, menuState.cursorCode);
@@ -178,7 +154,6 @@ void checkKeyboardActions(KeyboardState& keyboardState, MenuState& menuState, Va
             }
         } else {
             if (keyboardState.ok) {
-                menuState.cursorCode = getCursorCode(menuState.menu, keyboardState.count);
                 menuState.isEditingParam = true;
                 menuState.editedParameter = *getValueToEdit(menuState.cursorCode, variables);
                 resetKeyboardState(keyboardState);
@@ -189,6 +164,8 @@ void checkKeyboardActions(KeyboardState& keyboardState, MenuState& menuState, Va
                 resetKeyboardState(keyboardState);
             } else {
                 keyboardState.count = validate(keyboardState.count, menuState.menu);
+                keyboardState.previousCount = keyboardState.count;
+                menuState.previousCursorCode = menuState.cursorCode;
                 menuState.cursorCode = getCursorCode(menuState.menu, keyboardState.count);
             }
         }

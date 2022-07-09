@@ -293,7 +293,6 @@ void setup() {
   writeLine(menuV2, 1, "RespirAR FIUBA", 4);
   writeLine(menuV2, 2, "v2.0.1 - nuevo menu", 2);
 
-
   ads.begin();
   verror = verror_sum = verror_sum_outcycle = 0.;
   //TODO: Put all this inside a calib class
@@ -327,21 +326,21 @@ void setup() {
   vent_mode = VENTMODE_MAN;
 
   /////////////////// CALIBRACION /////////////////////////////////////
-  bool fin = false;
-  lcd.clear();
-  writeLine(menuV2, 1, "Desconecte flujo", 0);
-  writeLine(menuV2, 2, "y presione ok ", 0);
-
-  delay (1000); //Otherwise low enter button readed
-  lastButtonPress = millis();
-  while (!fin){
-    if (digitalRead(PIN_MENU_EN) == LOW)  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
-    if (millis() - lastButtonPress > 50) {
-      fin = true;
-      lastButtonPress = millis();
-    }// if time > last button press  
-  }
-
+//  bool fin = false;
+//  lcd.clear();
+//  writeLine(menuV2, 1, "Desconecte flujo", 0);
+//  writeLine(menuV2, 2, "y presione ok ", 0);
+//
+//  Serial.println("Calibration?");
+//  delay (1000); //Otherwise low enter button readed
+//  lastButtonPress = millis();
+//  while (!fin){
+//    if (digitalRead(PIN_MENU_EN) == LOW)  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
+//    if (millis() - lastButtonPress > 50) {
+//      fin = true;
+//      lastButtonPress = millis();
+//    }// if time > last button press
+//  }
 
 digitalWrite(PIN_STEPPER, HIGH);
 delay(1000);
@@ -360,8 +359,6 @@ stepper = new FlexyStepper();
     options
   );
 
-
-  /////
   // configura la ventilación
   ventilation -> start();
   ventilation -> update();
@@ -396,7 +393,6 @@ stepper = new FlexyStepper();
   Serial.println("home end");
 #endif
   //
-
 //  display_lcd();
   printMenu(menuV2, varParams);
 
@@ -405,7 +401,7 @@ stepper = new FlexyStepper();
 
   pinMode(PIN_ENC_SW, INPUT_PULLUP);
 
-  lastReadSensor =   lastShowSensor = millis();
+  lastReadSensor = lastShowSensor = millis();
   lastState = ventilation->getState();
   last_update_display = millis();
 
@@ -437,7 +433,6 @@ stepper = new FlexyStepper();
   tft.begin();
   tft.fillScreen(ILI9341_BLACK);
 
-
   digitalWrite(BCK_LED, LOW);
   buzzmuted = false;
   last_mute = HIGH;
@@ -457,7 +452,6 @@ stepper = new FlexyStepper();
     
   Serial.println("Exiting setup");
   //TODO: CALIBRATION RUN ALSO SHOULD BE HERE
-
 }
 
 
@@ -499,8 +493,6 @@ void loop() {
 
       lastSave = millis();
     }
-
-
 
     if ( time > lastShowSensor + TIME_SHOW ) {
 
@@ -666,7 +658,7 @@ void loop() {
       if (calibration_run) {
       //NEW, CALIBRATION
         verror = verror_sum / float(vcorr_count);
-        
+
        Serial.println("Calibration iter, cycle, verror, sum: " + String(vcorr_count) + ", " + 
                                                                   String(calib_cycle) + ", " + 
                                                                   String(verror) + ", " + 
