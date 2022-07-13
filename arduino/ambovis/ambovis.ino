@@ -193,6 +193,9 @@ float vlevel,vfactor;
 
 void setup() {
 
+  pinMode(PIN_STEPPER, OUTPUT);
+  digitalWrite(PIN_STEPPER, LOW);
+  
   Serial.begin(115200);
   
   //analogReference(INTERNAL1V1); // use AREF for reference voltage
@@ -213,8 +216,6 @@ void setup() {
   pinMode(YELLOW_LED, OUTPUT); //Set buzzerPin as output
   pinMode(RED_LED, OUTPUT); //Set buzzerPin as output
 
-  pinMode(PIN_STEPPER, OUTPUT);
-  digitalWrite(PIN_STEPPER, LOW);
 
   digitalWrite(PIN_BUZZER, BUZZER_LOW); //LOW, INVERTED
 
@@ -346,6 +347,9 @@ stepper = new FlexyStepper();
   ventilation -> start();
   ventilation -> update();
 
+  lcd.clear();
+  writeLine(1, "Iniciando...", 0);
+  
   ////
 #ifdef ACCEL_STEPPER
   stepper->setSpeed(STEPPER_HOMING_SPEED);
@@ -422,7 +426,6 @@ stepper = new FlexyStepper();
   ventilation->setCycleNum(last_cycle);
 
   tft.begin();
-  tft.fillScreen(ILI9341_BLACK);
 
 
   digitalWrite(BCK_LED, LOW);
@@ -522,7 +525,8 @@ void loop() {
       // Is like 1/vs
       vs = vlevel /** vfactor*/; 
       
-      adc0 = ads.readADC_SingleEnded(0);
+      //adc0 = ads.readADC_SingleEnded(0);
+      adc0=0;
       Voltage = (adc0 * 0.1875) * 0.001; //Volts
       //DATASHEET:
       // Vo = Vs (  
