@@ -30,8 +30,13 @@ bool drawing_cycle = 0;//TOD: Move to class member
 
 // FOR ADS
 #include <Wire.h>
-#include <Adafruit_ADS1015.h>
-Adafruit_ADS1115 ads(0x48);           //Conversor AD para leer mejor el flujo a partir de la presion
+//OLD
+//#include <Adafruit_ADS1015.h>
+//Adafruit_ADS1115 ads(0x48);           //Conversor AD para leer mejor el flujo a partir de la presion
+//NEW
+#include <Adafruit_ADS1X15.h>           //Currently is 
+Adafruit_ADS1115 ads;
+
 float Voltage = 0.0;
 int vt;
 float _mlInsVol = 0;
@@ -45,12 +50,9 @@ void write_memory();
 int Compression_perc = 8; //80%
 
 #ifdef ACCEL_STEPPER
-AccelStepper *stepper = new AccelStepper(
-  AccelStepper::DRIVER,
-  PIN_STEPPER_STEP,
-  PIN_STEPPER_DIRECTION);
+AccelStepper *stepper; 
 #else
-FlexyStepper * stepper = new FlexyStepper();
+FlexyStepper * stepper;
 #endif
 
 byte alarm_state = 0; //0: No alarm 1: peep 2: pip 3:both
@@ -191,6 +193,9 @@ float vlevel,vfactor;
 
 void setup() {
 
+  pinMode(PIN_STEPPER, OUTPUT);
+  digitalWrite(PIN_STEPPER, LOW);
+  
   Serial.begin(115200);
   
   //analogReference(INTERNAL1V1); // use AREF for reference voltage
@@ -210,6 +215,7 @@ void setup() {
   pinMode(BCK_LED,    OUTPUT); //Set buzzerPin as output
   pinMode(YELLOW_LED, OUTPUT); //Set buzzerPin as output
   pinMode(RED_LED, OUTPUT); //Set buzzerPin as output
+
 
   digitalWrite(PIN_BUZZER, BUZZER_LOW); //LOW, INVERTED
 
@@ -254,12 +260,6 @@ void setup() {
   options.tidalVolume = 300;
   options.percVolume = 100; //1 to 10
 
-  ventilation = new MechVentilation(
-    stepper,
-    pid,
-    options
-  );
-
   delay(100);
 
   //  Serial.println("Tiempo del ciclo (seg):" + String(ventilation -> getExsuflationTime() + ventilation -> getInsuflationTime()));
@@ -296,14 +296,61 @@ void setup() {
   //  Serial.print("pressure  MPX Volt (mV) at p0: "); Serial.println(verrp * 1000, 3);
 
   Serial.print("dp  error : "); Serial.println(-verror / (5.*0.09));
-  
+
+  ////// ANTES DE CONFIGURAR LA VENTILACION Y CHEQUEAR EL FIN DE CARRERA INICIO LOS MENUES
+  bool init=false;
+  byte bpm = DEFAULT_RPM;
+  byte i_e = 2;
+  Menu_inic menuini(&vent_mode, &bpm, &i_e);
+
+  options.respiratoryRate = bpm;
+  options.percInspEsp = i_e; //1:1 to 1:4, is denom
+  vent_mode = VENTMODE_MAN;
+
+  /////////////////// CALIBRACION /////////////////////////////////////
+  bool fin = false;
+  lcd.clear();
+  writeLine(1, "Desconecte flujo", 0);
+  writeLine(2, "y presione ok ", 0);
+
+  delay (1000); //Otherwise low enter button readed
+  lastButtonPress = millis();
+  while (!fin){
+    if (digitalRead(PIN_MENU_EN) == LOW)  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
+    if (millis() - lastButtonPress > 50) {
+      fin = true;
+      lastButtonPress = millis();
+    }// if time > last button press  
+  }
 
 
+digitalWrite(PIN_STEPPER, HIGH);
+delay(1000);
+#ifdef ACCEL_STEPPER
+stepper = new AccelStepper(
+  AccelStepper::DRIVER,
+  PIN_STEPPER_STEP,
+  PIN_STEPPER_DIRECTION);
+#else
+stepper = new FlexyStepper();
+#endif
+
+  ventilation = new MechVentilation(
+    stepper,
+    pid,
+    options
+  );
+
+
+  /////
   // configura la ventilación
   ventilation -> start();
   ventilation -> update();
 
-  //
+  lcd.clear();
+  writeLine(1, "Iniciando...", 0);
+  
+  ////
 #ifdef ACCEL_STEPPER
   stepper->setSpeed(STEPPER_HOMING_SPEED);
 
@@ -379,7 +426,6 @@ void setup() {
   ventilation->setCycleNum(last_cycle);
 
   tft.begin();
-  tft.fillScreen(ILI9341_BLACK);
 
 
   digitalWrite(BCK_LED, LOW);
@@ -398,13 +444,9 @@ void setup() {
   wake_up = false;
 
   //Serial.println("Vcc & Out MPX: " + String(analogRead(PIN_MPX_LEV)) + String(", ") + String(Voltage));
-
-  
-
-  
+    
   Serial.println("Exiting setup");
-  
-
+  //TODO: CALIBRATION RUN ALSO SHOULD BE HERE
 
 }
 
@@ -483,7 +525,8 @@ void loop() {
       // Is like 1/vs
       vs = vlevel /** vfactor*/; 
       
-      adc0 = ads.readADC_SingleEnded(0);
+      //adc0 = ads.readADC_SingleEnded(0);
+      adc0=0;
       Voltage = (adc0 * 0.1875) * 0.001; //Volts
       //DATASHEET:
       // Vo = Vs (  
@@ -574,10 +617,16 @@ void loop() {
 
       last_cycle = ventilation->getCycleNum();
 
-      display_lcd();
-      update_display = true;
-      last_update_display = time;
-
+      if (!calibration_run){
+        display_lcd();
+        update_display = true;
+        last_update_display = time;
+      } else {
+          lcd.clear();
+          writeLine(1, "Calibracion flujo", 0);
+          writeLine(2, "Ciclo: " + String(calib_cycle+1) + "/" + String(CALIB_CYCLES), 0);
+      }
+      
 #ifdef DEBUG_PID
       if (vent_mode = VENTMODE_PCL) {
         float err = (float)(pressure_max - options.peakInspiratoryPressure) / options.peakInspiratoryPressure;
@@ -594,9 +643,9 @@ void loop() {
         }
       }
 #endif
-      if (digitalRead(PIN_POWEROFF)) {
+      if (!digitalRead(PIN_POWEROFF)) {
         digitalWrite(YELLOW_LED, HIGH);
-        //Serial.println("Yellow high");
+        Serial.println("Poweroff");
       } else {
         digitalWrite(YELLOW_LED, LOW);
       }
@@ -616,6 +665,7 @@ void loop() {
           calibration_run = false;
           vzero = verror_sum_outcycle / float(CALIB_CYCLES);
           Serial.println("Calibration verror: " + String(vzero));
+          lcd.clear();
 
       }
     } else {
@@ -625,12 +675,13 @@ void loop() {
     
     }//change cycle
 
-    if (display_needs_update) {
-
-      display_lcd();
-      display_needs_update = false;
+    if (!calibration_run) {
+      if (display_needs_update) {
+        display_lcd();
+        display_needs_update = false;
+      }
     }
-
+  
     if ( update_options ) {
       ventilation->change_config(options);
       update_options = false;
@@ -645,10 +696,12 @@ void loop() {
     //      }
 
     //HERE changed_options flag is not updating until cycle hcanges
-    if (show_changed_options && ((millis() - last_update_display) > time_update_display) ) {
-      display_lcd();  //WITHOUT CLEAR!
-      last_update_display = millis();
-      show_changed_options = false;
+    if (!calibration_run){
+      if (show_changed_options && ((millis() - last_update_display) > time_update_display) ) {
+        display_lcd();  //WITHOUT CLEAR!
+        last_update_display = millis();
+        show_changed_options = false;
+      }
     }
 
     //        if (alarm_state > 0) {
