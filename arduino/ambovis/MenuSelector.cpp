@@ -137,7 +137,6 @@ void editParameter(KeyboardState& keyboardState, MenuState& menuState, VariableP
         resetKeyboardState(keyboardState);
         keyboardState.count = keyboardState.previousCount;
     } else {
-        Serial.print("keycount edit param"); Serial.println(keyboardState.count);
         int newValue = menuState.editedParameter + keyboardState.count;
         newValue = validate(newValue, menuState.cursorCode);
         menuState.editedParameter = newValue;
