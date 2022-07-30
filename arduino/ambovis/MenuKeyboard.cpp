@@ -4,43 +4,51 @@
 #include "MenuKeyboard.h"
 
 void checkUPButtonPressed(KeyboardState & keyboardState, unsigned long time) {
-    if (digitalRead(PIN_MENU_UP) == LOW) {
-        int timeDiff = time - keyboardState.lastKeyPressedTime;
-        if (timeDiff > 500) {
-            Serial.print("Up pressed ");Serial.println(timeDiff);
+    int currentState = digitalRead(PIN_MENU_UP);
+    if (currentState != keyboardState.lastUpState) {
+        if (currentState == 0) {
             keyboardState.count = keyboardState.count + 1;
             keyboardState.lastKeyPressedTime = time;
         }
+        keyboardState.lastUpState = currentState;
     }
 }
 
 void checkDOWNButtonPressed(KeyboardState& keyboardState, unsigned long time) {
-    if (digitalRead(PIN_MENU_DN) == LOW) {
-        int timeDiff = time - keyboardState.lastKeyPressedTime;
-        if (timeDiff > 500) {
-            Serial.print("Down pressed ");;Serial.println(timeDiff);
+    int currentState = digitalRead(PIN_MENU_DN);
+    if (currentState != keyboardState.lastDownState) {
+        if (currentState == 0) {
             keyboardState.count = keyboardState.count - 1;
             keyboardState.lastKeyPressedTime = time;
         }
+        keyboardState.lastDownState = currentState;
     }
 }
 
 void checkOKButtonPressed(KeyboardState& keyboardState, unsigned long time) {
-    if (digitalRead(PIN_MENU_EN) == LOW) {
-        int timeDiff = time - keyboardState.lastKeyPressedTime;
-        if (timeDiff > 700) {
-            Serial.print("OK pressed ");;Serial.println(timeDiff);
+    int currentState = digitalRead(PIN_MENU_EN);
+    if (currentState != keyboardState.lastOKState) {
+        if (currentState == 0) {
             keyboardState.ok = true;
             keyboardState.lastKeyPressedTime = time;
         }
+        keyboardState.lastOKState = currentState;
     }
 }
 
 void checkBackButtonPressed(KeyboardState& keyboardState, unsigned long time) {
-    if (digitalRead(PIN_MENU_BCK) == LOW) {
-        if (time - keyboardState.lastKeyPressedTime > 700) {
+    int currentState = digitalRead(PIN_MENU_BCK);
+    if (currentState != keyboardState.lastBackState) {
+        keyboardState.backHoldTime = 0;
+        if (currentState == 0) {
             keyboardState.back = true;
             keyboardState.lastKeyPressedTime = time;
+            keyboardState.backHoldTime = 200;
+        }
+        keyboardState.lastBackState = currentState;
+    } else {
+        if (currentState == 0) {
+            keyboardState.backHoldTime += 200;
         }
     }
 }

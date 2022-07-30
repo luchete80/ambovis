@@ -4,12 +4,16 @@
 
 #include "MenuSelector.h"
 
-int getCursorCode(int menu, int i) {
+int getCursorCode(int menu, int i, int ventMode) {
     switch (menu) {
         case MAIN:
             return MAIN_MENU[i];
         case PARAMETER:
-            return PARAM_MENU[i];
+            if (ventMode == VENTMODE_MAN) {
+                return PARAM_MENU[i];
+            } else {
+                return PARAM_MENU_PCV[i];
+            }
         case ALARM:
             return ALARM_MENU[i];
         case SETTINGS:
@@ -53,10 +57,10 @@ int* getValueToEdit(int code, VariableParameters& parameters) {
             return &parameters.f_min;
         case FF_OPT:
             return &parameters.f_max;
-        case PA_OPT:
-            return &parameters.pa_opt;
-        case FA_OPT:
-            return &parameters.fa_opt;
+//        case PA_OPT:
+//            return &parameters.pa_opt;
+//        case FA_OPT:
+//            return &parameters.fa_opt;
     }
 }
 
@@ -71,48 +75,47 @@ int validate(int val, int cursorCode) {
     int max = 0;
     switch (cursorCode) {
         case MAIN:
-            max = 3; break;
         case PARAMETER:
         case SETTINGS:
             max = 3; break;
         case ALARM:
             max = 2; break;
         case PID_SETTINGS:
-            max = 4; break;
+            max = 2; break;
         case MODE_OPT:
-            max = 1; break;
+            min = 1; max = 2; break;
         case PERC_V_OPT:
-            min = 80; max = 90; break;
+            min = 40; max = 100; break;
         case PIP_OPT:
-            min = 5; max = 20; break;
+            min = 15; max = 30; break;
         case BPM_OPT:
-            min = 70; max = 100; break;
+            min = DEFAULT_MIN_RPM; max = DEFAULT_MAX_RPM; break;
         case IE_OPT:
             min = 1; max = 3; break;
         case PIP_ALARM_OPT:
-            min = 100; max = 200; break;
+            min = 20; max = 50; break;
         case PEEP_ALARM_OPT:
-            min = 500; max = 700; break;
+            min = 5; max = 30; break;
         case VT_ALARM_OPT:
-            min = 5; max = 10; break;
+            min = 10; max = 50; break;
         case TRIM_OPT:
-            min = 70; max = 100; break;
+            min = 0; max = 200; break;
         case FIL_OPT:
             min = 0; max = 1; break;
         case AUTO_OPT:
             min = 0; max = 1; break;
         case CD_OPT:
-            min = 70; max = 100; break;
+            min = 70; max = 80; break;
         case DP_OPT:
-            min = 70; max = 100; break;
+            min = 10; max = 40; break;
         case F_OPT:
-            min = 70; max = 100; break;
+            min = 0; max = 99; break;
         case FF_OPT:
-            min = 70; max = 100; break;
-        case PA_OPT:
-            min = 70; max = 100; break;
-        case FA_OPT:
-            min = 70; max = 100; break;
+            min = 0; max = 99; break;
+//        case PA_OPT:
+//            min = 70; max = 100; break;
+//        case FA_OPT:
+//            min = 70; max = 100; break;
     }
     if (val < min) {
         return min;
@@ -123,51 +126,74 @@ int validate(int val, int cursorCode) {
     }
 }
 
+void editParameter(KeyboardState& keyboardState, MenuState& menuState, VariableParameters& variables) {
+    if (keyboardState.ok) {
+        *getValueToEdit(menuState.cursorCode, variables) = menuState.editedParameter;
+        menuState.isEditingParam = false;
+        resetKeyboardState(keyboardState);
+        keyboardState.count = keyboardState.previousCount;
+    } else if (keyboardState.back) {
+        menuState.isEditingParam = false;
+        resetKeyboardState(keyboardState);
+        keyboardState.count = keyboardState.previousCount;
+    } else {
+        Serial.print("keycount edit param"); Serial.println(keyboardState.count);
+        int newValue = menuState.editedParameter + keyboardState.count;
+        newValue = validate(newValue, menuState.cursorCode);
+        menuState.editedParameter = newValue;
+        keyboardState.count = 0;
+    }
+}
+
+void moveCursor(KeyboardState& keyboardState, MenuState& menuState, VariableParameters& variables, bool isInitialMenu = false) {
+    if (keyboardState.ok) {
+        if (menuState.cursorCode == END_SETUP) {
+            menuState.setupReady = true;
+        } else {
+            menuState.isEditingParam = true;
+            menuState.editedParameter = *getValueToEdit(menuState.cursorCode, variables);
+        }
+        resetKeyboardState(keyboardState);
+    } else if (keyboardState.back && !isInitialMenu) {
+        menuState.menu = MAIN;
+        menuState.cursorCode = getCursorCode(MAIN, 0, variables.vent_mode);
+        menuState.changedMenu = true;
+        resetKeyboardState(keyboardState);
+    } else {
+        keyboardState.count = validate(keyboardState.count, menuState.menu);
+        keyboardState.previousCount = keyboardState.count;
+        menuState.previousCursorCode = menuState.cursorCode;
+        menuState.cursorCode = isInitialMenu ? INIT_PARAM_MENU[keyboardState.count] :
+                getCursorCode(menuState.menu, keyboardState.count, variables.vent_mode);
+    }
+}
+
+void checkKeyboardActionForSetup(KeyboardState& keyboardState, MenuState& menuState, VariableParameters& variables) {
+    if (menuState.isEditingParam) {
+        editParameter(keyboardState, menuState, variables);
+    } else {
+        moveCursor(keyboardState, menuState, variables, true);
+    }
+}
+
 void checkKeyboardActions(KeyboardState& keyboardState, MenuState& menuState, VariableParameters& variables) {
     if (menuState.menu == MAIN) {
         if (keyboardState.ok) {
             menuState.menu = menuState.cursorCode;
             menuState.changedMenu = true;
             menuState.previousCursorCode = menuState.cursorCode;
-            menuState.cursorCode = getCursorCode(menuState.menu, 0);
+            menuState.cursorCode = getCursorCode(menuState.menu, 0, variables.vent_mode);
             resetKeyboardState(keyboardState);
         } else {
             keyboardState.count = validate(keyboardState.count, MAIN);
             menuState.previousCursorCode = menuState.cursorCode;
-            menuState.cursorCode = getCursorCode(MAIN, keyboardState.count);
+            menuState.cursorCode = getCursorCode(MAIN, keyboardState.count, variables.vent_mode);
         }
     } else {
         if (menuState.isEditingParam) {
-            if (keyboardState.ok) {
-                *getValueToEdit(menuState.cursorCode, variables) = menuState.editedParameter;
-                menuState.isEditingParam = false;
-                resetKeyboardState(keyboardState);
-                keyboardState.count = keyboardState.previousCount;
-            } else if (keyboardState.back) {
-                menuState.isEditingParam = false;
-                resetKeyboardState(keyboardState);
-                keyboardState.count = keyboardState.previousCount;
-            } else {
-                int newValue = menuState.editedParameter + keyboardState.count;
-                newValue = validate(newValue, menuState.cursorCode);
-                menuState.editedParameter = newValue;
-            }
+            editParameter(keyboardState, menuState, variables);
         } else {
-            if (keyboardState.ok) {
-                menuState.isEditingParam = true;
-                menuState.editedParameter = *getValueToEdit(menuState.cursorCode, variables);
-                resetKeyboardState(keyboardState);
-            } else if (keyboardState.back) {
-                menuState.menu = MAIN;
-                menuState.cursorCode = getCursorCode(MAIN, 0);
-                menuState.changedMenu = true;
-                resetKeyboardState(keyboardState);
-            } else {
-                keyboardState.count = validate(keyboardState.count, menuState.menu);
-                keyboardState.previousCount = keyboardState.count;
-                menuState.previousCursorCode = menuState.cursorCode;
-                menuState.cursorCode = getCursorCode(menuState.menu, keyboardState.count);
-            }
+            moveCursor(keyboardState, menuState, variables, false);
         }
     }
 }

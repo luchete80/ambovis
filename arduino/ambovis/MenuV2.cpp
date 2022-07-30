@@ -4,18 +4,7 @@
 
 #include "MenuV2.h"
 
-byte back2[8] = {
-        0b00100,
-        0b01000,
-        0b11111,
-        0b01001,
-        0b00101,
-        0b00001,
-        0b00001,
-        0b11111
-};
-
-typedef struct pos {
+typedef struct display_value {
     int c_x = 0;
     int c_y = 0;
     int x = 0;
@@ -23,13 +12,13 @@ typedef struct pos {
     int size = 0;
     String label = "";
     String strValue = "";
-} Pos;
+} DisplayValue;
 
 void initDisplay(MenuV2& menu) {
     menu.lcd->begin(20, 4);
     menu.lcd->clear();
     menu.lcd->setCursor(0, 0);
-    menu.lcd->createChar(0, back2);
+    menu.lcd->createChar(0, back);
 }
 
 void writeLine(MenuV2& menu, int line, String message = "", int offsetLeft = 0) {
@@ -72,9 +61,9 @@ void displayMainMenu(MenuV2& menu) {
     writeLine(menu, 3, "Ajustes PID1", 1);
 }
 
-Pos getValueToDisplay(int code, VariableParameters& parameters, MenuState& menuState) {
+DisplayValue getValueToDisplay(int code, VariableParameters& parameters, MenuState& menuState) {
     bool useEditedParam = menuState.cursorCode == code && menuState.isEditingParam;
-    Pos displayValue;
+    DisplayValue displayValue;
     int value = 0;
     char tempstr[5];
     switch (code) {
@@ -90,7 +79,7 @@ Pos getValueToDisplay(int code, VariableParameters& parameters, MenuState& menuS
             displayValue.x = 1; displayValue.y = 0; displayValue.size = 7;
             displayValue.c_x = 0; displayValue.c_y = 0; displayValue.label = "MOD:";
             value = useEditedParam ? menuState.editedParameter : parameters.vent_mode;
-            displayValue.strValue = value == 0 ? String("MAN") : String("PCL");
+            displayValue.strValue = value == 2 ? String("MAN") : String("PCL");
             break;
         case PERC_V_OPT:
             displayValue.x = 10; displayValue.y = 0; displayValue.size = 6;
@@ -164,13 +153,15 @@ Pos getValueToDisplay(int code, VariableParameters& parameters, MenuState& menuS
             displayValue.x = 1; displayValue.y = 0; displayValue.size = 6;
             displayValue.c_x = 0; displayValue.c_y = 0; displayValue.label = "dp:";
             value = useEditedParam ? menuState.editedParameter : parameters.dp_opt;
-            displayValue.strValue = String(value);
+            dtostrf(float(value)/10., 2, 1, tempstr);
+            displayValue.strValue = String(tempstr);
             break;
         case F_OPT:
             displayValue.x = 1; displayValue.y = 1; displayValue.size = 5;
             displayValue.c_x = 0; displayValue.c_y = 1; displayValue.label = "f:";
             value = useEditedParam ? menuState.editedParameter : parameters.f_min;
-            displayValue.strValue = String(value);
+            dtostrf(float(value)/50., 2, 1, tempstr);
+            displayValue.strValue = String(tempstr);
             break;
         case FF_OPT:
             displayValue.x = 9; displayValue.y = 1; displayValue.size = 6;
@@ -178,24 +169,27 @@ Pos getValueToDisplay(int code, VariableParameters& parameters, MenuState& menuS
             value = useEditedParam ? menuState.editedParameter : parameters.f_max;
             displayValue.strValue = String(value);
             break;
-        case PA_OPT:
+//        case PA_OPT:
+//            displayValue.x = 1; displayValue.y = 2; displayValue.size = 6;
+//            displayValue.c_x = 0; displayValue.c_y = 2; displayValue.label = "pa:";
+//            value = useEditedParam ? menuState.editedParameter : parameters.pa_opt;
+//            displayValue.strValue = String(value);
+//            break;
+//        case FA_OPT:
+//            displayValue.x = 9; displayValue.y = 2; displayValue.size = 6;
+//            displayValue.c_x = 8; displayValue.c_y = 2; displayValue.label = "fa:";
+//            value = useEditedParam ? menuState.editedParameter : parameters.fa_opt;
+//            displayValue.strValue = String(value);
+//            break;
+        case END_SETUP:
             displayValue.x = 1; displayValue.y = 2; displayValue.size = 6;
-            displayValue.c_x = 0; displayValue.c_y = 2; displayValue.label = "pa:";
-            value = useEditedParam ? menuState.editedParameter : parameters.pa_opt;
-            displayValue.strValue = String(value);
-            break;
-        case FA_OPT:
-            displayValue.x = 9; displayValue.y = 2; displayValue.size = 6;
-            displayValue.c_x = 8; displayValue.c_y = 2; displayValue.label = "fa:";
-            value = useEditedParam ? menuState.editedParameter : parameters.fa_opt;
-            displayValue.strValue = String(value);
-            break;
+            displayValue.c_x = 0; displayValue.c_y = 2; displayValue.label = "READY";
     }
     return displayValue;
 }
 
 void printCursor(MenuV2& menu, int cursorCode, VariableParameters & parameters) {
-    Pos valueToDisplay = getValueToDisplay(cursorCode, parameters, menu.menuState);
+    DisplayValue valueToDisplay = getValueToDisplay(cursorCode, parameters, menu.menuState);
     clearDigits(menu, valueToDisplay.c_x, valueToDisplay.c_y, 1);
     clearDigits(menu, valueToDisplay.x, valueToDisplay.y, valueToDisplay.size);
 
@@ -212,18 +206,29 @@ void printCursor(MenuV2& menu, int cursorCode, VariableParameters & parameters) 
 void displaySensorValues(int line, MenuV2& menu, VariableParameters& parameters) {
     char tempstr[5];
     writeLine(menu, line, "PIP:", 1);
+//    peakInspiratoryPressure
     dtostrf(parameters.last_pressure_min, 2, 0, tempstr);
     writeLine(menu, line, "PEEP:", 8);
     dtostrf((parameters._mllastInsVol + parameters._mllastExsVol)/2.*parameters.respiratoryRate*0.001, 2, 1, tempstr);
     writeLine(menu, line, "VM:", 15);
+//    dtostrf(_timeoutIns*0.001, 1, 1, tempstr);
+//    writeLine(3, "I:" + String(tempstr), 9);
+//    dtostrf(_timeoutEsp*0.001, 1, 1, tempstr);
+//    writeLine(3, "E:" + String(tempstr), 15);
+}
+
+void displayInitialParametersSettings(MenuV2& menu, VariableParameters& parameters) {
+    printCursor(menu, MODE_OPT, parameters);
+    printCursor(menu, BPM_OPT, parameters);
+    printCursor(menu, IE_OPT, parameters);
+    printCursor(menu, END_SETUP, parameters);
 }
 
 void displayParametersSettings(MenuV2& menu, VariableParameters& parameters) {
+    printCursor(menu, MODE_OPT, parameters);
     if (parameters.vent_mode == VENTMODE_PCL) {
-        printCursor(menu, MODE_OPT, parameters);
         printCursor(menu, PIP_OPT, parameters);
-    } else {
-        printCursor(menu, MODE_OPT, parameters);
+    } else if (parameters.vent_mode == VENTMODE_MAN) {
         printCursor(menu, PERC_V_OPT, parameters);
     }
     printCursor(menu, BPM_OPT, parameters);
@@ -242,15 +247,15 @@ void displaySettings(MenuV2& menu, VariableParameters& parameters) {
     printCursor(menu, TRIM_OPT, parameters);
     printCursor(menu, FIL_OPT, parameters);
     printCursor(menu, AUTO_OPT, parameters);
-    printCursor(menu, CD_OPT, parameters);
+    printCursor(menu, CD_OPT, parameters); // not editable
 }
 
 void displayPIDSettings(MenuV2& menu, VariableParameters& parameters) {
     printCursor(menu, DP_OPT, parameters);
     printCursor(menu, F_OPT, parameters);
     printCursor(menu, FF_OPT, parameters);
-    printCursor(menu, PA_OPT, parameters);
-    printCursor(menu, FA_OPT, parameters);
+//    printCursor(menu, PA_OPT, parameters);
+//    printCursor(menu, FA_OPT, parameters);
 }
 
 void printMenu(MenuV2& menu, VariableParameters& parameters) {
@@ -272,22 +277,37 @@ void displayMenu(MenuV2& menu, VariableParameters& parameters) {
         menu.lcd->clear();
         printMenu(menu, parameters);
     } else {
-        Pos valueToDisplay = getValueToDisplay(menu.menuState.previousCursorCode, parameters, menu.menuState);
-        clearDigits(menu, valueToDisplay.c_x, valueToDisplay.c_y, 1);
+        DisplayValue previousValue = getValueToDisplay(menu.menuState.previousCursorCode, parameters, menu.menuState);
+        clearDigits(menu, previousValue.c_x, previousValue.c_y, 1);
         printCursor(menu, menu.menuState.cursorCode, parameters);
     }
 }
 
 void checkEncoder(MenuV2& menu, VariableParameters& parameters, long time) {
-    checkKeyboard(menu.keyboardState, time);
     bool somethingChanged = menu.keyboardState.lastKeyPressedTime - time < 500;
-    checkKeyboardActions(menu.keyboardState, menu.menuState, parameters);
 
     if (somethingChanged) {
-        Serial.print("Keypressed count ");Serial.println(menu.keyboardState.count);
+        checkKeyboardActions(menu.keyboardState, menu.menuState, parameters);
         displayMenu(menu, parameters);
         if (menu.menuState.changedMenu) {
             menu.menuState.changedMenu = false;
         }
     }
+}
+
+void setupMenu(MenuV2& menuV2, VariableParameters& parameters, long time) {
+    menuV2.menuState.menu = PARAMETER;
+    menuV2.menuState.cursorCode = MODE_OPT;
+    menuV2.menuState.changedMenu = false;
+    menuV2.lcd->clear();
+    displayInitialParametersSettings(menuV2, parameters);
+    do {
+        checkKeyboard(menuV2.keyboardState, time);
+        bool somethingChanged = menuV2.keyboardState.lastKeyPressedTime - time < 500;
+        if (somethingChanged) {
+            checkKeyboardActionForSetup(menuV2.keyboardState, menuV2.menuState, parameters);
+            displayMenu(menuV2, parameters);
+        }
+        delay(150);
+    } while (!menuV2.menuState.setupReady);
 }

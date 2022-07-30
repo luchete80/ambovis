@@ -129,9 +129,9 @@ class VentilationOptions_t {
 #define VENTMODE_MAN 2
 
 //general variables
-extern byte vent_mode;
-extern bool send_data;
-extern bool sleep_mode;
+//extern byte vent_mode;
+//extern bool send_data;
+//extern bool sleep_mode;
 
 extern byte alarm_state;
 

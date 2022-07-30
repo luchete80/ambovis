@@ -13,7 +13,7 @@
 #include "defaults.h"
 #include "src/AutoPID/AutoPID.h"
 #include "Sensors.h"
-
+#include "MenuDataTypes.h"
 
 #ifdef ACCEL_STEPPER
 #include "src/AccelStepper/AccelStepper.h"
@@ -102,6 +102,9 @@ public:
     void setCycleNum(unsigned long cyc){_cyclenum=cyc;}
     void change_config(VentilationOptions_t);
 
+    void setVarParams(VariableParameters* variableParameters) {
+        this->variableParameters = variableParameters;
+    }
 
     //LUCIANO 
     float getCurrentPressure();
@@ -188,6 +191,7 @@ private:
     //float _currentFlow = 0.0;
     //float _currentVolume = 0.0;
     float timeoutCycle;
+    VariableParameters* variableParameters;
 };
 
 extern unsigned int _timeoutIns;
@@ -196,34 +200,35 @@ extern unsigned int _timeoutEsp;
 extern byte stepper_time;
 extern unsigned long last_vent_time;
 extern float _mlInsVol,_mlExsVol;
-extern int _mllastInsVol,_mllastExsVol;
+//extern int _mllastInsVol,_mllastExsVol;
 //_mlInsVol2;
 //extern float _stepperSpeed;
 extern float pressure_sec,psec_max,last_psec_max;
 extern unsigned long _msecTimerStartCycle; //CADA semiciclo
 extern bool display_needs_update;
-extern byte flux_count;
+//extern byte flux_count;
 extern unsigned long flux_filter_time;
 extern float flux_sum;
 extern VentilationOptions_t options;
 extern MechVentilation * ventilation;
 extern unsigned long last_cycle;
-extern byte alarm_max_pressure,alarm_peep_pressure;
-extern int alarm_vt;
+//extern byte alarm_max_pressure;
+//alarm_peep_pressure
+//extern int alarm_vt;
 extern byte cycle_pos; //0 to 127
-extern byte Cdyn;
-extern bool autopid;
-extern bool filter;
-extern byte pfmin,pfmax;
-extern float peep_fac;
-extern float pf_min,pf_max;
-extern float dpip;extern byte dpip_b;
-extern int max_accel,min_accel,max_speed,min_speed,max_cd,min_cd,max_pidk,min_pidk;
-extern int max_pidi,min_pidi;
-extern int max_pidd,min_pidd;
+//extern byte Cdyn;
+//extern bool autopid;
+//extern bool filter;
+//extern byte pfmin,pfmax;
+//extern float peep_fac;
+//extern float pf_min,pf_max;
+//extern float dpip;extern byte dpip_b;
+//extern int max_accel,min_accel,max_speed,min_speed,max_cd,min_cd,max_pidk,min_pidk;
+//extern int max_pidi,min_pidi;
+//extern int max_pidd,min_pidd;
 
-extern float f_acc;extern byte f_acc_b;
-extern byte p_acc;
+//extern float f_acc;extern byte f_acc_b;
+//extern byte p_acc;
 
 extern bool ended_whilemov;
     

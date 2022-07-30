@@ -35,13 +35,13 @@ float Voltage = 0.0;
 int vt;
 float _mlInsVol = 0;
 float _mlExsVol = 0;
-int _mllastInsVol, _mllastExsVol;
+//int _mllastInsVol, _mllastExsVol;
 unsigned long mute_count;
 
 void read_memory(); //Lee la EEPROM, usa variables externas, quiza deberian englobarse en un vector dinamico todos los offsets
 void write_memory();
 
-int Compression_perc = 8; //80%
+//int Compression_perc = 8; //80%
 
 #ifdef ACCEL_STEPPER
 AccelStepper *stepper; 
@@ -73,24 +73,26 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 byte vcorr_count;
 byte p_trim = 100;
 float pressure_p;   //EXTERN!!
-float last_pressure_max, last_pressure_min, last_pressure_peep;
-float pressure_peep;
+//float last_pressure_max, last_pressure_peep;
+//last_pressure_min,
+//float pressure_peep;
 
 byte vent_mode = VENTMODE_MAN; //0
 //Adafruit_BMP280 _pres1Sensor;
 Pressure_Sensor _dpsensor;
 float verrp;
-float _flux,    flow_f;;
+float _flux,    flow_f;
 //#ifdef FILTER_FLUX
 float _flux_fil[5];
-float _mlInsVol2;
+//float _mlInsVol2;
 float _flux_sum;
-byte flux_count;
+//byte flux_count;
 //#endif
 
-bool send_data = false;
-char tempstr[5], tempstr2[5];
-int curr_sel, old_curr_sel;
+//bool send_data = false;
+char tempstr[5];
+//tempstr2[5];
+//int curr_sel, old_curr_sel;
 float p_dpt;
 
 unsigned long lastReadSensor = 0;
@@ -105,7 +107,7 @@ bool update_options = false;
 unsigned long time_update_display = 20; //ms
 unsigned long last_update_display;
 
-extern float _mlInsVol, _mlExsVol;
+//extern float _mlInsVol, _mlExsVol;
 extern byte stepper_time = 50;
 unsigned long last_stepper_time;
 unsigned long last_vent_time;
@@ -113,16 +115,16 @@ unsigned long time;
 byte cycle_pos;
 int16_t adc0;
 
-int max_accel, min_accel;
-int max_speed, min_speed;
-int min_pidk, max_pidk;
-int min_pidi, max_pidi;
-int min_pidd, max_pidd;
-byte pfmin, pfmax;
-float pf_min, pf_max;
-float peep_fac;
+//int max_accel, min_accel;
+//int max_speed, min_speed;
+//int min_pidk, max_pidk;
+//int min_pidi, max_pidi;
+//int min_pidd, max_pidd;
+//byte pfmin, pfmax;
+//float pf_min, pf_max;
+//float peep_fac;
 
-int min_cd, max_cd;
+//int min_cd, max_cd;
 
 unsigned long last_cycle;
 
@@ -130,10 +132,10 @@ unsigned int _timeoutIns, _timeoutEsp; //In ms
 
 byte menu_number = 0;
 //TODO: READ FROM EEPROM
-byte alarm_max_pressure = 35;
-byte alarm_peep_pressure = 5;
+//byte alarm_max_pressure = 35;
+//byte alarm_peep_pressure = 5;
 byte isalarmvt_on;
-int alarm_vt = 200;
+int alarm_vt;
 
 // Menu V2
 KeyboardState kbState;
@@ -152,31 +154,30 @@ byte po_flux[] = {0, 10, 20, 30, 40, 50, 55, 60, 65, 70, 75, 80, 85, 86, 87, 88,
 
 bool change_pid_params = false;
 
-byte encoderPos = 1; //this variable stores our current value of encoder position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
-byte oldEncPos = 1; //stores the last encoder position value so we can compare to the current reading and see if it has changed (so we know when to print to the serial monitor)
-byte reading = 0; //somewhere to store the direct values we read from our interrupt pins before checking to see if we have moved a whole detent
+//byte encoderPos = 1; //this variable stores our current value of encoder position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
+//byte oldEncPos = 1; //stores the last encoder position value so we can compare to the current reading and see if it has changed (so we know when to print to the serial monitor)
+//byte reading = 0; //somewhere to store the direct values we read from our interrupt pins before checking to see if we have moved a whole detent
 
-byte max_sel, min_sel; //According to current selection
+//byte max_sel, min_sel; //According to current selection
 
 void check_buzzer_mute();
-void autotrim_flux();
+//void autotrim_flux();
 void check_sleep_mode();  //Batt charge only
 
-bool isitem_sel;
-byte old_menu_pos = 0;
-byte old_menu_num = 0;
+//bool isitem_sel;
+//byte old_menu_pos = 0;
+//byte old_menu_num = 0;
 
 AutoPID * pid;
-
 MechVentilation * ventilation;
 VentilationOptions_t options;
 
-int bck_state ;     // current state of the button
-int last_bck_state ; // previous state of the button
-int startPressed ;    // the moment the button was pressed
-int endPressed ;      // the moment the button was released
-int holdTime ;        // how long the button was hold
-int idleTime ;        // how long the button was idle
+//int bck_state ;     // current state of the button
+//int last_bck_state ; // previous state of the button
+//int startPressed ;    // the moment the button was pressed
+//int endPressed ;      // the moment the button was released
+//int holdTime ;        // how long the button was hold
+//int idleTime ;        // how long the button was idle
 
 float vsupply, vsupply_0;
 float vlevel,vfactor;
@@ -187,40 +188,59 @@ void setup() {
   
   analogReference(INTERNAL1V1); // use AREF for reference voltage
 
+  read_memory();
+
+  //init keyboard
+  kbState.lastUpState = digitalRead(PIN_MENU_UP);
+  kbState.lastDownState = digitalRead(PIN_MENU_DN);
+  kbState.lastOKState = digitalRead(PIN_MENU_EN);
+  kbState.lastBackState = digitalRead(PIN_MENU_BCK);
+
   // Init Menu V2
   menuV2.lcd = &lcd;
   menuV2.keyboardState = kbState;
   menuV2.menuState = menuState;
 
+  //init variables
   varParams.vent_mode = vent_mode;
-  varParams.alarm_max_pressure = alarm_max_pressure;
+  varParams.alarm_max_pressure = 35;
   varParams.respiratoryRate = DEFAULT_RPM;
-  varParams.alarm_peep_pressure = alarm_peep_pressure;
+  varParams.alarm_peep_pressure = 5;
   varParams.percInspEsp = 2;
-  varParams.alarm_vt = alarm_vt;
+  varParams.alarm_vt = 200;
   varParams.peakInspiratoryPressure = 20;
   varParams.percVolume = 100;
   varParams.p_trim = 100;
-  varParams.autopid = 0;
-  varParams.fil = 0;
+  varParams.autopid = autopid ? 1 : 0;
+  varParams.fil = filter ? 1 : 0;
   varParams.max_accel = 600;
   // for menu TBD
   varParams.cd_opt = 2;
   varParams.dp_opt = 3;
   varParams.f_min = 4;
   varParams.f_max = 5;
-  varParams.fa_opt = 6;
-  varParams.pa_opt = 7;
+//  varParams.fa_opt = 6;
+//  varParams.pa_opt = 7;
 
   // sensor values
-  varParams.last_pressure_min = last_pressure_min;
+//  varParams.last_pressure_min = last_pressure_min;
   varParams._mllastInsVol = 0;
   varParams._mllastExsVol = 10;
   // end init menu v2
 
+  // TODO: Añadir aquí la configuarcion inicial desde puerto serie
+  options.respiratoryRate = DEFAULT_RPM;
+  options.percInspEsp = 2; //1:1 to 1:4, is denom
+  options.peakInspiratoryPressure = 20.;
+  options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
+  options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
+  options.hasTrigger = false;
+  options.tidalVolume = 300;
+  options.percVolume = 100; //1 to 10
+
   //init_display();
   initDisplay(menuV2);
-  isitem_sel = false;
+//  isitem_sel = false;
 
   pinMode(TFT_SLEEP, OUTPUT); //Set buzzerPin as output
   digitalWrite(TFT_SLEEP, HIGH); //LOW, INVERTED
@@ -247,12 +267,12 @@ void setup() {
   // set PID update interval
   pid -> setTimeStep(PID_TS);
 
-  max_cd = 40; //T MODIFY: READ FROM MEM
-  min_cd = 10;
-  min_speed = 250;  // x microsteps
-  max_speed = 750;  // x Microsteps, originally 16000 (with 16 ms = 750)
-  max_accel = 600;
-  min_accel = 200;
+//  max_cd = 40; //T MODIFY: READ FROM MEM
+//  min_cd = 10;
+//  min_speed = 250;  // x microsteps
+//  max_speed = 750;  // x Microsteps, originally 16000 (with 16 ms = 750)
+//  max_accel = 600;
+//  min_accel = 200;
   change_pid_params = true; //To calculate at first time
 
   // Parte motor
@@ -269,16 +289,6 @@ void setup() {
 
   digitalWrite(PIN_EN, HIGH);
 
-  // TODO: Añadir aquí la configuarcion inicial desde puerto serie
-  options.respiratoryRate = DEFAULT_RPM;
-  options.percInspEsp = 2; //1:1 to 1:4, is denom
-  options.peakInspiratoryPressure = 20.;
-  options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
-  options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
-  options.hasTrigger = false;
-  options.tidalVolume = 300;
-  options.percVolume = 100; //1 to 10
-
   delay(100);
 
   //  Serial.println("Tiempo del ciclo (seg):" + String(ventilation -> getExsuflationTime() + ventilation -> getInsuflationTime()));
@@ -291,7 +301,7 @@ void setup() {
   digitalWrite(PIN_EN, LOW);
 
   writeLine(menuV2, 1, "RespirAR FIUBA", 4);
-  writeLine(menuV2, 2, "v2.0.1 - nuevo menu", 2);
+  writeLine(menuV2, 2, "v2.1.1", 5);
 
   ads.begin();
   verror = verror_sum = verror_sum_outcycle = 0.;
@@ -307,31 +317,31 @@ void setup() {
     }
   vsupply_0 /= 100.; //
   
-  Serial.println("Vsupply_0: " + String (vsupply_0));
+//  Serial.println("Vsupply_0: " + String (vsupply_0));
   //vfactor = 5./vsupply_0; //
 
-  Serial.print("dp (Flux) MPX Volt (mV) at p0: "); Serial.println(verror * 1000, 3);
+//  Serial.print("dp (Flux) MPX Volt (mV) at p0: "); Serial.println(verror * 1000, 3);
   //  Serial.print("pressure  MPX Volt (mV) at p0: "); Serial.println(verrp * 1000, 3);
 
-  Serial.print("dp  error : "); Serial.println(-verror / (5.*0.09));
+//  Serial.print("dp  error : "); Serial.println(-verror / (5.*0.09));
 
   ////// ANTES DE CONFIGURAR LA VENTILACION Y CHEQUEAR EL FIN DE CARRERA INICIO LOS MENUES
-  bool init=false;
-  byte bpm = DEFAULT_RPM;
-  byte i_e = 2;
+//  bool init=false;
+//  byte bpm = DEFAULT_RPM;
+//  byte i_e = 2;
 //  Menu_inic menuini(&vent_mode, &bpm, &i_e);
-
-  options.respiratoryRate = bpm;
-  options.percInspEsp = i_e; //1:1 to 1:4, is denom
-  vent_mode = VENTMODE_MAN;
+    setupMenu(menuV2, varParams, millis());
+    options.respiratoryRate = varParams.respiratoryRate;
+    options.percInspEsp = varParams.percInspEsp; //1:1 to 1:4, is denom
+//  vent_mode = varParams.vent_mode;
 
   /////////////////// CALIBRACION /////////////////////////////////////
-//  bool fin = false;
-//  lcd.clear();
-//  writeLine(menuV2, 1, "Desconecte flujo", 0);
-//  writeLine(menuV2, 2, "y presione ok ", 0);
-//
-//  Serial.println("Calibration?");
+  bool fin = false;
+  lcd.clear();
+  writeLine(menuV2, 1, "Desconecte flujo", 0);
+  writeLine(menuV2, 2, "y presione ok ", 0);
+
+  Serial.println("Calibration?");
 //  delay (1000); //Otherwise low enter button readed
 //  lastButtonPress = millis();
 //  while (!fin){
@@ -361,29 +371,31 @@ stepper = new FlexyStepper();
 
   // configura la ventilación
   ventilation -> start();
+  ventilation -> setVarParams(&varParams);
   ventilation -> update();
 
   ////
 #ifdef ACCEL_STEPPER
   stepper->setSpeed(STEPPER_HOMING_SPEED);
 
+  Serial.println("Start home search");
   long initial_homing = -1;
   //// HOMING TODO: PASAR NUEVAMENTE ESTA VARIABLE A PRIVADA
-  while (digitalRead(PIN_ENDSTOP)) {  // Make the Stepper move CCW until the switch is activated
-    stepper->moveTo(initial_homing);  // Set the position to move to
-    initial_homing--;  // Decrease by 1 for next move if needed
-    stepper->run();  // Start moving the stepper
-    delay(5);
-  }
-  stepper->setCurrentPosition(0);  // Set the current position as zero for now
-  initial_homing = 1;
-
-  while (!digitalRead(PIN_ENDSTOP)) { // Make the Stepper move CW until the switch is deactivated
-    stepper->moveTo(initial_homing);
-    stepper->run();
-    initial_homing++;
-    delay(5);
-  }
+//  while (digitalRead(PIN_ENDSTOP)) {  // Make the Stepper move CCW until the switch is activated
+//    stepper->moveTo(initial_homing);  // Set the position to move to
+//    initial_homing--;  // Decrease by 1 for next move if needed
+//    stepper->run();  // Start moving the stepper
+//    delay(5);
+//  }
+//  stepper->setCurrentPosition(0);  // Set the current position as zero for now
+//  initial_homing = 1;
+//
+//  while (!digitalRead(PIN_ENDSTOP)) { // Make the Stepper move CW until the switch is deactivated
+//    stepper->moveTo(initial_homing);
+//    stepper->run();
+//    initial_homing++;
+//    delay(5);
+//  }
   long position = stepper->currentPosition();
   Serial.print("Position "); Serial.print(position);
   stepper->setCurrentPosition(STEPPER_LOWEST_POSITION);
@@ -394,10 +406,11 @@ stepper = new FlexyStepper();
 #endif
   //
 //  display_lcd();
-  printMenu(menuV2, varParams);
+// TODO :maybe this can be removed
+//  printMenu(menuV2, varParams);
 
   //ENCODER
-  curr_sel = old_curr_sel = 1; //COMPRESSION
+//  curr_sel = old_curr_sel = 1; //COMPRESSION
 
   pinMode(PIN_ENC_SW, INPUT_PULLUP);
 
@@ -415,19 +428,17 @@ stepper = new FlexyStepper();
   Timer1.initialize(TIME_BASE_MICROS);  //BEFORE WERE 20...
   Timer1.attachInterrupt(timer1Isr);
 
-  Serial.println("Reading ROM");
+//  Serial.println("Reading ROM");
 #ifdef DEBUG_UPDATE
   Serial.print("Honey Volt at p0: "); Serial.println(analogRead(A0) / 1023.);
 #endif
 
-  read_memory();
+//  f_acc = (float)f_acc_b / 10.;
+//  dpip = (float)dpip_b / 10.;
 
-  f_acc = (float)f_acc_b / 10.;
-  dpip = (float)dpip_b / 10.;
+//  Serial.print("Maxcd: "); Serial.println(max_cd);
 
-  Serial.print("Maxcd: "); Serial.println(max_cd);
-
-  Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
+//  Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
   ventilation->setCycleNum(last_cycle);
 
   tft.begin();
@@ -440,9 +451,9 @@ stepper = new FlexyStepper();
 
   lcd.clear();
 
-  pf_min = (float)pfmin / 50.;
-  pf_max = (float)pfmax / 50.;
-  peep_fac = -(pf_max - pf_min) / 15.*last_pressure_min + pf_max;
+//  pf_min = (float)pfmin / 50.;
+//  pf_max = (float)pfmax / 50.;
+//  peep_fac = -(pf_max - pf_min) / 15.* varParams.last_pressure_min + pf_max;
 
   sleep_mode = false;
   put_to_sleep = false;
@@ -454,13 +465,12 @@ stepper = new FlexyStepper();
   //TODO: CALIBRATION RUN ALSO SHOULD BE HERE
 }
 
-
 bool update_display = false;
 byte pos;
 
 /////////////// CALIBRATION
 bool  calibration_run = true;
-int   start_cyle = last_cycle;  //Used for calibration
+//int   start_cyle = last_cycle;  //Used for calibration
 byte  calib_cycle = 0;
 float vs;
 ////////////////////////////////////////
@@ -469,6 +479,19 @@ float vs;
 void loop() {
 
   //digitalWrite(LCD_SLEEP, HIGH); //LOW, INVERTED
+  checkKeyboard(menuV2.keyboardState, time);
+
+  if (menuV2.keyboardState.backHoldTime > 2000) {
+      if (!sleep_mode) {
+          sleep_mode=true;
+          put_to_sleep=true;
+      } else {
+          sleep_mode=false;
+          wake_up=true;
+      }
+      delay(1000);
+      menuV2.keyboardState.backHoldTime = 0;
+  }
 
   if (!sleep_mode) {
     if (wake_up) {
@@ -509,7 +532,7 @@ void loop() {
       //
       //           Serial.println(flow_f,2);
 
-      tft_draw();
+      tft_draw(varParams);
 
     }
 
@@ -550,8 +573,8 @@ void loop() {
       _flux = po_flux[pos] - 100 + ( float (po_flux[pos + 1] - 100) - float (po_flux[pos] - 100) ) * ( p_dpt - float(dp[pos]) ) / (float)( dp[pos + 1] - dp[pos]);
       _flux *= 16.6667;
 
-      if (filter) {
-        flux_count++;    //Filter
+      if (varParams.fil == 1) {
+//        flux_count++;    //Filter
         for (int i = 0; i < 4; i++) {
           _flux_fil[i] = _flux_fil[i + 1];
         }
@@ -594,15 +617,15 @@ void loop() {
         vcorr_count += 1.;
       }
     
-    if (alarm_vt) {
-
-    }
+//    if (alarm_vt) {
+//
+//    }
     if ( ventilation -> getCycleNum () != last_cycle ) {
-      vt = (_mllastInsVol + _mllastInsVol) / 2;
-      if (vt < alarm_vt)  isalarmvt_on = 1;
+        vt = (varParams._mllastInsVol + varParams._mllastInsVol) / 2;
+      if (vt < varParams.alarm_vt)  isalarmvt_on = 1;
       else              isalarmvt_on = 0;
-      if ( last_pressure_max > alarm_max_pressure + 1 ) {
-        if ( last_pressure_min < alarm_peep_pressure - 1) {
+      if ( varParams.last_pressure_max > varParams.alarm_max_pressure + 1 ) {
+        if ( varParams.last_pressure_min < varParams.alarm_peep_pressure - 1) {
           if (!isalarmvt_on)  alarm_state = 3;
           else                alarm_state = 13;
         } else {
@@ -610,7 +633,7 @@ void loop() {
           else                alarm_state = 12;
         }
       } else {
-        if ( last_pressure_min < alarm_peep_pressure - 1 ) {
+          if ( varParams.last_pressure_min < varParams.alarm_peep_pressure - 1 ) {
           if (!isalarmvt_on) alarm_state = 1;
           else               alarm_state = 11;
         } else {
@@ -622,7 +645,6 @@ void loop() {
       last_cycle = ventilation->getCycleNum();
 
       if (!calibration_run){
-//        display_lcd();
         printMenu(menuV2, varParams);
         update_display = true;
         last_update_display = time;
@@ -633,7 +655,7 @@ void loop() {
       }
       
 #ifdef DEBUG_PID
-      if (vent_mode = VENTMODE_PCL) {
+      if (varParams.vent_mode = VENTMODE_PCL) {
         float err = (float)(pressure_max - options.peakInspiratoryPressure) / options.peakInspiratoryPressure;
         errpid_prom += fabs(err);
         errpid_prom_sig += err;
@@ -659,11 +681,13 @@ void loop() {
       //NEW, CALIBRATION
         verror = verror_sum / float(vcorr_count);
 
+        /*
        Serial.println("Calibration iter, cycle, verror, sum: " + String(vcorr_count) + ", " + 
                                                                   String(calib_cycle) + ", " + 
                                                                   String(verror) + ", " + 
                                                                   String(verror_sum_outcycle));
-        vcorr_count = verror_sum = 0.;
+        */
+         vcorr_count = verror_sum = 0.;
         calib_cycle ++;
         verror_sum_outcycle += verror;
         if (calib_cycle >= CALIB_CYCLES ){
@@ -808,25 +832,25 @@ void read_memory() {
   EEPROM.get(0, last_cycle); eeAddress += sizeof(unsigned long);
   EEPROM.get(eeAddress, p_trim);    eeAddress += sizeof(p_trim);
   EEPROM.get(eeAddress, autopid);   eeAddress += sizeof(autopid);
-  EEPROM.get(eeAddress, min_cd);    eeAddress += sizeof(min_cd);
-  EEPROM.get(eeAddress, max_cd);    eeAddress += sizeof(max_cd);
-  EEPROM.get(eeAddress, min_speed); eeAddress += sizeof(min_speed);
-  EEPROM.get(eeAddress, max_speed); eeAddress += sizeof(max_speed);
-  EEPROM.get(eeAddress, min_accel); eeAddress += sizeof(min_accel);
-  EEPROM.get(eeAddress, max_accel); eeAddress += sizeof(max_accel);
-  EEPROM.get(eeAddress, min_pidk);  eeAddress += sizeof(min_pidk);
-  EEPROM.get(eeAddress, max_pidk);  eeAddress += sizeof(max_pidk);
+//  EEPROM.get(eeAddress, min_cd);    eeAddress += sizeof(min_cd);
+//  EEPROM.get(eeAddress, max_cd);    eeAddress += sizeof(max_cd);
+//  EEPROM.get(eeAddress, min_speed); eeAddress += sizeof(min_speed);
+//  EEPROM.get(eeAddress, max_speed); eeAddress += sizeof(max_speed);
+//  EEPROM.get(eeAddress, min_accel); eeAddress += sizeof(min_accel);
+//  EEPROM.get(eeAddress, max_accel); eeAddress += sizeof(max_accel);
+//  EEPROM.get(eeAddress, min_pidk);  eeAddress += sizeof(min_pidk);
+//  EEPROM.get(eeAddress, max_pidk);  eeAddress += sizeof(max_pidk);
   EEPROM.get(eeAddress, alarm_vt);  eeAddress += sizeof(alarm_vt);
   EEPROM.get(eeAddress, filter);    eeAddress += sizeof(filter);
-  EEPROM.get(eeAddress, pfmin);     eeAddress += sizeof(pfmin);
-  EEPROM.get(eeAddress, pfmax);     eeAddress += sizeof(pfmax);
-  EEPROM.get(eeAddress, dpip_b);    eeAddress += sizeof(dpip_b);
-  EEPROM.get(eeAddress, min_pidi);  eeAddress += sizeof(min_pidi);
-  EEPROM.get(eeAddress, max_pidi);  eeAddress += sizeof(max_pidi);
-  EEPROM.get(eeAddress, min_pidd);  eeAddress += sizeof(min_pidd);
-  EEPROM.get(eeAddress, max_pidd);  eeAddress += sizeof(max_pidd);
-  EEPROM.get(eeAddress, p_acc);      eeAddress += sizeof(p_acc);
-  EEPROM.get(eeAddress, f_acc_b);    eeAddress += sizeof(f_acc_b);
+//  EEPROM.get(eeAddress, pfmin);     eeAddress += sizeof(pfmin);
+//  EEPROM.get(eeAddress, pfmax);     eeAddress += sizeof(pfmax);
+//  EEPROM.get(eeAddress, dpip_b);    eeAddress += sizeof(dpip_b);
+//  EEPROM.get(eeAddress, min_pidi);  eeAddress += sizeof(min_pidi);
+//  EEPROM.get(eeAddress, max_pidi);  eeAddress += sizeof(max_pidi);
+//  EEPROM.get(eeAddress, min_pidd);  eeAddress += sizeof(min_pidd);
+//  EEPROM.get(eeAddress, max_pidd);  eeAddress += sizeof(max_pidd);
+//  EEPROM.get(eeAddress, p_acc);      eeAddress += sizeof(p_acc);
+//  EEPROM.get(eeAddress, f_acc_b);    eeAddress += sizeof(f_acc_b);
 }
 
 void write_memory() {
@@ -834,24 +858,24 @@ void write_memory() {
   EEPROM.put(0, last_cycle);        eeAddress += sizeof(unsigned long);
   EEPROM.put(eeAddress, p_trim);    eeAddress += sizeof(p_trim);
   EEPROM.put(eeAddress, autopid);   eeAddress += sizeof(autopid);
-  EEPROM.put(eeAddress, min_cd);    eeAddress += sizeof(min_cd);
-  EEPROM.put(eeAddress, max_cd);    eeAddress += sizeof(max_cd);
-  EEPROM.put(eeAddress, min_speed); eeAddress += sizeof(min_speed);
-  EEPROM.put(eeAddress, max_speed); eeAddress += sizeof(max_speed);
-  EEPROM.put(eeAddress, min_accel); eeAddress += sizeof(min_accel);
-  EEPROM.put(eeAddress, max_accel); eeAddress += sizeof(max_accel);
-  EEPROM.put(eeAddress, min_pidk);  eeAddress += sizeof(min_pidk);
-  EEPROM.put(eeAddress, max_pidk);  eeAddress += sizeof(max_pidk);
+//  EEPROM.put(eeAddress, min_cd);    eeAddress += sizeof(min_cd);
+//  EEPROM.put(eeAddress, max_cd);    eeAddress += sizeof(max_cd);
+//  EEPROM.put(eeAddress, min_speed); eeAddress += sizeof(min_speed);
+//  EEPROM.put(eeAddress, max_speed); eeAddress += sizeof(max_speed);
+//  EEPROM.put(eeAddress, min_accel); eeAddress += sizeof(min_accel);
+//  EEPROM.put(eeAddress, max_accel); eeAddress += sizeof(max_accel);
+//  EEPROM.put(eeAddress, min_pidk);  eeAddress += sizeof(min_pidk);
+//  EEPROM.put(eeAddress, max_pidk);  eeAddress += sizeof(max_pidk);
   EEPROM.put(eeAddress, alarm_vt);  eeAddress += sizeof(alarm_vt);
   EEPROM.put(eeAddress, filter);    eeAddress += sizeof(filter);
-  EEPROM.put(eeAddress, pfmin);     eeAddress += sizeof(pfmin);
-  EEPROM.put(eeAddress, pfmax);     eeAddress += sizeof(pfmax);
-  EEPROM.put(eeAddress, dpip_b);    eeAddress += sizeof(dpip_b);
-  EEPROM.put(eeAddress, min_pidi);  eeAddress += sizeof(min_pidi);
-  EEPROM.put(eeAddress, max_pidi);  eeAddress += sizeof(max_pidi);
-  EEPROM.put(eeAddress, min_pidd);  eeAddress += sizeof(min_pidd);
-  EEPROM.put(eeAddress, max_pidd);  eeAddress += sizeof(max_pidd);
-  EEPROM.put(eeAddress, p_acc);      eeAddress += sizeof(p_acc);
-  EEPROM.put(eeAddress, f_acc_b);    eeAddress += sizeof(f_acc_b);
+//  EEPROM.put(eeAddress, pfmin);     eeAddress += sizeof(pfmin);
+//  EEPROM.put(eeAddress, pfmax);     eeAddress += sizeof(pfmax);
+//  EEPROM.put(eeAddress, dpip_b);    eeAddress += sizeof(dpip_b);
+//  EEPROM.put(eeAddress, min_pidi);  eeAddress += sizeof(min_pidi);
+//  EEPROM.put(eeAddress, max_pidi);  eeAddress += sizeof(max_pidi);
+//  EEPROM.put(eeAddress, min_pidd);  eeAddress += sizeof(min_pidd);
+//  EEPROM.put(eeAddress, max_pidd);  eeAddress += sizeof(max_pidd);
+//  EEPROM.put(eeAddress, p_acc);      eeAddress += sizeof(p_acc);
+//  EEPROM.put(eeAddress, f_acc_b);    eeAddress += sizeof(f_acc_b);
 }
 

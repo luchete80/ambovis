@@ -26,6 +26,7 @@ typedef struct menu_v2 {
 } MenuV2;
 
 void initDisplay(MenuV2& menu);
+void setupMenu(MenuV2& menu, VariableParameters& parameters, long time);
 void writeLine(MenuV2& menu, int line, String message = "", int offsetLeft = 0);
 void checkEncoder(MenuV2& menu, VariableParameters& parameters, long time);
 void printMenu(MenuV2& menu, VariableParameters& parameters);

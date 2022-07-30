@@ -3,6 +3,7 @@
 
 #include "pinout.h"
 #include "defaults.h"
+#include "MenuDataTypes.h"
 #include "Adafruit_GFX.h"
 #include "Adafruit_ILI9341.h"
 
@@ -23,7 +24,7 @@ extern Adafruit_ILI9341 tft; //= Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 extern bool drawing_cycle;//TODO: MOVE TO CLASS MEMBER
 void drawY2(uint16_t color);
 void print_bat();
-void tft_draw();
-void print_vols();
+void tft_draw(VariableParameters& variableParameters);
+void print_vols(VariableParameters& variableParameters);
 void check_alarms();
 #endif

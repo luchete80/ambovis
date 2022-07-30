@@ -5,15 +5,21 @@
 #ifndef AMBOVIS_MENUDATATYPES_H
 #define AMBOVIS_MENUDATATYPES_H
 
+#include "Arduino.h"
 #include "MenuConstants.h"
 #include "pinout.h"
 
 typedef struct keyboard_state {
+    int lastUpState = 0;
+    int lastDownState = 0;
+    int lastOKState = 0;
+    int lastBackState = 0;
     int previousCount = 0;
     int count = 0;
     bool ok = false;
     bool back = false;
     unsigned long lastKeyPressedTime = 0;
+    unsigned long backHoldTime = 0;
 } KeyboardState;
 
 typedef struct menu_state {
@@ -23,9 +29,10 @@ typedef struct menu_state {
     int previousCursorCode = 0;
     bool isEditingParam = false;
     bool changedMenu = false;
+    bool setupReady = false;
 } MenuState;
 
-typedef struct variable_parameters{
+typedef struct variable_parameters {
     int vent_mode;
     int alarm_max_pressure;
     int respiratoryRate;
@@ -48,6 +55,7 @@ typedef struct variable_parameters{
 
     // sensor values
     float last_pressure_min;
+    float last_pressure_max;
     int _mllastInsVol;
     int _mllastExsVol;
 
@@ -55,10 +63,11 @@ typedef struct variable_parameters{
 
 static int SIZE_MENU = 4;
 static int MAIN_MENU[] = {PARAMETER, ALARM, SETTINGS, PID_SETTINGS};
+static int INIT_PARAM_MENU[] = {MODE_OPT, BPM_OPT, IE_OPT, END_SETUP};
 static int PARAM_MENU[] = {MODE_OPT, PERC_V_OPT, BPM_OPT, IE_OPT};
 static int PARAM_MENU_PCV[] = {MODE_OPT, PIP_OPT, BPM_OPT, IE_OPT};
 static int ALARM_MENU[] = {PIP_ALARM_OPT, PEEP_ALARM_OPT, VT_ALARM_OPT};
 static int SETTINGS_MENU[] = {TRIM_OPT, FIL_OPT, AUTO_OPT, CD_OPT};
-static int PID_SETTINGS_MENU[] = {DP_OPT, F_OPT, FF_OPT, PA_OPT, FA_OPT};
+static int PID_SETTINGS_MENU[] = {DP_OPT, F_OPT, FF_OPT};
 
 #endif //AMBOVIS_MENUDATATYPES_H

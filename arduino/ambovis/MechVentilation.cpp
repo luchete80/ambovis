@@ -194,17 +194,17 @@ void MechVentilation :: update ( void )
         //Filter vars
         #ifdef FLUX_FILTER
         flux_filter_time=millis();
-        flux_count=0;
+//        flux_count=0;
         //flux_sum=0;
         #endif
         
         //adding_vol=true;
         //#ifdef DEBUG_UPDATE
-          Serial.println("INSUFLACION ");        
+//          Serial.println("INSUFLACION ");
         //#endif
   
-        last_pressure_max=pressure_max;
-        last_pressure_min=pressure_min;
+        this->variableParameters->last_pressure_max=pressure_max;
+        this->variableParameters->last_pressure_min=pressure_min;
         pressure_max=0;
         pressure_min=60;
 
@@ -215,10 +215,10 @@ void MechVentilation :: update ( void )
         _msecTimerStartCycle=millis();  //Luciano
         
         for (int i=0;i<2;i++) Cdyn_pass[i]=Cdyn_pass[i+1];
-        Cdyn_pass[2]=_mllastInsVol/(last_pressure_max-last_pressure_min);
-        Cdyn=(Cdyn_pass[0]+Cdyn_pass[1]+Cdyn_pass[2])/3.;
-        _mllastInsVol=int(_mlInsVol);
-        _mllastExsVol=int(fabs(_mlExsVol));
+        Cdyn_pass[2]=this->variableParameters->_mllastInsVol/(this->variableParameters->last_pressure_max- this->variableParameters->last_pressure_min);
+        this->variableParameters->cd_opt = (Cdyn_pass[0]+Cdyn_pass[1]+Cdyn_pass[2])/3.;
+        this->variableParameters->_mllastInsVol=int(_mlInsVol);
+        this->variableParameters->_mllastExsVol=int(fabs(_mlExsVol));
         
         //_mlInsVol2=0;
         _mlInsVol=0.;
@@ -237,7 +237,7 @@ void MechVentilation :: update ( void )
         _stepper->setSpeedInStepsPerSecond(STEPPER_SPEED_DEFAULT);
         _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_INSUFFLATION);
 
-        if (vent_mode!=VENTMODE_MAN)  //VCL && PCL
+        if (this->variableParameters->vent_mode!=VENTMODE_MAN)  //VCL && PCL
           _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
         else { //MANUAL MODE
           _stepper->setTargetPositionInSteps(int (STEPPER_HIGHEST_POSITION*(float)_percVol/100.));
@@ -362,8 +362,8 @@ void MechVentilation :: update ( void )
                 
 //                
                 //#ifdef DEBUG_UPDATE
-                Serial.println("ENDED TIME WHILE MOVING");
-                //#endif
+//                Serial.println("ENDED TIME WHILE MOVING");
+//                #endif
             }
             else {
               Serial.println("Motion Complete");
@@ -713,7 +713,7 @@ void MechVentilation::_setAlarm(Alarm alarm)
 }
 
 float MechVentilation::getInsVol() {
-    return (_mllastInsVol+_mllastExsVol)/2.;
+    return (this->variableParameters->_mllastInsVol+this->variableParameters->_mllastExsVol)/2.;
 }
 
 void MechVentilation::change_config(VentilationOptions_t options) {

@@ -41,7 +41,7 @@ int yflux[2];
 int yvt[2];
 char buffer[10];
 
-void tft_draw(void) {
+void tft_draw(VariableParameters& variableParameters) {
     //Serial.println(cycle_pos);Serial.println(ry[valsreaded]);
     last_x=cycle_pos;
     rx[valsreaded]=cycle_pos;
@@ -65,7 +65,7 @@ void tft_draw(void) {
     		valsreaded=0;
     		for (int i=0;i<2;i++) 
     		    valsreaded_[i]=0;
-        print_vols();
+        print_vols(variableParameters);
         print_bat();
         
         //TODO: DO IT ONLY WHEN CHANGE!
@@ -124,8 +124,8 @@ void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WIT
       tft.drawLine(axispos[i], x_start - rx[valsreaded-1], axispos[i], x_start - rx[valsreaded], ILI9341_DARKGREY);           //X AXIS 
     tft.fillRect(MIN_CURVES_Y, x_start - rx[valsreaded] - 10, MAX_CURVES_Y, 10, ILI9341_BLUE);                                       //CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
 //
-    Serial.print("ry[valsreaded-1]");Serial.println(ry[valsreaded-1]);
-    Serial.print("ry[valsreaded]");Serial.println(ry[valsreaded]);
+//    Serial.print("ry[valsreaded-1]");Serial.println(ry[valsreaded-1]);
+//    Serial.print("ry[valsreaded]");Serial.println(ry[valsreaded]);
 //    if      (ry[valsreaded-1] > MAX_CURVES_Y) ry[valsreaded-1] = MAX_CURVES_Y;
 //    else if (ry[valsreaded-1] < 0) ry[valsreaded-1] = 0;
 //    if      (ry[valsreaded] > MAX_CURVES_Y) ry[valsreaded] = MAX_CURVES_Y;
@@ -226,21 +226,21 @@ void print_bat(){
 
 }
 
-void print_vols(){
+void print_vols(VariableParameters& variableParameters){
     
     tft.setRotation(0);
     tft.fillRect(40,LEGEND_Y,40,80, ILI9341_RED); //Here x is the first value (in the less width dimension)
 
-    itoa(_mllastInsVol, buffer, 10);
+    itoa(variableParameters._mllastInsVol, buffer, 10);
     tft.setCursor(0, LEGEND_Y); //Before: 150,180 at right 
     tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
     tft.println("Vi: ");tft.setCursor(40, LEGEND_Y);tft.println(buffer); //Before 190,180
     
-    itoa(_mllastExsVol, buffer, 10);
+    itoa(variableParameters._mllastExsVol, buffer, 10);
     tft.setCursor(0, LEGEND_Y + 20);
     tft.println("Ve: ");tft.setCursor(40, LEGEND_Y + 20);tft.println(buffer);
     
-    itoa((_mllastInsVol + _mllastExsVol)/2, buffer, 10);
+    itoa((variableParameters._mllastInsVol + variableParameters._mllastExsVol)/2, buffer, 10);
     tft.setCursor(0, LEGEND_Y + 40);
     tft.println("VT: ");tft.setCursor(40, LEGEND_Y + 40);tft.println(buffer);
  
