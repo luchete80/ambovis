@@ -503,12 +503,12 @@ void loop() {
       //      Serial.println(time);
 #endif
       lastShowSensor = time;
-                 Serial.print(int(cycle_pos));Serial.print(",");
-                 Serial.println(Voltage,5);Serial.print(",");
-                 Serial.print(verror,3);Serial.print(",");
-                 Serial.print(p_dpt,5);Serial.print(",");
-      
-                 Serial.println(flow_f,2);
+//                 Serial.print(int(cycle_pos));Serial.print(",");
+//                 Serial.println(Voltage,5);Serial.print(",");
+//                 Serial.print(verror,3);Serial.print(",");
+//                 Serial.print(p_dpt,5);Serial.print(",");
+//      
+//                 Serial.println(flow_f,2);
 
       tft_draw();
 
