@@ -15,3 +15,4 @@
            Se corrige menu inicial, con espera a desconexion de flujo antes que inicie el respirador
            (habia un bug que leia el boton enter como apretado).
            Se limpia el display lcd luego de la calibracion. 
+20220804 - Se limpia el tft al comienzo y se muestra mensaje. 

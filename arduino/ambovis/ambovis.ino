@@ -274,6 +274,8 @@ void setup() {
   writeLine(1, "RespirAR FIUBA", 4);
   writeLine(2, "v2.0.1", 8);
 
+  tft.begin();
+  tft.fillScreen(ILI9341_BLACK);
 
   ads.begin();
   verror = verror_sum = verror_sum_outcycle = 0.;
@@ -424,8 +426,6 @@ stepper = new FlexyStepper();
 
   Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
   ventilation->setCycleNum(last_cycle);
-
-  tft.begin();
 
 
   digitalWrite(BCK_LED, LOW);
