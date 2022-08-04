@@ -529,8 +529,7 @@ void loop() {
       // Is like 1/vs
       vs = vlevel /** vfactor*/; 
       
-      //adc0 = ads.readADC_SingleEnded(0);
-      adc0=0;
+      adc0 = ads.readADC_SingleEnded(0);
       Voltage = (adc0 * 0.1875) * 0.001; //Volts
       //DATASHEET:
       // Vo = Vs (  
