@@ -348,6 +348,8 @@ stepper = new FlexyStepper();
   );
 
 
+  tft.fillScreen(ILI9341_BLACK);
+  
   /////
   // configura la ventilación
   ventilation -> start();
