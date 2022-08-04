@@ -276,6 +276,10 @@ void setup() {
 
   tft.begin();
   tft.fillScreen(ILI9341_BLACK);
+  tft.setTextColor(ILI9341_BLUE);
+  tft.setTextSize(4); 
+  tft.setCursor(10, 40);     tft.println("RespirAR");   
+  tft.setCursor(10, 80);     tft.println("FIUBA");
 
   ads.begin();
   verror = verror_sum = verror_sum_outcycle = 0.;
@@ -497,12 +501,12 @@ void loop() {
       //      Serial.println(time);
 #endif
       lastShowSensor = time;
-      //           Serial.print(int(cycle_pos));Serial.print(",");
-      //           Serial.println(Voltage,5);Serial.print(",");
-      //           Serial.print(verror,3);Serial.print(",");
-      //           Serial.print(p_dpt,5);Serial.print(",");
-      //
-      //           Serial.println(flow_f,2);
+                 Serial.print(int(cycle_pos));Serial.print(",");
+                 Serial.println(Voltage,5);Serial.print(",");
+                 Serial.print(verror,3);Serial.print(",");
+                 Serial.print(p_dpt,5);Serial.print(",");
+      
+                 Serial.println(flow_f,2);
 
       tft_draw();
 
