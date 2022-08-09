@@ -5,7 +5,7 @@
 
 static bool clear_all_display;
 
-static byte max_pidk_byte,min_pidk_byte;
+//static byte max_pidk_byte,min_pidk_byte;
 
 bool change_sleep;
 int pressed=0;  //0 nothing , 1 enter, 2 bck
@@ -333,7 +333,7 @@ void check_encoder ( ) {
   
   if (oldEncPos != encoderPos) {
     show_changed_options = true;
-    Serial.println("encoderPos: "+String(encoderPos)+","+"switching_menus"+String(switching_menus));
+//    Serial.println("encoderPos: "+String(encoderPos)+","+"switching_menus"+String(switching_menus));
     if (switching_menus) {
         if      (encoderPos<0)   encoderPos=0;
         else if (encoderPos>5)   encoderPos=5;
@@ -401,7 +401,7 @@ void check_encoder ( ) {
                   else  if (menu_number == 1)   alarm_max_pressure  = encoderPos;
                   else  if (menu_number == 2)   min_speed  = int((float)encoderPos*10.);
                   else if ( menu_number == 3 ){
-                      Serial.print("encoderPos: ");Serial.println(encoderPos);
+//                      Serial.print("encoderPos: ");Serial.println(encoderPos);
                       pfmin=encoderPos;
                       pf_min=(float)encoderPos/50.;
                       peep_fac = -(pf_max-pf_min)/15.*last_pressure_min + pf_max;
@@ -774,7 +774,7 @@ Menu_inic::Menu_inic(byte *mode, byte *bpm, byte *i_e){
 void Menu_inic::check_encoder ( ) {
     check_updn_button(PIN_MENU_DN,&encoderPos,true);   //Increment
     check_updn_button(PIN_MENU_UP,&encoderPos,false);  //Decrement
-    Serial.println("Encoder Pos: " +String( encoderPos) );
+//    Serial.println("Encoder Pos: " +String( encoderPos) );
     pressed=0;  //0 nothing , 1 enter, 2 bck
     if (digitalRead(PIN_MENU_EN) == LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
         if (time - lastButtonPress > 150) {

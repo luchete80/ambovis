@@ -178,7 +178,7 @@ class VentilationOptions_t {
 
 //general variables
 extern byte vent_mode;
-extern bool send_data;
+//extern bool send_data;
 extern bool sleep_mode;
 
 extern byte alarm_state;
