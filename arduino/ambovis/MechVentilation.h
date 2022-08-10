@@ -13,7 +13,7 @@
 #include "defaults.h"
 #include "src/AutoPID/AutoPID.h"
 #include "Sensors.h"
-
+#include "MacroLogger.h"
 
 #ifdef ACCEL_STEPPER
 #include "src/AccelStepper/AccelStepper.h"

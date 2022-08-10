@@ -71,7 +71,7 @@ bool isbuzzeron = false;
 
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 
-byte vcorr_count;
+byte vcorr_count = 0;
 byte p_trim = 100;
 float pressure_p;   //EXTERN!!
 float last_pressure_max, last_pressure_min, last_pressure_peep;
@@ -141,7 +141,7 @@ int alarm_vt = 200;
 
 //MENU
 unsigned long lastButtonPress;
-float verror, verror_sum, verror_sum_outcycle, vzero;  //verror sum is intra cycle, verror_sum_outcycle is inter-cycle
+float verror, verror_sum, verror_sum_outcycle, vzero = 0.;  //verror sum is intra cycle, verror_sum_outcycle is inter-cycle
 
 //FLUX IS -100 to +100, has to be added 100
 //ASSIMETRY IN MAX FLOW IS IN NEGATIVE (ORIGINAL CURVE)
@@ -181,7 +181,7 @@ int holdTime ;        // how long the button was hold
 int idleTime ;        // how long the button was idle
 
 // CALIBRATION: TODO: MAKE A CLASS
-float vsupply, vsupply_0;
+//float vsupply, vsupply_0;
 float vlevel;
 //float vfactor;
 
@@ -209,7 +209,7 @@ void setup() {
   Logger::info("flow_f=%s", dtostrf(flow_f, 2, 2, logStr));
   Logger::info("_flux_sum=%s", dtostrf(_flux_sum, 2, 2, logStr));
   Logger::info("flux_count=%d", flux_count);
-  Logger::info("vcorr_count=%d", vcorr_count);
+//  Logger::info("vcorr_count=%d", vcorr_count);
 //  Logger::info("p_trim=%d", p_trim);
 
   Logger::info("[START] [SENSOR]");
@@ -220,7 +220,6 @@ void setup() {
   Logger::info("last_pressure_peep=%s", dtostrf(last_pressure_peep, 2, 2, logStr));
   Logger::info("pressure_peep=%s", dtostrf(pressure_peep, 2, 2, logStr));
   Logger::info("Voltage=%s", dtostrf(Voltage, 2, 2, logStr));
-  Logger::info("vt=%d", vt);
   Logger::info("_mlInsVol=%s", dtostrf(_mlInsVol, 2, 2, logStr));
   Logger::info("_mlExsVol=%s", dtostrf(_mlExsVol, 2, 2, logStr));
 
@@ -306,20 +305,20 @@ void setup() {
 
   ads.begin();
 
-  Logger::info("[START] [VERROR]");
-  verror = verror_sum = verror_sum_outcycle = 0.;
-  vcorr_count = 0;
+//  Logger::info("[START] [VERROR]");
+//  verror = verror_sum = verror_sum_outcycle = 0.;
+//  vcorr_count = 0;
 //  float verrp = 0.;
-  vsupply_0 = 0.;
-  for (int i = 0; i < 100; i++) {
-      vsupply_0 += float(analogRead(PIN_MPX_LEV))/1024.*1.1*VOLTAGE_CONV;
-      delay(10);
-      Logger::info("vsupply_0=%s", dtostrf(vsupply_0, 2, 2, logStr));
-  }
-  vsupply_0 /= 100.;
+//  vsupply_0 = 0.;
+//  for (int i = 0; i < 100; i++) {
+//      vsupply_0 += float(analogRead(PIN_MPX_LEV))/1024.*1.1*VOLTAGE_CONV;
+//      delay(10);
+//      Logger::info("vsupply_0=%s", dtostrf(vsupply_0, 2, 2, logStr));
+//  }
+//  vsupply_0 /= 100.;
 
-  Logger::info("verror=%s", dtostrf(verror, 2, 2, logStr));
-  Logger::info("vsupply_0=%s", dtostrf(vsupply_0, 2, 2, logStr));
+//  Logger::info("verror=%s", dtostrf(verror, 2, 2, logStr));
+//  Logger::info("vsupply_0=%s", dtostrf(vsupply_0, 2, 2, logStr));
 
 //  Serial.println("Vsupply_0: " + String (vsupply_0));
 //  //vfactor = 5./vsupply_0; //
@@ -509,7 +508,6 @@ stepper = new FlexyStepper();
 //  Logger::trace("peep_fac=%s", dtostrf(peep_fac, 2, 2, logStr));
 }
 
-//bool update_display = false;
 byte pos;
 
 /////////////// CALIBRATION
@@ -652,13 +650,16 @@ void loop() {
 
       Logger::info("[LOOP] [SENSOR]");
       Logger::info("p_dpt=%s", dtostrf(p_dpt, 2, 2, logStr));
+      Logger::info("pos=%d", pos);
       Logger::info("pressure_p=%s", dtostrf(pressure_p, 2, 2, logStr));
+      Logger::info("pressure_max=%s", dtostrf(pressure_max, 2, 2, logStr));
+      Logger::info("pressure_min=%s", dtostrf(pressure_min, 2, 2, logStr));
       Logger::info("last_pressure_max=%s", dtostrf(last_pressure_max, 2, 2, logStr));
       Logger::info("last_pressure_min=%s", dtostrf(last_pressure_min, 2, 2, logStr));
       Logger::info("last_pressure_peep=%s", dtostrf(last_pressure_peep, 2, 2, logStr));
       Logger::info("pressure_peep=%s", dtostrf(pressure_peep, 2, 2, logStr));
       Logger::info("Voltage=%s", dtostrf(Voltage, 2, 2, logStr));
-      Logger::info("vt=%d", vt);
+      Logger::info("vs=%s", dtostrf(vs, 2, 2, logStr));
       Logger::info("_mlInsVol=%s", dtostrf(_mlInsVol, 2, 2, logStr));
       Logger::info("_mlExsVol=%s", dtostrf(_mlExsVol, 2, 2, logStr));
 
@@ -709,12 +710,16 @@ void loop() {
           else                alarm_state = 10;
         }
       }
+      Logger::info("[LOOP] [VENTILATION_CYCLE]");
+      Logger::info("vt=%d", vt);
+      Logger::info("last_cycle=%ul", last_cycle);
+      Logger::info("alarm_vt=%d", alarm_vt);
+      Logger::info("alarm_state=%d", alarm_state);
 
       last_cycle = ventilation->getCycleNum();
 
       if (!calibration_run) {
           display_lcd();
-//        update_display = true;
           last_update_display = time;
           Logger::info("[LOOP] [DISPLAY_LCD]");
       } else {
@@ -765,18 +770,15 @@ void loop() {
           lcd.clear();
 
         }
+        Logger::info("[LOOP] [CALIBRATION_RUN]");
+        Logger::info("verror_sum=%s", dtostrf(verror_sum, 2, 2, logStr));
+        Logger::info("verror_sum_outcycle=%s", dtostrf(verror_sum_outcycle, 2, 2, logStr));
+        Logger::info("verror=%s", dtostrf(verror, 2, 2, logStr));
+        Logger::info("vzero=%s", dtostrf(vzero, 2, 2, logStr));
       } else {
 //          verror = verror_sum / float(vcorr_count);
 //          vcorr_count = verror_sum = 0.;
       }
-
-      Logger::info("[LOOP] [ERRORS]");
-      Logger::info("vcorr_count=%d", vcorr_count);
-      Logger::info("verror_sum=%s", dtostrf(verror_sum, 2, 2, logStr));
-      Logger::info("verror_sum_outcycle=%s", dtostrf(verror_sum_outcycle, 2, 2, logStr));
-      Logger::info("verror=%s", dtostrf(verror, 2, 2, logStr));
-      Logger::info("vzero=%s", dtostrf(vzero, 2, 2, logStr));
-    
     }//change cycle
 
     if (!calibration_run) {

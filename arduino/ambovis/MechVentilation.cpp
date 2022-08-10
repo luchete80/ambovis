@@ -154,12 +154,7 @@ void MechVentilation :: update ( void )
     
     static int totalCyclesInThisState = 0;
     static int currentTime = 0;
-    static int flowSetpoint = 0;
-
-//    #if DEBUG_STATE_MACHINE
-//    extern volatile String debugMsg[];
-//    extern volatile byte debugMsgCounter;
-//    #endif
+//    static int flowSetpoint = 0;
 
   _msecTimerCnt=(unsigned long)(millis()-_msecTimerStartCycle);
   
@@ -167,6 +162,11 @@ void MechVentilation :: update ( void )
   int extra_time=0;
   if (_currentState == State_Exsufflation) extra_time=_timeoutIns;
   cycle_pos=byte( (float) ( (_msecTimerCnt+(float)extra_time)/(float)timeoutCycle * 127.0f) );
+
+  Logger::info("[LOOP] [VENT_UPDATE]");
+  Logger::info("_msecTimerCnt=%ul", _msecTimerCnt);
+  Logger::info("cycle_pos=%d", cycle_pos);
+  Logger::info("_currentState=%d", _currentState);
 
 //    if (pressures.state != SensorStateOK)
 //    {                                  // Sensor error detected: return to zero position and continue from there
@@ -576,7 +576,6 @@ void MechVentilation :: update ( void )
         }
     }
     break;
-
     case State_Homing:
     {
         // Open Solenoid Valve
@@ -643,7 +642,11 @@ void MechVentilation :: update ( void )
 //        //TODO
 //        break;
     }
-      
+    Logger::info("Cdyn=%d", Cdyn);
+    Logger::info("_currentState=%d", _currentState);
+    Logger::info("curr_ended_whilemov=%d", curr_ended_whilemov);
+    Logger::info("totalCyclesInThisState=%d", totalCyclesInThisState);
+
 }//update
 
 void MechVentilation::_init(
