@@ -46,11 +46,12 @@ void checkBackButtonPressed(KeyboardState& keyboardState, unsigned long time) {
             keyboardState.backHoldTime = 200;
         }
         keyboardState.lastBackState = currentState;
-    } else {
-        if (currentState == 0) {
-            keyboardState.backHoldTime += 200;
-        }
     }
+//    else {
+//        if (currentState == 0) {
+//            keyboardState.backHoldTime += 100;
+//        }
+//    }
 }
 
 void checkKeyboard(KeyboardState & keyboardState, unsigned long time) {

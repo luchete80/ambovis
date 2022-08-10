@@ -341,16 +341,15 @@ void setup() {
   writeLine(menuV2, 1, "Desconecte flujo", 0);
   writeLine(menuV2, 2, "y presione ok ", 0);
 
-  Serial.println("Calibration?");
-//  delay (1000); //Otherwise low enter button readed
-//  lastButtonPress = millis();
-//  while (!fin){
-//    if (digitalRead(PIN_MENU_EN) == LOW)  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
-//    if (millis() - lastButtonPress > 50) {
-//      fin = true;
-//      lastButtonPress = millis();
-//    }// if time > last button press
-//  }
+  delay(1000); //Otherwise low enter button readed
+  lastButtonPress = millis();
+  while (!fin){
+    if (digitalRead(PIN_MENU_EN) == LOW)  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
+    if (millis() - lastButtonPress > 50) {
+      fin = true;
+      lastButtonPress = millis();
+    }// if time > last button press
+  }
 
 digitalWrite(PIN_STEPPER, HIGH);
 delay(1000);
@@ -381,21 +380,21 @@ stepper = new FlexyStepper();
   Serial.println("Start home search");
   long initial_homing = -1;
   //// HOMING TODO: PASAR NUEVAMENTE ESTA VARIABLE A PRIVADA
-//  while (digitalRead(PIN_ENDSTOP)) {  // Make the Stepper move CCW until the switch is activated
-//    stepper->moveTo(initial_homing);  // Set the position to move to
-//    initial_homing--;  // Decrease by 1 for next move if needed
-//    stepper->run();  // Start moving the stepper
-//    delay(5);
-//  }
-//  stepper->setCurrentPosition(0);  // Set the current position as zero for now
-//  initial_homing = 1;
-//
-//  while (!digitalRead(PIN_ENDSTOP)) { // Make the Stepper move CW until the switch is deactivated
-//    stepper->moveTo(initial_homing);
-//    stepper->run();
-//    initial_homing++;
-//    delay(5);
-//  }
+  while (digitalRead(PIN_ENDSTOP)) {  // Make the Stepper move CCW until the switch is activated
+    stepper->moveTo(initial_homing);  // Set the position to move to
+    initial_homing--;  // Decrease by 1 for next move if needed
+    stepper->run();  // Start moving the stepper
+    delay(5);
+  }
+  stepper->setCurrentPosition(0);  // Set the current position as zero for now
+  initial_homing = 1;
+
+  while (!digitalRead(PIN_ENDSTOP)) { // Make the Stepper move CW until the switch is deactivated
+    stepper->moveTo(initial_homing);
+    stepper->run();
+    initial_homing++;
+    delay(5);
+  }
   long position = stepper->currentPosition();
   Serial.print("Position "); Serial.print(position);
   stepper->setCurrentPosition(STEPPER_LOWEST_POSITION);
