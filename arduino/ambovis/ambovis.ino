@@ -25,6 +25,7 @@ bool filter;
 bool sleep_mode;
 bool put_to_sleep, wake_up;
 unsigned long print_bat_time;
+bool motor_stopped;
 
 bool drawing_cycle = 0;//TOD: Move to class member
 
@@ -485,6 +486,7 @@ void loop() {
       display_lcd();    //TODO: Pass mech vent as argument in display
       tft.fillScreen(ILI9341_BLACK);
       wake_up = false;
+      ventilation->forceStart();
     }
     State state = ventilation->getState();
     check_encoder();
@@ -746,6 +748,7 @@ void loop() {
       print_bat();
       digitalWrite(LCD_SLEEP, LOW);
       digitalWrite(TFT_SLEEP, LOW);
+      ventilation->forceStop();
       //digitalWrite(PIN_BUZZER, !BUZZER_LOW); //Buzzer inverted
       lcd.clear();
     }
