@@ -16,3 +16,7 @@
            (habia un bug que leia el boton enter como apretado).
            Se limpia el display lcd luego de la calibracion. 
 20220804 - Se limpia el tft al comienzo y se muestra mensaje. 
+20220811 - Sleep Mode. Se detiene ahora el motor en sleep. 
+					Se corrige por hw la alarma y se cambian cosas de display.
+					
+					
