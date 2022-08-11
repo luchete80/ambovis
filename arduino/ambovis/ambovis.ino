@@ -598,6 +598,7 @@ void loop() {
       //vout = vs(0.09*P + 0.04) +/ERR
       verror_sum += ( Voltage - 0.04 * vs); //-5*0.04
       Serial.println("Calibration sum: "+ String(verror_sum));
+      Serial.println("readed: "+ String(Voltage - 0.04 * vs));
     } else { //This sums the feed error
         verror_sum += vlevel;       // -5*0.04
         vcorr_count += 1.;
@@ -679,7 +680,7 @@ void loop() {
           vzero = verror_sum_outcycle / float(CALIB_CYCLES);
           Serial.println("Calibration verror: " + String(vzero));
           lcd.clear();
-          tft.fillScreen(ILI9341_BLACK);();
+          tft.fillScreen(ILI9341_BLACK);
 
       }
     } else {
