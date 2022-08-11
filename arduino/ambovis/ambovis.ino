@@ -593,7 +593,7 @@ void loop() {
 
 //
     if (calibration_run) {
-      vcorr_count += 1.;
+      vcorr_count ++;
       //According to datasheet
       //vout = vs(0.09*P + 0.04) +/ERR
       verror_sum += ( Voltage - 0.04 * vs); //-5*0.04
@@ -601,7 +601,7 @@ void loop() {
       Serial.println("readed: "+ String(Voltage - 0.04 * vs));
     } else { //This sums the feed error
         verror_sum += vlevel;       // -5*0.04
-        vcorr_count += 1.;
+        vcorr_count ++;
       }
     
     if (alarm_vt) {
@@ -674,10 +674,11 @@ void loop() {
                                                                   String(verror_sum_outcycle));
         vcorr_count = verror_sum = 0.;
         calib_cycle ++;
-        verror_sum_outcycle += verror;
+        //if (calib_cycle>1)
+          verror_sum_outcycle += verror;
         if (calib_cycle >= CALIB_CYCLES ){
           calibration_run = false;
-          vzero = verror_sum_outcycle / float(CALIB_CYCLES);
+          vzero = verror_sum_outcycle / float(CALIB_CYCLES-1);
           Serial.println("Calibration verror: " + String(vzero));
           lcd.clear();
           tft.fillScreen(ILI9341_BLACK);

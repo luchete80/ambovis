@@ -124,8 +124,8 @@ void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WIT
     for (int i=0;i<2;i++)
       tft.drawLine(axispos[i], x_start - rx[valsreaded-1], axispos[i], x_start - rx[valsreaded], ILI9341_DARKGREY);           //X AXIS 
     tft.fillRect(MIN_CURVES_Y, x_start - rx[valsreaded] - 10, CLEAN_Y, 10, ILI9341_BLACK);                                //CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
-    Serial.print("ry[valsreaded-1]");Serial.println(ry[valsreaded-1]);
-    Serial.print("ry[valsreaded ]");Serial.println(ry[valsreaded ]);
+    //Serial.print("ry[valsreaded-1]");Serial.println(ry[valsreaded-1]);
+    //Serial.print("ry[valsreaded ]");Serial.println(ry[valsreaded ]);
 //
 //    Serial.print("ry[valsreaded-1]");Serial.println(ry[valsreaded-1]);
 //    Serial.print("ry[valsreaded]");Serial.println(ry[valsreaded]);
