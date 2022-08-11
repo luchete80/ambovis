@@ -679,6 +679,7 @@ void loop() {
           vzero = verror_sum_outcycle / float(CALIB_CYCLES);
           Serial.println("Calibration verror: " + String(vzero));
           lcd.clear();
+          tft.clear();
 
       }
     } else {
