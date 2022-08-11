@@ -326,7 +326,7 @@ void setup() {
   writeLine(1, "Desconecte flujo", 0);
   writeLine(2, "y presione ok ", 0);
 
-  delay (1000); //Otherwise low enter button readed
+  delay (100); //Otherwise low enter button readed
   lastButtonPress = millis();
   while (!fin){
     if (digitalRead(PIN_MENU_EN) == LOW)  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v

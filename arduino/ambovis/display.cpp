@@ -2,7 +2,8 @@
 #include "MechVentilation.h"
 
 #define MIN_CURVES_Y    60
-#define MAX_CURVES_Y    180
+#define MAX_CURVES_Y    250
+#define CLEAN_Y         200
 #define LEGEND_Y        260 //Begining of the legend on Y AXIS
 bool lcd_cleaned=false;
 
@@ -122,13 +123,18 @@ void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WIT
   if ( rx[valsreaded] > rx[valsreaded-1] ) {//to avoid draw entire line to the begining at the end of the cycle
     for (int i=0;i<2;i++)
       tft.drawLine(axispos[i], x_start - rx[valsreaded-1], axispos[i], x_start - rx[valsreaded], ILI9341_DARKGREY);           //X AXIS 
-    tft.fillRect(MIN_CURVES_Y, x_start - rx[valsreaded] - 10, MAX_CURVES_Y, 10, ILI9341_BLACK);                                       //CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
+    tft.fillRect(MIN_CURVES_Y, x_start - rx[valsreaded] - 10, CLEAN_Y, 10, ILI9341_BLACK);                                //CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
+    Serial.print("ry[valsreaded-1]");Serial.println(ry[valsreaded-1]);
+    Serial.print("ry[valsreaded ]");Serial.println(ry[valsreaded ]);
 //
 //    Serial.print("ry[valsreaded-1]");Serial.println(ry[valsreaded-1]);
 //    Serial.print("ry[valsreaded]");Serial.println(ry[valsreaded]);
-//    if      (ry[valsreaded-1] > MAX_CURVES_Y) ry[valsreaded-1] = MAX_CURVES_Y;
+      if      (ry[valsreaded] > 250 || ry[valsreaded-1] > 250 ){
+        ry[valsreaded -1 ] = ry[valsreaded] = 0;
+      }
+      //if      (ry[valsreaded-1] > MAX_CURVES_Y) ry[valsreaded-1] = MAX_CURVES_Y;
 //    else if (ry[valsreaded-1] < 0) ry[valsreaded-1] = 0;
-//    if      (ry[valsreaded] > MAX_CURVES_Y) ry[valsreaded] = MAX_CURVES_Y;
+      //if      (ry[valsreaded] > MAX_CURVES_Y) ry[valsreaded] = MAX_CURVES_Y;
 //    else if (ry[valsreaded] < 0)            ry[valsreaded] = 0;
 //    if      (ry[valsreaded] > MAX_CURVES_Y)   ry[valsreaded] = MAX_CURVES_Y;
 //    else if (ry[valsreaded] < MIN_CURVES_Y)   ry[valsreaded] = MIN_CURVES_Y;
