@@ -262,6 +262,12 @@ void setup() {
 
   delay(100);
 
+  if (!digitalRead(PIN_POWEROFF)) {
+    digitalWrite(YELLOW_LED, HIGH);
+    Serial.println("Poweroff");
+  }
+
+
   //  Serial.println("Tiempo del ciclo (seg):" + String(ventilation -> getExsuflationTime() + ventilation -> getInsuflationTime()));
   //  Serial.println("Tiempo inspiratorio (mseg):" + String(ventilation -> getInsuflationTime()));
   //  Serial.println("Tiempo espiratorio (mseg):" + String(ventilation -> getExsuflationTime()));
@@ -738,7 +744,9 @@ void loop() {
       put_to_sleep = false;
       print_bat_time = time;
       print_bat();
-      digitalWrite(PIN_BUZZER, !BUZZER_LOW); //Buzzer inverted
+      digitalWrite(LCD_SLEEP, LOW);
+      digitalWrite(TFT_SLEEP, LOW);
+      //digitalWrite(PIN_BUZZER, !BUZZER_LOW); //Buzzer inverted
       lcd.clear();
     }
     if (time > print_bat_time + 5000) {

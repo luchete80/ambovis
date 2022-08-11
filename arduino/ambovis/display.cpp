@@ -230,7 +230,7 @@ void print_bat(){
 void print_vols(){
     
     tft.setRotation(0);
-    tft.fillRect(40,LEGEND_Y,40,80, ILI9341_RED); //Here x is the first value (in the less width dimension)
+    tft.fillRect(40,LEGEND_Y,40,100, ILI9341_RED); //Here x is the first value (in the less width dimension)
 
     itoa(_mllastInsVol, buffer, 10);
     tft.setCursor(0, LEGEND_Y); //Before: 150,180 at right 
