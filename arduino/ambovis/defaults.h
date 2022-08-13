@@ -68,7 +68,7 @@ extern int STEPPER_ACCEL_MAX;       //(1500 * STEPPER_MICROSTEPS)
 #define DEFAULT_MAX_RPM 30
 #define DEFAULT_MIN_RPM 12
 #define DEFAULT_POR_INSPIRATORIO 33.3333F // %
-#define DEFAULT_PEAK_INSPIRATORY_PRESSURE 25
+//#define DEFAULT_PEAK_INSPIRATORY_PRESSURE 25
 #define DEFAULT_PEAK_ESPIRATORY_PRESSURE 5
 
 #define V_SUPPLY_HONEY 5.0F
@@ -113,7 +113,7 @@ class VentilationOptions_t {
   byte percInspEsp;
   bool hasTrigger;
   short tidalVolume;  //in ml
-  byte modeCtl;
+//  byte modeCtl;
   byte percVolume;   //For manual mode: 1 to 10
 
   VentilationOptions_t(){}
@@ -121,7 +121,7 @@ class VentilationOptions_t {
 };
 
 #define MODE_VOL_CTL 0
-#define MODE_VOL_CTL 1
+//#define MODE_VOL_CTL 1
 #define MODE_MANUAL  2
 
 #define VENTMODE_VCL 0
@@ -130,14 +130,14 @@ class VentilationOptions_t {
 
 //general variables
 extern byte vent_mode;
-extern bool send_data;
+//extern bool send_data;
 extern bool sleep_mode;
 
 extern byte alarm_state;
 
 extern bool put_to_sleep,wake_up;
 //PID LIMITS
-extern bool change_pid_params;
+//extern bool change_pid_params;
 extern unsigned long time;
 
 // 5v to 1.1v dividiver, in order to use 1.1 arduino vref (more stable)

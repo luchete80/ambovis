@@ -9,7 +9,6 @@
 #define PIN_ENDSTOP 5
 
 // Display
-
 #ifdef LCD_I2C
 #define I2C_DIR 0x3F
 #else

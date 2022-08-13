@@ -6,43 +6,42 @@
 #define LEGEND_Y        260 //Begining of the legend on Y AXIS
 bool lcd_cleaned=false;
 
-unsigned long time_last_show=0;
+//unsigned long time_last_show=0;
 
-char a[10],b[10];
+//char a[10],b[10];
 
-const byte numChars = 32;
-char receivedChars[numChars]; // an array to store the received data
-int last_t;
-int integerFromPC [5];
-float floatFromPC = 0.0;
+//const byte numChars = 32;
+//char receivedChars[numChars]; // an array to store the received data
+//int last_t;
+//int integerFromPC [5];
+//float floatFromPC = 0.0;
 int axispos[]={130,200}; //from each graph, from 0 to 320 (display height, IN PORTRAIT MODE)
 byte state_r;
-int buzzer=3; //pin
+//int buzzer=3; //pin
 
 enum _state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
 
 _state state;
 
-char recvChar;
-char endMarker = '>';
-boolean newData = false;
+//char recvChar;
+//char endMarker = '>';
+//boolean newData = false;
 byte valsreaded=0;
 int valsreaded_[3];
 byte last_x=0;
 
 
-int count=0;
-byte escala=32;
-byte x[128],y[64];
+//int count=0;
+//byte escala=32;
+//byte x[128],y[64];
 
 byte rx[128],ry[128];
-int  ry2[128];
+//int  ry2[128];
 int yflux[2];
 int yvt[2];
 char buffer[10];
 
 void tft_draw(void) {
-    //Serial.println(cycle_pos);Serial.println(ry[valsreaded]);
     last_x=cycle_pos;
     rx[valsreaded]=cycle_pos;
     ry[valsreaded]=pressure_p*2.;     
@@ -56,8 +55,6 @@ void tft_draw(void) {
         drawY2(ILI9341_GREEN);
     valsreaded+=1;
 
-//ORIGINAL
-//  	if (last_x>117 && !lcd_cleaned){
     if (last_x>117 && !lcd_cleaned){//NO PONER UN VALOR MENOR QUE 10
     		lcd_cleaned=true;
        //tft.fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
@@ -101,21 +98,6 @@ void tft_draw(void) {
     check_alarms();
     
 }//loop
-
-// ORIGINAL WITH 1 cycle
-//void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
-//
-//  if ( rx[valsreaded] > rx[valsreaded-1] ) {//to avoid draw entire line to the begining at the end of the cycle
-//          for (int i=0;i<2;i++)
-//            tft.drawLine(axispos[i], 240-rx[valsreaded-1], axispos[i], 240-rx[valsreaded], ILI9341_DARKGREY);           //X AXIS 
-//            tft.fillRect(0, 240 - rx[valsreaded] - 10, MAX_CURVES_Y, 10, ILI9341_BLACK);                                //CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
-//            
-//            tft.drawLine(axispos[0]- ry[valsreaded-1], 240-rx[valsreaded-1], axispos[0] - ry[valsreaded],   240-rx[valsreaded], color);
-//            tft.drawLine(axispos[1]-yflux[0],           240-rx[valsreaded-1], axispos[1]-yflux[1],          240-rx[valsreaded], ILI9341_MAGENTA);
-//
-//  }
-//}
-
 
 void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
   int x_start = 240 - (int) drawing_cycle * 120;
@@ -186,7 +168,7 @@ void check_alarms(){
       }
 }
 
-void print_bat(){
+void print_bat() {
     float level,level_perc;
     level=0.;
     tft.setRotation(0);
@@ -219,11 +201,6 @@ void print_bat(){
     //tft.setCursor(220, 260);tft.println("%");
 
     dtostrf(level, 1, 2, buffer);
-    //Temporary
-    //Serial.print("Bat level: ");Serial.println(level);
-    //tft.setCursor(150, 280);tft.println("Vo:");
-    //tft.setCursor(180, 280);tft.println(buffer);
-
 }
 
 void print_vols(){
@@ -244,4 +221,4 @@ void print_vols(){
     tft.setCursor(0, LEGEND_Y + 40);
     tft.println("VT: ");tft.setCursor(40, LEGEND_Y + 40);tft.println(buffer);
  
-  }
+}

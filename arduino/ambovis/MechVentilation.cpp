@@ -1,13 +1,13 @@
 #include "MechVentilation.h"
 
-int currentWaitTriggerTime = 0;
-int currentStopInsufflationTime = 0;
-float currentFlow = 0;
+//int currentWaitTriggerTime = 0;
+//int currentStopInsufflationTime = 0;
+//float currentFlow = 0;
 
 float pressure_max;
 float pressure_min;
 
-static int highest_man_pos;
+//static int highest_man_pos;
 unsigned long _msecTimerStartCycle;
 
 byte Cdyn_pass[3];
@@ -20,14 +20,15 @@ int STEPPER_SPEED_MAX        = STEPPER_MICROSTEPS * 1500;
 int STEPPER_ACCEL_MAX        = STEPPER_MICROSTEPS * 1500;
 
 //static
-float speed_m,accel_m,speed_b,accel_b;
-float pidk_m,pidk_b;
-float pidi_m,pidi_b;
-float pidd_m,pidd_b;
+//float speed_m,accel_m,speed_b,accel_b;
+//float pidk_m,pidk_b;
+//float pidi_m,pidi_b;
+//float pidd_m,pidd_b;
 float dpip;
 byte dpip_b;
 
-float f_acc;byte f_acc_b;
+float f_acc;
+byte f_acc_b;
 byte  p_acc;
 bool ended_whilemov;
 
@@ -156,7 +157,7 @@ void MechVentilation::deactivateRecruitment(void)
  */
 void MechVentilation :: update ( void )
 {
-    last_vent_time = millis();
+//    last_vent_time = millis();
     
     static int totalCyclesInThisState = 0;
     static int currentTime = 0;
@@ -193,7 +194,7 @@ void MechVentilation :: update ( void )
 
         //Filter vars
         #ifdef FLUX_FILTER
-        flux_filter_time=millis();
+//        flux_filter_time=millis();
         flux_count=0;
         //flux_sum=0;
         #endif
@@ -220,7 +221,6 @@ void MechVentilation :: update ( void )
         _mllastInsVol=int(_mlInsVol);
         _mllastExsVol=int(fabs(_mlExsVol));
         
-        //_mlInsVol2=0;
         _mlInsVol=0.;
         _mlExsVol=0.;
         
@@ -725,5 +725,5 @@ void MechVentilation::change_config(VentilationOptions_t options) {
     setRPM(_rpm); //Include set inspiratory cycle
     _percVol=options.percVolume;
 
-    _mode = options.modeCtl;
+//    _mode = options.modeCtl;
 }
