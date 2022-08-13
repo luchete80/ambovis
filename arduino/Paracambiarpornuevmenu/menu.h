@@ -68,8 +68,7 @@ extern byte oldEncPos; //stores the last encoder position value so we can compar
 extern byte old_menu_pos,old_menu_num;
 extern bool show_changed_options; //Only for display
 extern bool update_options;
-extern char tempstr[5];
-//extern char tempstr2[5];
+extern char tempstr[5],tempstr2[5];
 extern byte menu_number;
 extern byte p_trim;
 
