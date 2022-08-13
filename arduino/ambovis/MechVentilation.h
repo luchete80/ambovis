@@ -14,6 +14,7 @@
 #include "src/AutoPID/AutoPID.h"
 #include "Sensors.h"
 
+
 #ifdef ACCEL_STEPPER
 #include "src/AccelStepper/AccelStepper.h"
 #else
@@ -192,6 +193,7 @@ private:
 extern unsigned int _timeoutIns;
 extern unsigned int _timeoutEsp;
     
+extern byte stepper_time;
 extern unsigned long last_vent_time;
 extern float _mlInsVol,_mlExsVol;
 extern int _mllastInsVol,_mllastExsVol;
