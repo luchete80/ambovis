@@ -47,6 +47,8 @@ byte alarm_state = 0; //0: No alarm 1: peep 2: pip 3:both
 void read_memory(); //Lee la EEPROM, usa variables externas, quiza deberian englobarse en un vector dinamico todos los offsets
 void write_memory();
 
+int Compression_perc = 8; //80%
+
 #ifdef ACCEL_STEPPER
 AccelStepper *stepper; 
 #else
@@ -65,9 +67,11 @@ LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PI
 //MUTE
 boolean last_mute, curr_mute;
 unsigned long time_mute;
+
 boolean buzzmuted;
 unsigned long timebuzz = 0;
 bool isbuzzeron = false;
+
 
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 
@@ -79,18 +83,18 @@ float pressure_peep;
 
 byte vent_mode = VENTMODE_MAN; //0
 //Adafruit_BMP280 _pres1Sensor;
-//Pressure_Sensor _dpsensor;
-//float verrp;
-float _flux,    flow_f;
+Pressure_Sensor _dpsensor;
+float verrp;
+float _flux,    flow_f;;
 //#ifdef FILTER_FLUX
 float _flux_fil[5];
-//float _mlInsVol2;
+float _mlInsVol2;
 float _flux_sum;
 byte flux_count;
 //#endif
 
-//bool send_data = false;
-char tempstr[5];
+bool send_data = false;
+char tempstr[5], tempstr2[5];
 int curr_sel, old_curr_sel;
 float p_dpt;
 
@@ -99,14 +103,15 @@ unsigned long lastShowSensor = 0;
 unsigned long lastSave = 0;
 bool display_needs_update = false;
 
-//State static lastState;
+State static lastState;
 bool show_changed_options = false; //Only for display
 bool update_options = false;
 
 unsigned long time_update_display = 20; //ms
 unsigned long last_update_display;
 
-//extern byte stepper_time = 50;
+extern float _mlInsVol, _mlExsVol;
+extern byte stepper_time = 50;
 unsigned long last_stepper_time;
 unsigned long last_vent_time;
 unsigned long time;
@@ -156,7 +161,7 @@ bool change_pid_params = false;
 
 byte encoderPos = 1; //this variable stores our current value of encoder position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
 byte oldEncPos = 1; //stores the last encoder position value so we can compare to the current reading and see if it has changed (so we know when to print to the serial monitor)
-//byte reading = 0; //somewhere to store the direct values we read from our interrupt pins before checking to see if we have moved a whole detent
+byte reading = 0; //somewhere to store the direct values we read from our interrupt pins before checking to see if we have moved a whole detent
 
 byte max_sel, min_sel; //According to current selection
 
@@ -165,13 +170,14 @@ void autotrim_flux();
 void check_sleep_mode();  //Batt charge only
 
 bool isitem_sel;
-//byte old_menu_pos = 0;
-//byte old_menu_num = 0;
+byte old_menu_pos = 0;
+byte old_menu_num = 0;
 
 AutoPID * pid;
 
 MechVentilation * ventilation;
 VentilationOptions_t options;
+
 
 int bck_state ;     // current state of the button
 int last_bck_state ; // previous state of the button
@@ -181,9 +187,8 @@ int holdTime ;        // how long the button was hold
 int idleTime ;        // how long the button was idle
 
 // CALIBRATION: TODO: MAKE A CLASS
-//float vsupply, vsupply_0;
-float vlevel;
-//float vfactor;
+float vsupply, vsupply_0;
+float vlevel,vfactor;
 
 void setup() {
 
@@ -241,6 +246,7 @@ void setup() {
   pinMode(BCK_LED,    OUTPUT); //Set buzzerPin as output
   pinMode(YELLOW_LED, OUTPUT); //Set buzzerPin as output
   pinMode(RED_LED, OUTPUT); //Set buzzerPin as output
+
 
   digitalWrite(PIN_BUZZER, BUZZER_LOW); //LOW, INVERTED
 
@@ -303,6 +309,7 @@ void setup() {
   writeLine(1, "RespirAR FIUBA", 4);
   writeLine(2, "v2.0.1", 8);
 
+
   ads.begin();
 
 //  Logger::info("[START] [VERROR]");
@@ -320,14 +327,6 @@ void setup() {
 //  Logger::info("verror=%s", dtostrf(verror, 2, 2, logStr));
 //  Logger::info("vsupply_0=%s", dtostrf(vsupply_0, 2, 2, logStr));
 
-//  Serial.println("Vsupply_0: " + String (vsupply_0));
-//  //vfactor = 5./vsupply_0; //
-//
-//  Serial.print("dp (Flux) MPX Volt (mV) at p0: "); Serial.println(verror * 1000, 3);
-//  //  Serial.print("pressure  MPX Volt (mV) at p0: "); Serial.println(verrp * 1000, 3);
-//
-//  Serial.print("dp  error : "); Serial.println(-verror / (5.*0.09));
-
   ////// ANTES DE CONFIGURAR LA VENTILACION Y CHEQUEAR EL FIN DE CARRERA INICIO LOS MENUES
   bool init=false;
   byte bpm = DEFAULT_RPM;
@@ -338,27 +337,22 @@ void setup() {
   options.percInspEsp = i_e; //1:1 to 1:4, is denom
   vent_mode = VENTMODE_MAN;
 
-//  Logger::trace("[START] [INIT_MENU]");
-//  Logger::trace("bpm=%d", bpm);
-//  Logger::trace("i_e=%d", i_e);
-//  Logger::trace("vent_mode=%d", vent_mode);
-
   /////////////////// CALIBRACION /////////////////////////////////////
-//  bool fin = false;
-//  lcd.clear();
-//  writeLine(1, "Desconecte flujo", 0);
-//  writeLine(2, "y presione ok ", 0);
-//  Logger::info("[START] [CALIBRATE_LOOP]");
-//  delay (1000); //Otherwise low enter button readed
-//  lastButtonPress = millis();
-//  while (!fin){
-//    if (digitalRead(PIN_MENU_EN) == LOW)  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
-//    if (millis() - lastButtonPress > 50) {
-//      fin = true;
-//      lastButtonPress = millis();
-//      Logger::info("lastButtonPress=%l", lastButtonPress);
-//    }// if time > last button press
-//  }
+  bool fin = false;
+  lcd.clear();
+  writeLine(1, "Desconecte flujo", 0);
+  writeLine(2, "y presione ok ", 0);
+  Logger::info("[START] [CALIBRATE_LOOP]");
+  delay (1000); //Otherwise low enter button readed
+  lastButtonPress = millis();
+  while (!fin){
+    if (digitalRead(PIN_MENU_EN) == LOW)  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
+    if (millis() - lastButtonPress > 50) {
+      fin = true;
+      lastButtonPress = millis();
+    }// if time > last button press
+  }
+
 
 digitalWrite(PIN_STEPPER, HIGH);
 delay(1000);
@@ -377,6 +371,8 @@ stepper = new FlexyStepper();
     options
   );
 
+
+  /////
   // configura la ventilación
   ventilation -> start();
   ventilation -> update();
@@ -384,6 +380,7 @@ stepper = new FlexyStepper();
   lcd.clear();
   writeLine(1, "Iniciando...", 0);
   
+  ////
 #ifdef ACCEL_STEPPER
   stepper->setSpeed(STEPPER_HOMING_SPEED);
 
@@ -412,7 +409,9 @@ stepper = new FlexyStepper();
 //    Logger::trace("position=%l", position);
 //    Logger::trace("initial_homing=%l", initial_homing);
 #endif
+  //
 
+  //sensors -> readPressure();
   display_lcd();
 
   //ENCODER
@@ -434,19 +433,11 @@ stepper = new FlexyStepper();
   pinMode(PIN_ENC_SW, INPUT_PULLUP);
 
   lastReadSensor = lastShowSensor = last_update_display = millis();
-//  lastState = ventilation->getState();
-//  last_update_display = millis();
+  lastState = ventilation->getState();
+
 
   //STEPPER
   last_stepper_time = last_vent_time = millis();
-//  last_vent_time = millis();
-
-//  Logger::trace("[START] [TIME]");
-//  Logger::trace("last_stepper_time=%ul", last_stepper_time);
-//  Logger::trace("last_vent_time=%ul", last_vent_time);
-//  Logger::trace("lastReadSensor=%ul", lastReadSensor);
-//  Logger::trace("lastShowSensor=%ul", lastShowSensor);
-//  Logger::trace("last_update_display=%ul", last_update_display);
 
   Timer3.initialize(TIME_STEPPER_ISR_MICROS);
   Timer3.attachInterrupt(timer3Isr);
@@ -482,6 +473,7 @@ stepper = new FlexyStepper();
 
   tft.begin();
 
+
   digitalWrite(BCK_LED, LOW);
   buzzmuted = false;
   last_mute = HIGH;
@@ -508,11 +500,13 @@ stepper = new FlexyStepper();
 //  Logger::trace("peep_fac=%s", dtostrf(peep_fac, 2, 2, logStr));
 }
 
+
+bool update_display = false;
 byte pos;
 
 /////////////// CALIBRATION
 bool  calibration_run = true;
-//int   start_cyle = last_cycle;  //Used for calibration
+int   start_cyle = last_cycle;  //Used for calibration
 byte  calib_cycle = 0;
 float vs;
 ////////////////////////////////////////
@@ -522,6 +516,7 @@ void loop() {
 
     Logger::info("[LOOP] [START]");
   //digitalWrite(LCD_SLEEP, HIGH); //LOW, INVERTED
+
   if (!sleep_mode) {
     if (wake_up) {
       lcd.clear();
@@ -559,9 +554,12 @@ void loop() {
     //Serial.print("Carga: ");Serial.println(analogRead(PIN_BAT_LEV));
 
     if (millis() > lastSave + TIME_SAVE) {
-        write_memory();
-        lastSave = millis();
+      write_memory();
+
+      lastSave = millis();
     }
+
+
 
     if ( time > lastShowSensor + TIME_SHOW ) {
 
@@ -575,8 +573,11 @@ void loop() {
       //           Serial.println(Voltage,5);Serial.print(",");
       //           Serial.print(verror,3);Serial.print(",");
       //           Serial.print(p_dpt,5);Serial.print(",");
+      //
       //           Serial.println(flow_f,2);
+
       tft_draw();
+
     }
 
 
@@ -596,8 +597,7 @@ void loop() {
       // Is like 1/vs
       vs = vlevel /** vfactor*/; 
       
-      //adc0 = ads.readADC_SingleEnded(0);
-      adc0=0;
+      adc0 = ads.readADC_SingleEnded(0);
       Voltage = (adc0 * 0.1875) * 0.001; //Volts
       //DATASHEET:
       // Vo = Vs (  
@@ -676,7 +676,6 @@ void loop() {
         //According to datasheet
         //vout = vs(0.09*P + 0.04) +/ERR
         verror_sum += ( Voltage - 0.04 * vs); //-5*0.04
-//      Serial.println("Calibration sum: "+ String(verror_sum));
     } else { //This sums the feed error
         verror_sum += vlevel;       // -5*0.04
         vcorr_count += 1.;
@@ -686,10 +685,10 @@ void loop() {
     Logger::info("vcorr_count=%d", vcorr_count);
     Logger::info("verror_sum=%s", dtostrf(verror_sum, 2, 2, logStr));
 
-//    if (alarm_vt) {
-//
-//    }
-    if ( ventilation->getCycleNum() != last_cycle ) {
+    if (alarm_vt) {
+
+    }
+    if ( ventilation -> getCycleNum () != last_cycle ) {
       vt = (_mllastInsVol + _mllastInsVol) / 2;
       if (vt < alarm_vt)  isalarmvt_on = 1;
       else              isalarmvt_on = 0;
@@ -718,10 +717,11 @@ void loop() {
 
       last_cycle = ventilation->getCycleNum();
 
-      if (!calibration_run) {
-          display_lcd();
-          last_update_display = time;
-          Logger::info("[LOOP] [DISPLAY_LCD]");
+      if (!calibration_run){
+        display_lcd();
+        update_display = true;
+        last_update_display = time;
+        Logger::info("[LOOP] [DISPLAY_LCD]");
       } else {
           lcd.clear();
           writeLine(1, "Calibracion flujo", 0);
@@ -746,7 +746,6 @@ void loop() {
 //#endif
       if (!digitalRead(PIN_POWEROFF)) {
           digitalWrite(YELLOW_LED, HIGH);
-//        Serial.println("Poweroff");
       } else {
           digitalWrite(YELLOW_LED, LOW);
       }
@@ -755,18 +754,11 @@ void loop() {
       vcorr_count = verror_sum = 0.;
       if (calibration_run) {
       //NEW, CALIBRATION
-//        verror = verror_sum / float(vcorr_count);
-//       Serial.println("Calibration iter, cycle, verror, sum: " + String(vcorr_count) + ", " +
-//                                                                  String(calib_cycle) + ", " +
-//                                                                  String(verror) + ", " +
-//                                                                  String(verror_sum_outcycle));
-//        vcorr_count = verror_sum = 0.;
         calib_cycle ++;
         verror_sum_outcycle += verror;
-        if (calib_cycle >= CALIB_CYCLES ) {
+        if (calib_cycle >= CALIB_CYCLES ){
           calibration_run = false;
           vzero = verror_sum_outcycle / float(CALIB_CYCLES);
-//          Serial.println("Calibration verror: " + String(vzero));
           lcd.clear();
 
         }
@@ -775,9 +767,6 @@ void loop() {
         Logger::info("verror_sum_outcycle=%s", dtostrf(verror_sum_outcycle, 2, 2, logStr));
         Logger::info("verror=%s", dtostrf(verror, 2, 2, logStr));
         Logger::info("vzero=%s", dtostrf(vzero, 2, 2, logStr));
-      } else {
-//          verror = verror_sum / float(vcorr_count);
-//          vcorr_count = verror_sum = 0.;
       }
     }//change cycle
 
@@ -796,7 +785,7 @@ void loop() {
     }
 
     //HERE changed_options flag is not updating until cycle hcanges
-    if (!calibration_run) {
+    if (!calibration_run){
       if (show_changed_options && ((millis() - last_update_display) > time_update_display) ) {
         display_lcd();  //WITHOUT CLEAR!
         last_update_display = millis();

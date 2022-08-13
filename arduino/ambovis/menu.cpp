@@ -4,9 +4,13 @@
 #include "MechVentilation.h"  //options
 
 static bool clear_all_display;
-//static byte max_pidk_byte,min_pidk_byte;
+
+static byte max_pidk_byte,min_pidk_byte;
+
 bool change_sleep;
 int pressed=0;  //0 nothing , 1 enter, 2 bck
+
+
 
 byte back[8] = {
   0b00100,
@@ -135,7 +139,6 @@ void check_bck_state(){
     } else {
        updateCounter(); // button state not changed. It runs in a loop.
        if (holdTime > 2000 && !change_sleep){
-//        Serial.println("Activando Sleep Mode");
         if (!sleep_mode){
             
             sleep_mode=true;
@@ -145,7 +148,6 @@ void check_bck_state(){
            wake_up=true;   
         }
         change_sleep=true;
-//        Serial.print("Sleep Mode");Serial.println(sleep_mode);
         }
     }
     last_bck_state = bck_state;
@@ -165,15 +167,15 @@ void check_encoder ( ) {
       }// if time > last button press
   }
 
-  check_bck_state();
+    check_bck_state();
 
-  if (pressed > 0) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6)
+    if (pressed > 0) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6)
       if (!isitem_sel) {
-          curr_sel=oldEncPos=encoderPos=old_curr_sel;
+        curr_sel=oldEncPos=encoderPos=old_curr_sel;
       }
                   
       if (isitem_sel) {
-          switch (curr_sel) {
+          switch (curr_sel){
             case 1: 
              if ( menu_number == 0 ) {
                     min_sel=1;max_sel=2;
@@ -228,8 +230,6 @@ void check_encoder ( ) {
  //                     min_sel=200;max_sel=800;
                         encoderPos=oldEncPos=options.peakInspiratoryPressure;
                         min_sel=15;max_sel=30;
-//                        Serial.print("pip: ");Serial.println(options.peakInspiratoryPressure);
-//                        Serial.print("encoderpos: ");Serial.println(encoderPos);
                     } else {//Manual
                       encoderPos=oldEncPos=options.percVolume;
                       min_sel=40;max_sel=100;            
@@ -377,7 +377,6 @@ void check_encoder ( ) {
                 else  if (menu_number == 1)   alarm_peep_pressure     = encoderPos;
                 else  if (menu_number == 2)   STEPPER_SPEED_MAX  = int((float)encoderPos*200.);
                 else if ( menu_number == 3 ){
-//                    Serial.print("encoderPos: ");Serial.println(encoderPos);
                     pfmin=encoderPos;
                     pf_min=(float)encoderPos/50.;
                     peep_fac = -(pf_max-pf_min)/15.*last_pressure_min + pf_max;
@@ -397,8 +396,6 @@ void check_encoder ( ) {
                 if ( menu_number == 0 ) {
                     if (vent_mode==VENTMODE_PCL){
                       options.peakInspiratoryPressure = encoderPos;
-//                        Serial.print("pip: ");Serial.println(options.peakInspiratoryPressure);
-//                        Serial.print("encoderpos: ");Serial.println(encoderPos);
                       } else { //manual
                       options.percVolume = encoderPos;
                     }
@@ -450,8 +447,6 @@ void check_encoder ( ) {
             case 11:
                 if ( menu_number == 2 ){
                     max_pidi=int(encoderPos)*2;
-//                    Serial.print("Max pid i:");Serial.println(max_pidi);
-//                    Serial.print("Encoder pos:");Serial.println(encoderPos);
                 }
                 break;
             case 12:
@@ -674,12 +669,17 @@ void display_lcd ( ) {
 
 }
 
+
+
 //////////////////////////////////////
 /////// MENU INICIAL /////////////////
 //////////////////////////////////////
 
 Menu_inic::Menu_inic(byte *mode, byte *bpm, byte *i_e){
     _mod=*mode;_bpm=*bpm;_i_e=*i_e;
+//    mode=&_mod;
+//    bpm=&_bpm;
+//    i_e=&_i_e;
     clear_all_display=false;
     fin=false;
     menu_number=0;
@@ -688,8 +688,9 @@ Menu_inic::Menu_inic(byte *mode, byte *bpm, byte *i_e){
     lastButtonPress=0;
     m_curr_sel=1;
     display_lcd();
+    //lcd_selxy(0,1);
     last_update_display=millis();
-    while (!fin) {
+    while (!fin){
         this->check_encoder();
         time=millis();
         if (show_changed_options && ((millis() - last_update_display) > 50) ) {
@@ -700,7 +701,6 @@ Menu_inic::Menu_inic(byte *mode, byte *bpm, byte *i_e){
     }
     isitem_sel=false;
     m_curr_sel=old_curr_sel=1;
-//    Serial.println("bpm "+String(*bpm));
     *mode=_mod;*bpm=_bpm;*i_e=_i_e;
     switching_menus = false;
 
@@ -710,7 +710,6 @@ Menu_inic::Menu_inic(byte *mode, byte *bpm, byte *i_e){
 void Menu_inic::check_encoder ( ) {
     check_updn_button(PIN_MENU_DN,&encoderPos,true);   //Increment
     check_updn_button(PIN_MENU_UP,&encoderPos,false);  //Decrement
-//    Serial.println("Encoder Pos: " +String( encoderPos) );
     pressed=0;  //0 nothing , 1 enter, 2 bck
     if (digitalRead(PIN_MENU_EN) == LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
         if (time - lastButtonPress > 150) {
@@ -726,7 +725,6 @@ void Menu_inic::check_encoder ( ) {
     if (pressed > 0) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
       if (!isitem_sel) {
         m_curr_sel=oldEncPos=encoderPos=old_curr_sel;
-//        Serial.println("Item sel, curr_sel"+String(m_curr_sel));
       }
                   
       if (isitem_sel) {
@@ -858,7 +856,6 @@ void Menu_inic::display_lcd ( ) {
     writeLine(0, "INGRESE PARAMS", 3);
     writeLine(1, "MOD: ",1);
     
-//    Serial.println("modo: "+String(_mod));
     if ( _mod == VENTMODE_MAN ) {
         writeLine(1, "MAN", 6);
     }
@@ -870,6 +867,8 @@ void Menu_inic::display_lcd ( ) {
     writeLine(3, "FIN: ", 13);
       
   }
+
+
   clear_all_display=false;
 
 }
@@ -896,8 +895,8 @@ void Menu_inic::check_bck_state(){
     } else {
        updateCounter(); // button state not changed. It runs in a loop.
        if (holdTime > 2000 && !change_sleep){
-//        Serial.println("Activando Sleep Mode");
-        if (!sleep_mode) {
+        if (!sleep_mode){
+
             sleep_mode=true;
             put_to_sleep=true;
         } else {
@@ -905,7 +904,6 @@ void Menu_inic::check_bck_state(){
            wake_up=true;   
         }
         change_sleep=true;
-//        Serial.print("Sleep Mode");Serial.println(sleep_mode);
         }
     }
     last_bck_state = bck_state;
