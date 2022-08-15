@@ -214,8 +214,6 @@ void setup() {
   Logger::info("flow_f=%s", dtostrf(flow_f, 2, 2, logStr));
   Logger::info("_flux_sum=%s", dtostrf(_flux_sum, 2, 2, logStr));
   Logger::info("flux_count=%d", flux_count);
-//  Logger::info("vcorr_count=%d", vcorr_count);
-//  Logger::info("p_trim=%d", p_trim);
 
   Logger::info("[START] [SENSOR]");
   Logger::info("p_dpt=%s", dtostrf(p_dpt, 2, 2, logStr));
@@ -227,13 +225,6 @@ void setup() {
   Logger::info("Voltage=%s", dtostrf(Voltage, 2, 2, logStr));
   Logger::info("_mlInsVol=%s", dtostrf(_mlInsVol, 2, 2, logStr));
   Logger::info("_mlExsVol=%s", dtostrf(_mlExsVol, 2, 2, logStr));
-
-//  Logger::trace("[START] [ALARM_INIT]");
-//  Logger::trace("alarm_max_pressure=%d", alarm_max_pressure);
-//  Logger::trace("alarm_peep_pressure=%d", alarm_peep_pressure);
-//  Logger::trace("isalarmvt_on=%d", isalarmvt_on);
-//  Logger::trace("alarm_vt=%d", alarm_vt);
-//  Logger::trace("alarm_state=%d", alarm_state);
 
   pinMode(TFT_SLEEP, OUTPUT); //Set buzzerPin as output
   digitalWrite(TFT_SLEEP, HIGH); //LOW, INVERTED
@@ -291,16 +282,6 @@ void setup() {
   options.tidalVolume = 300;
   options.percVolume = 100; //1 to 10
 
-//  Logger::trace("[START] [OPTIONS]");
-//  Logger::trace("respiratoryRate=%d", options.respiratoryRate);
-//  Logger::trace("percInspEsp=%d", options.percInspEsp);
-//  Logger::trace("peakInspiratoryPressure=%d", options.peakInspiratoryPressure);
-//  Logger::trace("peakEspiratoryPressure=%d", options.peakEspiratoryPressure);
-//  Logger::trace("triggerThreshold=%s", dtostrf(options.triggerThreshold, 2,2, logStr));
-//  Logger::trace("hasTrigger=%d", options.hasTrigger);
-//  Logger::trace("tidalVolume=%d", options.tidalVolume);
-//  Logger::trace("percVolume=%d", options.percVolume);
-
   delay(100);
 
   // Habilita el motor
@@ -312,20 +293,18 @@ void setup() {
 
   ads.begin();
 
-//  Logger::info("[START] [VERROR]");
-//  verror = verror_sum = verror_sum_outcycle = 0.;
-//  vcorr_count = 0;
-//  float verrp = 0.;
-//  vsupply_0 = 0.;
-//  for (int i = 0; i < 100; i++) {
-//      vsupply_0 += float(analogRead(PIN_MPX_LEV))/1024.*1.1*VOLTAGE_CONV;
-//      delay(10);
-//      Logger::info("vsupply_0=%s", dtostrf(vsupply_0, 2, 2, logStr));
-//  }
-//  vsupply_0 /= 100.;
+  Logger::info("[START] [VERROR]");
+  verror = verror_sum = verror_sum_outcycle = 0.;
+  vcorr_count = 0;
+  float verrp = 0.;
+  vsupply_0 = 0.;
+  for (int i = 0; i < 100; i++) {
+      vsupply_0 += float(analogRead(PIN_MPX_LEV))/1024.*1.1*VOLTAGE_CONV;
+      delay(10);
+  }
+  vsupply_0 /= 100.;
 
-//  Logger::info("verror=%s", dtostrf(verror, 2, 2, logStr));
-//  Logger::info("vsupply_0=%s", dtostrf(vsupply_0, 2, 2, logStr));
+  Logger::info("vsupply_0=%s", dtostrf(vsupply_0, 2, 2, logStr));
 
   ////// ANTES DE CONFIGURAR LA VENTILACION Y CHEQUEAR EL FIN DE CARRERA INICIO LOS MENUES
   bool init=false;
@@ -405,9 +384,6 @@ stepper = new FlexyStepper();
   stepper->setCurrentPosition(STEPPER_LOWEST_POSITION);
   position = stepper->currentPosition();
 
-//    Logger::trace("[START] [STEPPER]");
-//    Logger::trace("position=%l", position);
-//    Logger::trace("initial_homing=%l", initial_homing);
 #endif
   //
 
@@ -450,25 +426,6 @@ stepper = new FlexyStepper();
   f_acc = (float)f_acc_b / 10.;
   dpip = (float)dpip_b / 10.;
 
-//  Logger::info("[START] [PID_PARAMS]");
-//  Logger::info("max_cd=%d", max_cd);
-//  Logger::info("min_cd=%d", min_cd);
-//  Logger::info("min_speed=%d", min_speed);
-//  Logger::info("max_speed=%d", max_speed);
-//  Logger::info("max_accel=%d", max_accel);
-//  Logger::info("min_pidk=%d", min_pidk);
-//  Logger::info("max_pidk=%d", max_pidk);
-//  Logger::info("min_pidi=%d", min_pidi);
-//  Logger::info("max_pidi=%d", max_pidi);
-//  Logger::info("min_pidd=%d", min_pidd);
-//  Logger::info("max_pidd=%d", max_pidd);
-//  Logger::info("pfmin=%d", pfmin);
-//  Logger::info("pfmax=%d", pfmax);
-//  Logger::info("change_pid_params=%d", change_pid_params);
-//  Logger::info("f_acc=%s", dtostrf(f_acc, 2, 2, logStr));
-//  Logger::info("dpip=%s", dtostrf(dpip, 2, 2, logStr));
-//  Logger::info("last_cycle=%d", last_cycle);
-
   ventilation->setCycleNum(last_cycle);
 
   tft.begin();
@@ -489,15 +446,6 @@ stepper = new FlexyStepper();
   put_to_sleep = false;
   wake_up = false;
 
-//  Logger::trace("[START] [STATE]");
-//  Logger::trace("sleep_mode=%d", sleep_mode);
-//  Logger::trace("put_to_sleep=%d", put_to_sleep);
-//  Logger::trace("wake_up=%d", wake_up);
-
-//  Logger::trace("[START] [PF]");
-//  Logger::trace("pf_min=%s", dtostrf(pf_min, 2, 2, logStr));
-//  Logger::trace("pf_max=%s", dtostrf(pf_max, 2, 2, logStr));
-//  Logger::trace("peep_fac=%s", dtostrf(peep_fac, 2, 2, logStr));
 }
 
 
@@ -563,18 +511,7 @@ void loop() {
 
     if ( time > lastShowSensor + TIME_SHOW ) {
 
-        //     #ifdef DEBUG_STEPPER
-        //      unsigned long reltime = ventilation->getMSecTimerCnt();
-        //      Serial.print("Rel Msec: ");Serial.print(reltime);Serial.print(", Abs: ");
-        //      Serial.println(time);
-        //     #endif
       lastShowSensor = time;
-      //           Serial.print(int(cycle_pos));Serial.print(",");
-      //           Serial.println(Voltage,5);Serial.print(",");
-      //           Serial.print(verror,3);Serial.print(",");
-      //           Serial.print(p_dpt,5);Serial.print(",");
-      //
-      //           Serial.println(flow_f,2);
 
       tft_draw();
 
@@ -586,11 +523,8 @@ void loop() {
       //vout = vs(0.09*P + 0.04) +/ERR
       // P = ( vout/vs - 0.04 )/0.09 So, vout/vs if 
       //IF vs = 5V     
-//      #ifdef USING_1v1_4PRESS
-      pressure_p = ( analogRead(PIN_PRESSURE)/ (1023.)/*- verrp * 0.2 */ - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010      
-//      #else //Original, pressure sensor connected to A0
-//      pressure_p = ( analogRead(A0) / (1023.) /*- verrp * 0.2 */ - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
-//      #endif
+
+      pressure_p = ( analogRead(PIN_PRESSURE)/ (1023.)/*- verrp * 0.2 */ - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
 
       vlevel = float(analogRead(PIN_MPX_LEV))/1024.*1.1*VOLTAGE_CONV;
 
@@ -728,22 +662,22 @@ void loop() {
           writeLine(2, "Ciclo: " + String(calib_cycle+1) + "/" + String(CALIB_CYCLES), 0);
       }
       
-//#ifdef DEBUG_PID
-//      if (vent_mode = VENTMODE_PCL) {
-//        float err = (float)(pressure_max - options.peakInspiratoryPressure) / options.peakInspiratoryPressure;
-//        errpid_prom += fabs(err);
-//        errpid_prom_sig += err;
-//        Serial.println("Error PID: "); Serial.print(err, 5);
-//        ciclo_errpid++;
-//
-//        if (ciclo_errpid > 4) {
-//          errpid_prom /= 5.; errpid_prom_sig /= 5.;
-//          Serial.print(options.peakInspiratoryPressure); Serial.print(" "); Serial.print(errpid_prom, 5); Serial.print(" "); Serial.println(errpid_prom_sig, 5);
-//          errpid_prom = 0.; errpid_prom_sig = 0.;
-//          ciclo_errpid = 0;
-//        }
-//      }
-//#endif
+#ifdef DEBUG_PID
+      if (vent_mode = VENTMODE_PCL) {
+        float err = (float)(pressure_max - options.peakInspiratoryPressure) / options.peakInspiratoryPressure;
+        errpid_prom += fabs(err);
+        errpid_prom_sig += err;
+        Serial.println("Error PID: "); Serial.print(err, 5);
+        ciclo_errpid++;
+
+        if (ciclo_errpid > 4) {
+          errpid_prom /= 5.; errpid_prom_sig /= 5.;
+          Serial.print(options.peakInspiratoryPressure); Serial.print(" "); Serial.print(errpid_prom, 5); Serial.print(" "); Serial.println(errpid_prom_sig, 5);
+          errpid_prom = 0.; errpid_prom_sig = 0.;
+          ciclo_errpid = 0;
+        }
+      }
+#endif
       if (!digitalRead(PIN_POWEROFF)) {
           digitalWrite(YELLOW_LED, HIGH);
       } else {
