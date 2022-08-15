@@ -69,14 +69,14 @@ void tft_draw(void) {
         print_bat();
         
         //TODO: DO IT ONLY WHEN CHANGE!
-        tft.fillRect(10,10,150,15, ILI9341_BLACK); 
+        tft.fillRect(10,10,150,15, ILI9341_BLUE);
         if (!digitalRead(PIN_POWEROFF)){
           tft.setCursor(10, 10);tft.println("CORTE ENERGIA");         
         }
         
         dtostrf(vlevel, 1, 2, buffer);
         tft.setCursor(100, 80);tft.println("Vmpx:");
-        tft.fillRect(180,80,50,50, ILI9341_BLUE);
+        tft.fillRect(180,80,50,50, ILI9341_BLACK);
         tft.setCursor(180, 80);tft.println(buffer);
         
         drawing_cycle = !drawing_cycle;
@@ -122,7 +122,7 @@ void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WIT
   if ( rx[valsreaded] > rx[valsreaded-1] ) {//to avoid draw entire line to the begining at the end of the cycle
     for (int i=0;i<2;i++)
       tft.drawLine(axispos[i], x_start - rx[valsreaded-1], axispos[i], x_start - rx[valsreaded], ILI9341_DARKGREY);           //X AXIS 
-    tft.fillRect(MIN_CURVES_Y, x_start - rx[valsreaded] - 10, MAX_CURVES_Y, 10, ILI9341_BLUE);                                       //CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
+    tft.fillRect(MIN_CURVES_Y, x_start - rx[valsreaded] - 10, MAX_CURVES_Y, 10, ILI9341_BLACK);                                       //CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
 //
     Serial.print("ry[valsreaded-1]");Serial.println(ry[valsreaded-1]);
     Serial.print("ry[valsreaded]");Serial.println(ry[valsreaded]);

@@ -274,6 +274,12 @@ void setup() {
   writeLine(1, "RespirAR FIUBA", 4);
   writeLine(2, "v2.0.1", 8);
 
+  tft.begin();
+  tft.fillScreen(ILI9341_BLACK);
+  tft.setTextColor(ILI9341_BLUE);
+  tft.setTextSize(4);
+  tft.setCursor(10, 40);     tft.println("RespirAR");
+  tft.setCursor(10, 80);     tft.println("FIUBA");
 
   ads.begin();
   verror = verror_sum = verror_sum_outcycle = 0.;
@@ -341,6 +347,8 @@ stepper = new FlexyStepper();
     options
   );
 
+
+  tft.fillScreen(ILI9341_BLACK);
 
   /////
   // configura la ventilación
@@ -424,8 +432,6 @@ stepper = new FlexyStepper();
 
   Serial.print("LAST CYCLE: "); Serial.println(last_cycle);
   ventilation->setCycleNum(last_cycle);
-
-  tft.begin();
 
 
   digitalWrite(BCK_LED, LOW);
@@ -525,8 +531,7 @@ void loop() {
       // Is like 1/vs
       vs = vlevel /** vfactor*/; 
       
-      //adc0 = ads.readADC_SingleEnded(0);
-      adc0=0;
+      adc0 = ads.readADC_SingleEnded(0);
       Voltage = (adc0 * 0.1875) * 0.001; //Volts
       //DATASHEET:
       // Vo = Vs (  
