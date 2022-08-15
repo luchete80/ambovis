@@ -1,13 +1,8 @@
 #include "MechVentilation.h"
 
-//int currentWaitTriggerTime = 0;
-//int currentStopInsufflationTime = 0;
-//float currentFlow = 0;
-
 float pressure_max;
 float pressure_min;
 
-//static int highest_man_pos;
 unsigned long _msecTimerStartCycle;
 
 byte Cdyn_pass[3];
@@ -19,11 +14,6 @@ int STEPPER_ACC_INSUFFLATION = STEPPER_MICROSTEPS * 1500;
 int STEPPER_SPEED_MAX        = STEPPER_MICROSTEPS * 1500;
 int STEPPER_ACCEL_MAX        = STEPPER_MICROSTEPS * 1500;
 
-//static
-//float speed_m,accel_m,speed_b,accel_b;
-//float pidk_m,pidk_b;
-//float pidi_m,pidi_b;
-//float pidd_m,pidd_b;
 float dpip;
 byte dpip_b;
 
@@ -157,8 +147,7 @@ void MechVentilation::deactivateRecruitment(void)
  */
 void MechVentilation :: update ( void )
 {
-//    last_vent_time = millis();
-    
+
     static int totalCyclesInThisState = 0;
     static int currentTime = 0;
     static int flowSetpoint = 0;
@@ -201,7 +190,7 @@ void MechVentilation :: update ( void )
         
         //adding_vol=true;
         //#ifdef DEBUG_UPDATE
-          Serial.println("INSUFLACION ");        
+        //Serial.println("INSUFLACION ");
         //#endif
   
         last_pressure_max=pressure_max;
@@ -367,12 +356,11 @@ void MechVentilation :: update ( void )
             }
             else {
               Serial.println("Motion Complete");
-              }
+            }
             _setState(Init_Exsufflation);
             if (_recruitmentMode) {
                 deactivateRecruitment();
             }
-
         }
 //        else //Time has not expired (State Insufflation)
 //        {
@@ -500,9 +488,7 @@ void MechVentilation :: update ( void )
 
         /* Status update and reset timer, for next time */
         _setState(State_Exsufflation);
-    
-        //display_needs_update=true;
-        //last_pressure_max=pressure_max;
+
     }
     break;
     case State_Exsufflation:
@@ -724,6 +710,4 @@ void MechVentilation::change_config(VentilationOptions_t options) {
     _percIE= options.percInspEsp;
     setRPM(_rpm); //Include set inspiratory cycle
     _percVol=options.percVolume;
-
-//    _mode = options.modeCtl;
 }

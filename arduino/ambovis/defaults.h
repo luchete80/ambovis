@@ -8,13 +8,10 @@
 //#define DEBUG_PID 1
 //#define DEBUG_UPDATE  1
 #define DEBUG_STEPPER     1
-//#define FILTER_FLUX 1
 #define DEBUG_OFF 1 //Release version
 #define BUZZER_LOW 0
 
 #define BMP_I2C 1  //Pressure Sensor
-
-//#define PRUEBAS 1 // testing over arduino without sensors
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE                 20                                          // msec
@@ -35,7 +32,6 @@
 // Sensores
 #define ENABLED_SENSOR_VOLUME 1
 #if ENABLED_SENSOR_VOLUME
-//#define ENABLED_SENSOR_VOLUME_SFM3300 1
 #endif
 
 
@@ -72,7 +68,6 @@ extern int STEPPER_ACCEL_MAX;       //(1500 * STEPPER_MICROSTEPS)
 #define DEFAULT_PEAK_ESPIRATORY_PRESSURE 5
 
 #define V_SUPPLY_HONEY 5.0F
-// #define DEFAULT_PEAK_ESPIRATORY_PRESSURE 6
 
 #define DEFAULT_PRESSURE_V_FLUX_K1 1.
 // Presión
@@ -121,7 +116,7 @@ class VentilationOptions_t {
 };
 
 #define MODE_VOL_CTL 0
-//#define MODE_VOL_CTL 1
+#define MODE_VOL_CTL 1
 #define MODE_MANUAL  2
 
 #define VENTMODE_VCL 0
@@ -130,14 +125,10 @@ class VentilationOptions_t {
 
 //general variables
 extern byte vent_mode;
-//extern bool send_data;
 extern bool sleep_mode;
-
 extern byte alarm_state;
-
-extern bool put_to_sleep,wake_up;
-//PID LIMITS
-//extern bool change_pid_params;
+extern bool put_to_sleep, wake_up;
+extern float vlevel;
 extern unsigned long time;
 
 // 5v to 1.1v dividiver, in order to use 1.1 arduino vref (more stable)
@@ -157,7 +148,5 @@ extern unsigned long time;
 //Battery level voltage dividers
 #define BATDIV_R1           12000
 #define BATDIV_R2           470
-extern float vlevel;
-
 
 #endif // DEFAULTS_H

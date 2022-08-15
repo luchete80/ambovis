@@ -9,9 +9,6 @@
 #define ILI9341_LIGHTGREY 0xC618 /* 192, 192, 192 */
 #define ILI9341_DARKGREY 0x7BEF /* 128, 128, 128 */
 
-//#define DEBUG 1
-//enum serialpos={ALARM_=0,TIME_,PRESSURE_,FLUX_,VT_};
-//enum serialpos {TIME_=0,PRESSURE_,FLUX_,VT_,ALARM_};//ORIGINAL
 #define TIME_     0
 #define PRESSURE_ 1
 #define FLUX_     2

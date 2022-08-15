@@ -150,7 +150,6 @@ int endPressed ;      // the moment the button was released
 int holdTime ;        // how long the button was hold
 int idleTime ;        // how long the button was idle
 
-// CALIBRATION: TODO: MAKE A CLASS
 float vsupply_0 = 0.;
 float vlevel = 0.;
 
@@ -364,7 +363,6 @@ stepper = new FlexyStepper();
 
 
 byte pos;
-/////////////// CALIBRATION
 bool  calibration_run = true;
 byte  calib_cycle = 0;
 float vs;
@@ -457,7 +455,6 @@ void loop() {
       }
     }//Read Sensor
 
-//
     if (calibration_run) {
       vcorr_count += 1.;
       //According to datasheet
@@ -526,13 +523,7 @@ void loop() {
       }
 
       if (calibration_run) {
-      //NEW, CALIBRATION
         verror = verror_sum / float(vcorr_count);
-        
-//       Serial.println("Calibration iter, cycle, verror, sum: " + String(vcorr_count) + ", " +
-//                                                                  String(calib_cycle) + ", " +
-//                                                                  String(verror) + ", " +
-//                                                                  String(verror_sum_outcycle));
         vcorr_count = verror_sum = 0.;
         calib_cycle ++;
         verror_sum_outcycle += verror;

@@ -28,16 +28,13 @@ extern int startPressed ;    // the moment the button was pressed
 extern int endPressed ;      // the moment the button was released
 extern int holdTime ;        // how long the button was hold
 extern int idleTime ;        // how long the button was idle
-//bool bck_pressed;
 
 extern int curr_sel, old_curr_sel;
 extern byte encoderPos; //this variable stores our current value of encoder position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
 extern byte oldEncPos; //stores the last encoder position value so we can compare to the current reading and see if it has changed (so we know when to print to the serial monitor)
-//extern byte old_menu_pos,old_menu_num;
 extern bool show_changed_options; //Only for display
 extern bool update_options;
 extern char tempstr[5];
-//extern char tempstr2[5];
 extern byte menu_number;
 extern byte p_trim;
 
@@ -55,17 +52,13 @@ void check_bck_state();
 extern bool isitem_sel;
 
 class Menu{
-  
-  byte cant_opciones_mod;
-  byte opciones_mod[3];
-  
   public:
 
   Menu(){};
   ~Menu(){};
   
   
-  };
+};
   
 class Menu_inic:public Menu{
   byte _mod,_bpm,_i_e;  
@@ -79,7 +72,6 @@ class Menu_inic:public Menu{
     void Menu_inic::check_encoder ( );
     void Menu_inic::display_lcd ( );
     void check_bck_state();
-    
 };
 
 #endif

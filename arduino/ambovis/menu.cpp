@@ -327,7 +327,7 @@ void check_encoder ( ) {
            encoderPos=oldEncPos=max_sel; 
         } else if ( encoderPos < min_sel ) {
             encoderPos=oldEncPos=min_sel;
-          } else {
+        } else {
       
         oldEncPos = encoderPos;
 

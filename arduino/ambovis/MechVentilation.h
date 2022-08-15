@@ -76,7 +76,6 @@ public:
     /** Recruitment */
     void activateRecruitment(void);
     void deactivateRecruitment(void);
-//    byte _mode;
     /**
      * getters
      */
@@ -183,8 +182,6 @@ private:
     bool _running = false;
     bool _sensor_error_detected;
     bool _startWasTriggeredByPatient = false;
-    //float _currentFlow = 0.0;
-    //float _currentVolume = 0.0;
     float timeoutCycle;
 };
 
@@ -193,12 +190,8 @@ extern unsigned int _timeoutEsp;
 
 extern float _mlInsVol,_mlExsVol;
 extern int _mllastInsVol,_mllastExsVol;
-//extern float psec_max,last_psec_max;
-//extern unsigned long _msecTimerStartCycle; //CADA semiciclo
 extern bool display_needs_update;
 extern byte flux_count;
-//extern unsigned long flux_filter_time;
-//extern float flux_sum;
 extern VentilationOptions_t options;
 extern MechVentilation * ventilation;
 extern unsigned long last_cycle;
