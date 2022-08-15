@@ -13,9 +13,7 @@ enum _state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
 _state state;
 
 byte valsreaded=0;
-int valsreaded_[3];
 byte last_x=0;
-
 
 byte rx[128],ry[128];
 int yflux[2];
@@ -30,19 +28,15 @@ void tft_draw(void) {
     yflux[0]=yflux[1];yflux[1]=int(flow_f*0.035);
     yvt[0]=yvt[1];yvt[1]=int((_mlInsVol - _mlExsVol)*0.1);
 
-
     tft.setRotation(1);
     if (valsreaded > 0)
         drawY2(ILI9341_GREEN);
     valsreaded+=1;
 
     if (last_x>117 && !lcd_cleaned){//NO PONER UN VALOR MENOR QUE 10
-    		lcd_cleaned=true;
+        lcd_cleaned=true;
        //tft.fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
-
-    		valsreaded=0;
-    		for (int i=0;i<2;i++) 
-    		    valsreaded_[i]=0;
+        valsreaded=0;
         print_vols();
         print_bat();
         
@@ -70,25 +64,23 @@ void tft_draw(void) {
         tft.fillRect(0,0,60,100, ILI9341_BLACK); //FOR ALARMS, UPPER RIRHT
         tft.fillRect(0, 240 , 320, 10, ILI9341_GREEN);//x,y,lengthx,lentgthy
 
-		} else {
-		    lcd_cleaned=false;
-		}
+    } else {
+        lcd_cleaned=false;
+    }
 
-
-    
     check_alarms();
     
 }//loop
 
-void drawY2(uint16_t color){// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
+void drawY2(uint16_t color) {// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
   int x_start = 240 - (int) drawing_cycle * 120;
   if ( rx[valsreaded] > rx[valsreaded-1] ) {//to avoid draw entire line to the begining at the end of the cycle
     for (int i=0;i<2;i++)
       tft.drawLine(axispos[i], x_start - rx[valsreaded-1], axispos[i], x_start - rx[valsreaded], ILI9341_DARKGREY);           //X AXIS 
     tft.fillRect(MIN_CURVES_Y, x_start - rx[valsreaded] - 10, MAX_CURVES_Y, 10, ILI9341_BLUE);                                       //CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
 //
-    Serial.print("ry[valsreaded-1]");Serial.println(ry[valsreaded-1]);
-    Serial.print("ry[valsreaded]");Serial.println(ry[valsreaded]);
+//    Serial.print("ry[valsreaded-1]");Serial.println(ry[valsreaded-1]);
+//    Serial.print("ry[valsreaded]");Serial.println(ry[valsreaded]);
 //    if      (ry[valsreaded-1] > MAX_CURVES_Y) ry[valsreaded-1] = MAX_CURVES_Y;
 //    else if (ry[valsreaded-1] < 0) ry[valsreaded-1] = 0;
 //    if      (ry[valsreaded] > MAX_CURVES_Y) ry[valsreaded] = MAX_CURVES_Y;
@@ -149,7 +141,7 @@ void check_alarms(){
 }
 
 void print_bat() {
-    float level,level_perc;
+    float level;
     level=0.;
     tft.setRotation(0);
     //tft.fillRect(180,150,70,20, ILI9341_BLACK);//ONLY BAT LEVEL
@@ -164,17 +156,10 @@ void print_bat() {
     unsigned short count = 5;
     for (int i=0;i<count;i++) {
         level+=float(analogRead(PIN_BAT_LEV));
-        Serial.println(analogRead(PIN_BAT_LEV));
     }
     level*=fac/count;
-    if (level > 24.0) level_perc =100.;
-    else {
-        if (level > 22.0) level_perc = (level - 22.)/(24.-22.0) * 100.;
-        else              level_perc =0.;
-      }
-    //dtostrf(level_perc, 2, 0, buffer);
+
     dtostrf(level, 2, 1, buffer); //DEBUG
-    //dtostrf(level, 2, 1, buffer);
     Serial.print("Bat level: ");Serial.println(level);
     tft.setCursor(130, 260);tft.println("Bat:");
     tft.setCursor(180, 260);tft.println(buffer);

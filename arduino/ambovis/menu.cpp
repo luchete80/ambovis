@@ -560,18 +560,10 @@ void display_lcd ( ) {
     writeLine(0, String(tempstr), 16);
   
     writeLine(2, String(options.percInspEsp), 6);
-  
-    #ifdef DEBUG_UPDATE
-      Serial.print("Presion mostrada: ");Serial.println(pressure_max);
-    #endif
+
     dtostrf(last_pressure_max, 2, 0, tempstr);
     writeLine(1, String(tempstr), 16);  
-    
-    #ifdef DEBUG_UPDATE
-      Serial.print("Max press conv: ");Serial.println(tempstr);
-      Serial.print("Min Max press");  Serial.print(pressure_min);Serial.print(" ");Serial.println(pressure_max);
-    #endif
-      
+
     writeLine(2, "PEEP: ", 11);
     dtostrf(last_pressure_min, 2, 0, tempstr);
     writeLine(2, String(tempstr), 16);  
@@ -640,8 +632,6 @@ void display_lcd ( ) {
 
 }
 
-
-
 //////////////////////////////////////
 /////// MENU INICIAL /////////////////
 //////////////////////////////////////
@@ -659,7 +649,6 @@ Menu_inic::Menu_inic(byte *mode, byte *bpm, byte *i_e){
     //lcd_selxy(0,1);
     last_update_display=millis();
     while (!fin){
-        Serial.println("Inside loop");
         this->check_encoder();
         time=millis();
         if (show_changed_options && ((millis() - last_update_display) > 50) ) {
@@ -679,7 +668,6 @@ Menu_inic::Menu_inic(byte *mode, byte *bpm, byte *i_e){
 void Menu_inic::check_encoder ( ) {
     check_updn_button(PIN_MENU_DN,&encoderPos,true);   //Increment
     check_updn_button(PIN_MENU_UP,&encoderPos,false);  //Decrement
-    Serial.println("Encoder Pos: " +String( encoderPos) );
     pressed=0;  //0 nothing , 1 enter, 2 bck
     if (digitalRead(PIN_MENU_EN) == LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
         if (time - lastButtonPress > 150) {
@@ -699,104 +687,80 @@ void Menu_inic::check_encoder ( ) {
       }
                   
       if (isitem_sel) {
-          switch (m_curr_sel){
-            case 1: 
-             if ( menu_number == 0 ) {
-                    min_sel=1;max_sel=2;
-                    encoderPos=oldEncPos=vent_mode;
-                } 
+          switch (m_curr_sel) {
+            case 1:
+                min_sel=1;
+                max_sel=2;
+                encoderPos=oldEncPos=vent_mode;
             break;
-            case 2: 
-                if ( menu_number == 0 ) {
-                    encoderPos=oldEncPos=_bpm;
-                    min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
-                } 
+            case 2:
+                encoderPos=oldEncPos=_bpm;
+                min_sel=DEFAULT_MIN_RPM;
+                max_sel=DEFAULT_MAX_RPM;
             break;
             case 3:
-              if ( menu_number == 0 ) {
-                  encoderPos=oldEncPos=options.percInspEsp;
-                  min_sel=1;max_sel=3;   
-              } else if ( menu_number == 1 ) {
-                    encoderPos=byte(0.1*float(alarm_vt));
-                    min_sel=10;max_sel=50;//vt
-              } else if ( menu_number == 2 ) {
-                    encoderPos=min_accel/10; 
-                    min_sel=10;max_sel=100; 
-              } else if ( menu_number == 3 ){
-                        encoderPos=pfmax=50.*pf_max;
-                        min_sel=0;max_sel=99;
-                    }  
+                encoderPos=oldEncPos=options.percInspEsp;
+                min_sel=1;
+                max_sel=3;
             break;
-            case 4: 
-                if ( menu_number == 0 ) {
-                    fin=true;
-                }
+            case 4:
+                fin=true;
                 break;
-      }
+          }
     
         }//if switch select
-          show_changed_options = true;
-          update_options = true;
+        show_changed_options = true;
+        update_options = true;
   }//If selection
   
   if (oldEncPos != encoderPos) {
-    show_changed_options = true;
+      show_changed_options = true;
 
-    if (!isitem_sel) { //Selecting position
+      if (!isitem_sel) { //Selecting position
           m_curr_sel=encoderPos;
           encoderPos=oldEncPos=m_curr_sel;
 
-          if ( menu_number == 0 ) {
-              if (encoderPos > 4) {
-                  encoderPos=4;
-                  //menu_number+=1;
-              } else if ( encoderPos < 1) {
-                  encoderPos=1;
-                  //menu_number=3;
-              }
-          } 
-          clear_all_display=true;
-          display_lcd();
-    } else {//inside a particular selection
-     
-      //if (curr_sel != 0) {
-        if ( encoderPos > max_sel ) {
-           encoderPos=oldEncPos=max_sel; 
-        } else if ( encoderPos < min_sel ) {
-            encoderPos=oldEncPos=min_sel;
-          } else {
+          if (encoderPos > 4) {
+              encoderPos=4;
+          } else if ( encoderPos < 1) {
+              encoderPos=1;
+          }
+        clear_all_display=true;
+        display_lcd();
+  } else {//inside a particular selection
+
+      if ( encoderPos > max_sel ) {
+          encoderPos=oldEncPos=max_sel;
+      } else if ( encoderPos < min_sel ) {
+          encoderPos=oldEncPos=min_sel;
+      } else {
         
         oldEncPos = encoderPos;
         
             switch (m_curr_sel) {
               case 1:
-                if ( menu_number == 0 )       { _mod = encoderPos; }
+                 _mod = encoderPos;
                 break;
               case 2:
-                if ( menu_number == 0 )       { _bpm = encoderPos; }
+                _bpm = encoderPos;
                 break;
               case 3:
-                if ( menu_number == 0 )       { _i_e = encoderPos; }
-
+                _i_e = encoderPos;
                 break;
               case 4:
-                if ( menu_number == 0 ) {
-
-                }  
                 break;
 
             }//switch
             show_changed_options = true;
             update_options=true;
-          }//Valid range
+      }//Valid range
 
-    old_curr_sel = curr_sel;
-
+      old_curr_sel = curr_sel;
     }//oldEncPos != encoderPos and valid between range
   }
 }
 
-void Menu_inic::clear_n_sel(int menu){
+void Menu_inic::clear_n_sel(int menu) {
     if (menu==0) {  
         lcd_clearxy(0,0);
         lcd_clearxy(0,1);lcd_clearxy(9,0);
@@ -838,8 +802,7 @@ void Menu_inic::display_lcd ( ) {
     writeLine(3, "IE:  1:" + String(_i_e), 1);
     writeLine(3, "FIN: ", 13);
       
-  } 
-
+  }
 
   clear_all_display=false;
 

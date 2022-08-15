@@ -51,16 +51,7 @@ void check_bck_state();
 
 extern bool isitem_sel;
 
-class Menu{
-  public:
-
-  Menu(){};
-  ~Menu(){};
-  
-  
-};
-  
-class Menu_inic:public Menu{
+class Menu_inic {
   byte _mod,_bpm,_i_e;  
   unsigned long last_update_display;
   bool fin=false;

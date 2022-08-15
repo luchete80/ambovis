@@ -7,11 +7,9 @@
 #define ACCEL_STEPPER 1
 //#define DEBUG_PID 1
 //#define DEBUG_UPDATE  1
+//#define STEPPER_DIR 1
 #define DEBUG_STEPPER     1
-#define DEBUG_OFF 1 //Release version
 #define BUZZER_LOW 0
-
-#define BMP_I2C 1  //Pressure Sensor
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE                 20                                          // msec
@@ -24,25 +22,12 @@
 #define TIME_BUZZER 500
 #define TIME_MUTE   60000             //msec
 
-#define TIME_SEND_CONFIGURATION 2000 // msec
-#define V_HONEY_P0 	0.49874F //Analog/1023
-
-#define TIME_BUZZER 500
-
-// Sensores
-#define ENABLED_SENSOR_VOLUME 1
-#if ENABLED_SENSOR_VOLUME
-#endif
-
-
 #define STEPPER_MICROSTEPS 4
 #define STEPPER_STEPS_PER_REVOLUTION 200
 #define STEPPER_MICROSTEPS_PER_REVOLUTION (STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS)
-//#define STEPPER_DIR 1
+
 #define STEPPER_HOMING_DIRECTION    (1)
 #define STEPPER_HOMING_SPEED        (STEPPER_MICROSTEPS * 600)   // Steps/s
-//#define STEPPER_LOWEST_POSITION     (STEPPER_MICROSTEPS *  -100)   // Steps
-//#define STEPPER_HIGHEST_POSITION    (STEPPER_MICROSTEPS *   100)   // Steps
 #define STEPPER_LOWEST_POSITION     (-5)   // Steps
 #define STEPPER_HIGHEST_POSITION    ( 183 * STEPPER_MICROSTEPS)   //270º ,2500 for 270º, 2850 for 220º, 2930 for 330º
 #define STEPPER_SPEED_DEFAULT       (STEPPER_MICROSTEPS *  1500)   // Steps/s
@@ -53,23 +38,15 @@ extern int STEPPER_ACCEL_MAX;       //(1500 * STEPPER_MICROSTEPS)
 //#define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  2000)   // Steps/s2
 
 // Valores por defecto
-#define DEFAULT_HEIGHT 170 // cm
-#define DEFAULT_SEX 0 // 0: varón, 1: mujer
-#define DEFAULT_ML_POR_KG_DE_PESO_IDEAL 7
-#define DEFAULT_MAX_VTIDAL 800
-#define DEFAULT_MIN_VTIDAL 240
 #define DEFAULT_FRAC_CYCLE_VCL_INSUFF 0.75
 #define DEFAULT_TRIGGER_THRESHOLD 3.0
 #define DEFAULT_RPM 30
 #define DEFAULT_MAX_RPM 30
 #define DEFAULT_MIN_RPM 12
 #define DEFAULT_POR_INSPIRATORIO 33.3333F // %
-//#define DEFAULT_PEAK_INSPIRATORY_PRESSURE 25
+#define DEFAULT_PEAK_INSPIRATORY_PRESSURE 20.
 #define DEFAULT_PEAK_ESPIRATORY_PRESSURE 5
 
-#define V_SUPPLY_HONEY 5.0F
-
-#define DEFAULT_PRESSURE_V_FLUX_K1 1.
 // Presión
 #define DEFAULT_PA_TO_CM_H20 0.0102F
 #define DEFAULT_PSI_TO_CM_H20 70.306957F
@@ -77,9 +54,6 @@ extern int STEPPER_ACCEL_MAX;       //(1500 * STEPPER_MICROSTEPS)
 // Recruitment
 #define DEFAULT_RECRUITMENT_TIMEOUT 40000 // msec
 #define DEFAULT_RECRUITMENT_PIP 40
-
-// Alarmas
-#define ALARM_MIN_PRESSURE 1  // cm H2O
 
 // Válvula de emergencia
 #define VALVE_MAX_PRESSURE 60 // cm H2O
@@ -93,10 +67,6 @@ extern int PID_KP,PID_KI,PID_KD;
 
 #define PID_TS TIME_BASE
 #define PID_BANGBANG 8
-
-// Solenoid
-#define SOLENOID_CLOSED 0
-#define SOLENOID_OPEN 1
 
 class VentilationOptions_t {
 
@@ -142,9 +112,7 @@ extern unsigned long time;
 // Amp: (120 + 470)/120 = 4.9166666
 #define VOLTAGE_CONV   4.916666
 #define USING_1v1_4PRESS
-#define TIME_VOLTAGE_SENSOR 50                // msec
 
-#define VMIN_MPX            4.5               //For battery charge reference
 //Battery level voltage dividers
 #define BATDIV_R1           12000
 #define BATDIV_R2           470

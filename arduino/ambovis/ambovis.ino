@@ -210,7 +210,7 @@ void setup() {
 
   options.respiratoryRate = DEFAULT_RPM;
   options.percInspEsp = 2; //1:1 to 1:4, is denom
-  options.peakInspiratoryPressure = 20.;
+  options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
   options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
   options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
   options.hasTrigger = false;
@@ -331,10 +331,6 @@ stepper = new FlexyStepper();
   Timer1.initialize(TIME_BASE_MICROS);  //BEFORE WERE 20...
   Timer1.attachInterrupt(timer1Isr);
 
-#ifdef DEBUG_UPDATE
-  Serial.print("Honey Volt at p0: "); Serial.println(analogRead(A0) / 1023.);
-#endif
-  Serial.println("Reading ROM");
   read_memory();
 
   f_acc = (float)f_acc_b / 10.;
@@ -517,26 +513,22 @@ void loop() {
 #endif
       if (!digitalRead(PIN_POWEROFF)) {
         digitalWrite(YELLOW_LED, HIGH);
-        Serial.println("Poweroff");
       } else {
         digitalWrite(YELLOW_LED, LOW);
       }
 
+      verror = verror_sum / float(vcorr_count);
+      vcorr_count = verror_sum = 0.;
+
       if (calibration_run) {
-        verror = verror_sum / float(vcorr_count);
-        vcorr_count = verror_sum = 0.;
         calib_cycle ++;
         verror_sum_outcycle += verror;
-        if (calib_cycle >= CALIB_CYCLES ){
+        if (calib_cycle >= CALIB_CYCLES ) {
           calibration_run = false;
           vzero = verror_sum_outcycle / float(CALIB_CYCLES);
           Serial.println("Calibration verror: " + String(vzero));
           lcd.clear();
-
-      }
-    } else {
-        verror = verror_sum / float(vcorr_count);
-        vcorr_count = verror_sum = 0.;
+        }
       }
     
     }//change cycle
