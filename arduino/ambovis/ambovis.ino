@@ -73,7 +73,6 @@ float _flux;
 float flow_f;
 float _flux_fil[5];
 float _flux_sum;
-byte flux_count;
 
 char tempstr[5];
 int curr_sel, old_curr_sel;
@@ -420,7 +419,6 @@ void loop() {
       _flux *= 16.6667;
 
       if (filter) {
-        flux_count++;    //Filter
         for (int i = 0; i < 4; i++) {
           _flux_fil[i] = _flux_fil[i + 1];
         }

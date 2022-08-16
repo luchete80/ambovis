@@ -191,7 +191,6 @@ extern unsigned int _timeoutEsp;
 extern float _mlInsVol,_mlExsVol;
 extern int _mllastInsVol,_mllastExsVol;
 extern bool display_needs_update;
-extern byte flux_count;
 extern VentilationOptions_t options;
 extern MechVentilation * ventilation;
 extern unsigned long last_cycle;

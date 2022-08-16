@@ -175,13 +175,6 @@ void MechVentilation :: update ( void )
     case Init_Insufflation:
     {
 
-        //Filter vars
-        #ifdef FLUX_FILTER
-//        flux_filter_time=millis();
-        flux_count=0;
-        //flux_sum=0;
-        #endif
-
         last_pressure_max=pressure_max;
         last_pressure_min=pressure_min;
         pressure_max=0;
@@ -227,13 +220,7 @@ void MechVentilation :: update ( void )
           _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
         } 
         #endif
-//        
-//        _pid->reset();
-//
-//#if DEBUG_STATE_MACHINE
-//        debugMsg[debugMsgCounter++] = "State: InitInsuflation at " + String(millis());
-//#endif
-//
+
         /* Status update, reset timer, for next time, and reset PID integrator to zero */
         _setState(State_Insufflation);
 
