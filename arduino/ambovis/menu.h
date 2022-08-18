@@ -44,12 +44,12 @@ extern byte p_trim;
 void writeLine(int line, String message = "", int offsetLeft = 0);
 void lcd_clearxy(int x, int y,int pos=1);
 void lcd_selxy(int x, int y);
-void check_encoder();
-void display_lcd ();
+void check_encoder(SystemState& systemState);
+void display_lcd (SystemState& systemState);
 void init_display();
 
 void check_updn_button(int pin, byte *var, bool incr_decr);
-void check_bck_state();
+void check_bck_state(SystemState& systemState);
 
 extern bool isitem_sel;
 

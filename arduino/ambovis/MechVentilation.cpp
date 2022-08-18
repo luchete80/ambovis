@@ -32,9 +32,10 @@ byte  p_acc;
 bool ended_whilemov;
 
 MechVentilation::MechVentilation(
+        #if TESTING_MODE_DISABLED
         #ifdef ACCEL_STEPPER
         AccelStepper *stepper,
-      #else
+        #else
         FlexyStepper *stepper,
       #endif
     AutoPID *pid,
@@ -77,6 +78,10 @@ void MechVentilation::start(void)
 void MechVentilation::stop(void)
 {
     _running = false;
+}
+
+bool MechVentilation::isRunning() {
+    return _running;
 }
 
 uint8_t MechVentilation::getRPM(void)
@@ -122,9 +127,12 @@ void MechVentilation::setPeakEspiratoryPressure(float peep) {
     _peep = peep;
 }
 
+float MechVentilation::getTimeoutCycle() {
+    return timeoutCycle;
+}
+
 void MechVentilation::_setInspiratoryCycle(void) {
     timeoutCycle = ((float)60) * 1000.0f / ((float)_rpm); // Tiempo de ciclo en msegundos
-    //_timeoutIns = timeoutCycle * DEFAULT_POR_INSPIRATORIO / 100;
     _timeoutIns = timeoutCycle / (float(_percIE+1));
     _timeoutEsp = (timeoutCycle) - _timeoutIns;    
   #ifdef DEBUG_UPDATE
@@ -134,8 +142,6 @@ void MechVentilation::_setInspiratoryCycle(void) {
   #endif
     
 }
-
-      
 
 void MechVentilation::activateRecruitment(void)
 {
@@ -157,8 +163,8 @@ void MechVentilation::deactivateRecruitment(void)
 /**
  * It's called from timer1Isr
  */
-void MechVentilation :: update ( void )
-{
+void MechVentilation :: update (SystemState& systemState) {
+
     last_vent_time = millis();
     
     static int totalCyclesInThisState = 0;
@@ -172,11 +178,14 @@ void MechVentilation :: update ( void )
 
   _msecTimerCnt=(unsigned long)(millis()-_msecTimerStartCycle);
   
-  cycle_pos=byte( (float) ( (_msecTimerCnt)/(float)timeoutCycle * 127.0f) );
   int extra_time=0;
-  if (_currentState == State_Exsufflation) extra_time=_timeoutIns;
+  if (_currentState == State_Exsufflation) {
+      extra_time=_timeoutIns;
+  }
+
   cycle_pos=byte( (float) ( (_msecTimerCnt+(float)extra_time)/(float)timeoutCycle * 127.0f) );
 
+<<<<<<< HEAD
 //    if (pressures.state != SensorStateOK)
 //    {                                  // Sensor error detected: return to zero position and continue from there
 //        _sensor_error_detected = true; //An error was detected in sensors
@@ -220,63 +229,82 @@ void MechVentilation :: update ( void )
         last_pressure_min=pressure_min;
         pressure_max=0;
         pressure_min=60;
+=======
+    switch (_currentState) {
+    case Init_Insufflation:
+    {
+        last_pressure_max = pressure_max;
+        last_pressure_min = pressure_min;
+        pressure_max = 0;
+        pressure_min = 60;
+>>>>>>> 259c12fc297d1cc339133fbd12eaf4c500b7715a
 
         // Close Solenoid Valve
-
         totalCyclesInThisState = (_timeoutIns) / TIME_BASE;
 
         _msecTimerStartCycle=millis();  //Luciano
         
-        for (int i=0;i<2;i++) Cdyn_pass[i]=Cdyn_pass[i+1];
-        Cdyn_pass[2]=_mllastInsVol/(last_pressure_max-last_pressure_min);
-        Cdyn=(Cdyn_pass[0]+Cdyn_pass[1]+Cdyn_pass[2])/3.;
+        for(int i=0;i<2;i++) {
+            Cdyn_pass[i]=Cdyn_pass[i+1];
+        }
+        Cdyn_pass[2]=_mllastInsVol/(last_pressure_max - last_pressure_min);
+        Cdyn = (Cdyn_pass[0]+Cdyn_pass[1]+Cdyn_pass[2])/3.;
         _mllastInsVol=int(_mlInsVol);
         _mllastExsVol=int(fabs(_mlExsVol));
-        
-        //_mlInsVol2=0;
+
         _mlInsVol=0.;
         _mlExsVol=0.;
         
         wait_NoMove=false;
-        /* Stepper control: set acceleration and end-position */
 
         #ifdef ACCEL_STEPPER
+        #if TESTING_MODE_DISABLED
         _stepper->setSpeed(STEPPER_SPEED_MAX);
         _stepper->moveTo(-STEPPER_HIGHEST_POSITION);
         _stepper->setAcceleration(STEPPER_ACCEL_MAX);
+        #endif //TESTING_MODE_DISABLED
         #else
         // Note: this can only be called when the motor is stopped
         //IMPORTANT FROM https://github.com/Stan-Reifel/FlexyStepper/blob/master/Documentation.md
+        #if TESTING_MODE_DISABLED
         _stepper->setSpeedInStepsPerSecond(STEPPER_SPEED_DEFAULT);
         _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_INSUFFLATION);
+        #endif //TESTING_MODE_DISABLED
 
-        if (vent_mode!=VENTMODE_MAN)  //VCL && PCL
-          _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
-        else { //MANUAL MODE
-          _stepper->setTargetPositionInSteps(int (STEPPER_HIGHEST_POSITION*(float)_percVol/100.));
-          _stepperSpeed = 1.1 * STEPPER_HIGHEST_POSITION*(float(_percVol)*0.01)/( (float)(_timeoutIns*0.001) * DEFAULT_FRAC_CYCLE_VCL_INSUFF);//En [ml/s]
-          
+        if (systemState.vent_mode!=VENTMODE_MAN)  {//VCL && PCL
+            #if TESTING_MODE_DISABLED
+            _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
+            #endif //TESTING_MODE_DISABLED
+        } else { //MANUAL MODE
+            long absPositionInSteps = int (STEPPER_HIGHEST_POSITION*(float)_percVol/100.);
+
+            #if TESTING_MODE_DISABLED
+            _stepper->setTargetPositionInSteps(absPositionInSteps);
+            #endif //TESTING_MODE_DISABLED
+            _stepperSpeed = 1.1 * STEPPER_HIGHEST_POSITION*(float(_percVol)*0.01)/( (float)(_timeoutIns*0.001) * DEFAULT_FRAC_CYCLE_VCL_INSUFF);//En [ml/s]
+
         #ifdef DEBUG_UPDATE
           Serial.print("Manual mode Timeout ins , speed: ");Serial.print(_timeoutIns);Serial.print(" ");Serial.println(_stepperSpeed);
         #endif
+        #if TESTING_MODE_DISABLED
           _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCEL_MAX);
-          if (_stepperSpeed>STEPPER_SPEED_MAX)
-            _stepperSpeed=STEPPER_SPEED_MAX;
-          _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
-        } 
-        #endif
-//        
+        #endif //TESTING_MODE_DISABLED
+          if (_stepperSpeed>STEPPER_SPEED_MAX){
+                _stepperSpeed=STEPPER_SPEED_MAX;
+            }
+            #if TESTING_MODE_DISABLED
+            _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
+            #endif //TESTING_MODE_DISABLED
+        }
+        #endif //ACCEL_STEPPER
+
 //        _pid->reset();
-//
-//#if DEBUG_STATE_MACHINE
-//        debugMsg[debugMsgCounter++] = "State: InitInsuflation at " + String(millis());
-//#endif
-//
+
         /* Status update, reset timer, for next time, and reset PID integrator to zero */
         _setState(State_Insufflation);
 
         currentTime = millis();
-        display_needs_update=true;
+        systemState.display_needs_update = true;
 //      
 //      if (vent_mode==VENTMODE_PCL){
 //      if (autopid) {
@@ -357,6 +385,7 @@ void MechVentilation :: update ( void )
         //if (currentTime > totalCyclesInThisState)
         if(_msecTimerCnt > _timeoutIns)
         {
+            #if TESTING_MODE_DISABLED
             #ifdef ACCEL_STEPPER
             if (_stepper->distanceToGo() != 0 )
             #else
@@ -364,23 +393,12 @@ void MechVentilation :: update ( void )
             #endif
             {
                 curr_ended_whilemov = true;
-                // motor not finished, force motor to stop in current position
-                //_stepper->setTargetPositionInSteps(_stepper->getCurrentPositionInSteps());
-                //MODIFIED
-//                #ifdef ACCEL_STEPPER
-//                _stepper->stop(); 
-//                #else 
-//                _stepper->setTargetPositionToStop();
-//                #endif
-                
-//                
-                //#ifdef DEBUG_UPDATE
                 Serial.println("ENDED TIME WHILE MOVING");
-                //#endif
             }
             else {
               Serial.println("Motion Complete");
-              }
+            }
+            #endif //TESTING_MODE_DISABLED
             _setState(Init_Exsufflation);
             if (_recruitmentMode) {
                 deactivateRecruitment();
@@ -472,12 +490,6 @@ void MechVentilation :: update ( void )
       Serial.println("ended_whilemov: " + String(ended_whilemov ));
       
       _msecTimerStartCycle=millis();
-      //Serial.print("Current pressure");Serial.println(_currentPressure);
-      
-//#if DEBUG_UPDATE
-//        Serial.println("Starting exsuflation");
-//#endif
-
         totalCyclesInThisState = _timeoutEsp / TIME_BASE;
 
 #if DEBUG_STATE_MACHINE
@@ -485,37 +497,21 @@ void MechVentilation :: update ( void )
 #endif
 
         /* Stepper control*/
+        #if TESTING_MODE_DISABLED
         #ifdef ACCEL_STEPPER
         _stepper->setAcceleration(STEPPER_ACCEL_MAX);
         _stepper->setSpeed(STEPPER_SPEED_EXSUFF);
         _stepper->moveTo(STEPPER_LOWEST_POSITION);
-      #ifdef DEBUG_STEPPER
-      unsigned long reltime = ventilation->getMSecTimerCnt();
-      Serial.print("Exsuff. Rel Msec: ");Serial.print(reltime);Serial.print(", Abs: ");
-      Serial.println(time);
-      #endif
         #else
         _stepper->setSpeedInStepsPerSecond(STEPPER_SPEED_EXSUFF);
         _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCEL_MAX);//EXSUFF NO SE UTILIZA MAS; ES LA MAXIMA
-        //LUCIANO
-        //_stepper->setTargetPositionInSteps(
-          //  STEPPER_DIR * (STEPPER_LOWEST_POSITION));
-          _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
-        //---------------------LUCIANO
-
-          #endif
-          
-#if DEBUG_STATE_MACHINE
-        debugMsg[debugMsgCounter++] = "Motor: to exsuflation at " + String(millis());
-#endif
-
+        _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
+        #endif
         _pid->reset();
+        #endif// TESTING_MODE_DISABLED
 
         /* Status update and reset timer, for next time */
         _setState(State_Exsufflation);
-    
-        //display_needs_update=true;
-        //last_pressure_max=pressure_max;
     }
     break;
     case State_Exsufflation:
@@ -560,6 +556,7 @@ void MechVentilation :: update ( void )
         ////////////////////////////////*** ORIGINAL
 
         //////////////////// NEW //////////////////////////
+        #if TESTING_MODE_DISABLED
         #ifdef ACCEL_STEPPER
          if (_stepper->currentPosition()==STEPPER_LOWEST_POSITION) 
             /// in steps. Positive is clockwise from the 0 position.
@@ -567,36 +564,15 @@ void MechVentilation :: update ( void )
         if (_stepper->getCurrentPositionInSteps()==STEPPER_LOWEST_POSITION) 
         #endif
         {
-        
+
             _setState(Init_Insufflation);
-            //_startWasTriggeredByPatient = false;
-      #ifdef DEBUG_STEPPER
-      unsigned long reltime = ventilation->getMSecTimerCnt();
-      Serial.print("End Exsuff. Rel Msec: ");Serial.print(reltime);Serial.print(", Abs: ");
-      Serial.print(time);Serial.print(" Exsuff time: ");Serial.println(_timeoutEsp);
-      #endif
-      
             _msecTimerStartCycle=millis();
             _cyclenum++;  //THIS ALWAYS SGOULD BE PRESENT
           }
-        /////////////////// NEW ///////////////////////////
-        } else    //Time hasnot expired
-        {
-//            _pid->run(pressure_p, (float)_peep, &_stepperSpeed);
-//            _pid->run(float(pressure_p-pressure_p0), (float)_peep, &_stepperSpeed);
-//LUCIANO
-//              _stepper->setSpeedInStepsPerSecond(4000);
-             // Serial.println(_stepperSpeed);
-//            if (_stepperSpeed >= 0)
-//                _stepper->setTargetPositionInSteps(STEPPER_LOWEST_POSITION);
-//            else
-//                _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
-
-
+          #endif //TESTING_MODE_DISABLED
         }
     }
     break;
-
     case State_Homing:
     {
         // Open Solenoid Valve
@@ -621,15 +597,8 @@ void MechVentilation :: update ( void )
 //        Now is homing without setting
         if (digitalRead(PIN_ENDSTOP))
         {
-
-
-
+            #if TESTING_MODE_DISABLED
             /* Stepper control: homming */
-            #if DEBUG_UPDATE
-            //Serial.println("Attempting homing...");
-            #endif
-//            bool moveToHomeInSteps(long directionTowardHome, 
-//  float speedInStepsPerSecond, long maxDistanceToMoveInSteps, int homeLimitSwitchPin)
             if (_stepper->moveToHomeInSteps(
                     STEPPER_HOMING_DIRECTION,
                     STEPPER_HOMING_SPEED,
@@ -643,14 +612,13 @@ void MechVentilation :: update ( void )
               //_stepper->setCurrentPositionInSteps(int(STEPPER_HIGHEST_POSITION*0.12));
               
               }
-            
+            #endif//TESTING_MODE_DISABLED
         }
         else{
 #if DEBUG_UPDATE
            Serial.println("No end stop detected.");
 #endif
         }
-    
       #endif//ACCEL_STEPPER
         
         /* Status update and reset timer, for next time */
@@ -658,12 +626,6 @@ void MechVentilation :: update ( void )
         _setState(Init_Insufflation);
     }
     break;
-//
-//    case State_Error:
-//        break;
-//    default:
-//        //TODO
-//        break;
     }
 
     }//!stopped
@@ -671,6 +633,7 @@ void MechVentilation :: update ( void )
 }//update
 
 void MechVentilation::_init(
+        #if TESTING_MODE_DISABLED
 #ifdef ACCEL_STEPPER
     AccelStepper *stepper,
 #else
@@ -679,10 +642,15 @@ void MechVentilation::_init(
 
     AutoPID *pid,
     VentilationOptions_t options)
+        #else
+        VentilationOptions_t options)
+        #endif//TESTING_MODE_DISABLED
 {
     /* Set configuration parameters */
+    #if TESTING_MODE_DISABLED
     _stepper = stepper;
     _pid = pid;
+    #endif //TESTING_MODE_DISABLED
     _rpm = options.respiratoryRate;
     _pip = options.peakInspiratoryPressure;
     _peep = options.peakEspiratoryPressure;
@@ -706,13 +674,13 @@ void MechVentilation::_init(
     _stepperSpeed = STEPPER_SPEED_DEFAULT;
     //
     // connect and configure the stepper motor to its IO pins
-    //
-    //;
+    #if TESTING_MODE_DISABLED
     #ifdef ACCEL_STEPPER
     #else
     _stepper->connectToPins(PIN_STEPPER_STEP, PIN_STEPPER_DIRECTION);
     _stepper->setStepsPerRevolution(1600);
     #endif
+    #endif //TESTING_MODE_DISABLED
 
     _sensor_error_detected = false;
 }
