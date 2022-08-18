@@ -20,5 +20,7 @@
 					Se corrige por hw la alarma y se cambian cosas de display.
 20220818 - SE CORRIGE ERROR CRITICO DE CALIBRACION.
 					  La suma de mediciones estaba afuera del loop de medicion.
+					  Se agrega apagado y encendeido del driver en modo sleep  / wake up
+					  Se apaga pin de LCD y TFT en displays. (Sin embargo queda el de contraste de LCD).
 					  
 					

@@ -481,9 +481,13 @@ void loop() {
 
   if (!sleep_mode) {
     if (wake_up) {
+      digitalWrite(PIN_STEPPER, HIGH);
+      digitalWrite(TFT_SLEEP, HIGH);
+      digitalWrite(LCD_SLEEP, HIGH);
       lcd.clear();
       init_display();
       display_lcd();    //TODO: Pass mech vent as argument in display
+      tft.begin();
       tft.fillScreen(ILI9341_BLACK);
       wake_up = false;
       ventilation->forceStart();
@@ -746,13 +750,14 @@ void loop() {
     //! sleep_mode
   } else {
     if (put_to_sleep) {
-      tft.fillScreen(ILI9341_BLACK);
+      //tft.fillScreen(ILI9341_BLACK);
       digitalWrite(PIN_LCD_EN, HIGH);
       put_to_sleep = false;
       print_bat_time = time;
       print_bat();
       digitalWrite(LCD_SLEEP, LOW);
       digitalWrite(TFT_SLEEP, LOW);
+      digitalWrite(PIN_STEPPER, LOW);
       ventilation->forceStop();
       //digitalWrite(PIN_BUZZER, !BUZZER_LOW); //Buzzer inverted
       lcd.clear();
