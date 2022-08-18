@@ -589,20 +589,21 @@ void loop() {
       if (pressure_p < pressure_min) {
         pressure_min = pressure_p;
       }
+      if (calibration_run) {
+        vcorr_count ++;
+        //According to datasheet
+        //vout = vs(0.09*P + 0.04) +/ERR
+        verror_sum += ( Voltage - 0.04 * vs); //-5*0.04
+        //Serial.println("Calibration sum: "+ String(verror_sum));
+        Serial.println("readed: "+ String(Voltage - 0.04 * vs));
+      } 
+//      else { //This sums the feed error
+//          verror_sum += vlevel;       // -5*0.04
+//          vcorr_count ++;
+//      }
+      
     }//Read Sensor
 
-//
-    if (calibration_run) {
-      vcorr_count ++;
-      //According to datasheet
-      //vout = vs(0.09*P + 0.04) +/ERR
-      verror_sum += ( Voltage - 0.04 * vs); //-5*0.04
-      Serial.println("Calibration sum: "+ String(verror_sum));
-      Serial.println("readed: "+ String(Voltage - 0.04 * vs));
-    } else { //This sums the feed error
-        verror_sum += vlevel;       // -5*0.04
-        vcorr_count ++;
-      }
     
     if (alarm_vt) {
 
@@ -678,16 +679,17 @@ void loop() {
           verror_sum_outcycle += verror;
         if (calib_cycle >= CALIB_CYCLES ){
           calibration_run = false;
-          vzero = verror_sum_outcycle / float(CALIB_CYCLES-1);
+          vzero = verror_sum_outcycle / float(CALIB_CYCLES);
           Serial.println("Calibration verror: " + String(vzero));
           lcd.clear();
           tft.fillScreen(ILI9341_BLACK);
 
       }
-    } else {
-        verror = verror_sum / float(vcorr_count);
-        vcorr_count = verror_sum = 0.;
-      }
+    } 
+//    else {
+//        verror = verror_sum / float(vcorr_count);
+//        vcorr_count = verror_sum = 0.;
+//      }
     
     }//change cycle
 

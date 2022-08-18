@@ -18,5 +18,7 @@
 20220804 - Se limpia el tft al comienzo y se muestra mensaje. 
 20220811 - Sleep Mode. Se detiene ahora el motor en sleep. 
 					Se corrige por hw la alarma y se cambian cosas de display.
-					
+20220818 - SE CORRIGE ERROR CRITICO DE CALIBRACION.
+					  La suma de mediciones estaba afuera del loop de medicion.
+					  
 					
