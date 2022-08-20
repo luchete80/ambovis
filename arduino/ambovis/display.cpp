@@ -2,7 +2,8 @@
 #include "MechVentilation.h"
 
 #define MIN_CURVES_Y    60
-#define MAX_CURVES_Y    180
+#define MAX_CURVES_Y    250
+#define CLEAN_Y         200
 #define LEGEND_Y        260 //Begining of the legend on Y AXIS
 bool lcd_cleaned=false;
 int axispos[]={130,200}; //from each graph, from 0 to 320 (display height, IN PORTRAIT MODE)
@@ -50,7 +51,7 @@ void tft_draw(void) {
         
         dtostrf(vlevel, 1, 2, buffer);
         tft.setCursor(100, 80);tft.println("Vmpx:");
-        tft.fillRect(180,80,50,50, ILI9341_BLUE);
+        tft.fillRect(180,80,50,50, ILI9341_BLACK);
         tft.setCursor(180, 80);tft.println(buffer);
         
         drawing_cycle = !drawing_cycle;
@@ -76,16 +77,20 @@ void tft_draw(void) {
 void drawY2(uint16_t color) {// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
   int x_start = 240 - (int) drawing_cycle * 120;
   if ( rx[valsreaded] > rx[valsreaded-1] ) {//to avoid draw entire line to the begining at the end of the cycle
-    for (int i=0;i<2;i++) {
-        tft.drawLine(axispos[i], x_start - rx[valsreaded-1], axispos[i], x_start - rx[valsreaded], ILI9341_DARKGREY);          //X AXIS
-    }
-    tft.fillRect(MIN_CURVES_Y, x_start - rx[valsreaded] - 10, MAX_CURVES_Y, 10, ILI9341_BLUE);                                       //CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
+    for (int i=0;i<2;i++)
+      tft.drawLine(axispos[i], x_start - rx[valsreaded-1], axispos[i], x_start - rx[valsreaded], ILI9341_DARKGREY);           //X AXIS 
+    tft.fillRect(MIN_CURVES_Y, x_start - rx[valsreaded] - 10, CLEAN_Y, 10, ILI9341_BLACK);                                //CLEAN PREVIOUS CURVE x,y,lengthx,lentgthy
+    //Serial.print("ry[valsreaded-1]");Serial.println(ry[valsreaded-1]);
+    //Serial.print("ry[valsreaded ]");Serial.println(ry[valsreaded ]);
 //
 //    Serial.print("ry[valsreaded-1]");Serial.println(ry[valsreaded-1]);
 //    Serial.print("ry[valsreaded]");Serial.println(ry[valsreaded]);
-//    if      (ry[valsreaded-1] > MAX_CURVES_Y) ry[valsreaded-1] = MAX_CURVES_Y;
+      if      (ry[valsreaded] > 250 || ry[valsreaded-1] > 250 ){
+        ry[valsreaded -1 ] = ry[valsreaded] = 0;
+      }
+      //if      (ry[valsreaded-1] > MAX_CURVES_Y) ry[valsreaded-1] = MAX_CURVES_Y;
 //    else if (ry[valsreaded-1] < 0) ry[valsreaded-1] = 0;
-//    if      (ry[valsreaded] > MAX_CURVES_Y) ry[valsreaded] = MAX_CURVES_Y;
+      //if      (ry[valsreaded] > MAX_CURVES_Y) ry[valsreaded] = MAX_CURVES_Y;
 //    else if (ry[valsreaded] < 0)            ry[valsreaded] = 0;
 //    if      (ry[valsreaded] > MAX_CURVES_Y)   ry[valsreaded] = MAX_CURVES_Y;
 //    else if (ry[valsreaded] < MIN_CURVES_Y)   ry[valsreaded] = MIN_CURVES_Y;
@@ -150,7 +155,7 @@ void print_bat() {
     float fdiv = (float)(BATDIV_R1 + BATDIV_R2)/(float)BATDIV_R2;
     tft.fillRect(180,250,70,50, ILI9341_BLACK);
     float fac=1.1/1024.*fdiv;  //5./(1024.*0.175)
-    
+
     //Vt > 24V   =>   PC = 100%
     //Vmin < Vt < 24V   =>   PC[%] = (Vt[V]-Vmin)/(24-Vmin)*100
     //Vt < Vmin   =>   PC = 0%
@@ -172,7 +177,7 @@ void print_bat() {
 void print_vols() {
     
     tft.setRotation(0);
-    tft.fillRect(40,LEGEND_Y,40,80, ILI9341_RED); //Here x is the first value (in the less width dimension)
+    tft.fillRect(40,LEGEND_Y,60,80, ILI9341_BLACK); //Here x is the first value (in the less width dimension)
 
     itoa(_mllastInsVol, buffer, 10);
     tft.setCursor(0, LEGEND_Y); //Before: 150,180 at right 

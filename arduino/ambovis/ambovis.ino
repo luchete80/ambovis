@@ -17,6 +17,7 @@ bool filter;
 bool sleep_mode;
 bool put_to_sleep, wake_up;
 unsigned long print_bat_time;
+bool motor_stopped;
 
 bool drawing_cycle = 0;
 
@@ -201,11 +202,23 @@ void setup() {
 
   delay(100);
 
+  if (!digitalRead(PIN_POWEROFF)) {
+    digitalWrite(YELLOW_LED, HIGH);
+    Serial.println("Poweroff");
+  }
+
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
   writeLine(1, "RespirAR FIUBA", 4);
   writeLine(2, "v2.0.2", 8);
+
+  tft.begin();
+  tft.fillScreen(ILI9341_BLACK);
+  tft.setTextColor(ILI9341_BLUE);
+  tft.setTextSize(4); 
+  tft.setCursor(10, 40);     tft.println("RespirAR");   
+  tft.setCursor(10, 80);     tft.println("FIUBA");
 
   ads.begin();
   for (int i = 0; i < 100; i++) {
@@ -229,7 +242,7 @@ void setup() {
   writeLine(1, "Desconecte flujo", 0);
   writeLine(2, "y presione ok ", 0);
 
-  delay (1000); //Otherwise low enter button readed
+  delay (100); //Otherwise low enter button readed
   lastButtonPress = millis();
   while (!fin) {
     if (digitalRead(PIN_MENU_EN) == LOW)
@@ -252,6 +265,8 @@ void setup() {
     pid,
     options
   );
+
+  tft.fillScreen(ILI9341_BLACK);
 
   // configura la ventilación
   ventilation -> start();
@@ -309,8 +324,6 @@ void setup() {
 
   ventilation->setCycleNum(last_cycle);
 
-  tft.begin();
-
   digitalWrite(BCK_LED, LOW);
   buzzmuted = false;
   last_mute = HIGH;
@@ -337,11 +350,16 @@ void loop() {
 
   if (!sleep_mode) {
     if (wake_up) {
+      digitalWrite(PIN_STEPPER, HIGH);
+      digitalWrite(TFT_SLEEP, HIGH);
+      digitalWrite(LCD_SLEEP, HIGH);
       lcd.clear();
       init_display();
       display_lcd();
+      tft.begin();
       tft.fillScreen(ILI9341_BLACK);
       wake_up = false;
+      ventilation->forceStart();
     }
     State state = ventilation->getState();
     check_encoder();
@@ -411,18 +429,20 @@ void loop() {
       if (pressure_p < pressure_min) {
         pressure_min = pressure_p;
       }
+      if (calibration_run) {
+        vcorr_count ++;
+        //According to datasheet
+        //vout = vs(0.09*P + 0.04) +/ERR
+        verror_sum += ( Voltage - 0.04 * vs); //-5*0.04
+        //Serial.println("Calibration sum: "+ String(verror_sum));
+        Serial.println("readed: "+ String(Voltage - 0.04 * vs));
+      } 
+//      else { //This sums the feed error
+//          verror_sum += vlevel;       // -5*0.04
+//          vcorr_count ++;
+//      }
+      
     }//Read Sensor
-
-    if (calibration_run) {
-      vcorr_count += 1.;
-      //According to datasheet
-      //vout = vs(0.09*P + 0.04) +/ERR
-      verror_sum += ( Voltage - 0.04 * vs); //-5*0.04
-      Serial.println("Calibration sum: "+ String(verror_sum));
-    } else { //This sums the feed error
-        verror_sum += vlevel;       // -5*0.04
-        vcorr_count += 1.;
-    }
 
     if ( ventilation -> getCycleNum () != last_cycle ) {
       int vt = (_mllastInsVol + _mllastInsVol) / 2;
@@ -486,12 +506,15 @@ void loop() {
         calib_cycle ++;
         verror_sum_outcycle += verror;
         if (calib_cycle >= CALIB_CYCLES ) {
+
           calibration_run = false;
           vzero = verror_sum_outcycle / float(CALIB_CYCLES);
           Serial.println("Calibration verror: " + String(vzero));
           lcd.clear();
-        }
+          tft.fillScreen(ILI9341_BLACK);
+
       }
+    }
     
     }//change cycle
 
@@ -539,12 +562,16 @@ void loop() {
     //! sleep_mode
   } else {
     if (put_to_sleep) {
-      tft.fillScreen(ILI9341_BLACK);
+      //tft.fillScreen(ILI9341_BLACK);
       digitalWrite(PIN_LCD_EN, HIGH);
       put_to_sleep = false;
       print_bat_time = time;
       print_bat();
-      digitalWrite(PIN_BUZZER, !BUZZER_LOW); //Buzzer inverted
+      digitalWrite(LCD_SLEEP, LOW);
+      digitalWrite(TFT_SLEEP, LOW);
+      digitalWrite(PIN_STEPPER, LOW);
+      ventilation->forceStop();
+      //digitalWrite(PIN_BUZZER, !BUZZER_LOW); //Buzzer inverted
       lcd.clear();
     }
     if (time > print_bat_time + 5000) {

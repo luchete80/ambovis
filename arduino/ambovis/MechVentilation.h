@@ -85,6 +85,9 @@ public:
     short getInsuflationTime(void);
     short getPeakInspiratoryPressure(void);
     short getPeakEspiratoryPressure(void);
+    void forceStop(){force_stop = true;};
+    void forceStart(){force_start = true;};
+    bool  force_stop, stopped,force_start;
     State getState(void);
     /**
      * setters
@@ -129,6 +132,7 @@ private:
     void _decreaseInsuflation (byte factor);
 #endif
     void _setInspiratoryCycle(void);
+    
 
 
     /* Configuration parameters */

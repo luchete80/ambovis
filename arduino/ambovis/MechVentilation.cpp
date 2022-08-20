@@ -36,6 +36,9 @@ MechVentilation::MechVentilation(
         stepper,
         pid,
         options);
+        force_stop = false;
+        stopped = false;
+        force_start = false;
 }
 
 //TODO: use this method to play a beep in main loop, 1 second long for example.
@@ -168,11 +171,21 @@ void MechVentilation :: update ( void )
 //    else {
 //        _sensor_error_detected = false; //clear flag
 //    }
-
+    if (force_start) {
+      stopped=false;
+      force_start = false;
+    }
+          
+    if (!stopped){
     switch (_currentState)
     {
     case Init_Insufflation:
     {
+        if (force_stop){
+          force_stop = false;
+          stopped = true;
+          return;
+        }
 
         last_pressure_max=pressure_max;
         last_pressure_min=pressure_min;
@@ -594,6 +607,8 @@ void MechVentilation :: update ( void )
 //        //TODO
 //        break;
     }
+
+    }//!stopped
       
 }//update
 
