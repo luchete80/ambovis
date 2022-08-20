@@ -499,14 +499,12 @@ void loop() {
         digitalWrite(YELLOW_LED, LOW);
       }
 
-      verror = verror_sum / float(vcorr_count);
-      vcorr_count = verror_sum = 0.;
-
       if (calibration_run) {
+        verror = verror_sum / float(vcorr_count);
+        vcorr_count = verror_sum = 0.;
         calib_cycle ++;
         verror_sum_outcycle += verror;
         if (calib_cycle >= CALIB_CYCLES ) {
-
           calibration_run = false;
           vzero = verror_sum_outcycle / float(CALIB_CYCLES);
           Serial.println("Calibration verror: " + String(vzero));
