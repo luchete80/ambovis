@@ -43,12 +43,7 @@ void updateCounter() {
 }
 
 void init_display() {
-  #ifdef LCD_I2C
-  lcd.begin(20, 4);  //I2C
-#else
-  lcd.begin(20, 4); //NO I2C
-#endif
-  //lcd.backlight();
+  lcd.begin(20, 4);
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.createChar(0,back);
@@ -83,11 +78,12 @@ void check_updn_button(int pin, byte *var, bool incr_decr) {
           else
               *var=*var-1;
           lastButtonPress = time;
+          Serial.print("encoder "); Serial.println(*var);
       }// if time > last button press
     }
 }
-void check_bck_state(){
-      bck_state=digitalRead(PIN_MENU_BCK);         
+void check_bck_state() {
+    bck_state=digitalRead(PIN_MENU_BCK);
 
     if (bck_state != last_bck_state) { 
        updateState(); // button state changed. It runs only once.
@@ -119,7 +115,7 @@ void check_bck_state(){
   
   }
   
-void check_encoder ( ) {
+void check_encoder() {
   check_updn_button(PIN_MENU_DN,&encoderPos,true);   //Increment
   check_updn_button(PIN_MENU_UP,&encoderPos,false);  //Decrement
   pressed=0;  //0 nothing , 1 enter, 2 bck

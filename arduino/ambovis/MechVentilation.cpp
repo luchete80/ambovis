@@ -144,7 +144,6 @@ void MechVentilation :: update ( void )
 
     static int totalCyclesInThisState = 0;
     static int currentTime = 0;
-    static int flowSetpoint = 0;
 
     #if DEBUG_STATE_MACHINE
     extern volatile String debugMsg[];

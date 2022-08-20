@@ -1,16 +1,12 @@
-#include "pinout.h"
-#include "MechVentilation.h"
 #include "src/TimerOne/TimerOne.h"
 #include "src/TimerThree/TimerThree.h"
+#include "src/AutoPID/AutoPID.h"
+#include "src/AccelStepper/AccelStepper.h"
 
 #include "menu.h"
 #include "display.h"
-
-#include "src/AutoPID/AutoPID.h"
-#ifdef ACCEL_STEPPER
-#include "src/AccelStepper/AccelStepper.h"
-#include "src/FlexyStepper/FlexyStepper.h"
-#endif
+#include "pinout.h"
+#include "MechVentilation.h"
 #include <EEPROM.h>
 
 #define CALIB_CYCLES  5
@@ -30,7 +26,6 @@ bool drawing_cycle = 0;
 Adafruit_ADS1115 ads;
 
 float Voltage = 0.0;
-int vt;
 float _mlInsVol = 0;
 float _mlExsVol = 0;
 int _mllastInsVol, _mllastExsVol;
@@ -39,25 +34,15 @@ unsigned long mute_count;
 void read_memory(); //Lee la EEPROM, usa variables externas, quiza deberian englobarse en un vector dinamico todos los offsets
 void write_memory();
 
-#ifdef ACCEL_STEPPER
-AccelStepper *stepper; 
-#else
-FlexyStepper * stepper;
-#endif
+AccelStepper *stepper;
 
 byte alarm_state = 0; //0: No alarm 1: peep 2: pip 3:both
-//////////////////////////
-// - EXTERNAL VARIABLES //
-//////////////////////////
-#ifdef LCD_I2C
-LiquidCrystal_I2C lcd(0x3F, 20, 4);
-#else
+
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
-#endif
 
 //MUTE
-boolean last_mute, curr_mute;
-boolean buzzmuted;
+bool last_mute, curr_mute;
+bool buzzmuted;
 unsigned long timebuzz = 0;
 bool isbuzzeron = false;
 
@@ -86,7 +71,6 @@ bool display_needs_update = false;
 bool show_changed_options = false; //Only for display
 bool update_options = false;
 
-unsigned long time_update_display = 20; //ms TODO: move to constant
 unsigned long last_update_display;
 
 unsigned long time;
@@ -135,7 +119,7 @@ byte max_sel, min_sel; //According to current selection
 void check_buzzer_mute();
 void check_sleep_mode();  //Batt charge only
 
-bool isitem_sel;
+bool isitem_sel =false;
 
 AutoPID * pid;
 
@@ -162,7 +146,6 @@ void setup() {
   analogReference(INTERNAL1V1); // use AREF for reference voltage
 
   init_display();
-  isitem_sel = false;
 
   pinMode(TFT_SLEEP, OUTPUT); //Set buzzerPin as output
   digitalWrite(TFT_SLEEP, HIGH); //LOW, INVERTED
@@ -230,10 +213,6 @@ void setup() {
       delay(10);
   }
   vsupply_0 /= 100.;
-  
-  Serial.println("Vsupply_0: " + String (vsupply_0));
-  Serial.print("dp (Flux) MPX Volt (mV) at p0: "); Serial.println(verror * 1000, 3);
-  Serial.print("dp  error : "); Serial.println(-verror / (5.*0.09));
 
   ////// ANTES DE CONFIGURAR LA VENTILACION Y CHEQUEAR EL FIN DE CARRERA INICIO LOS MENUES
   byte bpm = DEFAULT_RPM;
@@ -252,25 +231,21 @@ void setup() {
 
   delay (1000); //Otherwise low enter button readed
   lastButtonPress = millis();
-  while (!fin){
-    if (digitalRead(PIN_MENU_EN) == LOW)  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
-    if (millis() - lastButtonPress > 50) {
-      fin = true;
-      lastButtonPress = millis();
-    }// if time > last button press  
+  while (!fin) {
+    if (digitalRead(PIN_MENU_EN) == LOW)
+        if (millis() - lastButtonPress > 50) {
+            fin = true;
+            lastButtonPress = millis();
+        }// if time > last button press
   }
 
-digitalWrite(PIN_STEPPER, HIGH);
-delay(1000);
+  digitalWrite(PIN_STEPPER, HIGH);
+  delay(1000);
 
-#ifdef ACCEL_STEPPER
-stepper = new AccelStepper(
-  AccelStepper::DRIVER,
-  PIN_STEPPER_STEP,
-  PIN_STEPPER_DIRECTION);
-#else
-stepper = new FlexyStepper();
-#endif
+  stepper = new AccelStepper(
+    AccelStepper::DRIVER,
+    PIN_STEPPER_STEP,
+    PIN_STEPPER_DIRECTION);
 
   ventilation = new MechVentilation(
     stepper,
@@ -307,11 +282,8 @@ stepper = new FlexyStepper();
   }
 
   long position = stepper->currentPosition();
-  Serial.print("Position "); Serial.print(position);
   stepper->setCurrentPosition(STEPPER_LOWEST_POSITION);
   position = stepper->currentPosition();
-  Serial.print("Position "); Serial.print(position);
-  Serial.println("home end");
 #endif
 
   display_lcd();
@@ -356,17 +328,12 @@ stepper = new FlexyStepper();
 
 }
 
-
-byte pos;
 bool  calibration_run = true;
 byte  calib_cycle = 0;
-float vs;
 ////////////////////////////////////////
 ////////////// MAIN LOOP ///////////////
 ////////////////////////////////////////
 void loop() {
-
-  //digitalWrite(LCD_SLEEP, HIGH); //LOW, INVERTED
 
   if (!sleep_mode) {
     if (wake_up) {
@@ -382,7 +349,7 @@ void loop() {
     time = millis();
     check_buzzer_mute();
 
-    if (millis() > lastSave + TIME_SAVE) {
+    if (time > lastSave + TIME_SAVE) {
       write_memory();
 
       lastSave = millis();
@@ -395,25 +362,22 @@ void loop() {
     }
 
 
+    float vs = 0.;
     if (time > lastReadSensor + TIME_SENSOR) {
 
-      #ifdef USING_1v1_4PRESS
-      pressure_p = ( analogRead(PIN_PRESSURE)/ (1023.)/*- verrp * 0.2 */ - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010      
-      #else //Original, pressure sensor connected to A0
-      pressure_p = ( analogRead(A0) / (1023.) /*- verrp * 0.2 */ - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
-      #endif
+      pressure_p = ( analogRead(PIN_PRESSURE)/ (1023.) - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
 
       vlevel = float(analogRead(PIN_MPX_LEV))/1024.*1.1*VOLTAGE_CONV;
 
       // Is like 1/vs
-      vs = vlevel /** vfactor*/; 
+      vs = vlevel /** vfactor*/;
       
       adc0 = ads.readADC_SingleEnded(0);
       Voltage = (adc0 * 0.1875) * 0.001; //Volts
 
       p_dpt = ( (Voltage - vzero)/vs   - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
       
-      pos = findClosest(dp, 55, p_dpt);
+      byte pos = findClosest(dp, 55, p_dpt);
       //flux should be shifted up (byte storage issue)
       _flux = po_flux[pos] - 100 + ( float (po_flux[pos + 1] - 100) - float (po_flux[pos] - 100) ) * ( p_dpt - float(dp[pos]) ) / (float)( dp[pos + 1] - dp[pos]);
       _flux *= 16.6667;
@@ -461,7 +425,7 @@ void loop() {
     }
 
     if ( ventilation -> getCycleNum () != last_cycle ) {
-      vt = (_mllastInsVol + _mllastInsVol) / 2;
+      int vt = (_mllastInsVol + _mllastInsVol) / 2;
       if (vt < alarm_vt)  isalarmvt_on = 1;
       else              isalarmvt_on = 0;
       if ( last_pressure_max > alarm_max_pressure + 1 ) {
@@ -493,22 +457,22 @@ void loop() {
           writeLine(2, "Ciclo: " + String(calib_cycle+1) + "/" + String(CALIB_CYCLES), 0);
       }
       
-#ifdef DEBUG_PID
-      if (vent_mode = VENTMODE_PCL) {
-        float err = (float)(pressure_max - options.peakInspiratoryPressure) / options.peakInspiratoryPressure;
-        errpid_prom += fabs(err);
-        errpid_prom_sig += err;
-        Serial.println("Error PID: "); Serial.print(err, 5);
-        ciclo_errpid++;
-
-        if (ciclo_errpid > 4) {
-          errpid_prom /= 5.; errpid_prom_sig /= 5.;
-          Serial.print(options.peakInspiratoryPressure); Serial.print(" "); Serial.print(errpid_prom, 5); Serial.print(" "); Serial.println(errpid_prom_sig, 5);
-          errpid_prom = 0.; errpid_prom_sig = 0.;
-          ciclo_errpid = 0;
-        }
-      }
-#endif
+//#ifdef DEBUG_PID
+//      if (vent_mode = VENTMODE_PCL) {
+//        float err = (float)(pressure_max - options.peakInspiratoryPressure) / options.peakInspiratoryPressure;
+//        errpid_prom += fabs(err);
+//        errpid_prom_sig += err;
+//        Serial.println("Error PID: "); Serial.print(err, 5);
+//        ciclo_errpid++;
+//
+//        if (ciclo_errpid > 4) {
+//          errpid_prom /= 5.; errpid_prom_sig /= 5.;
+//          Serial.print(options.peakInspiratoryPressure); Serial.print(" "); Serial.print(errpid_prom, 5); Serial.print(" "); Serial.println(errpid_prom_sig, 5);
+//          errpid_prom = 0.; errpid_prom_sig = 0.;
+//          ciclo_errpid = 0;
+//        }
+//      }
+//#endif
       if (!digitalRead(PIN_POWEROFF)) {
         digitalWrite(YELLOW_LED, HIGH);
       } else {
@@ -543,12 +507,12 @@ void loop() {
       update_options = false;
     }
 
-    if (!calibration_run){
-      if (show_changed_options && ((millis() - last_update_display) > time_update_display) ) {
-        display_lcd();  //WITHOUT CLEAR!
-        last_update_display = millis();
-        show_changed_options = false;
-      }
+    if (!calibration_run) {
+        if (show_changed_options && ((millis() - last_update_display) > TIME_UPDATE_DISPLAY) ) {
+            display_lcd();  //WITHOUT CLEAR!
+            last_update_display = millis();
+            show_changed_options = false;
+        }
     }
 
     //        if (alarm_state > 0) {
@@ -599,11 +563,7 @@ void timer1Isr(void) {
 }
 
 void timer3Isr(void) {
-#ifdef ACCEL_STEPPER
   stepper->run();
-#else
-  stepper -> processMovement(); //LUCIANO
-#endif
 }
 
 int findClosest(float arr[], int n, float target) {
@@ -619,7 +579,7 @@ int findClosest(float arr[], int n, float target) {
   return i;
 }
 
-bool debounce(boolean last, int pin) {
+bool debounce(bool last, int pin) {
   bool current = digitalRead(pin);
   if (last != current) {
     delay(50);

@@ -21,6 +21,7 @@
 #define TIME_SAVE 	5000
 #define TIME_BUZZER 500
 #define TIME_MUTE   60000             //msec
+#define TIME_UPDATE_DISPLAY 20
 
 #define STEPPER_MICROSTEPS 4
 #define STEPPER_STEPS_PER_REVOLUTION 200
