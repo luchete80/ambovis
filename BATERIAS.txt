@@ -1,9 +1,0 @@
-La tension en carga es de unos 26.8 a 27, no suele llegar a 27V.
-Baterias grandes 30 BPM: I:E 1/3
-0h - 24.2
-1h - 23.7
-2h - 22.9
-2:30 hs - 22.7
-16:00 hs - 21.3
-16:30 hs (3:30 hs) -> 17.9V (17.7 en multimetro)
-16:40  -  14.1 Motor comienza a perder pasos
