@@ -707,7 +707,6 @@ Menu_inic::Menu_inic(byte *mode, byte *bpm, byte *i_e){
     //lcd_selxy(0,1);
     last_update_display=millis();
     while (!fin){
-        Serial.println("Inside loop");
         this->check_encoder();
         time=millis();
         if (show_changed_options && ((millis() - last_update_display) > 50) ) {
