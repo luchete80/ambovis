@@ -15,3 +15,12 @@
            Se corrige menu inicial, con espera a desconexion de flujo antes que inicie el respirador
            (habia un bug que leia el boton enter como apretado).
            Se limpia el display lcd luego de la calibracion. 
+20220804 - Se limpia el tft al comienzo y se muestra mensaje. 
+20220811 - Sleep Mode. Se detiene ahora el motor en sleep. 
+					Se corrige por hw la alarma y se cambian cosas de display.
+20220818 - SE CORRIGE ERROR CRITICO DE CALIBRACION.
+					  La suma de mediciones estaba afuera del loop de medicion.
+					  Se agrega apagado y encendeido del driver en modo sleep  / wake up
+					  Se apaga pin de LCD y TFT en displays. (Sin embargo queda el de contraste de LCD).
+					  
+					
