@@ -194,7 +194,7 @@ void check_alarms(){
 
 float calc_bat(const int &iter){
   unsigned short count = iter;
-  float level;
+  float level= 0.;
   float fdiv = (float)(BATDIV_R1 + BATDIV_R2)/(float)BATDIV_R2;
   float fac=1.1/1024.*fdiv;  //5./(1024.*0.175) //TODO: HACER AL COMIENZO
   
@@ -203,9 +203,14 @@ float calc_bat(const int &iter){
     //Serial.println(analogRead(PIN_BAT_LEV));
     }
   level*=fac/count;
+  return level;
 }
 
 void print_float(const int &row, const int &col, const float &val){
+  dtostrf(val, 2, 1, buffer); //DEBUG
+  //tft.setCursor(130, 260);tft.println("Bat:");
+  tft.setCursor(col, row);tft.println(buffer);
+  //tft.setCursor(100, 80);tft.println("Vmpx:");
 }
 
 void print_bat(){

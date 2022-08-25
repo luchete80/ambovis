@@ -112,7 +112,10 @@ unsigned long lastSave = 0;
 bool display_needs_update = false;
 
 #ifdef BAT_TEST
-unsigned lastShowBat = 0;
+unsigned long lastShowBat = 0;
+#endif
+#ifdef TEMP_TEST
+unsigned lastReadTemp = 0;
 #endif
 State static lastState;
 bool show_changed_options = false; //Only for display
@@ -715,10 +718,16 @@ void loop() {
 //        vcorr_count = verror_sum = 0.;
 //      }
     #ifdef TEMP_TEST
-    sensors.requestTemperatures();
-    temp=sensors.getTempCByIndex(0);
-    Serial.println ("Temp: " + String(temp));
-    #endif TEMP_TEST
+    if (time > lastReadTemp + TIME_READ_TEMP){
+      lastReadTemp = time;
+      sensors.requestTemperatures();
+      temp=sensors.getTempCByIndex(0);
+      //Serial.println ("Temp: " + String(temp));
+    }
+    tft.fillRect(200,100,20,40, ILI9341_BLUE);    
+    print_float(100,200,temp);
+    #endif TEMP_TEST+
+    
     
     }//change cycle
 
@@ -804,6 +813,7 @@ void loop() {
   #ifdef BAT_TEST
   if ( time > lastShowBat + TIME_SHOW_BAT ){
     lastShowBat = time;
+    Serial.println("last show bat " + String(lastShowBat));
     float level = calc_bat(5);
     Serial.println(String(time)+", " +String(level));
   }
