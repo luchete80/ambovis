@@ -201,6 +201,7 @@ void MechVentilation :: update ( void )
         if (force_stop){
           force_stop = false;
           stopped = true;
+          digitalWrite(PIN_STEPPER, LOW);
           return;
         }
 

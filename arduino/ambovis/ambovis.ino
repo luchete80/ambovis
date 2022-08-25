@@ -791,7 +791,7 @@ void loop() {
       print_bat();
       digitalWrite(LCD_SLEEP, LOW);
       digitalWrite(TFT_SLEEP, LOW);
-      digitalWrite(PIN_STEPPER, LOW);
+      //digitalWrite(PIN_STEPPER, LOW); //TODO: call it here (now is inside stepper)
       ventilation->forceStop();
       //digitalWrite(PIN_BUZZER, !BUZZER_LOW); //Buzzer inverted
       lcd.clear();
