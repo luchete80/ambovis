@@ -7,7 +7,7 @@
 #define ACCEL_STEPPER 1
 //#define DEBUG_PID 1
 //#define DEBUG_UPDATE  1
-#define DEBUG_STEPPER     1
+//#define DEBUG_STEPPER     1
 //#define FILTER_FLUX 1
 #define DEBUG_OFF 1 //Release version
 #define BUZZER_LOW 0

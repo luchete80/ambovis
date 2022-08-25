@@ -81,7 +81,7 @@ void tft_draw(void) {
         tft.setCursor(180, 80);tft.println(buffer);
         
         drawing_cycle = !drawing_cycle;
-        Serial.println("Drawing cycle: " + String(drawing_cycle));
+        //Serial.println("Drawing cycle: " + String(drawing_cycle));
         tft.fillRect(180,280,70,50, ILI9341_BLACK);    
         if (ended_whilemov){
           tft.setCursor(150, 300);tft.println("ENDErr");
@@ -200,7 +200,7 @@ float calc_bat(const int &iter){
   
   for (int i=0;i<count;i++){
     level+=float(analogRead(PIN_BAT_LEV));
-    Serial.println(analogRead(PIN_BAT_LEV));
+    //Serial.println(analogRead(PIN_BAT_LEV));
     }
   level*=fac/count;
 }
@@ -215,7 +215,7 @@ void print_bat(){
     //tft.fillRect(180,150,70,20, ILI9341_BLACK);//ONLY BAT LEVEL
     //TODO: Make this calcs at setup
     float fdiv = (float)(BATDIV_R1 + BATDIV_R2)/(float)BATDIV_R2;
-    Serial.print("fdiv: ");Serial.println(fdiv);
+    //Serial.print("fdiv: ");Serial.println(fdiv);
 
     tft.fillRect(180,250,70,50, ILI9341_BLACK);    
     float fac=1.1/1024.*fdiv;  //5./(1024.*0.175) //TODO: HACER AL COMIENZO
@@ -226,7 +226,7 @@ void print_bat(){
     unsigned short count = 5;
     for (int i=0;i<count;i++){
         level+=float(analogRead(PIN_BAT_LEV));
-        Serial.println(analogRead(PIN_BAT_LEV));
+        //Serial.println(analogRead(PIN_BAT_LEV));
         }
     level*=fac/count;
     if (level > 24.0) level_perc =100.;
@@ -237,7 +237,7 @@ void print_bat(){
     //dtostrf(level_perc, 2, 0, buffer);
     dtostrf(level, 2, 1, buffer); //DEBUG
     //dtostrf(level, 2, 1, buffer);
-    Serial.print("Bat level: ");Serial.println(level);
+    //Serial.print("Bat level: ");Serial.println(level);
     tft.setCursor(130, 260);tft.println("Bat:");
     tft.setCursor(180, 260);tft.println(buffer);
     //tft.setCursor(220, 260);tft.println("%");

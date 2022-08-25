@@ -375,7 +375,9 @@ void MechVentilation :: update ( void )
                 
 //                
                 //#ifdef DEBUG_UPDATE
+                #ifdef DEBUG_STEPPER
                 Serial.println("ENDED TIME WHILE MOVING");
+                #endif
                 //#endif
             }
             else {
@@ -469,7 +471,6 @@ void MechVentilation :: update ( void )
     case Init_Exsufflation:
     {
       ended_whilemov = curr_ended_whilemov;
-      Serial.println("ended_whilemov: " + String(ended_whilemov ));
       
       _msecTimerStartCycle=millis();
       //Serial.print("Current pressure");Serial.println(_currentPressure);
