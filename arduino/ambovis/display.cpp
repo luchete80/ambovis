@@ -192,6 +192,22 @@ void check_alarms(){
       }
 }
 
+float calc_bat(const int &iter){
+  unsigned short count = iter;
+  float level;
+  float fdiv = (float)(BATDIV_R1 + BATDIV_R2)/(float)BATDIV_R2;
+  float fac=1.1/1024.*fdiv;  //5./(1024.*0.175) //TODO: HACER AL COMIENZO
+  
+  for (int i=0;i<count;i++){
+    level+=float(analogRead(PIN_BAT_LEV));
+    Serial.println(analogRead(PIN_BAT_LEV));
+    }
+  level*=fac/count;
+}
+
+void print_float(const int &row, const int &col, const float &val){
+}
+
 void print_bat(){
     float level,level_perc;
     level=0.;
@@ -201,7 +217,8 @@ void print_bat(){
     float fdiv = (float)(BATDIV_R1 + BATDIV_R2)/(float)BATDIV_R2;
     Serial.print("fdiv: ");Serial.println(fdiv);
 
-    tft.fillRect(180,250,70,50, ILI9341_BLACK);    float fac=1.1/1024.*fdiv;  //5./(1024.*0.175)
+    tft.fillRect(180,250,70,50, ILI9341_BLACK);    
+    float fac=1.1/1024.*fdiv;  //5./(1024.*0.175) //TODO: HACER AL COMIENZO
     
     //Vt > 24V   =>   PC = 100%
     //Vmin < Vt < 24V   =>   PC[%] = (Vt[V]-Vmin)/(24-Vmin)*100

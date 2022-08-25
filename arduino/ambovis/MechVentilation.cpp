@@ -213,7 +213,7 @@ void MechVentilation :: update ( void )
         
         //adding_vol=true;
         //#ifdef DEBUG_UPDATE
-          Serial.println("INSUFLACION ");        
+        //  Serial.println("INSUFLACION ");        
         //#endif
   
         last_pressure_max=pressure_max;

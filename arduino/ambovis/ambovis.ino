@@ -18,6 +18,12 @@
 
 #define CALIB_CYCLES  5
 
+#ifdef TEMP_TEST
+#include <OneWire.h>
+#include <DallasTemperature.h>
+float temp;
+#endif
+
 bool init_verror;
 byte Cdyn;
 bool autopid;
@@ -105,6 +111,9 @@ unsigned long lastShowSensor = 0;
 unsigned long lastSave = 0;
 bool display_needs_update = false;
 
+#ifdef BAT_TEST
+unsigned lastShowBat = 0;
+#endif
 State static lastState;
 bool show_changed_options = false; //Only for display
 bool update_options = false;
@@ -192,6 +201,11 @@ int idleTime ;        // how long the button was idle
 float vsupply, vsupply_0;
 float vlevel,vfactor;
 
+#ifdef TEMP_TEST
+OneWire           oneWire(PIN_TEMP);
+DallasTemperature sensors(&oneWire);
+#endif
+  
 void setup() {
 
   pinMode(PIN_STEPPER, OUTPUT);
@@ -410,8 +424,11 @@ stepper = new FlexyStepper();
 
 #ifdef DEBUG_UPDATE
 
-#endif
-
+  #endif
+  #ifdef BAT_TEST
+  lastShowBat = millis();
+  #endif
+  
   //STEPPER
   last_stepper_time = millis();
   last_vent_time = millis();
@@ -461,6 +478,9 @@ stepper = new FlexyStepper();
   Serial.println("Exiting setup");
   //TODO: CALIBRATION RUN ALSO SHOULD BE HERE
 
+  #ifdef TEMP_TEST
+  sensors.begin();
+  #endif
 }
 
 
@@ -505,7 +525,7 @@ void loop() {
       lastSave = millis();
     }
 
-
+  
 
     if ( time > lastShowSensor + TIME_SHOW ) {
 
@@ -599,7 +619,7 @@ void loop() {
         //vout = vs(0.09*P + 0.04) +/ERR
         verror_sum += ( Voltage - 0.04 * vs); //-5*0.04
         //Serial.println("Calibration sum: "+ String(verror_sum));
-        Serial.println("readed: "+ String(Voltage - 0.04 * vs));
+        //Serial.println("readed: "+ String(Voltage - 0.04 * vs));
       } 
 //      else { //This sums the feed error
 //          verror_sum += vlevel;       // -5*0.04
@@ -694,6 +714,11 @@ void loop() {
 //        verror = verror_sum / float(vcorr_count);
 //        vcorr_count = verror_sum = 0.;
 //      }
+    #ifdef TEMP_TEST
+    sensors.requestTemperatures();
+    temp=sensors.getTempCByIndex(0);
+    Serial.println ("Temp: " + String(temp));
+    #endif TEMP_TEST
     
     }//change cycle
 
@@ -775,6 +800,14 @@ void loop() {
   //  #else
   //    stepper -> processMovement(); //LUCIANO
   //  #endif
+
+  #ifdef BAT_TEST
+  if ( time > lastShowBat + TIME_SHOW_BAT ){
+    lastShowBat = time;
+    float level = calc_bat(5);
+    Serial.println(String(time)+", " +String(level));
+  }
+  #endif BAT_TEST
 
 }//LOOP
 

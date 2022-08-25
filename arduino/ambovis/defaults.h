@@ -159,5 +159,8 @@ extern unsigned long time;
 #define BATDIV_R2           470
 extern float vlevel;
 
+//#define BAT_TEST
+#define TIME_SHOW_BAT   15000 //MSECS
+//#define TEMP_TEST
 
 #endif // DEFAULTS_H

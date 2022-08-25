@@ -33,7 +33,7 @@
 #define TFT_DC 		49
 #define TFT_RST 	48
 #define TFT_SLEEP 40
-#define LCD_SLEEP 42
+#define LCD_SLEEP 38
 
 #define PIN_POWEROFF    43
 #define BCK_LED         44
@@ -59,6 +59,6 @@
 //#define PIN_ENC_CL  2
 //#define PIN_ENC_DIR 3
 
-
+#define PIN_TEMP        37
 
 #endif // ENCODER_H
