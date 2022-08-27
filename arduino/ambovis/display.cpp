@@ -188,6 +188,7 @@ void print_bat(){
     }
     level*=fac/count;
 
+    dtostrf(level, 2, 1, buffer); //DEBUG
     tft.setCursor(130, 260);tft.println("Bat:");
     tft.setCursor(180, 260);tft.println(buffer);
     //tft.setCursor(220, 260);tft.println("%");
