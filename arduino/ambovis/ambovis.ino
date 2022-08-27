@@ -72,7 +72,7 @@ bool isbuzzeron = false;
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 
 byte vcorr_count;
-byte p_trim = 100;
+//byte p_trim = 100;
 float pressure_p;   //EXTERN!!
 //float last_pressure_max, last_pressure_peep;
 //last_pressure_min,
@@ -139,10 +139,11 @@ byte isalarmvt_on;
 int alarm_vt;
 
 // Menu V2
-KeyboardState kbState;
+KeyboardState keyboardState;
 MenuState menuState;
 MenuV2 menuV2;
 VariableParameters varParams;
+SensorData sensorData;
 // END MENU V2
 
 //MENU
@@ -195,14 +196,14 @@ void setup() {
   read_memory();
 
   //init keyboard
-  kbState.lastUpState = digitalRead(PIN_MENU_UP);
-  kbState.lastDownState = digitalRead(PIN_MENU_DN);
-  kbState.lastOKState = digitalRead(PIN_MENU_EN);
-  kbState.lastBackState = digitalRead(PIN_MENU_BCK);
+  keyboardState.lastUpState = digitalRead(PIN_MENU_UP);
+  keyboardState.lastDownState = digitalRead(PIN_MENU_DN);
+  keyboardState.lastOKState = digitalRead(PIN_MENU_EN);
+  keyboardState.lastBackState = digitalRead(PIN_MENU_BCK);
 
   // Init Menu V2
   menuV2.lcd = &lcd;
-  menuV2.keyboardState = kbState;
+  menuV2.keyboardState = keyboardState;
   menuV2.menuState = menuState;
 
   //init variables
@@ -211,25 +212,15 @@ void setup() {
   varParams.respiratoryRate = DEFAULT_RPM;
   varParams.alarm_peep_pressure = 5;
   varParams.percInspEsp = 2;
-  varParams.alarm_vt = 200;
+  varParams.alarm_vt = alarm_vt;
   varParams.peakInspiratoryPressure = 20;
   varParams.percVolume = 100;
-  varParams.p_trim = 100;
   varParams.autopid = autopid ? 1 : 0;
-  varParams.fil = filter ? 1 : 0;
-  varParams.max_accel = 600;
-  // for menu TBD
-  varParams.cd_opt = 2;
-  varParams.dp_opt = 3;
-  varParams.f_min = 4;
-  varParams.f_max = 5;
-//  varParams.fa_opt = 6;
-//  varParams.pa_opt = 7;
+  varParams.filter = filter ? 1 : 0;
 
   // sensor values
-//  varParams.last_pressure_min = last_pressure_min;
-  varParams._mllastInsVol = 0;
-  varParams._mllastExsVol = 10;
+  sensorData._mlLastInsVol = 0;
+  sensorData._mlLastExsVol = 10;
   // end init menu v2
 
   // TODO: Añadir aquí la configuarcion inicial desde puerto serie
@@ -308,8 +299,8 @@ void setup() {
   // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
-  writeLine(1, "RespirAR FIUBA", 4);
-  writeLine(2, "v2.1.1", 8);
+  writeLine(menuV2, 1, "RespirAR FIUBA", 4);
+  writeLine(menuV2, 2, "v2.1.1", 8);
 
   tft.begin();
   tft.fillScreen(ILI9341_BLACK);
@@ -332,20 +323,20 @@ void setup() {
     }
   vsupply_0 /= 100.; //
   
-//  Serial.println("Vsupply_0: " + String (vsupply_0));
+  Serial.println("Vsupply_0: " + String (vsupply_0));
   //vfactor = 5./vsupply_0; //
 
-//  Serial.print("dp (Flux) MPX Volt (mV) at p0: "); Serial.println(verror * 1000, 3);
+  Serial.print("dp (Flux) MPX Volt (mV) at p0: "); Serial.println(verror * 1000, 3);
   //  Serial.print("pressure  MPX Volt (mV) at p0: "); Serial.println(verrp * 1000, 3);
 
-//  Serial.print("dp  error : "); Serial.println(-verror / (5.*0.09));
+  Serial.print("dp  error : "); Serial.println(-verror / (5.*0.09));
 
   ////// ANTES DE CONFIGURAR LA VENTILACION Y CHEQUEAR EL FIN DE CARRERA INICIO LOS MENUES
 //  bool init=false;
 //  byte bpm = DEFAULT_RPM;
 //  byte i_e = 2;
 //  Menu_inic menuini(&vent_mode, &bpm, &i_e);
-    setupMenu(menuV2, varParams, millis());
+    setupMenu(menuV2, varParams, sensorData, millis());
     options.respiratoryRate = varParams.respiratoryRate;
     options.percInspEsp = varParams.percInspEsp; //1:1 to 1:4, is denom
 //  vent_mode = varParams.vent_mode;
@@ -365,6 +356,7 @@ void setup() {
       lastButtonPress = millis();
     }// if time > last button press
   }
+
 
 digitalWrite(PIN_STEPPER, HIGH);
 delay(1000);
@@ -388,16 +380,15 @@ stepper = new FlexyStepper();
   // configura la ventilación
   ventilation -> start();
   ventilation -> setVarParams(&varParams);
-  ventilation -> update();
+  ventilation -> update(sensorData);
 
   lcd.clear();
-  writeLine(1, "Iniciando...", 0);
+  writeLine(menuV2, 1, "Iniciando...", 0);
   
   ////
 #ifdef ACCEL_STEPPER
   stepper->setSpeed(STEPPER_HOMING_SPEED);
 
-  Serial.println("Start home search");
   long initial_homing = -1;
   //// HOMING TODO: PASAR NUEVAMENTE ESTA VARIABLE A PRIVADA
   while (digitalRead(PIN_ENDSTOP)) {  // Make the Stepper move CCW until the switch is activated
@@ -426,7 +417,7 @@ stepper = new FlexyStepper();
   //
 //  display_lcd();
 // TODO :maybe this can be removed
-//  printMenu(menuV2, varParams);
+//  printMenu(menuV2, varParams, sensorData);
 
   //ENCODER
 //  curr_sel = old_curr_sel = 1; //COMPRESSION
@@ -447,7 +438,7 @@ stepper = new FlexyStepper();
   Timer1.initialize(TIME_BASE_MICROS);  //BEFORE WERE 20...
   Timer1.attachInterrupt(timer1Isr);
 
-//  Serial.println("Reading ROM");
+  Serial.println("Reading ROM");
 #ifdef DEBUG_UPDATE
   Serial.print("Honey Volt at p0: "); Serial.println(analogRead(A0) / 1023.);
 #endif
@@ -518,7 +509,7 @@ void loop() {
 //      init_display();
       initDisplay(menuV2);
 //      display_lcd();    //TODO: Pass mech vent as argument in display
-      printMenu(menuV2, varParams);
+      printMenu(menuV2, varParams, sensorData);
       tft.begin();
       tft.fillScreen(ILI9341_BLACK);
       wake_up = false;
@@ -526,7 +517,7 @@ void loop() {
     }
     State state = ventilation->getState();
 //    check_encoder();
-    checkEncoder(menuV2, varParams, time);
+    checkEncoder(menuV2, varParams, sensorData, time);
 
     time = millis();
     check_buzzer_mute();
@@ -553,7 +544,7 @@ void loop() {
 //      
 //                 Serial.println(flow_f,2);
 
-      tft_draw(varParams);
+      tft_draw(varParams, sensorData);
 
     }
 
@@ -594,7 +585,7 @@ void loop() {
       _flux = po_flux[pos] - 100 + ( float (po_flux[pos + 1] - 100) - float (po_flux[pos] - 100) ) * ( p_dpt - float(dp[pos]) ) / (float)( dp[pos + 1] - dp[pos]);
       _flux *= 16.6667;
 
-      if (varParams.fil == 1) {
+      if (varParams.filter == 1) {
 //        flux_count++;    //Filter
         for (int i = 0; i < 4; i++) {
           _flux_fil[i] = _flux_fil[i + 1];
@@ -644,11 +635,11 @@ void loop() {
 //
 //    }
     if ( ventilation -> getCycleNum () != last_cycle ) {
-        vt = (varParams._mllastInsVol + varParams._mllastInsVol) / 2;
+        vt = (sensorData._mlLastInsVol + sensorData._mlLastInsVol) / 2;
       if (vt < varParams.alarm_vt)  isalarmvt_on = 1;
       else              isalarmvt_on = 0;
-      if ( varParams.last_pressure_max > varParams.alarm_max_pressure + 1 ) {
-        if ( varParams.last_pressure_min < varParams.alarm_peep_pressure - 1) {
+      if ( sensorData.last_pressure_max > varParams.alarm_max_pressure + 1 ) {
+          if ( sensorData.last_pressure_min < varParams.alarm_peep_pressure - 1) {
           if (!isalarmvt_on)  alarm_state = 3;
           else                alarm_state = 13;
         } else {
@@ -656,7 +647,7 @@ void loop() {
           else                alarm_state = 12;
         }
       } else {
-          if ( varParams.last_pressure_min < varParams.alarm_peep_pressure - 1 ) {
+          if ( sensorData.last_pressure_min < varParams.alarm_peep_pressure - 1 ) {
           if (!isalarmvt_on) alarm_state = 1;
           else               alarm_state = 11;
         } else {
@@ -668,7 +659,7 @@ void loop() {
       last_cycle = ventilation->getCycleNum();
 
       if (!calibration_run){
-        printMenu(menuV2, varParams);
+        printMenu(menuV2, varParams, sensorData);
         update_display = true;
         last_update_display = time;
       } else {
@@ -704,13 +695,11 @@ void loop() {
       //NEW, CALIBRATION
         verror = verror_sum / float(vcorr_count);
 
-        /*
        Serial.println("Calibration iter, cycle, verror, sum: " + String(vcorr_count) + ", " + 
                                                                   String(calib_cycle) + ", " + 
                                                                   String(verror) + ", " + 
                                                                   String(verror_sum_outcycle));
-        */
-         vcorr_count = verror_sum = 0.;
+        vcorr_count = verror_sum = 0.;
         calib_cycle ++;
         //if (calib_cycle>1)
           verror_sum_outcycle += verror;
@@ -733,14 +722,16 @@ void loop() {
     if (!calibration_run) {
       if (display_needs_update) {
 //        display_lcd();
-        printMenu(menuV2, varParams);
+        printMenu(menuV2, varParams, sensorData);
         display_needs_update = false;
       }
     }
   
-    if ( update_options ) {
+    if ( menuV2.menuState.updatedOptions ) {
       ventilation->change_config(options);
-      update_options = false;
+      ventilation->updateParameters();
+      menuV2.menuState.updatedOptions = false;
+//      update_options = false;
       //show_changed_options=true;
     }
 
@@ -755,7 +746,7 @@ void loop() {
     if (!calibration_run){
       if (show_changed_options && ((millis() - last_update_display) > time_update_display) ) {
 //        display_lcd();  //WITHOUT CLEAR!
-        printMenu(menuV2, varParams);
+        printMenu(menuV2, varParams, sensorData);
         last_update_display = millis();
         show_changed_options = false;
       }
@@ -808,7 +799,7 @@ void loop() {
 }//LOOP
 
 void timer1Isr(void) {
-  ventilation->update();
+  ventilation->update(sensorData);
   //alarms->update(ventilation->getPeakInspiratoryPressure());
 }
 
@@ -860,7 +851,7 @@ void check_buzzer_mute() {
 void read_memory() {
   int eeAddress = 0;
   EEPROM.get(0, last_cycle); eeAddress += sizeof(unsigned long);
-  EEPROM.get(eeAddress, p_trim);    eeAddress += sizeof(p_trim);
+//  EEPROM.get(eeAddress, p_trim);    eeAddress += sizeof(p_trim);
   EEPROM.get(eeAddress, autopid);   eeAddress += sizeof(autopid);
 //  EEPROM.get(eeAddress, min_cd);    eeAddress += sizeof(min_cd);
 //  EEPROM.get(eeAddress, max_cd);    eeAddress += sizeof(max_cd);
@@ -886,7 +877,7 @@ void read_memory() {
 void write_memory() {
   int eeAddress = 0;
   EEPROM.put(0, last_cycle);        eeAddress += sizeof(unsigned long);
-  EEPROM.put(eeAddress, p_trim);    eeAddress += sizeof(p_trim);
+//  EEPROM.put(eeAddress, p_trim);    eeAddress += sizeof(p_trim);
   EEPROM.put(eeAddress, autopid);   eeAddress += sizeof(autopid);
 //  EEPROM.put(eeAddress, min_cd);    eeAddress += sizeof(min_cd);
 //  EEPROM.put(eeAddress, max_cd);    eeAddress += sizeof(max_cd);

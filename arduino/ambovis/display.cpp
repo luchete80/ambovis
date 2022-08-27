@@ -42,7 +42,7 @@ int yflux[2];
 int yvt[2];
 char buffer[10];
 
-void tft_draw(VariableParameters& variableParameters) {
+void tft_draw(VariableParameters variableParameters, SensorData sensorData) {
     //Serial.println(cycle_pos);Serial.println(ry[valsreaded]);
     last_x=cycle_pos;
     rx[valsreaded]=cycle_pos;
@@ -66,7 +66,7 @@ void tft_draw(VariableParameters& variableParameters) {
     		valsreaded=0;
     		for (int i=0;i<2;i++) 
     		    valsreaded_[i]=0;
-        print_vols(variableParameters);
+        print_vols(sensorData);
         print_bat();
         
         //TODO: DO IT ONLY WHEN CHANGE!
@@ -81,7 +81,7 @@ void tft_draw(VariableParameters& variableParameters) {
         tft.setCursor(180, 80);tft.println(buffer);
         
         drawing_cycle = !drawing_cycle;
-        Serial.println("Drawing cycle: " + String(drawing_cycle));
+//        Serial.println("Drawing cycle: " + String(drawing_cycle));
         tft.fillRect(180,280,70,50, ILI9341_BLACK);    
         if (ended_whilemov){
           tft.setCursor(150, 300);tft.println("ENDErr");
@@ -199,7 +199,7 @@ void print_bat(){
     //tft.fillRect(180,150,70,20, ILI9341_BLACK);//ONLY BAT LEVEL
     //TODO: Make this calcs at setup
     float fdiv = (float)(BATDIV_R1 + BATDIV_R2)/(float)BATDIV_R2;
-    Serial.print("fdiv: ");Serial.println(fdiv);
+//    Serial.print("fdiv: ");Serial.println(fdiv);
 
     tft.fillRect(180,250,70,50, ILI9341_BLACK);    float fac=1.1/1024.*fdiv;  //5./(1024.*0.175)
     
@@ -209,7 +209,7 @@ void print_bat(){
     unsigned short count = 5;
     for (int i=0;i<count;i++){
         level+=float(analogRead(PIN_BAT_LEV));
-        Serial.println(analogRead(PIN_BAT_LEV));
+//        Serial.println(analogRead(PIN_BAT_LEV));
         }
     level*=fac/count;
     if (level > 24.0) level_perc =100.;
@@ -220,7 +220,7 @@ void print_bat(){
     //dtostrf(level_perc, 2, 0, buffer);
     dtostrf(level, 2, 1, buffer); //DEBUG
     //dtostrf(level, 2, 1, buffer);
-    Serial.print("Bat level: ");Serial.println(level);
+//    Serial.print("Bat level: ");Serial.println(level);
     tft.setCursor(130, 260);tft.println("Bat:");
     tft.setCursor(180, 260);tft.println(buffer);
     //tft.setCursor(220, 260);tft.println("%");
@@ -233,21 +233,21 @@ void print_bat(){
 
 }
 
-void print_vols(VariableParameters& variableParameters){
+void print_vols(SensorData sensorData){
     
     tft.setRotation(0);
     tft.fillRect(40,LEGEND_Y,60,80, ILI9341_BLACK); //Here x is the first value (in the less width dimension)
 
-    itoa(variableParameters._mllastInsVol, buffer, 10);
+    itoa(sensorData._mlLastInsVol, buffer, 10);
     tft.setCursor(0, LEGEND_Y); //Before: 150,180 at right 
     tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
     tft.println("Vi: ");tft.setCursor(40, LEGEND_Y);tft.println(buffer); //Before 190,180
     
-    itoa(variableParameters._mllastExsVol, buffer, 10);
+    itoa(sensorData._mlLastExsVol, buffer, 10);
     tft.setCursor(0, LEGEND_Y + 20);
     tft.println("Ve: ");tft.setCursor(40, LEGEND_Y + 20);tft.println(buffer);
     
-    itoa((variableParameters._mllastInsVol + variableParameters._mllastExsVol)/2, buffer, 10);
+    itoa((sensorData._mlLastInsVol + sensorData._mlLastExsVol)/2, buffer, 10);
     tft.setCursor(0, LEGEND_Y + 40);
     tft.println("VT: ");tft.setCursor(40, LEGEND_Y + 40);tft.println(buffer);
  

@@ -30,6 +30,7 @@ typedef struct menu_state {
     bool isEditingParam = false;
     bool changedMenu = false;
     bool setupReady = false;
+    bool updatedOptions = false;
 } MenuState;
 
 typedef struct variable_parameters {
@@ -41,33 +42,24 @@ typedef struct variable_parameters {
     int alarm_vt;
     int peakInspiratoryPressure;
     int percVolume;
-    int p_trim;
     int autopid;
-    int fil;
-    int max_accel;
-    // for menu TBD
-    int cd_opt;
-    int dp_opt;
-    int f_min;
-    int f_max;
-    int fa_opt;
-    int pa_opt;
-
-    // sensor values
-    float last_pressure_min;
-    float last_pressure_max;
-    int _mllastInsVol;
-    int _mllastExsVol;
-
+    int filter;
 } VariableParameters;
 
+typedef struct sensor_data {
+    float last_pressure_min;
+    float last_pressure_max;
+    int _mlLastInsVol;
+    int _mlLastExsVol;
+    int cdyn;
+} SensorData;
+
 static int SIZE_MENU = 4;
-static int MAIN_MENU[] = {PARAMETER, ALARM, SETTINGS, PID_SETTINGS};
+static int MAIN_MENU[] = {PARAMETER, ALARM, SETTINGS};
 static int INIT_PARAM_MENU[] = {MODE_OPT, BPM_OPT, IE_OPT, END_SETUP};
 static int PARAM_MENU[] = {MODE_OPT, PERC_V_OPT, BPM_OPT, IE_OPT};
 static int PARAM_MENU_PCV[] = {MODE_OPT, PIP_OPT, BPM_OPT, IE_OPT};
 static int ALARM_MENU[] = {PIP_ALARM_OPT, PEEP_ALARM_OPT, VT_ALARM_OPT};
-static int SETTINGS_MENU[] = {TRIM_OPT, FIL_OPT, AUTO_OPT, CD_OPT};
-static int PID_SETTINGS_MENU[] = {DP_OPT, F_OPT, FF_OPT};
+static int SETTINGS_MENU[] = {FIL_OPT, AUTO_OPT};
 
 #endif //AMBOVIS_MENUDATATYPES_H

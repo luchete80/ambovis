@@ -73,7 +73,7 @@ public:
     void start(void);
     /** Stop mechanical ventilation. */
     void stop(void);
-    void update(void);
+    void update(SensorData& sensorData);
 
     /** Recruitment */
     void activateRecruitment(void);
@@ -99,11 +99,12 @@ public:
     void setPeakInspiratoryPressure(float pip);
     void setPeakEspiratoryPressure(float peep);
 
-    float getInsVol(void);
+//    float getInsVol(void);
 
     unsigned long getCycleNum(){return _cyclenum;};
     void setCycleNum(unsigned long cyc){_cyclenum=cyc;}
     void change_config(VentilationOptions_t);
+    void updateParameters();
 
     void setVarParams(VariableParameters* variableParameters) {
         this->variableParameters = variableParameters;

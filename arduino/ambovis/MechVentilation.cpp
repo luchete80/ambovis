@@ -126,7 +126,7 @@ void MechVentilation::_setInspiratoryCycle(void) {
     timeoutCycle = ((float)60) * 1000.0f / ((float)_rpm); // Tiempo de ciclo en msegundos
     //_timeoutIns = timeoutCycle * DEFAULT_POR_INSPIRATORIO / 100;
     _timeoutIns = timeoutCycle / (float(_percIE+1));
-    _timeoutEsp = (timeoutCycle) - _timeoutIns;    
+    _timeoutEsp = (timeoutCycle) - _timeoutIns;
   #ifdef DEBUG_UPDATE
       Serial.print("Timeout Cycle");Serial.println(timeoutCycle);
       Serial.print("_timeoutIns");Serial.println(_timeoutIns);
@@ -134,8 +134,6 @@ void MechVentilation::_setInspiratoryCycle(void) {
   #endif
     
 }
-
-      
 
 void MechVentilation::activateRecruitment(void)
 {
@@ -157,7 +155,7 @@ void MechVentilation::deactivateRecruitment(void)
 /**
  * It's called from timer1Isr
  */
-void MechVentilation :: update ( void )
+void MechVentilation :: update ( SensorData& sensorData )
 {
     last_vent_time = millis();
     
@@ -213,11 +211,11 @@ void MechVentilation :: update ( void )
         
         //adding_vol=true;
         //#ifdef DEBUG_UPDATE
-          Serial.println("INSUFLACION ");        
+          Serial.println("INSUFLACION ");
         //#endif
   
-        this->variableParameters->last_pressure_max=pressure_max;
-        this->variableParameters->last_pressure_min=pressure_min;
+        sensorData.last_pressure_max=pressure_max;
+        sensorData.last_pressure_min=pressure_min;
         pressure_max=0;
         pressure_min=60;
 
@@ -228,10 +226,10 @@ void MechVentilation :: update ( void )
         _msecTimerStartCycle=millis();  //Luciano
         
         for (int i=0;i<2;i++) Cdyn_pass[i]=Cdyn_pass[i+1];
-        Cdyn_pass[2]=this->variableParameters->_mllastInsVol/(this->variableParameters->last_pressure_max- this->variableParameters->last_pressure_min);
-        this->variableParameters->cd_opt = (Cdyn_pass[0]+Cdyn_pass[1]+Cdyn_pass[2])/3.;
-        this->variableParameters->_mllastInsVol=int(_mlInsVol);
-        this->variableParameters->_mllastExsVol=int(fabs(_mlExsVol));
+        Cdyn_pass[2]=sensorData._mlLastInsVol/(sensorData.last_pressure_max - sensorData.last_pressure_min);
+        sensorData.cdyn = (Cdyn_pass[0]+Cdyn_pass[1]+Cdyn_pass[2])/3.;
+        sensorData._mlLastInsVol=int(_mlInsVol);
+        sensorData._mlLastExsVol=int(fabs(_mlExsVol));
         
         //_mlInsVol2=0;
         _mlInsVol=0.;
@@ -375,8 +373,8 @@ void MechVentilation :: update ( void )
                 
 //                
                 //#ifdef DEBUG_UPDATE
-//                Serial.println("ENDED TIME WHILE MOVING");
-//                #endif
+                Serial.println("ENDED TIME WHILE MOVING");
+                //#endif
             }
             else {
               Serial.println("Motion Complete");
@@ -727,9 +725,9 @@ void MechVentilation::_setAlarm(Alarm alarm)
     _currentAlarm = alarm;
 }
 
-float MechVentilation::getInsVol() {
-    return (this->variableParameters->_mllastInsVol+this->variableParameters->_mllastExsVol)/2.;
-}
+//float MechVentilation::getInsVol() {
+//    return (this->variableParameters->_mllastInsVol+this->variableParameters->_mllastExsVol)/2.;
+//}
 
 void MechVentilation::change_config(VentilationOptions_t options) {
     _rpm = options.respiratoryRate;
@@ -741,4 +739,11 @@ void MechVentilation::change_config(VentilationOptions_t options) {
     _percVol=options.percVolume;
 
     _mode = options.modeCtl;
+}
+
+void MechVentilation::updateParameters() {
+    _rpm = variableParameters->respiratoryRate;
+    _percIE= byte(variableParameters->percInspEsp);
+    _percVol= byte(variableParameters->percVolume);
+    _setInspiratoryCycle();
 }
