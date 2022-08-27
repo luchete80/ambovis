@@ -9,17 +9,12 @@
 #define PIN_ENDSTOP 5
 
 // Display
-
-#ifdef LCD_I2C
-#define I2C_DIR 0x3F
-#else
 #define PIN_LCD_RS 8
 #define PIN_LCD_EN 9
 #define PIN_LCD_D4 10
 #define PIN_LCD_D5 11
 #define PIN_LCD_D6 12
 #define PIN_LCD_D7 13
-#endif
 
 // #define PIN_BME_CS2  4  // sensor de presion 2
 #define PIN_ENC_CL  18
@@ -33,7 +28,7 @@
 #define TFT_DC 		49
 #define TFT_RST 	48
 #define TFT_SLEEP 40
-#define LCD_SLEEP 42
+#define LCD_SLEEP 38
 
 #define PIN_POWEROFF    43
 #define BCK_LED         44
@@ -55,10 +50,6 @@
 #define PIN_MPX_LEV     A2
 #define PIN_PRESSURE    A3
 
-// IF ARDUINO UNO
-//#define PIN_ENC_CL  2
-//#define PIN_ENC_DIR 3
-
-
+#define PIN_TEMP        37
 
 #endif // ENCODER_H

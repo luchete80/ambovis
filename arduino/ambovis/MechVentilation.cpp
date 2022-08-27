@@ -1,13 +1,8 @@
 #include "MechVentilation.h"
 
-int currentWaitTriggerTime = 0;
-int currentStopInsufflationTime = 0;
-float currentFlow = 0;
-
 float pressure_max;
 float pressure_min;
 
-static int highest_man_pos;
 unsigned long _msecTimerStartCycle;
 
 byte Cdyn_pass[3];
@@ -19,15 +14,11 @@ int STEPPER_ACC_INSUFFLATION = STEPPER_MICROSTEPS * 1500;
 int STEPPER_SPEED_MAX        = STEPPER_MICROSTEPS * 1500;
 int STEPPER_ACCEL_MAX        = STEPPER_MICROSTEPS * 1500;
 
-//static
-float speed_m,accel_m,speed_b,accel_b;
-float pidk_m,pidk_b;
-float pidi_m,pidi_b;
-float pidd_m,pidd_b;
 float dpip;
 byte dpip_b;
 
-float f_acc;byte f_acc_b;
+float f_acc;
+byte f_acc_b;
 byte  p_acc;
 bool ended_whilemov;
 
@@ -127,12 +118,6 @@ void MechVentilation::_setInspiratoryCycle(void) {
     //_timeoutIns = timeoutCycle * DEFAULT_POR_INSPIRATORIO / 100;
     _timeoutIns = timeoutCycle / (float(_percIE+1));
     _timeoutEsp = (timeoutCycle) - _timeoutIns;
-  #ifdef DEBUG_UPDATE
-      Serial.print("Timeout Cycle");Serial.println(timeoutCycle);
-      Serial.print("_timeoutIns");Serial.println(_timeoutIns);
-      Serial.print("_timeoutEsp");Serial.println(_timeoutEsp);
-  #endif
-    
 }
 
 void MechVentilation::activateRecruitment(void)
@@ -157,11 +142,9 @@ void MechVentilation::deactivateRecruitment(void)
  */
 void MechVentilation :: update ( SensorData& sensorData )
 {
-    last_vent_time = millis();
-    
+
     static int totalCyclesInThisState = 0;
     static int currentTime = 0;
-    static int flowSetpoint = 0;
 
     #if DEBUG_STATE_MACHINE
     extern volatile String debugMsg[];
@@ -199,21 +182,10 @@ void MechVentilation :: update ( SensorData& sensorData )
         if (force_stop){
           force_stop = false;
           stopped = true;
+          digitalWrite(PIN_STEPPER, LOW);
           return;
         }
 
-        //Filter vars
-        #ifdef FLUX_FILTER
-        flux_filter_time=millis();
-//        flux_count=0;
-        //flux_sum=0;
-        #endif
-        
-        //adding_vol=true;
-        //#ifdef DEBUG_UPDATE
-          Serial.println("INSUFLACION ");
-        //#endif
-  
         sensorData.last_pressure_max=pressure_max;
         sensorData.last_pressure_min=pressure_min;
         pressure_max=0;
@@ -231,7 +203,6 @@ void MechVentilation :: update ( SensorData& sensorData )
         sensorData._mlLastInsVol=int(_mlInsVol);
         sensorData._mlLastExsVol=int(fabs(_mlExsVol));
         
-        //_mlInsVol2=0;
         _mlInsVol=0.;
         _mlExsVol=0.;
         
@@ -253,23 +224,14 @@ void MechVentilation :: update ( SensorData& sensorData )
         else { //MANUAL MODE
           _stepper->setTargetPositionInSteps(int (STEPPER_HIGHEST_POSITION*(float)_percVol/100.));
           _stepperSpeed = 1.1 * STEPPER_HIGHEST_POSITION*(float(_percVol)*0.01)/( (float)(_timeoutIns*0.001) * DEFAULT_FRAC_CYCLE_VCL_INSUFF);//En [ml/s]
-          
-        #ifdef DEBUG_UPDATE
-          Serial.print("Manual mode Timeout ins , speed: ");Serial.print(_timeoutIns);Serial.print(" ");Serial.println(_stepperSpeed);
-        #endif
+
           _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACCEL_MAX);
           if (_stepperSpeed>STEPPER_SPEED_MAX)
             _stepperSpeed=STEPPER_SPEED_MAX;
           _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
         } 
         #endif
-//        
-//        _pid->reset();
-//
-//#if DEBUG_STATE_MACHINE
-//        debugMsg[debugMsgCounter++] = "State: InitInsuflation at " + String(millis());
-//#endif
-//
+
         /* Status update, reset timer, for next time, and reset PID integrator to zero */
         _setState(State_Insufflation);
 
@@ -373,17 +335,18 @@ void MechVentilation :: update ( SensorData& sensorData )
                 
 //                
                 //#ifdef DEBUG_UPDATE
+                #ifdef DEBUG_STEPPER
                 Serial.println("ENDED TIME WHILE MOVING");
+                #endif
                 //#endif
             }
             else {
               Serial.println("Motion Complete");
-              }
+            }
             _setState(Init_Exsufflation);
             if (_recruitmentMode) {
                 deactivateRecruitment();
             }
-
         }
 //        else //Time has not expired (State Insufflation)
 //        {
@@ -467,7 +430,6 @@ void MechVentilation :: update ( SensorData& sensorData )
     case Init_Exsufflation:
     {
       ended_whilemov = curr_ended_whilemov;
-      Serial.println("ended_whilemov: " + String(ended_whilemov ));
       
       _msecTimerStartCycle=millis();
       //Serial.print("Current pressure");Serial.println(_currentPressure);
@@ -511,9 +473,7 @@ void MechVentilation :: update ( SensorData& sensorData )
 
         /* Status update and reset timer, for next time */
         _setState(State_Exsufflation);
-    
-        //display_needs_update=true;
-        //last_pressure_max=pressure_max;
+
     }
     break;
     case State_Exsufflation:
@@ -620,14 +580,6 @@ void MechVentilation :: update ( SensorData& sensorData )
         if (digitalRead(PIN_ENDSTOP))
         {
 
-
-
-            /* Stepper control: homming */
-            #if DEBUG_UPDATE
-            //Serial.println("Attempting homing...");
-            #endif
-//            bool moveToHomeInSteps(long directionTowardHome, 
-//  float speedInStepsPerSecond, long maxDistanceToMoveInSteps, int homeLimitSwitchPin)
             if (_stepper->moveToHomeInSteps(
                     STEPPER_HOMING_DIRECTION,
                     STEPPER_HOMING_SPEED,
@@ -637,16 +589,8 @@ void MechVentilation :: update ( SensorData& sensorData )
 #if DEBUG_UPDATE
                     Serial.println("Homing failed");
 #endif
-            } else{
-              //_stepper->setCurrentPositionInSteps(int(STEPPER_HIGHEST_POSITION*0.12));
-              
-              }
+            }
             
-        }
-        else{
-#if DEBUG_UPDATE
-           Serial.println("No end stop detected.");
-#endif
         }
     
       #endif//ACCEL_STEPPER
@@ -737,8 +681,6 @@ void MechVentilation::change_config(VentilationOptions_t options) {
     _percIE= options.percInspEsp;
     setRPM(_rpm); //Include set inspiratory cycle
     _percVol=options.percVolume;
-
-    _mode = options.modeCtl;
 }
 
 void MechVentilation::updateParameters() {
