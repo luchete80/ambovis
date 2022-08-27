@@ -171,7 +171,7 @@ void MechVentilation :: update ( SensorData& sensorData )
       stopped=false;
       force_start = false;
     }
-    
+
     if (!stopped){
     switch (_currentState)
     {

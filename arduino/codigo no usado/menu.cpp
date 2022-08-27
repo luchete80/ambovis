@@ -126,17 +126,6 @@ void check_encoder() {
       lastButtonPress = time;
     }// if time > last button press
 
-<<<<<<< HEAD:arduino/codigo no usado/menu.cpp
-// ORIGINAL BCK WITHOUT SLEEP MODE
-//    if (digitalRead(PIN_MENU_BCK) == LOW )  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6)
-//        if (time - lastButtonPress > 150) {
-//          pressed = 2;
-//          isitem_sel=false;
-//          lastButtonPress = time;
-//        }// if time > last button press
-
-=======
->>>>>>> RESP-develop:arduino/ambovis/menu.cpp
     check_bck_state();
 
     if (pressed > 0) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
