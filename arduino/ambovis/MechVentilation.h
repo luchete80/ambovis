@@ -55,7 +55,6 @@ public:
 	 * @param stepper
 	 * @param sensors
 	 * @param pid
-	 * @param options
 	 */
     MechVentilation(
       #ifdef ACCEL_STEPPER
@@ -63,8 +62,7 @@ public:
       #else
         FlexyStepper *_stepper,
       #endif
-        AutoPID *pid,
-        VentilationOptions_t options);
+        AutoPID *pid);
 
     boolean getStartWasTriggeredByPatient();
     void setVentilationCyle_WaitTime(float speedExsufflation);
@@ -96,12 +94,8 @@ public:
     void setRPM(uint8_t rpm);
     void setPeakInspiratoryPressure(float pip);
     void setPeakEspiratoryPressure(float peep);
-
-//    float getInsVol(void);
-
     unsigned long getCycleNum(){return _cyclenum;};
     void setCycleNum(unsigned long cyc){_cyclenum=cyc;}
-    void change_config(VentilationOptions_t);
     void updateParameters();
 
     void setVarParams(VariableParameters* variableParameters) {
@@ -121,8 +115,7 @@ private:
         #else
         FlexyStepper *_stepper,
         #endif
-        AutoPID *pid,
-        VentilationOptions_t options);
+        AutoPID *pid);
 #if 0
     int _calculateInsuflationPosition (void);
 #endif
@@ -201,14 +194,12 @@ extern unsigned int _timeoutEsp;
 extern float _mlInsVol,_mlExsVol;
 //extern int _mllastInsVol,_mllastExsVol;
 extern bool display_needs_update;
-extern VentilationOptions_t options;
 extern MechVentilation * ventilation;
 extern unsigned long last_cycle;
 //extern byte alarm_max_pressure;
 //alarm_peep_pressure
 //extern int alarm_vt;
 extern byte cycle_pos; //0 to 127
-//extern byte Cdyn;
 //extern bool autopid;
 //extern bool filter;
 //extern byte pfmin,pfmax;

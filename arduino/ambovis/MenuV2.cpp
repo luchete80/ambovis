@@ -74,9 +74,8 @@ DisplayValue buildConfiguration(int line, int cursorOffset, int valueSize, Strin
 }
 
 DisplayValue getVentilationModeConfig(int value, bool isSetupReady) {
-    String strValue = value == 2 ? String("MAN") : String("PCL");
     int line = isSetupReady ? 0 : 1;
-    return buildConfiguration(line, 0, 3, "MOD:", strValue);
+    return buildConfiguration(line, 0, 3, "MOD:", String("MAN"));
 }
 
 DisplayValue getPercVConfig(int value, bool isSetupReady) {
@@ -199,33 +198,25 @@ void printCursor(MenuV2& menu, int cursorCode, VariableParameters parameters) {
 }
 
 void displaySensorValues(int line, MenuV2& menu, VariableParameters parameters, SensorData sensorData) {
-    char tempstr[5];
-    writeLine(menu, line, "PIP:", 1);
-    dtostrf(sensorData.last_pressure_min, 2, 0, tempstr);
-    writeLine(menu, line, "PEEP:", 8);
-    dtostrf((sensorData._mlLastInsVol + sensorData._mlLastExsVol)/2.*parameters.respiratoryRate*0.001, 2, 1, tempstr);
-    writeLine(menu, line, "VM:", 15);
-//    dtostrf(_timeoutIns*0.001, 1, 1, tempstr);
-//    writeLine(3, "I:" + String(tempstr), 9);
-//    dtostrf(_timeoutEsp*0.001, 1, 1, tempstr);
-//    writeLine(3, "E:" + String(tempstr), 15);
+    char tempStr[5];
+    dtostrf(sensorData.last_pressure_min, 2, 0, tempStr);
+    writeLine(menu, line, "PEEP:" + String(tempStr), 0);
+
+    dtostrf((sensorData._mlLastInsVol + sensorData._mlLastExsVol)/2.*parameters.respiratoryRate*0.001, 2, 1, tempStr);
+    writeLine(menu, line, "VM:" + String(tempStr), 10);
 }
 
 void displayInitialParametersSettings(MenuV2& menu, VariableParameters parameters) {
     writeLine(menu, 0, "Parametros inic", 1);
-    printCursor(menu, MODE_OPT, parameters);
+    writeLine(menu, 1, "MOD:MAN", 1);
     printCursor(menu, BPM_OPT, parameters);
     printCursor(menu, IE_OPT, parameters);
     printCursor(menu, END_SETUP, parameters);
 }
 
 void displayParametersSettings(MenuV2& menu, VariableParameters parameters, SensorData& sensorData) {
-    printCursor(menu, MODE_OPT, parameters);
-    if (parameters.vent_mode == VENTMODE_PCL) {
-        printCursor(menu, PIP_OPT, parameters);
-    } else if (parameters.vent_mode == VENTMODE_MAN) {
-        printCursor(menu, PERC_V_OPT, parameters);
-    }
+    writeLine(menu, 0, "MOD:MAN", 1);
+    printCursor(menu, PERC_V_OPT, parameters);
     printCursor(menu, BPM_OPT, parameters);
     printCursor(menu, IE_OPT, parameters);
 
@@ -248,7 +239,7 @@ void displaySettings(MenuV2& menu, VariableParameters parameters, SensorData sen
 }
 
 void printMenu(MenuV2& menu, VariableParameters parameters, SensorData sensorData) {
-    if ( menu.menuState.menu == MAIN ) { //All the titles
+    if ( menu.menuState.menu == MAIN ) {
         displayMainMenu(menu);
     } else if ( menu.menuState.menu == PARAMETER ) {
         if (!menu.menuState.setupReady) {
@@ -267,6 +258,7 @@ void displayMenu(MenuV2& menu, VariableParameters parameters, SensorData sensorD
     if (menu.menuState.changedMenu) {
         menu.lcd->clear();
         printMenu(menu, parameters, sensorData);
+        menu.menuState.changedMenu = false;
     } else {
         DisplayValue previousValue = getValueToDisplay(menu.menuState.previousCursorCode, parameters, menu.menuState);
         clearCursor(menu, previousValue.cursorOffset, previousValue.line);
@@ -280,15 +272,12 @@ void checkEncoder(MenuV2& menu, VariableParameters& parameters, SensorData& sens
     if (somethingChanged) {
         checkKeyboardActions(menu.keyboardState, menu.menuState, parameters);
         displayMenu(menu, parameters, sensorData);
-        if (menu.menuState.changedMenu) {
-            menu.menuState.changedMenu = false;
-        }
     }
 }
 
 void setupMenu(MenuV2& menuV2, VariableParameters& parameters, SensorData& sensorData, long time) {
     menuV2.menuState.menu = PARAMETER;
-    menuV2.menuState.cursorCode = MODE_OPT;
+    menuV2.menuState.cursorCode = INIT_PARAM_MENU[0];
     menuV2.menuState.changedMenu = false;
     menuV2.lcd->clear();
     displayInitialParametersSettings(menuV2, parameters);
@@ -301,4 +290,5 @@ void setupMenu(MenuV2& menuV2, VariableParameters& parameters, SensorData& senso
         }
         delay(150);
     } while (!menuV2.menuState.setupReady);
+    menuV2.menuState.cursorCode = PARAM_MENU[0];
 }

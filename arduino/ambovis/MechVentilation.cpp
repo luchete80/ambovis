@@ -28,14 +28,12 @@ MechVentilation::MechVentilation(
       #else
         FlexyStepper *stepper,
       #endif
-    AutoPID *pid,
-    VentilationOptions_t options)
+    AutoPID *pid)
 {
 
     _init(
         stepper,
-        pid,
-        options);
+        pid);
         force_stop = false;
         stopped = false;
         force_start = false;
@@ -173,7 +171,7 @@ void MechVentilation :: update ( SensorData& sensorData )
       stopped=false;
       force_start = false;
     }
-          
+    
     if (!stopped){
     switch (_currentState)
     {
@@ -619,30 +617,11 @@ void MechVentilation::_init(
     FlexyStepper *stepper,
 #endif
 
-    AutoPID *pid,
-    VentilationOptions_t options)
+    AutoPID *pid)
 {
     /* Set configuration parameters */
     _stepper = stepper;
     _pid = pid;
-    _rpm = options.respiratoryRate;
-    _pip = options.peakInspiratoryPressure;
-    _peep = options.peakEspiratoryPressure;
-    _tidalVol=options.tidalVolume;
-    _percIE= options.percInspEsp;
-    _percVol=options.percVolume;
-    
-    setRPM(_rpm);
-    _hasTrigger = options.hasTrigger;
-    if (_hasTrigger)
-    {
-        _triggerThreshold = options.triggerThreshold;
-    }
-    else
-    {
-        _triggerThreshold = FLT_MAX;
-    }
-
     /* Initialize internal state */
     _currentState = State_Homing;
     _stepperSpeed = STEPPER_SPEED_DEFAULT;
@@ -669,23 +648,10 @@ void MechVentilation::_setAlarm(Alarm alarm)
     _currentAlarm = alarm;
 }
 
-//float MechVentilation::getInsVol() {
-//    return (this->variableParameters->_mllastInsVol+this->variableParameters->_mllastExsVol)/2.;
-//}
-
-void MechVentilation::change_config(VentilationOptions_t options) {
-    _rpm = options.respiratoryRate;
-    _pip = options.peakInspiratoryPressure;
-    _peep = options.peakEspiratoryPressure;
-    _tidalVol=options.tidalVolume;
-    _percIE= options.percInspEsp;
-    setRPM(_rpm); //Include set inspiratory cycle
-    _percVol=options.percVolume;
-}
-
 void MechVentilation::updateParameters() {
     _rpm = variableParameters->respiratoryRate;
     _percIE= byte(variableParameters->percInspEsp);
     _percVol= byte(variableParameters->percVolume);
     _setInspiratoryCycle();
+    Serial.println("params updated");
 }

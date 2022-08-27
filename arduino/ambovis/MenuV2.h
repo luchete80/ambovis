@@ -6,21 +6,13 @@
 #define _MENU_V2_H_
 
 #include "defaults.h"
-#ifdef LCD_I2C
-#include "src/LiquidCrystal_I2C/LiquidCrystal_I2C.h"
-#else
 #include <LiquidCrystal.h>
-#endif
 #include "MenuDataTypes.h"
 #include "MenuKeyboard.h"
 #include "MenuSelector.h"
 
 typedef struct menu_v2 {
-#ifdef LCD_I2C
-    LiquidCrystal_I2C *lcd;
-#else
     LiquidCrystal *lcd;
-#endif
     KeyboardState keyboardState;
     MenuState menuState;
 } MenuV2;

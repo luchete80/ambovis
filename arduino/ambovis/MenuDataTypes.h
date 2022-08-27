@@ -56,9 +56,8 @@ typedef struct sensor_data {
 
 static int SIZE_MENU = 4;
 static int MAIN_MENU[] = {PARAMETER, ALARM, SETTINGS};
-static int INIT_PARAM_MENU[] = {MODE_OPT, BPM_OPT, IE_OPT, END_SETUP};
-static int PARAM_MENU[] = {MODE_OPT, PERC_V_OPT, BPM_OPT, IE_OPT};
-static int PARAM_MENU_PCV[] = {MODE_OPT, PIP_OPT, BPM_OPT, IE_OPT};
+static int INIT_PARAM_MENU[] = {BPM_OPT, IE_OPT, END_SETUP};
+static int PARAM_MENU[] = {PERC_V_OPT, BPM_OPT, IE_OPT};
 static int ALARM_MENU[] = {PIP_ALARM_OPT, PEEP_ALARM_OPT, VT_ALARM_OPT};
 static int SETTINGS_MENU[] = {FIL_OPT, AUTO_OPT};
 

@@ -4,16 +4,12 @@
 
 #include "MenuSelector.h"
 
-int getCursorCode(int menu, int i, int ventMode) {
+int getCursorCode(int menu, int i) {
     switch (menu) {
         case MAIN:
             return MAIN_MENU[i];
         case PARAMETER:
-            if (ventMode == VENTMODE_MAN) {
-                return PARAM_MENU[i];
-            } else {
-                return PARAM_MENU_PCV[i];
-            }
+            return PARAM_MENU[i];
         case ALARM:
             return ALARM_MENU[i];
         case SETTINGS:
@@ -25,8 +21,6 @@ int getCursorCode(int menu, int i, int ventMode) {
 
 int* getValueToEdit(int code, VariableParameters& parameters) {
     switch (code) {
-        case MODE_OPT:
-            return &parameters.vent_mode;
         case PERC_V_OPT:
             return &parameters.percVolume;
         case BPM_OPT:
@@ -68,13 +62,10 @@ int validate(int val, int cursorCode) {
     switch (cursorCode) {
         case MAIN:
         case PARAMETER:
-            return validate(val, 0, 3);
         case ALARM:
             return validate(val, 0, 2);
         case SETTINGS:
             return validate(val, 0, 1);
-        case MODE_OPT:
-            return validate(val, 1, 2);
         case PERC_V_OPT:
             return validate(val, 40, 100);
         case PIP_OPT:
@@ -128,7 +119,7 @@ void moveCursor(KeyboardState& keyboardState, MenuState& menuState, VariablePara
         resetKeyboardState(keyboardState);
     } else if (keyboardState.back && !isInitialMenu) {
         menuState.menu = MAIN;
-        menuState.cursorCode = getCursorCode(MAIN, 0, variables.vent_mode);
+        menuState.cursorCode = getCursorCode(MAIN, 0);
         menuState.changedMenu = true;
         resetKeyboardState(keyboardState);
     } else {
@@ -136,7 +127,7 @@ void moveCursor(KeyboardState& keyboardState, MenuState& menuState, VariablePara
         keyboardState.previousCount = keyboardState.count;
         menuState.previousCursorCode = menuState.cursorCode;
         menuState.cursorCode = isInitialMenu ? INIT_PARAM_MENU[keyboardState.count] :
-                getCursorCode(menuState.menu, keyboardState.count, variables.vent_mode);
+                getCursorCode(menuState.menu, keyboardState.count);
     }
 }
 
@@ -154,12 +145,12 @@ void checkKeyboardActions(KeyboardState& keyboardState, MenuState& menuState, Va
             menuState.menu = menuState.cursorCode;
             menuState.changedMenu = true;
             menuState.previousCursorCode = menuState.cursorCode;
-            menuState.cursorCode = getCursorCode(menuState.menu, 0, variables.vent_mode);
+            menuState.cursorCode = getCursorCode(menuState.menu, 0);
             resetKeyboardState(keyboardState);
         } else {
             keyboardState.count = validate(keyboardState.count, MAIN);
             menuState.previousCursorCode = menuState.cursorCode;
-            menuState.cursorCode = getCursorCode(MAIN, keyboardState.count, variables.vent_mode);
+            menuState.cursorCode = getCursorCode(MAIN, keyboardState.count);
         }
     } else {
         if (menuState.isEditingParam) {
