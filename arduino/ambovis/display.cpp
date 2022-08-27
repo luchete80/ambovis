@@ -56,6 +56,7 @@ void tft_draw(void) {
         
         drawing_cycle = !drawing_cycle;
         tft.fillRect(180,280,70,50, ILI9341_BLACK);
+
         if (ended_whilemov){
           tft.setCursor(150, 300);tft.println("ENDErr");
         }
@@ -147,15 +148,37 @@ void check_alarms(){
       }
 }
 
-void print_bat() {
+float calc_bat(const int &iter){
+  unsigned short count = iter;
+  float level= 0.;
+  float fdiv = (float)(BATDIV_R1 + BATDIV_R2)/(float)BATDIV_R2;
+  float fac=1.1/1024.*fdiv;  //5./(1024.*0.175) //TODO: HACER AL COMIENZO
+  
+  for (int i=0;i<count;i++){
+    level+=float(analogRead(PIN_BAT_LEV));
+    //Serial.println(analogRead(PIN_BAT_LEV));
+    }
+  level*=fac/count;
+  return level;
+}
+
+void print_float(const int &row, const int &col, const float &val){
+  dtostrf(val, 2, 1, buffer); //DEBUG
+  //tft.setCursor(130, 260);tft.println("Bat:");
+  tft.setCursor(col, row);tft.println(buffer);
+  //tft.setCursor(100, 80);tft.println("Vmpx:");
+}
+
+void print_bat(){
     float level = 0.;
     tft.setRotation(0);
     //tft.fillRect(180,150,70,20, ILI9341_BLACK);//ONLY BAT LEVEL
     //TODO: Make this calcs at setup
     float fdiv = (float)(BATDIV_R1 + BATDIV_R2)/(float)BATDIV_R2;
-    tft.fillRect(180,250,70,50, ILI9341_BLACK);
-    float fac=1.1/1024.*fdiv;  //5./(1024.*0.175)
 
+    tft.fillRect(180,250,70,50, ILI9341_BLACK);
+    float fac=1.1/1024.*fdiv;  //5./(1024.*0.175) //TODO: HACER AL COMIENZO
+    
     //Vt > 24V   =>   PC = 100%
     //Vmin < Vt < 24V   =>   PC[%] = (Vt[V]-Vmin)/(24-Vmin)*100
     //Vt < Vmin   =>   PC = 0%
@@ -165,8 +188,6 @@ void print_bat() {
     }
     level*=fac/count;
 
-    dtostrf(level, 2, 1, buffer); //DEBUG
-    Serial.print("Bat level: ");Serial.println(level);
     tft.setCursor(130, 260);tft.println("Bat:");
     tft.setCursor(180, 260);tft.println(buffer);
     //tft.setCursor(220, 260);tft.println("%");

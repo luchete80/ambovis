@@ -7,8 +7,9 @@
 #define ACCEL_STEPPER 1
 //#define DEBUG_PID 1
 //#define DEBUG_UPDATE  1
-//#define STEPPER_DIR 1
-#define DEBUG_STEPPER     1
+//#define DEBUG_STEPPER     1
+//#define FILTER_FLUX 1
+#define DEBUG_OFF 1 //Release version
 #define BUZZER_LOW 0
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
@@ -117,5 +118,10 @@ extern unsigned long time;
 //Battery level voltage dividers
 #define BATDIV_R1           12000
 #define BATDIV_R2           470
+extern float vlevel;
+#define BAT_TEST
+#define TIME_SHOW_BAT   15000 //MSECS
+#define TEMP_TEST
+#define TIME_READ_TEMP  15000 //MSECS
 
 #endif // DEFAULTS_H

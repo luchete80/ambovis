@@ -1,0 +1,6 @@
+Calibration iter, cycle, verror, sum: 145, 0, 0.48, 0.00
+Calibration iter, cycle, verror, sum: 113, 1, 0.29, 0.48
+Calibration iter, cycle, verror, sum: 20, 2, 1.58, 0.77
+Calibration iter, cycle, verror, sum: 239, 3, 0.13, 2.35
+Calibration iter, cycle, verror, sum: 28, 4, 1.14, 2.48
+Calibration verror: 0.91

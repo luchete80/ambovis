@@ -11,6 +11,12 @@
 
 #define CALIB_CYCLES  5
 
+#ifdef TEMP_TEST
+#include <OneWire.h>
+#include <DallasTemperature.h>
+float temp;
+#endif
+
 byte Cdyn;
 bool autopid;
 bool filter;
@@ -69,6 +75,12 @@ unsigned long lastShowSensor = 0;
 unsigned long lastSave = 0;
 bool display_needs_update = false;
 
+#ifdef BAT_TEST
+unsigned long lastShowBat = 0;
+#endif
+#ifdef TEMP_TEST
+unsigned lastReadTemp = 0;
+#endif
 bool show_changed_options = false; //Only for display
 bool update_options = false;
 
@@ -137,6 +149,11 @@ int idleTime ;        // how long the button was idle
 float vsupply_0 = 0.;
 float vlevel = 0.;
 
+#ifdef TEMP_TEST
+OneWire           oneWire(PIN_TEMP);
+DallasTemperature sensors(&oneWire);
+#endif
+  
 void setup() {
 
   pinMode(PIN_STEPPER, OUTPUT);
@@ -310,6 +327,10 @@ void setup() {
 
   lastReadSensor =  lastShowSensor = last_update_display = millis();
 
+  #ifdef BAT_TEST
+  lastShowBat = millis();
+  #endif
+
   //STEPPER
   Timer3.initialize(TIME_STEPPER_ISR_MICROS);
   Timer3.attachInterrupt(timer3Isr);
@@ -339,6 +360,14 @@ void setup() {
   put_to_sleep = false;
   wake_up = false;
 
+  //Serial.println("Vcc & Out MPX: " + String(analogRead(PIN_MPX_LEV)) + String(", ") + String(Voltage));
+    
+  Serial.println("Exiting setup");
+  //TODO: CALIBRATION RUN ALSO SHOULD BE HERE
+
+  #ifdef TEMP_TEST
+  sensors.begin();
+  #endif
 }
 
 bool  calibration_run = true;
@@ -435,7 +464,7 @@ void loop() {
         //vout = vs(0.09*P + 0.04) +/ERR
         verror_sum += ( Voltage - 0.04 * vs); //-5*0.04
         //Serial.println("Calibration sum: "+ String(verror_sum));
-        Serial.println("readed: "+ String(Voltage - 0.04 * vs));
+        //Serial.println("readed: "+ String(Voltage - 0.04 * vs));
       } 
 //      else { //This sums the feed error
 //          verror_sum += vlevel;       // -5*0.04
@@ -512,8 +541,19 @@ void loop() {
           tft.fillScreen(ILI9341_BLACK);
 
       }
+    } 
+
+    #ifdef TEMP_TEST
+    if (time > lastReadTemp + TIME_READ_TEMP){
+      lastReadTemp = time;
+      sensors.requestTemperatures();
+      temp=sensors.getTempCByIndex(0);
+      //Serial.println ("Temp: " + String(temp));
     }
-    
+    tft.fillRect(200,100,20,40, ILI9341_BLUE);    
+    print_float(100,200,temp);
+    #endif TEMP_TEST+
+
     }//change cycle
 
     if (!calibration_run) {
@@ -567,7 +607,7 @@ void loop() {
       print_bat();
       digitalWrite(LCD_SLEEP, LOW);
       digitalWrite(TFT_SLEEP, LOW);
-      digitalWrite(PIN_STEPPER, LOW);
+      //digitalWrite(PIN_STEPPER, LOW); //TODO: call it here (now is inside stepper)
       ventilation->forceStop();
       //digitalWrite(PIN_BUZZER, !BUZZER_LOW); //Buzzer inverted
       lcd.clear();
@@ -579,6 +619,15 @@ void loop() {
     time = millis();
     check_bck_state();
   }
+
+  #ifdef BAT_TEST
+  if ( time > lastShowBat + TIME_SHOW_BAT ){
+    lastShowBat = time;
+    Serial.println("last show bat " + String(lastShowBat));
+    float level = calc_bat(5);
+    Serial.println(String(time)+", " +String(level));
+  }
+  #endif BAT_TEST
 
 }//LOOP
 
