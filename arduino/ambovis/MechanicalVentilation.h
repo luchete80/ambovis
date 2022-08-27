@@ -14,12 +14,19 @@ enum State {
     State_Error = -1
 };
 
+typedef struct variable_parameters {
+    int alarm_max_pressure;
+    int alarm_peep_pressure;
+    int alarm_vt;
+} AlarmConfig;
+
 typedef struct ventilation_config {
     short respiratoryRate;
     short peakInspiratoryPressure;
     short peakExpiratoryPressure;
     byte percIE;
     byte percVolume;
+    AlarmConfig alarmConfig;
 } VentilationConfig;
 
 typedef struct ventilation_status {
@@ -36,6 +43,7 @@ typedef struct ventilation_status {
     int mlLastInsVol;
     int mlLastExpVol;
     float cDyn;
+    bool newInsufflation;
     bool endedWhileMoving;
     bool updateDisplay;
 } VentilationStatus;
@@ -56,7 +64,8 @@ typedef struct sensor_data {
 
 void start(MechanicalVentilation& mechanicalVentilation);
 void stop(MechanicalVentilation& mechanicalVentilation);
-void update(MechanicalVentilation& mechanicalVentilation, SensorData& sensorData);
+void update(MechanicalVentilation& mechanicalVentilation);
+void newInsufflationActions(VentilationStatus& status, SensorData& sensorData);
 void update_config(MechanicalVentilation& mechanicalVentilation);
 
 #endif /* MECHANICAL_VENTILATION_H */
