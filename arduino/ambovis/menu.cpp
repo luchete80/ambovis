@@ -78,7 +78,6 @@ void check_updn_button(int pin, byte *var, bool incr_decr) {
           else
               *var=*var-1;
           lastButtonPress = time;
-          Serial.print("encoder "); Serial.println(*var);
       }// if time > last button press
     }
 }

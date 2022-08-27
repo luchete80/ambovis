@@ -23,4 +23,5 @@
 					  Se agrega apagado y encendeido del driver en modo sleep  / wake up
 					  Se apaga pin de LCD y TFT en displays. (Sin embargo queda el de contraste de LCD).
 					  
-					
+20220825 - Se agrega test de temperatura y baterial. Se limpia serial. 
+			RESTANTE: MODO SLEEP, BATERIAS.
