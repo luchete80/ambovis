@@ -10,7 +10,6 @@ void initCycleTimes(MechanicalVentilation& mechanicalVentilation) {
 }
 
 void start(MechanicalVentilation& mechanicalVentilation) {
-    digitalWrite(PIN_STEPPER, HIGH);
     mechanicalVentilation.ventilationStatus.running = true;
     initCycleTimes(mechanicalVentilation);
 }
@@ -21,14 +20,14 @@ void stop(MechanicalVentilation& mechanicalVentilation) {
 }
 
 void newInsufflationActions(VentilationStatus& status, SensorData& sensorData) {
-    float last_pressure_max = sensorData.max_pressure;
-    float last_pressure_min = sensorData.min_pressure;
+    status.lastMaxPressure = sensorData.max_pressure;
+    status.lastMinPressure = sensorData.min_pressure;
     sensorData.max_pressure = 0;
     sensorData.min_pressure = 60;
 
     status.cDynPass[0] = status.cDynPass[1];
     status.cDynPass[1] = status.cDynPass[2];
-    status.cDynPass[2] = status.mlLastInsVol/(last_pressure_max - last_pressure_min);
+    status.cDynPass[2] = status.mlLastInsVol/(status.lastMaxPressure - status.lastMinPressure);
 
     status.cDyn = (status.cDynPass[0] + status.cDynPass[1] + status.cDynPass[2]) / 3.;
     status.mlLastInsVol = int(sensorData.mlInsVol);

@@ -1,8 +1,9 @@
 #ifndef _MENU_H_
 #define _MENU_H_
 
-#include "defaults.h"
+#include <arduino.h>
 #include <LiquidCrystal.h>
+#include "MechanicalVentilation.h"
 
 extern LiquidCrystal lcd;
 extern byte max_sel,min_sel; //According to current selection
@@ -23,13 +24,29 @@ extern bool update_options;
 extern char tempstr[5];
 extern byte menu_number;
 extern byte p_trim;
-
+// These were imported from old mechVentilation
+extern int max_accel,min_accel,max_speed,min_speed,max_cd,min_cd,max_pidk,min_pidk;
+extern int max_pidi,min_pidi;
+extern int max_pidd,min_pidd;
+extern float f_acc;
+extern byte f_acc_b;
+extern byte p_acc;
+extern byte pfmin,pfmax;
+extern float peep_fac;
+extern float pf_min,pf_max;
+extern float dpip;
+extern byte dpip_b;
+extern bool autopid;
+extern bool filter;
+extern unsigned long last_cycle;
+extern float flow_f;
+extern float pressure_p;
 
 void writeLine(int line, String message = "", int offsetLeft = 0);
 void lcd_clearxy(int x, int y,int pos=1);
 void lcd_selxy(int x, int y);
-void check_encoder();
-void display_lcd ();
+void check_encoder(VentilationStatus status, VentilationConfig& config);
+void display_lcd (VentilationStatus status, VentilationConfig config);
 void init_display();
 
 void check_updn_button(int pin, byte *var, bool incr_decr);

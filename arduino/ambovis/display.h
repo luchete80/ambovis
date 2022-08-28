@@ -3,6 +3,7 @@
 
 #include "pinout.h"
 #include "defaults.h"
+#include "MechanicalVentilation.h"
 #include "Adafruit_GFX.h"
 #include "Adafruit_ILI9341.h"
 
@@ -11,11 +12,12 @@
 //SPI HARDWARE SHOULD BE PINS CLK #13 AND MISO #11, WITH THIS CONSTRUCTOR!
 extern Adafruit_ILI9341 tft; //= Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 extern bool drawing_cycle;//TODO: MOVE TO CLASS MEMBER
+extern float flow_f;
 void drawY2(uint16_t color);
 void print_bat();
 void print_float(const int &row, const int &col, const float &val);
 float calc_bat(const int &iter);
-void tft_draw();
-void print_vols();
+void tft_draw(VentilationStatus status, SensorData sensorData);
+void print_vols(VentilationStatus status);
 void check_alarms();
 #endif

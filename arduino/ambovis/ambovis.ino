@@ -6,7 +6,7 @@
 #include "menu.h"
 #include "display.h"
 #include "pinout.h"
-#include "MechVentilation.h"
+#include "MechanicalVentilation.h"
 #include <EEPROM.h>
 
 #define CALIB_CYCLES  5
@@ -32,7 +32,6 @@ bool drawing_cycle = 0;
 #include <Adafruit_ADS1X15.h>
 Adafruit_ADS1115 ads;
 
-float Voltage = 0.0;
 float _mlInsVol = 0;
 float _mlExsVol = 0;
 int _mllastInsVol, _mllastExsVol;
@@ -41,7 +40,7 @@ unsigned long mute_count;
 void read_memory(); //Lee la EEPROM, usa variables externas, quiza deberian englobarse en un vector dinamico todos los offsets
 void write_memory();
 
-AccelStepper *stepper;
+//AccelStepper *stepper;
 
 byte alarm_state = 0; //0: No alarm 1: peep 2: pip 3:both
 
@@ -134,10 +133,13 @@ void check_sleep_mode();  //Batt charge only
 
 bool isitem_sel =false;
 
-AutoPID * pid;
-
-MechVentilation * ventilation;
-VentilationOptions_t options;
+//AutoPID * pid;
+//
+//MechVentilation * ventilation;
+//VentilationOptions_t options;
+//NEW MechanicalVentilation
+MechanicalVentilation mechanicalVentilation;
+SensorData sensorData;
 
 int bck_state ;     // current state of the button
 int last_bck_state ; // previous state of the button
@@ -148,6 +150,17 @@ int idleTime ;        // how long the button was idle
 
 float vsupply_0 = 0.;
 float vlevel = 0.;
+
+//FROM old mechVentilation - should be removed in the future
+int STEPPER_ACC_INSUFFLATION = STEPPER_MICROSTEPS * 1500;
+int STEPPER_SPEED_MAX        = STEPPER_MICROSTEPS * 1500;
+int STEPPER_ACCEL_MAX        = STEPPER_MICROSTEPS * 1500;
+float dpip;
+byte dpip_b;
+float f_acc;
+byte f_acc_b;
+byte  p_acc;
+bool ended_whilemov;
 
 #ifdef TEMP_TEST
 OneWire           oneWire(PIN_TEMP);
@@ -179,13 +192,13 @@ void setup() {
 
   digitalWrite(PIN_BUZZER, BUZZER_LOW); //LOW, INVERTED
 
-  // PID
-  pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
-  // if pressure is more than PID_BANGBANG below or above setpoint,
-  // output will be set to min or max respectively
-  pid -> setBangBang(PID_BANGBANG);
-  // set PID update interval
-  pid -> setTimeStep(PID_TS);
+//  // PID
+//  pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
+//  // if pressure is more than PID_BANGBANG below or above setpoint,
+//  // output will be set to min or max respectively
+//  pid -> setBangBang(PID_BANGBANG);
+//  // set PID update interval
+//  pid -> setTimeStep(PID_TS);
 
   max_cd = 40; //T MODIFY: READ FROM MEM
   min_cd = 10;
@@ -208,14 +221,22 @@ void setup() {
 
   digitalWrite(PIN_EN, HIGH);
 
-  options.respiratoryRate = DEFAULT_RPM;
-  options.percInspEsp = 2; //1:1 to 1:4, is denom
-  options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
-  options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
-  options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
-  options.hasTrigger = false;
-  options.tidalVolume = 300; // TODO: might be removed
-  options.percVolume = 100; //1 to 10
+//  options.respiratoryRate = DEFAULT_RPM;
+//  options.percInspEsp = 2; //1:1 to 1:4, is denom
+//  options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
+//  options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
+//  options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
+//  options.hasTrigger = false;
+//  options.tidalVolume = 300; // TODO: might be removed
+//  options.percVolume = 100; //1 to 10
+    mechanicalVentilation.ventilationConfig.respiratoryRate = DEFAULT_RPM;
+    mechanicalVentilation.ventilationConfig.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
+    mechanicalVentilation.ventilationConfig.peakExpiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
+    mechanicalVentilation.ventilationConfig.percIE = 2;
+    mechanicalVentilation.ventilationConfig.percVolume = 100;
+    mechanicalVentilation.ventilationConfig.alarmConfig.alarm_max_pressure = 35;
+    mechanicalVentilation.ventilationConfig.alarmConfig.alarm_peep_pressure = 5;
+    mechanicalVentilation.ventilationConfig.alarmConfig.alarm_vt = 200;
 
   delay(100);
 
@@ -249,9 +270,12 @@ void setup() {
   byte i_e = 2;
   Menu_inic menuini(&vent_mode, &bpm, &i_e);
 
-  options.respiratoryRate = bpm;
-  options.percInspEsp = i_e; //1:1 to 1:4, is denom
-  vent_mode = VENTMODE_MAN; // TODO: always starts with MANUAL mode?
+//  options.respiratoryRate = bpm;
+//  options.percInspEsp = i_e; //1:1 to 1:4, is denom
+
+  mechanicalVentilation.ventilationConfig.respiratoryRate = bpm;
+  mechanicalVentilation.ventilationConfig.percIE = i_e;
+  vent_mode = VENTMODE_MAN;
 
   /////////////////// CALIBRACION /////////////////////////////////////
   bool fin = false;
@@ -272,53 +296,55 @@ void setup() {
   digitalWrite(PIN_STEPPER, HIGH);
   delay(1000);
 
-  stepper = new AccelStepper(
-    AccelStepper::DRIVER,
-    PIN_STEPPER_STEP,
-    PIN_STEPPER_DIRECTION);
-
-  ventilation = new MechVentilation(
-    stepper,
-    pid,
-    options
-  );
+//  stepper = new AccelStepper(
+//    AccelStepper::DRIVER,
+//    PIN_STEPPER_STEP,
+//    PIN_STEPPER_DIRECTION);
+//
+//  ventilation = new MechVentilation(
+//    stepper,
+//    pid,
+//    options
+//  );
 
   tft.fillScreen(ILI9341_BLACK);
 
   // configura la ventilación
-  ventilation -> start();
-  ventilation -> update();
+//  ventilation -> start();
+  start(mechanicalVentilation);
+  update(mechanicalVentilation);
+//  ventilation -> update();
 
   lcd.clear();
   writeLine(1, "Iniciando...", 0);
 
 #ifdef ACCEL_STEPPER
-  stepper->setSpeed(STEPPER_HOMING_SPEED);
+  mechanicalVentilation.stepper->setSpeed(STEPPER_HOMING_SPEED);
 
   long initial_homing = -1;
 
   while (digitalRead(PIN_ENDSTOP)) {  // Make the Stepper move CCW until the switch is activated
-    stepper->moveTo(initial_homing);  // Set the position to move to
+    mechanicalVentilation.stepper->moveTo(initial_homing);  // Set the position to move to
     initial_homing--;  // Decrease by 1 for next move if needed
-    stepper->run();  // Start moving the stepper
+    mechanicalVentilation.stepper->run();  // Start moving the stepper
     delay(5);
   }
-  stepper->setCurrentPosition(0);  // Set the current position as zero for now
+  mechanicalVentilation.stepper->setCurrentPosition(0);  // Set the current position as zero for now
   initial_homing = 1;
 
   while (!digitalRead(PIN_ENDSTOP)) { // Make the Stepper move CW until the switch is deactivated
-    stepper->moveTo(initial_homing);
-    stepper->run();
+    mechanicalVentilation.stepper->moveTo(initial_homing);
+    mechanicalVentilation.stepper->run();
     initial_homing++;
     delay(5);
   }
 
-  long position = stepper->currentPosition();
-  stepper->setCurrentPosition(STEPPER_LOWEST_POSITION);
-  position = stepper->currentPosition();
+  long position = mechanicalVentilation.stepper->currentPosition();
+  mechanicalVentilation.stepper->setCurrentPosition(STEPPER_LOWEST_POSITION);
+  position = mechanicalVentilation.stepper->currentPosition();
 #endif
 
-  display_lcd();
+  display_lcd(mechanicalVentilation.ventilationStatus, mechanicalVentilation.ventilationConfig);
 
   //ENCODER
   curr_sel = old_curr_sel = 1; //COMPRESSION
@@ -343,7 +369,8 @@ void setup() {
   f_acc = (float)f_acc_b / 10.;
   dpip = (float)dpip_b / 10.;
 
-  ventilation->setCycleNum(last_cycle);
+//  ventilation->setCycleNum(last_cycle);
+  mechanicalVentilation.ventilationStatus.cycleNum = last_cycle;
 
   digitalWrite(BCK_LED, LOW);
   buzzmuted = false;
@@ -354,7 +381,7 @@ void setup() {
 
   pf_min = (float)pfmin / 50.;
   pf_max = (float)pfmax / 50.;
-  peep_fac = -(pf_max - pf_min) / 15.*last_pressure_min + pf_max;
+  peep_fac = -(pf_max - pf_min) / 15.* mechanicalVentilation.ventilationStatus.lastMinPressure + pf_max;
 
   sleep_mode = false;
   put_to_sleep = false;
@@ -384,14 +411,15 @@ void loop() {
       digitalWrite(LCD_SLEEP, HIGH);
       lcd.clear();
       init_display();
-      display_lcd();
+      display_lcd(mechanicalVentilation.ventilationStatus, mechanicalVentilation.ventilationConfig);
       tft.begin();
       tft.fillScreen(ILI9341_BLACK);
       wake_up = false;
-      ventilation->forceStart();
+//      ventilation->forceStart();
+      start(mechanicalVentilation);
     }
-    State state = ventilation->getState();
-    check_encoder();
+//    State state = ventilation->getState();
+    check_encoder(mechanicalVentilation.ventilationStatus, mechanicalVentilation.ventilationConfig);
 
     time = millis();
     check_buzzer_mute();
@@ -405,14 +433,14 @@ void loop() {
     if ( time > lastShowSensor + TIME_SHOW ) {
       lastShowSensor = time;
 
-      tft_draw();
+      tft_draw(mechanicalVentilation.ventilationStatus, sensorData);
     }
 
 
     float vs = 0.;
     if (time > lastReadSensor + TIME_SENSOR) {
 
-      pressure_p = ( analogRead(PIN_PRESSURE)/ (1023.) - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
+      sensorData.pressure_p = ( analogRead(PIN_PRESSURE)/ (1023.) - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
 
       vlevel = float(analogRead(PIN_MPX_LEV))/1024.*1.1*VOLTAGE_CONV;
 
@@ -420,7 +448,7 @@ void loop() {
       vs = vlevel /** vfactor*/;
       
       adc0 = ads.readADC_SingleEnded(0);
-      Voltage = (adc0 * 0.1875) * 0.001; //Volts
+      float Voltage = (adc0 * 0.1875) * 0.001; //Volts
 
       p_dpt = ( (Voltage - vzero)/vs   - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
       
@@ -452,11 +480,11 @@ void loop() {
       lastReadSensor = millis();
 
       //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
-      if (pressure_p > pressure_max) {
-        pressure_max = pressure_p;
+      if (sensorData.pressure_p > sensorData.max_pressure) {
+          sensorData.max_pressure = sensorData.pressure_p;
       }
-      if (pressure_p < pressure_min) {
-        pressure_min = pressure_p;
+      if (sensorData.pressure_p < sensorData.min_pressure) {
+          sensorData.min_pressure = sensorData.pressure_p;
       }
       if (calibration_run) {
         vcorr_count ++;
@@ -466,19 +494,21 @@ void loop() {
         //Serial.println("Calibration sum: "+ String(verror_sum));
         //Serial.println("readed: "+ String(Voltage - 0.04 * vs));
       } 
-//      else { //This sums the feed error
-//          verror_sum += vlevel;       // -5*0.04
-//          vcorr_count ++;
-//      }
-      
+
     }//Read Sensor
 
-    if ( ventilation -> getCycleNum () != last_cycle ) {
-      int vt = (_mllastInsVol + _mllastInsVol) / 2;
-      if (vt < alarm_vt)  isalarmvt_on = 1;
-      else              isalarmvt_on = 0;
-      if ( last_pressure_max > alarm_max_pressure + 1 ) {
-        if ( last_pressure_min < alarm_peep_pressure - 1) {
+//    if ( ventilation -> getCycleNum () != last_cycle ) {
+    VentilationStatus ventStatus = mechanicalVentilation.ventilationStatus;
+    VentilationConfig ventConfig = mechanicalVentilation.ventilationConfig;
+    if ( ventStatus.cycleNum != last_cycle ) {
+        int vt = (ventStatus.mlLastInsVol + ventStatus.mlLastExpVol) / 2;
+        if (vt < ventConfig.alarmConfig.alarm_vt) {
+          isalarmvt_on = 1;
+      } else {
+          isalarmvt_on = 0;
+      }
+        if ( ventStatus.lastMaxPressure > ventConfig.alarmConfig.alarm_max_pressure + 1 ) {
+            if ( ventStatus.lastMinPressure < ventConfig.alarmConfig.alarm_peep_pressure - 1) {
           if (!isalarmvt_on)  alarm_state = 3;
           else                alarm_state = 13;
         } else {
@@ -486,7 +516,7 @@ void loop() {
           else                alarm_state = 12;
         }
       } else {
-        if ( last_pressure_min < alarm_peep_pressure - 1 ) {
+            if ( ventStatus.lastMinPressure < ventConfig.alarmConfig.alarm_peep_pressure - 1 ) {
           if (!isalarmvt_on) alarm_state = 1;
           else               alarm_state = 11;
         } else {
@@ -495,33 +525,17 @@ void loop() {
         }
       }
 
-      last_cycle = ventilation->getCycleNum();
+      last_cycle = ventStatus.cycleNum;
 
       if (!calibration_run) {
-        display_lcd();
-        last_update_display = time;
+          display_lcd(mechanicalVentilation.ventilationStatus, mechanicalVentilation.ventilationConfig);
+          last_update_display = time;
       } else {
           lcd.clear();
           writeLine(1, "Calibracion flujo", 0);
           writeLine(2, "Ciclo: " + String(calib_cycle+1) + "/" + String(CALIB_CYCLES), 0);
       }
-      
-//#ifdef DEBUG_PID
-//      if (vent_mode = VENTMODE_PCL) {
-//        float err = (float)(pressure_max - options.peakInspiratoryPressure) / options.peakInspiratoryPressure;
-//        errpid_prom += fabs(err);
-//        errpid_prom_sig += err;
-//        Serial.println("Error PID: "); Serial.print(err, 5);
-//        ciclo_errpid++;
-//
-//        if (ciclo_errpid > 4) {
-//          errpid_prom /= 5.; errpid_prom_sig /= 5.;
-//          Serial.print(options.peakInspiratoryPressure); Serial.print(" "); Serial.print(errpid_prom, 5); Serial.print(" "); Serial.println(errpid_prom_sig, 5);
-//          errpid_prom = 0.; errpid_prom_sig = 0.;
-//          ciclo_errpid = 0;
-//        }
-//      }
-//#endif
+
       if (!digitalRead(PIN_POWEROFF)) {
         digitalWrite(YELLOW_LED, HIGH);
       } else {
@@ -541,7 +555,11 @@ void loop() {
           tft.fillScreen(ILI9341_BLACK);
 
       }
-    } 
+    }
+
+    if (mechanicalVentilation.ventilationStatus.newInsufflation) {
+        newInsufflationActions(mechanicalVentilation.ventilationStatus, sensorData);
+    }
 
     #ifdef TEMP_TEST
     if (time > lastReadTemp + TIME_READ_TEMP){
@@ -558,19 +576,20 @@ void loop() {
 
     if (!calibration_run) {
       if (display_needs_update) {
-        display_lcd();
+        display_lcd(mechanicalVentilation.ventilationStatus, mechanicalVentilation.ventilationConfig);
         display_needs_update = false;
       }
     }
   
     if ( update_options ) {
-      ventilation->change_config(options);
-      update_options = false;
+//      ventilation->change_config(options);
+        update_config(mechanicalVentilation);
+        update_options = false;
     }
 
     if (!calibration_run) {
         if (show_changed_options && ((millis() - last_update_display) > TIME_UPDATE_DISPLAY) ) {
-            display_lcd();  //WITHOUT CLEAR!
+            display_lcd(mechanicalVentilation.ventilationStatus, mechanicalVentilation.ventilationConfig);  //WITHOUT CLEAR!
             last_update_display = millis();
             show_changed_options = false;
         }
@@ -608,7 +627,8 @@ void loop() {
       digitalWrite(LCD_SLEEP, LOW);
       digitalWrite(TFT_SLEEP, LOW);
       //digitalWrite(PIN_STEPPER, LOW); //TODO: call it here (now is inside stepper)
-      ventilation->forceStop();
+//      ventilation->forceStop();
+      stop(mechanicalVentilation);
       //digitalWrite(PIN_BUZZER, !BUZZER_LOW); //Buzzer inverted
       lcd.clear();
     }
@@ -632,12 +652,12 @@ void loop() {
 }//LOOP
 
 void timer1Isr(void) {
-  ventilation->update();
-  //alarms->update(ventilation->getPeakInspiratoryPressure());
+//  ventilation->update();
+  update(mechanicalVentilation);
 }
 
 void timer3Isr(void) {
-  stepper->run();
+  mechanicalVentilation.stepper->run();
 }
 
 int findClosest(float arr[], int n, float target) {

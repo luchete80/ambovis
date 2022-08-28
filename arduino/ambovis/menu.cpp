@@ -1,10 +1,6 @@
-#include <arduino.h>
-#include "pinout.h"
 #include "menu.h"
-#include "MechVentilation.h"  //options
 
 static bool clear_all_display;
-
 bool change_sleep;
 int pressed=0;  //0 nothing , 1 enter, 2 bck
 
@@ -114,7 +110,7 @@ void check_bck_state() {
   
   }
   
-void check_encoder() {
+void check_encoder(VentilationStatus status, VentilationConfig& config) {
   check_updn_button(PIN_MENU_DN,&encoderPos,true);   //Increment
   check_updn_button(PIN_MENU_UP,&encoderPos,false);  //Decrement
   pressed=0;  //0 nothing , 1 enter, 2 bck
@@ -141,7 +137,7 @@ void check_encoder() {
                     encoderPos=oldEncPos=vent_mode;
                 } else if ( menu_number == 1 ) {
                     min_sel=20;max_sel=50;
-                    encoderPos=oldEncPos=alarm_max_pressure;            
+                    encoderPos=oldEncPos=config.alarmConfig.alarm_max_pressure;
              } else if ( menu_number == 2 ) {
                 //encoderPos=min_cd;
                 encoderPos = STEPPER_ACCEL_MAX/200;
@@ -153,11 +149,11 @@ void check_encoder() {
             break;
             case 2: 
                 if ( menu_number == 0 ) {
-                    encoderPos=oldEncPos=options.respiratoryRate;
+                    encoderPos=oldEncPos=config.respiratoryRate;
                     min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
                     } else if ( menu_number == 1 ) {
                         min_sel=5;max_sel=30;
-                        encoderPos=oldEncPos=alarm_peep_pressure;                          
+                        encoderPos=oldEncPos=config.alarmConfig.alarm_peep_pressure;
                     } else if ( menu_number == 2 ){
 //                        encoderPos=min_speed/10;     
                         encoderPos=STEPPER_SPEED_MAX/200;     
@@ -169,10 +165,10 @@ void check_encoder() {
             break;
             case 3:
               if ( menu_number == 0 ) {
-                  encoderPos=oldEncPos=options.percInspEsp;
+                  encoderPos=oldEncPos=config.percIE;
                   min_sel=1;max_sel=3;   
               } else if ( menu_number == 1 ) {
-                    encoderPos=byte(0.1*float(alarm_vt));
+                    encoderPos=byte(0.1*float(config.alarmConfig.alarm_vt));
                     min_sel=10;max_sel=50;//vt
               } else if ( menu_number == 2 ) {
                     encoderPos=min_accel/10; 
@@ -187,12 +183,12 @@ void check_encoder() {
                     if ( vent_mode==VENTMODE_PCL){
  //                     encoderPos=oldEncPos=options.tidalVolume;
  //                     min_sel=200;max_sel=800;
-                        encoderPos=oldEncPos=options.peakInspiratoryPressure;
+                        encoderPos=oldEncPos=config.peakInspiratoryPressure;
                         min_sel=15;max_sel=30;
-                        Serial.print("pip: ");Serial.println(options.peakInspiratoryPressure);
+                        Serial.print("pip: ");Serial.println(config.peakInspiratoryPressure);
                         Serial.print("encoderpos: ");Serial.println(encoderPos);
                     } else {//Manual
-                      encoderPos=oldEncPos=options.percVolume;
+                      encoderPos=oldEncPos=config.percVolume;
                       min_sel=40;max_sel=100;            
                     } 
                 } else if ( menu_number == 1 ) {//menu 0
@@ -314,7 +310,7 @@ void check_encoder() {
               }
           }
           clear_all_display=true;
-          display_lcd();
+          display_lcd(status, config);
     } else {//inside a particular selection
      
       //if (curr_sel != 0) {
@@ -329,39 +325,39 @@ void check_encoder() {
             switch (curr_sel) {
               case 1:
                 if ( menu_number == 0 )     vent_mode           = encoderPos;
-                else if (menu_number == 1)  alarm_max_pressure  = encoderPos;
+                else if (menu_number == 1)  config.alarmConfig.alarm_max_pressure  = encoderPos;
                 else if (menu_number == 2)  {STEPPER_ACCEL_MAX  = int((float)encoderPos*200.);}
                 else if (menu_number == 3)  {dpip_b = encoderPos; dpip  = float(encoderPos)/10.;}
                 break;
               case 2:
-                if ( menu_number == 0 )       options.respiratoryRate = encoderPos;
-                else  if (menu_number == 1)   alarm_peep_pressure     = encoderPos;
+                if ( menu_number == 0 )       config.respiratoryRate = encoderPos;
+                else  if (menu_number == 1)   config.alarmConfig.alarm_peep_pressure     = encoderPos;
                 else  if (menu_number == 2)   STEPPER_SPEED_MAX  = int((float)encoderPos*200.);
                 else if ( menu_number == 3 ){
                     Serial.print("encoderPos: ");Serial.println(encoderPos);
                     pfmin=encoderPos;
                     pf_min=(float)encoderPos/50.;
-                    peep_fac = -(pf_max-pf_min)/15.*last_pressure_min + pf_max;
+                    peep_fac = -(pf_max-pf_min)/15.*status.lastMinPressure + pf_max;
                 }
                 break;
               case 3:
-                if ( menu_number == 0 ) options.percInspEsp=encoderPos;
-                else    if (menu_number == 1) alarm_vt=int(10.*(float)encoderPos);
+                if ( menu_number == 0 ) config.percIE=encoderPos;
+                else    if (menu_number == 1) config.alarmConfig.alarm_vt=int(10.*(float)encoderPos);
                 else    if (menu_number == 2) min_accel  = int((float)encoderPos*10.);
                 if ( menu_number == 3 ){
                     pfmax=encoderPos;
                     pf_max=(float)encoderPos/50.;
-                    peep_fac = -(pf_max-pf_min)/15.*last_pressure_min + pf_max;
+                    peep_fac = -(pf_max-pf_min)/15.*status.lastMinPressure + pf_max;
                 }
                 break;
               case 4:
                 if ( menu_number == 0 ) {
                     if (vent_mode==VENTMODE_PCL){
-                      options.peakInspiratoryPressure = encoderPos;
-                        Serial.print("pip: ");Serial.println(options.peakInspiratoryPressure);
+                      config.peakInspiratoryPressure = encoderPos;
+                        Serial.print("pip: ");Serial.println(config.peakInspiratoryPressure);
                         Serial.print("encoderpos: ");Serial.println(encoderPos);
                       } else { //manual
-                      options.percVolume = encoderPos;
+                      config.percVolume = encoderPos;
                     }
                 } else if (menu_number == 1) {
                     p_trim=encoderPos;
@@ -380,7 +376,7 @@ void check_encoder() {
                 break;
               case 6:
                 if ( menu_number == 0 )
-                  options.peakEspiratoryPressure = encoderPos;
+                  config.peakExpiratoryPressure = encoderPos;
                 else if ( menu_number == 1 )  //There is not 6 in menu 1
                     if (encoderPos==1) filter  = true;
                     else                filter=false;
@@ -433,7 +429,7 @@ void check_encoder() {
   }
 }
 
-void clear_n_sel(int menu){
+void clear_n_sel(int menu) {
     if (menu==0) {  
         lcd_clearxy(0,0);
         lcd_clearxy(0,1);lcd_clearxy(9,0);
@@ -521,7 +517,7 @@ void clear_n_sel(int menu){
     }//menu number 
 }
 
-void display_lcd ( ) {
+void display_lcd (VentilationStatus status, VentilationConfig config) {
     if (clear_all_display)
         lcd.clear();        
   clear_n_sel(menu_number);
@@ -532,43 +528,43 @@ void display_lcd ( ) {
   
     switch (vent_mode){
       case VENTMODE_VCL:
-        writeLine(0, "MOD:VCV", 1); writeLine(0, "V:" + String(options.tidalVolume), 10);    
+        writeLine(0, "MOD:VCV", 1); writeLine(0, "V:" + String(config.percVolume), 10);
         writeLine(1, "PIP: -", 9);
       break;
       case VENTMODE_PCL:
         writeLine(0, "MOD:PCV", 1); 
-        writeLine(1, "PIP:" + String(options.peakInspiratoryPressure), 9);
+        writeLine(1, "PIP:" + String(config.peakInspiratoryPressure), 9);
         writeLine(0, "V: -", 10);
       break;    
       case VENTMODE_MAN:
         writeLine(0, "MOD:VCV", 1); 
-        writeLine(0, "V:" + String(options.percVolume)+"%", 10);    
+        writeLine(0, "V:" + String(config.percVolume)+"%", 10);
         writeLine(1, "PIP: -", 9);
       break;
     }
      
       
-    writeLine(1, "BPM:" + String(options.respiratoryRate), 1);
+    writeLine(1, "BPM:" + String(config.respiratoryRate), 1);
     writeLine(2, "IE:1:", 1);
   
-    dtostrf((_mllastInsVol+_mllastExsVol)/2, 4, 0, tempstr);
+    dtostrf((status.mlLastInsVol+status.mlLastExpVol)/2, 4, 0, tempstr);
     writeLine(0, String(tempstr), 16);
   
-    writeLine(2, String(options.percInspEsp), 6);
+    writeLine(2, String(config.percIE), 6);
 
-    dtostrf(last_pressure_max, 2, 0, tempstr);
+    dtostrf(status.lastMaxPressure, 2, 0, tempstr);
     writeLine(1, String(tempstr), 16);  
 
     writeLine(2, "PEEP: ", 11);
-    dtostrf(last_pressure_min, 2, 0, tempstr);
+    dtostrf(status.lastMinPressure, 2, 0, tempstr);
     writeLine(2, String(tempstr), 16);  
     
-    dtostrf((_mllastInsVol + _mllastExsVol)/2.*options.respiratoryRate*0.001, 2, 1, tempstr);
+    dtostrf((status.mlLastInsVol+status.mlLastExpVol)/2.*config.respiratoryRate*0.001, 2, 1, tempstr);
     writeLine(3, "VM:" + String(tempstr), 0);
     
-    dtostrf(_timeoutIns*0.001, 1, 1, tempstr);
+    dtostrf(status.timeIns*0.001, 1, 1, tempstr);
     writeLine(3, "I:" + String(tempstr), 9); 
-    dtostrf(_timeoutEsp*0.001, 1, 1, tempstr);
+    dtostrf(status.timeExp*0.001, 1, 1, tempstr);
     writeLine(3, "E:" + String(tempstr), 15); 
       
   } else if (menu_number ==1 ) {//OTHER SETTINGS
@@ -576,13 +572,13 @@ void display_lcd ( ) {
     lcd_clearxy(8,1,2); lcd_clearxy(16,1,3);
                         lcd_clearxy(15,2,3);
         
-    writeLine(0, "PIPAL:" + String(alarm_max_pressure), 1); 
+    writeLine(0, "PIPAL:" + String(config.alarmConfig.alarm_max_pressure), 1);
     
-    dtostrf(Cdyn*1.01972, 2, 1, tempstr);
+    dtostrf(status.cDyn*1.01972, 2, 1, tempstr);
     writeLine(0, "CD:" + String(tempstr), 10); 
     
-    writeLine(1, "PEEPAL:" + String(alarm_peep_pressure), 1); 
-    writeLine(1, "VTAL:" + String(alarm_vt), 11);
+    writeLine(1, "PEEPAL:" + String(config.alarmConfig.alarm_peep_pressure), 1);
+    writeLine(1, "VTAL:" + String(config.alarmConfig.alarm_vt), 11);
     
     dtostrf((float(p_trim-100)), 2, 0, tempstr);
     writeLine(2, "TRIM:" + String(tempstr) + "e-3", 1); 
@@ -601,7 +597,7 @@ void display_lcd ( ) {
 
     for (int i=0;i<3;i++){
         lcd_clearxy(3,i,3); lcd_clearxy(9,i,3);lcd_clearxy(15,i,3);
-      }
+    }
 
     writeLine(0, "a:" + String(STEPPER_ACCEL_MAX), 1); 
     writeLine(0, "s:" + String(STEPPER_SPEED_MAX), 10); 
@@ -694,7 +690,7 @@ void Menu_inic::check_encoder ( ) {
                 max_sel=DEFAULT_MAX_RPM;
             break;
             case 3:
-                encoderPos=oldEncPos=options.percInspEsp;
+                encoderPos=oldEncPos=_i_e;
                 min_sel=1;
                 max_sel=3;
             break;

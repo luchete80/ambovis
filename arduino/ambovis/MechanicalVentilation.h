@@ -42,6 +42,8 @@ typedef struct ventilation_status {
     int cDynPass[3];
     int mlLastInsVol;
     int mlLastExpVol;
+    int lastMaxPressure;
+    int lastMinPressure;
     float cDyn;
     bool newInsufflation;
     bool endedWhileMoving;
