@@ -30,28 +30,29 @@ typedef struct ventilation_config {
 } VentilationConfig;
 
 typedef struct ventilation_status {
-    State currentState;
-    unsigned long msTimerCnt;
+    volatile State currentState;
+    volatile unsigned long msTimerCnt;
     unsigned long cycleNum;
-    byte cyclePosition;
+    volatile byte cyclePosition;
     bool running;
-    float timeoutCycle;
+    volatile float timeoutCycle;
     unsigned int timeIns;
     unsigned int timeExp;
-    unsigned long startCycleTimeInMs;
+    volatile unsigned long startCycleTimeInMs;
     int cDynPass[3];
     int mlLastInsVol;
     int mlLastExpVol;
     int lastMaxPressure;
     int lastMinPressure;
     float cDyn;
-    bool newInsufflation;
-    bool endedWhileMoving;
-    bool updateDisplay;
+    volatile bool newInsufflation;
+    volatile bool endingWhileMoving;
+    volatile bool endedWhileMoving;
+    volatile bool updateDisplay;
 } VentilationStatus;
 
 typedef struct mechanical_ventilation {
-    AccelStepper * stepper = new AccelStepper(AccelStepper::DRIVER, PIN_STEPPER_STEP, PIN_STEPPER_DIRECTION);
+    AccelStepper * volatile stepper = new AccelStepper(AccelStepper::DRIVER, PIN_STEPPER_STEP, PIN_STEPPER_DIRECTION);
     VentilationConfig ventilationConfig;
     VentilationStatus ventilationStatus;
 } MechanicalVentilation;
@@ -68,6 +69,7 @@ void start(MechanicalVentilation& mechanicalVentilation);
 void stop(MechanicalVentilation& mechanicalVentilation);
 void update(MechanicalVentilation& mechanicalVentilation);
 void newInsufflationActions(VentilationStatus& status, SensorData& sensorData);
+void newExufflationActions(VentilationStatus& status);
 void update_config(MechanicalVentilation& mechanicalVentilation);
 
 #endif /* MECHANICAL_VENTILATION_H */

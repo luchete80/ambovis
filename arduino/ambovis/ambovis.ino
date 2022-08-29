@@ -553,7 +553,6 @@ void loop() {
           Serial.println("Calibration verror: " + String(vzero));
           lcd.clear();
           tft.fillScreen(ILI9341_BLACK);
-
       }
     }
 

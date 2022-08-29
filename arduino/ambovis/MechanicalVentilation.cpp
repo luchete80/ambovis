@@ -45,7 +45,6 @@ void update(MechanicalVentilation& mechanicalVentilation) {
         return;
     }
 
-    bool endedWhileMoving = false;
     status.msTimerCnt = millis() - status.startCycleTimeInMs;
   
     float extra_time = 0.;
@@ -67,22 +66,22 @@ void update(MechanicalVentilation& mechanicalVentilation) {
 
             status.currentState = State_Insufflation;
             status.updateDisplay = true;
+            status.endingWhileMoving = false;
 
         }
         break;
         case State_Insufflation: {
             if (status.msTimerCnt > status.timeIns) {
                 if (mechanicalVentilation.stepper->distanceToGo() != 0 ) {
-                    endedWhileMoving = true;
+                    status.endingWhileMoving = true;
                 }
                 status.currentState = Init_Exufflation;
             }
         }
         break;
         case Init_Exufflation: {
-            status.endedWhileMoving = endedWhileMoving;
+            status.endedWhileMoving = status.endingWhileMoving;
             status.startCycleTimeInMs = millis();
-
             mechanicalVentilation.stepper->setAcceleration(STEPPER_ACCEL_MAX);
             mechanicalVentilation.stepper->setSpeed(STEPPER_SPEED_EXSUFF);
             mechanicalVentilation.stepper->moveTo(STEPPER_LOWEST_POSITION);
