@@ -7,6 +7,7 @@
 #include "display.h"
 #include "pinout.h"
 #include "MechVentilation.h"
+#include "alarms.h"
 #include <EEPROM.h>
 
 #define CALIB_CYCLES  5
@@ -43,7 +44,7 @@ void write_memory();
 
 AccelStepper *stepper;
 
-byte alarm_state = 0; //0: No alarm 1: peep 2: pip 3:both
+short alarm_state = 0; //0: No alarm 1: peep 2: pip 3:both
 
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
 
@@ -465,41 +466,20 @@ void loop() {
         verror_sum += ( Voltage - 0.04 * vs); //-5*0.04
         //Serial.println("Calibration sum: "+ String(verror_sum));
         //Serial.println("readed: "+ String(Voltage - 0.04 * vs));
-      } 
-//      else { //This sums the feed error
-//          verror_sum += vlevel;       // -5*0.04
-//          vcorr_count ++;
-//      }
-      
+      }
     }//Read Sensor
 
     if ( ventilation -> getCycleNum () != last_cycle ) {
       int vt = (_mllastInsVol + _mllastInsVol) / 2;
-      if (vt < alarm_vt)  isalarmvt_on = 1;
-      else              isalarmvt_on = 0;
-      if ( last_pressure_max > alarm_max_pressure + 1 ) {
-        if ( last_pressure_min < alarm_peep_pressure - 1) {
-          if (!isalarmvt_on)  alarm_state = 3;
-          else                alarm_state = 13;
-        } else {
-          if (!isalarmvt_on)  alarm_state = 2;
-          else                alarm_state = 12;
-        }
-      } else {
-        if ( last_pressure_min < alarm_peep_pressure - 1 ) {
-          if (!isalarmvt_on) alarm_state = 1;
-          else               alarm_state = 11;
-        } else {
-          if (!isalarmvt_on)  alarm_state = 0;
-          else                alarm_state = 10;
-        }
-      }
+      bool is_alarm_vt_on = vt < alarm_vt;
+      alarm_state = getAlarmState(is_alarm_vt_on, last_pressure_max, last_pressure_min,
+                                  alarm_max_pressure, alarm_peep_pressure);
 
       last_cycle = ventilation->getCycleNum();
 
       if (!calibration_run) {
-        display_lcd();
-        last_update_display = time;
+         display_lcd();
+         last_update_display = time;
       } else {
           lcd.clear();
           writeLine(1, "Calibracion flujo", 0);
