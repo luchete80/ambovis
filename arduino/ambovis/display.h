@@ -11,6 +11,7 @@
 //SPI HARDWARE SHOULD BE PINS CLK #13 AND MISO #11, WITH THIS CONSTRUCTOR!
 extern Adafruit_ILI9341 tft; //= Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 extern bool drawing_cycle;//TODO: MOVE TO CLASS MEMBER
+extern bool is_alarm_vt_on;
 void drawY2(uint16_t color);
 void print_bat();
 void print_float(const int &row, const int &col, const float &val);

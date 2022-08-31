@@ -5,6 +5,6 @@
 #ifndef AMBOVIS_ALARMS_H
 #define AMBOVIS_ALARMS_H
 
-short getAlarmState(bool is_alarm_vt_on, float last_pressure_max, float last_pressure_min, short alarm_max_pressure, short alarm_peep_pressure);
+short getAlarmState(float last_pressure_max, float last_pressure_min, short alarm_max_pressure, short alarm_peep_pressure);
 
 #endif //AMBOVIS_ALARMS_H

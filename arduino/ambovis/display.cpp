@@ -102,50 +102,61 @@ void drawY2(uint16_t color) {// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WI
   }
 }
 
-void check_alarms(){
+void showVTAlarm() {
+    digitalWrite(RED_LED,HIGH);
+    digitalWrite(GREEN_LED,LOW);
+    tft.setRotation(0);
+    tft.setTextColor(ILI9341_RED);
+    tft.setTextSize(2);
+    tft.setCursor(150, 40);
+    tft.println("VT AL");
+}
+
+void showPeepAlarm() {
+    digitalWrite(GREEN_LED,LOW);
+    digitalWrite(RED_LED,HIGH);
+    tft.setRotation(0);
+    tft.setTextColor(ILI9341_RED);
+    tft.setTextSize(2);
+    tft.setCursor(150, 20);
+    tft.println("PEEP AL");
+}
+
+void showPipAlarm() {
+    digitalWrite(GREEN_LED,LOW);
+    digitalWrite(RED_LED,HIGH);
+    tft.setRotation(0);
+    tft.setTextColor(ILI9341_RED);
+    tft.setTextSize(2);
+    tft.setCursor(150, 0);
+    tft.println("PIP AL");
+}
+
+void check_alarms() {
   
-    if (alarm_state>9) {
-        digitalWrite(RED_LED,HIGH);
-        digitalWrite(GREEN_LED,LOW);
-        tft.setRotation(0);
-        tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
-        tft.setCursor(150, 40);   
-        tft.println("VT AL");
-        state_r=alarm_state-10;
+    if (is_alarm_vt_on) {
+        showVTAlarm();
     } else {
-        digitalWrite(RED_LED,LOW);  
-        state_r=alarm_state;
+        digitalWrite(RED_LED,LOW);
     }
-    switch (state_r) {
+    switch (alarm_state) {
         case NO_ALARM:
-            if (alarm_state==0){ //state_r!=10
-            digitalWrite(GREEN_LED,HIGH); digitalWrite(RED_LED,LOW);   }
-          break;
+            if (!is_alarm_vt_on) {
+                digitalWrite(GREEN_LED,HIGH);
+                digitalWrite(RED_LED,LOW);
+            }
+            break;
         case PEEP_ALARM:
-          digitalWrite(GREEN_LED,LOW); digitalWrite(RED_LED,HIGH);  
-          tft.setRotation(0);
-          tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
-          tft.setCursor(150, 20);   
-          tft.println("PEEP AL");
-        break;
+            showPeepAlarm();
+            break;
         case PIP_ALARM:
-          digitalWrite(GREEN_LED,LOW); digitalWrite(RED_LED,HIGH);      
-          tft.setRotation(0);
-          tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
-          tft.setCursor(150, 0);   
-          tft.println("PIP AL");
-      break;  
+            showPipAlarm();
+            break;
         case PEEP_PIP_ALARM:
-          digitalWrite(GREEN_LED,LOW); digitalWrite(RED_LED,HIGH);      
-          tft.setRotation(0);
-          tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
-          tft.setCursor(150, 0);   
-          tft.println("PIP AL");
-          tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
-          tft.setCursor(150, 20);   
-          tft.println("PEEP AL");
-      break;
-      }
+            showPipAlarm();
+            showPeepAlarm();
+            break;
+    }
 }
 
 float calc_bat(const int &iter){

@@ -53,6 +53,7 @@ bool last_mute, curr_mute;
 bool buzzmuted;
 unsigned long timebuzz = 0;
 bool isbuzzeron = false;
+bool is_alarm_vt_on;
 
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 
@@ -471,8 +472,8 @@ void loop() {
 
     if ( ventilation -> getCycleNum () != last_cycle ) {
       int vt = (_mllastInsVol + _mllastInsVol) / 2;
-      bool is_alarm_vt_on = vt < alarm_vt;
-      alarm_state = getAlarmState(is_alarm_vt_on, last_pressure_max, last_pressure_min,
+      is_alarm_vt_on = vt < alarm_vt;
+      alarm_state = getAlarmState(last_pressure_max, last_pressure_min,
                                   alarm_max_pressure, alarm_peep_pressure);
 
       last_cycle = ventilation->getCycleNum();
