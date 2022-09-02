@@ -3,6 +3,7 @@
 
 #include "pinout.h"
 #include "defaults.h"
+#include "sensorcalculation.h"
 #include "Adafruit_GFX.h"
 #include "Adafruit_ILI9341.h"
 
@@ -15,7 +16,7 @@ void drawY2(uint16_t color);
 void print_bat();
 void print_float(const int &row, const int &col, const float &val);
 float calc_bat(const int &iter);
-void tft_draw();
+void tft_draw(SensorData& sensorData);
 void print_vols();
 void check_alarms();
 #endif

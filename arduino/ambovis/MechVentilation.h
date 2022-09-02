@@ -11,6 +11,7 @@
 #include <inttypes.h>
 #include "pinout.h"
 #include "defaults.h"
+#include "sensorcalculation.h"
 #include "src/AutoPID/AutoPID.h"
 
 #ifdef ACCEL_STEPPER
@@ -71,7 +72,7 @@ public:
     void start(void);
     /** Stop mechanical ventilation. */
     void stop(void);
-    void update(void);
+    void update( SensorData& sensorData );
 
     /** Recruitment */
     void activateRecruitment(void);
@@ -192,7 +193,7 @@ private:
 extern unsigned int _timeoutIns;
 extern unsigned int _timeoutEsp;
 
-extern float _mlInsVol,_mlExsVol;
+//extern float _mlInsVol,_mlExsVol;
 extern int _mllastInsVol,_mllastExsVol;
 extern bool display_needs_update;
 extern VentilationOptions_t options;
@@ -221,6 +222,6 @@ extern bool ended_whilemov;
 extern float pressure_max,pressure_min;
 extern float pressure_p;
 extern float last_pressure_max,last_pressure_min;
-extern float flow_f;
+//extern float flow_f;
     
 #endif /* INC_MECHANICAL_VENTILATION_H */
