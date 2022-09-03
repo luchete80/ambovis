@@ -150,7 +150,6 @@ float vsupply_0 = 0.;
 float vlevel = 0.;
 float fdiv = (float)(BATDIV_R1 + BATDIV_R2)/(float)BATDIV_R2;
 float fac = 1.1/1024.*fdiv;
-float batteryMeasurementFactor = (float)(fac/BATTERY_READ);
 
 #ifdef TEMP_TEST
 OneWire           oneWire(PIN_TEMP);
