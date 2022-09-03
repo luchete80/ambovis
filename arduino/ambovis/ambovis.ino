@@ -148,6 +148,9 @@ int idleTime ;        // how long the button was idle
 
 float vsupply_0 = 0.;
 float vlevel = 0.;
+float fdiv = (float)(BATDIV_R1 + BATDIV_R2)/(float)BATDIV_R2;
+float fac = 1.1/1024.*fdiv;
+float batteryMeasurementFactor = (float)(fac/BATTERY_READ);
 
 #ifdef TEMP_TEST
 OneWire           oneWire(PIN_TEMP);
@@ -405,7 +408,7 @@ void loop() {
     if ( time > lastShowSensor + TIME_SHOW ) {
       lastShowSensor = time;
 
-      tft_draw();
+      tft_draw(tft, fac);
     }
 
 
@@ -544,14 +547,14 @@ void loop() {
     } 
 
     #ifdef TEMP_TEST
-    if (time > lastReadTemp + TIME_READ_TEMP){
+    if (time > lastReadTemp + TIME_READ_TEMP) {
       lastReadTemp = time;
       sensors.requestTemperatures();
       temp=sensors.getTempCByIndex(0);
       //Serial.println ("Temp: " + String(temp));
     }
     tft.fillRect(200,100,20,40, ILI9341_BLUE);    
-    print_float(100,200,temp);
+    print_float(tft, 100,200,temp);
     #endif TEMP_TEST+
 
     }//change cycle
@@ -604,7 +607,7 @@ void loop() {
       digitalWrite(PIN_LCD_EN, HIGH);
       put_to_sleep = false;
       print_bat_time = time;
-      print_bat();
+      print_bat(tft, fac);
       digitalWrite(LCD_SLEEP, LOW);
       digitalWrite(TFT_SLEEP, LOW);
       //digitalWrite(PIN_STEPPER, LOW); //TODO: call it here (now is inside stepper)
@@ -613,8 +616,8 @@ void loop() {
       lcd.clear();
     }
     if (time > print_bat_time + 5000) {
-      print_bat();
-      print_bat_time = time;
+        print_bat(tft, fac);
+        print_bat_time = time;
     }
     time = millis();
     check_bck_state();
@@ -624,7 +627,7 @@ void loop() {
   if ( time > lastShowBat + TIME_SHOW_BAT ){
     lastShowBat = time;
     Serial.println("last show bat " + String(lastShowBat));
-    float level = calc_bat(5);
+    float level = calc_bat(5, fac);
     Serial.println(String(time)+", " +String(level));
   }
   #endif BAT_TEST
