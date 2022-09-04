@@ -19,15 +19,15 @@ int yflux[2];
 int yvt[2];
 char buffer[10];
 
-void tft_draw(VentilationStatus status, SensorData sensorData) {
+void tft_draw(VentilationStatus status) {
     byte last_x=status.cyclePosition;
     rx[valsreaded]=status.cyclePosition;
-    ry[valsreaded]=sensorData.pressure_p*2.;
+    ry[valsreaded]=pressure_p*2.;
 
     yflux[0]=yflux[1];
     yflux[1]=int(flow_f*0.035);
     yvt[0]=yvt[1];
-    yvt[1]=int((sensorData.mlInsVol - sensorData.mlExsVol)*0.1);
+    yvt[1]=int((_mlInsVol - _mlExsVol)*0.1);
 
     tft.setRotation(1);
     if (valsreaded > 0) {

@@ -52,24 +52,19 @@ typedef struct ventilation_status {
 } VentilationStatus;
 
 typedef struct mechanical_ventilation {
-    AccelStepper * volatile stepper = new AccelStepper(AccelStepper::DRIVER, PIN_STEPPER_STEP, PIN_STEPPER_DIRECTION);
+    AccelStepper * stepper;
     VentilationConfig ventilationConfig;
     VentilationStatus ventilationStatus;
 } MechanicalVentilation;
 
-typedef struct sensor_data {
-    int pressure_p;
-    int max_pressure;
-    int min_pressure;
-    float mlInsVol;
-    float mlExsVol;
-} SensorData;
+extern float pressure_max,pressure_min;
+extern float pressure_p;
+extern float _mlInsVol,_mlExsVol;
 
 void start(MechanicalVentilation& mechanicalVentilation);
 void stop(MechanicalVentilation& mechanicalVentilation);
 void update(MechanicalVentilation& mechanicalVentilation);
-void newInsufflationActions(VentilationStatus& status, SensorData& sensorData);
-void newExufflationActions(VentilationStatus& status);
+void newInsufflationActions(VentilationStatus& status);
 void update_config(MechanicalVentilation& mechanicalVentilation);
 
 #endif /* MECHANICAL_VENTILATION_H */

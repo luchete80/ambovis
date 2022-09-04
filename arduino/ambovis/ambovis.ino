@@ -23,7 +23,6 @@ bool filter;
 bool sleep_mode;
 bool put_to_sleep, wake_up;
 unsigned long print_bat_time;
-bool motor_stopped;
 
 bool drawing_cycle = 0;
 
@@ -40,8 +39,6 @@ unsigned long mute_count;
 void read_memory(); //Lee la EEPROM, usa variables externas, quiza deberian englobarse en un vector dinamico todos los offsets
 void write_memory();
 
-//AccelStepper *stepper;
-
 byte alarm_state = 0; //0: No alarm 1: peep 2: pip 3:both
 
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
@@ -56,7 +53,8 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 
 byte vcorr_count = 0;
 byte p_trim = 100;
-float pressure_p;   //EXTERN!!
+float pressure_p;
+float pressure_max,pressure_min;
 float last_pressure_max, last_pressure_min;
 
 byte vent_mode = VENTMODE_MAN; //0
@@ -133,13 +131,11 @@ void check_sleep_mode();  //Batt charge only
 
 bool isitem_sel =false;
 
-//AutoPID * pid;
-//
 //MechVentilation * ventilation;
 //VentilationOptions_t options;
 //NEW MechanicalVentilation
 MechanicalVentilation mechanicalVentilation;
-SensorData sensorData;
+AccelStepper * stepper;
 
 int bck_state ;     // current state of the button
 int last_bck_state ; // previous state of the button
@@ -221,6 +217,10 @@ void setup() {
 
   digitalWrite(PIN_EN, HIGH);
 
+  stepper = new AccelStepper(
+          AccelStepper::DRIVER,
+          PIN_STEPPER_STEP,
+          PIN_STEPPER_DIRECTION);
 //  options.respiratoryRate = DEFAULT_RPM;
 //  options.percInspEsp = 2; //1:1 to 1:4, is denom
 //  options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
@@ -229,6 +229,7 @@ void setup() {
 //  options.hasTrigger = false;
 //  options.tidalVolume = 300; // TODO: might be removed
 //  options.percVolume = 100; //1 to 10
+    mechanicalVentilation.stepper = stepper;
     mechanicalVentilation.ventilationConfig.respiratoryRate = DEFAULT_RPM;
     mechanicalVentilation.ventilationConfig.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
     mechanicalVentilation.ventilationConfig.peakExpiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
@@ -270,9 +271,6 @@ void setup() {
   byte i_e = 2;
   Menu_inic menuini(&vent_mode, &bpm, &i_e);
 
-//  options.respiratoryRate = bpm;
-//  options.percInspEsp = i_e; //1:1 to 1:4, is denom
-
   mechanicalVentilation.ventilationConfig.respiratoryRate = bpm;
   mechanicalVentilation.ventilationConfig.percIE = i_e;
   vent_mode = VENTMODE_MAN;
@@ -296,11 +294,6 @@ void setup() {
   digitalWrite(PIN_STEPPER, HIGH);
   delay(1000);
 
-//  stepper = new AccelStepper(
-//    AccelStepper::DRIVER,
-//    PIN_STEPPER_STEP,
-//    PIN_STEPPER_DIRECTION);
-//
 //  ventilation = new MechVentilation(
 //    stepper,
 //    pid,
@@ -433,14 +426,14 @@ void loop() {
     if ( time > lastShowSensor + TIME_SHOW ) {
       lastShowSensor = time;
 
-      tft_draw(mechanicalVentilation.ventilationStatus, sensorData);
+      tft_draw(mechanicalVentilation.ventilationStatus);
     }
 
 
     float vs = 0.;
     if (time > lastReadSensor + TIME_SENSOR) {
 
-      sensorData.pressure_p = ( analogRead(PIN_PRESSURE)/ (1023.) - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
+      pressure_p = ( analogRead(PIN_PRESSURE)/ (1023.) - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
 
       vlevel = float(analogRead(PIN_MPX_LEV))/1024.*1.1*VOLTAGE_CONV;
 
@@ -480,11 +473,11 @@ void loop() {
       lastReadSensor = millis();
 
       //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
-      if (sensorData.pressure_p > sensorData.max_pressure) {
-          sensorData.max_pressure = sensorData.pressure_p;
+      if (pressure_p > pressure_max) {
+          pressure_max = pressure_p;
       }
-      if (sensorData.pressure_p < sensorData.min_pressure) {
-          sensorData.min_pressure = sensorData.pressure_p;
+      if (pressure_p < pressure_min) {
+          pressure_min = pressure_p;
       }
       if (calibration_run) {
         vcorr_count ++;
@@ -498,17 +491,17 @@ void loop() {
     }//Read Sensor
 
 //    if ( ventilation -> getCycleNum () != last_cycle ) {
-    VentilationStatus ventStatus = mechanicalVentilation.ventilationStatus;
-    VentilationConfig ventConfig = mechanicalVentilation.ventilationConfig;
-    if ( ventStatus.cycleNum != last_cycle ) {
-        int vt = (ventStatus.mlLastInsVol + ventStatus.mlLastExpVol) / 2;
-        if (vt < ventConfig.alarmConfig.alarm_vt) {
+    VentilationStatus* ventStatus = &mechanicalVentilation.ventilationStatus;
+    VentilationConfig* ventConfig = &mechanicalVentilation.ventilationConfig;
+    if ( ventStatus->cycleNum != last_cycle ) {
+        int vt = (ventStatus->mlLastInsVol + ventStatus->mlLastExpVol) / 2;
+        if (vt < ventConfig->alarmConfig.alarm_vt) {
           isalarmvt_on = 1;
       } else {
           isalarmvt_on = 0;
       }
-        if ( ventStatus.lastMaxPressure > ventConfig.alarmConfig.alarm_max_pressure + 1 ) {
-            if ( ventStatus.lastMinPressure < ventConfig.alarmConfig.alarm_peep_pressure - 1) {
+        if ( ventStatus->lastMaxPressure > ventConfig->alarmConfig.alarm_max_pressure + 1 ) {
+            if ( ventStatus->lastMinPressure < ventConfig->alarmConfig.alarm_peep_pressure - 1) {
           if (!isalarmvt_on)  alarm_state = 3;
           else                alarm_state = 13;
         } else {
@@ -516,7 +509,7 @@ void loop() {
           else                alarm_state = 12;
         }
       } else {
-            if ( ventStatus.lastMinPressure < ventConfig.alarmConfig.alarm_peep_pressure - 1 ) {
+            if ( ventStatus->lastMinPressure < ventConfig->alarmConfig.alarm_peep_pressure - 1 ) {
           if (!isalarmvt_on) alarm_state = 1;
           else               alarm_state = 11;
         } else {
@@ -525,7 +518,7 @@ void loop() {
         }
       }
 
-      last_cycle = ventStatus.cycleNum;
+      last_cycle = ventStatus->cycleNum;
 
       if (!calibration_run) {
           display_lcd(mechanicalVentilation.ventilationStatus, mechanicalVentilation.ventilationConfig);
@@ -557,7 +550,7 @@ void loop() {
     }
 
     if (mechanicalVentilation.ventilationStatus.newInsufflation) {
-        newInsufflationActions(mechanicalVentilation.ventilationStatus, sensorData);
+        newInsufflationActions(mechanicalVentilation.ventilationStatus);
     }
 
     #ifdef TEMP_TEST
@@ -588,7 +581,7 @@ void loop() {
 
     if (!calibration_run) {
         if (show_changed_options && ((millis() - last_update_display) > TIME_UPDATE_DISPLAY) ) {
-            display_lcd(mechanicalVentilation.ventilationStatus, mechanicalVentilation.ventilationConfig);  //WITHOUT CLEAR!
+            display_lcd(mechanicalVentilation.ventilationStatus, mechanicalVentilation.ventilationConfig);
             last_update_display = millis();
             show_changed_options = false;
         }
