@@ -33,7 +33,7 @@ Adafruit_ADS1115 ads;
 
 float _mlInsVol = 0;
 float _mlExsVol = 0;
-int _mllastInsVol, _mllastExsVol;
+//int _mllastInsVol, _mllastExsVol;
 unsigned long mute_count;
 
 void read_memory(); //Lee la EEPROM, usa variables externas, quiza deberian englobarse en un vector dinamico todos los offsets
@@ -55,7 +55,7 @@ byte vcorr_count = 0;
 byte p_trim = 100;
 float pressure_p;
 float pressure_max,pressure_min;
-float last_pressure_max, last_pressure_min;
+//float last_pressure_max, last_pressure_min;
 
 byte vent_mode = VENTMODE_MAN; //0
 float _flux;
@@ -99,7 +99,7 @@ int min_cd, max_cd;
 
 unsigned long last_cycle;
 
-unsigned int _timeoutIns, _timeoutEsp; //In ms
+//unsigned int _timeoutIns, _timeoutEsp; //In ms
 
 byte menu_number = 0;
 //TODO: READ FROM EEPROM
@@ -156,7 +156,7 @@ byte dpip_b;
 float f_acc;
 byte f_acc_b;
 byte  p_acc;
-bool ended_whilemov;
+//bool ended_whilemov;
 
 #ifdef TEMP_TEST
 OneWire           oneWire(PIN_TEMP);
@@ -238,6 +238,10 @@ void setup() {
     mechanicalVentilation.ventilationConfig.alarmConfig.alarm_max_pressure = 35;
     mechanicalVentilation.ventilationConfig.alarmConfig.alarm_peep_pressure = 5;
     mechanicalVentilation.ventilationConfig.alarmConfig.alarm_vt = 200;
+    mechanicalVentilation.ventilationStatus.running = true;
+    mechanicalVentilation.ventilationStatus.currentState = State_Homing;
+    mechanicalVentilation.ventilationStatus.startCycleTimeInMs = 0;
+    mechanicalVentilation.ventilationStatus.endedWhileMoving = false;
 
   delay(100);
 
