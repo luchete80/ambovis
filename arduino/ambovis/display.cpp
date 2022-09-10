@@ -21,7 +21,7 @@ int yvt[2];
 char buffer[10];
 
 
-void tft_draw(VariableParameters variableParameters, SensorData sensorData) {
+void tft_draw(VariableParameters variableParameters) {
     byte last_x=cycle_pos;
     rx[valsreaded]=cycle_pos;
     ry[valsreaded]=pressure_p*2.;     
@@ -41,7 +41,7 @@ void tft_draw(VariableParameters variableParameters, SensorData sensorData) {
         lcd_cleaned=true;
        //tft.fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
         valsreaded=0;
-        print_vols(sensorData);
+        print_vols();
         print_bat();
         
         //TODO: DO IT ONLY WHEN CHANGE!
@@ -149,7 +149,7 @@ void check_alarms(){
       }
 }
 
-float calc_bat(const int &iter){
+float calc_bat(const int &iter) {
   unsigned short count = iter;
   float level= 0.;
   float fdiv = (float)(BATDIV_R1 + BATDIV_R2)/(float)BATDIV_R2;
@@ -163,14 +163,14 @@ float calc_bat(const int &iter){
   return level;
 }
 
-void print_float(const int &row, const int &col, const float &val){
+void print_float(const int &row, const int &col, const float &val) {
   dtostrf(val, 2, 1, buffer); //DEBUG
   //tft.setCursor(130, 260);tft.println("Bat:");
   tft.setCursor(col, row);tft.println(buffer);
   //tft.setCursor(100, 80);tft.println("Vmpx:");
 }
 
-void print_bat(){
+void print_bat() {
     float level = 0.;
     tft.setRotation(0);
     //tft.fillRect(180,150,70,20, ILI9341_BLACK);//ONLY BAT LEVEL
@@ -197,20 +197,20 @@ void print_bat(){
     dtostrf(level, 1, 2, buffer);
 }
 
-void print_vols(SensorData sensorData){
+void print_vols() {
     tft.setRotation(0);
     tft.fillRect(40,LEGEND_Y,60,80, ILI9341_BLACK); //Here x is the first value (in the less width dimension)
 
-    itoa(sensorData._mlLastInsVol, buffer, 10);
+    itoa(_mllastInsVol, buffer, 10);
     tft.setCursor(0, LEGEND_Y); //Before: 150,180 at right 
     tft.setTextColor(ILI9341_ORANGE);  tft.setTextSize(2);
     tft.println("Vi: ");tft.setCursor(40, LEGEND_Y);tft.println(buffer); //Before 190,180
     
-    itoa(sensorData._mlLastExsVol, buffer, 10);
+    itoa(_mllastExsVol, buffer, 10);
     tft.setCursor(0, LEGEND_Y + 20);
     tft.println("Ve: ");tft.setCursor(40, LEGEND_Y + 20);tft.println(buffer);
     
-    itoa((sensorData._mlLastInsVol + sensorData._mlLastExsVol)/2, buffer, 10);
+    itoa((_mllastInsVol + _mllastExsVol)/2, buffer, 10);
     tft.setCursor(0, LEGEND_Y + 40);
     tft.println("VT: ");tft.setCursor(40, LEGEND_Y + 40);tft.println(buffer);
  

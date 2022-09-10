@@ -16,7 +16,7 @@ void drawY2(uint16_t color);
 void print_bat();
 void print_float(const int &row, const int &col, const float &val);
 float calc_bat(const int &iter);
-void tft_draw(VariableParameters variableParameters, SensorData sensorData);
-void print_vols(SensorData sensorData);
+void tft_draw(VariableParameters variableParameters);
+void print_vols();
 void check_alarms();
 #endif

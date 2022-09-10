@@ -138,7 +138,7 @@ void MechVentilation::deactivateRecruitment(void)
 /**
  * It's called from timer1Isr
  */
-void MechVentilation :: update ( SensorData& sensorData )
+void MechVentilation :: update()
 {
 
     static int totalCyclesInThisState = 0;
@@ -184,8 +184,8 @@ void MechVentilation :: update ( SensorData& sensorData )
           return;
         }
 
-        sensorData.last_pressure_max=pressure_max;
-        sensorData.last_pressure_min=pressure_min;
+        last_pressure_max=pressure_max;
+        last_pressure_min=pressure_min;
         pressure_max=0;
         pressure_min=60;
 
@@ -196,10 +196,10 @@ void MechVentilation :: update ( SensorData& sensorData )
         _msecTimerStartCycle=millis();  //Luciano
         
         for (int i=0;i<2;i++) Cdyn_pass[i]=Cdyn_pass[i+1];
-        Cdyn_pass[2]=sensorData._mlLastInsVol/(sensorData.last_pressure_max - sensorData.last_pressure_min);
-        sensorData.cdyn = (Cdyn_pass[0]+Cdyn_pass[1]+Cdyn_pass[2])/3.;
-        sensorData._mlLastInsVol=int(_mlInsVol);
-        sensorData._mlLastExsVol=int(fabs(_mlExsVol));
+        Cdyn_pass[2]=_mllastInsVol/(last_pressure_max - last_pressure_min);
+        Cdyn = (Cdyn_pass[0]+Cdyn_pass[1]+Cdyn_pass[2])/3.;
+        _mllastInsVol=int(_mlInsVol);
+        _mllastExsVol=int(fabs(_mlExsVol));
         
         _mlInsVol=0.;
         _mlExsVol=0.;

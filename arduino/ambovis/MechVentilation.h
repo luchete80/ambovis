@@ -70,7 +70,7 @@ public:
     void start(void);
     /** Stop mechanical ventilation. */
     void stop(void);
-    void update(SensorData& sensorData);
+    void update();
 
     /** Recruitment */
     void activateRecruitment(void);
@@ -192,7 +192,7 @@ extern unsigned int _timeoutIns;
 extern unsigned int _timeoutEsp;
 
 extern float _mlInsVol,_mlExsVol;
-//extern int _mllastInsVol,_mllastExsVol;
+extern int _mllastInsVol,_mllastExsVol;
 extern bool display_needs_update;
 extern MechVentilation * ventilation;
 extern unsigned long last_cycle;
@@ -200,6 +200,7 @@ extern unsigned long last_cycle;
 //alarm_peep_pressure
 //extern int alarm_vt;
 extern byte cycle_pos; //0 to 127
+extern byte Cdyn;
 //extern bool autopid;
 //extern bool filter;
 //extern byte pfmin,pfmax;

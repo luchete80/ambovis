@@ -44,15 +44,6 @@ typedef struct variable_parameters {
     int filter;
 } VariableParameters;
 
-typedef struct sensor_data {
-    float last_pressure_min;
-    float last_pressure_max;
-    int _mlLastInsVol;
-    int _mlLastExsVol;
-    int cdyn;
-} SensorData;
-
-static int SIZE_MENU = 4;
 static int MAIN_MENU[] = {PARAMETER, ALARM, SETTINGS};
 static int INIT_PARAM_MENU[] = {BPM_OPT, IE_OPT, END_SETUP};
 static int PARAM_MENU[] = {PERC_V_OPT, BPM_OPT, IE_OPT};

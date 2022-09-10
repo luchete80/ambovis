@@ -181,27 +181,27 @@ void printCursor(MenuV2& menu, int cursorCode, VariableParameters parameters) {
     printDigits(menu, displayValue.valueOffset, displayValue.line, displayValue.label + displayValue.strValue);
 }
 
-void displaySensorValues(int line, MenuV2& menu, VariableParameters parameters, SensorData sensorData) {
+void displaySensorValues(int line, MenuV2& menu, VariableParameters parameters) {
     char tempStr[5];
-    dtostrf(sensorData.last_pressure_min, 2, 0, tempStr);
+    dtostrf(last_pressure_min, 2, 0, tempStr);
     writeLine(menu, line, "PEEP:" + String(tempStr), 0);
 
-    dtostrf(sensorData.last_pressure_max, 2, 0, tempStr);
+    dtostrf(last_pressure_max, 2, 0, tempStr);
     writeLine(menu, line, "PIP:" + String(tempStr), 7);
 
-    dtostrf((sensorData._mlLastInsVol + sensorData._mlLastExsVol)/2.*parameters.respiratoryRate*0.001, 2, 1, tempStr);
+    dtostrf((_mllastInsVol + _mllastExsVol)/2.* parameters.respiratoryRate*0.001, 2, 1, tempStr);
     writeLine(menu, line, "VM:" + String(tempStr), 14);
 }
 
-void displayMainMenu(MenuV2& menu, VariableParameters parameters, SensorData sensorData) {
+void displayMainMenu(MenuV2& menu) {
     int x, y = 0;
     switch (menu.menuState.cursorCode) {
         case PARAMETER:
             y = 0; break;
-            case ALARM:
-                y = 1; break;
-                case SETTINGS:
-                    y = 2; break;
+        case ALARM:
+            y = 1; break;
+        case SETTINGS:
+            y = 2; break;
     }
     printDigits(menu, x, y , ">");
     writeLine(menu, 0, "Parametros", 1);
@@ -217,13 +217,13 @@ void displayInitialParametersSettings(MenuV2& menu, VariableParameters parameter
     printCursor(menu, END_SETUP, parameters);
 }
 
-void displayParametersSettings(MenuV2& menu, VariableParameters parameters, SensorData& sensorData) {
+void displayParametersSettings(MenuV2& menu, VariableParameters parameters) {
     writeLine(menu, 0, "MOD:MAN", 1);
     printCursor(menu, PERC_V_OPT, parameters);
     printCursor(menu, BPM_OPT, parameters);
     printCursor(menu, IE_OPT, parameters);
 
-    displaySensorValues(3, menu, parameters, sensorData);
+    displaySensorValues(3, menu, parameters);
 }
 
 void displayAlarmSettings(MenuV2& menu, VariableParameters parameters) {
@@ -232,40 +232,40 @@ void displayAlarmSettings(MenuV2& menu, VariableParameters parameters) {
     printCursor(menu, VT_ALARM_OPT, parameters);
 }
 
-void displaySettings(MenuV2& menu, VariableParameters parameters, SensorData sensorData) {
+void displaySettings(MenuV2& menu, VariableParameters parameters) {
     printCursor(menu, FIL_OPT, parameters);
     printCursor(menu, AUTO_OPT, parameters);
 
     char temp[5];
-    dtostrf(sensorData.cdyn * 1.01972, 2, 1, temp);
+    dtostrf(Cdyn * 1.01972, 2, 1, temp);
     writeLine(menu, 2, "CD:" + String(temp), 1);
 }
 
-void printMenu(MenuV2& menu, VariableParameters parameters, SensorData sensorData, long time) {
+void printMenu(MenuV2& menu, VariableParameters parameters, long time) {
     long diff = time - menu.keyboardState.lastKeyPressedTime;
     if (diff > 15000 && menu.menuState.menu != PARAMETER && menu.menuState.setupReady) {
         menu.lcd->clear();
         menu.menuState.menu = PARAMETER;
     }
     if ( menu.menuState.menu == MAIN ) {
-        displayMainMenu(menu, parameters, sensorData);
+        displayMainMenu(menu);
     } else if ( menu.menuState.menu == PARAMETER ) {
         if (!menu.menuState.setupReady) {
             displayInitialParametersSettings(menu, parameters);
         } else {
-            displayParametersSettings(menu, parameters, sensorData);
+            displayParametersSettings(menu, parameters);
         }
     } else if ( menu.menuState.menu == ALARM ) {
         displayAlarmSettings(menu, parameters);
     } else if ( menu.menuState.menu == SETTINGS ) {
-        displaySettings(menu, parameters, sensorData);
+        displaySettings(menu, parameters);
     }
 }
 
-void displayMenu(MenuV2& menu, VariableParameters parameters, SensorData sensorData, long time) {
+void displayMenu(MenuV2& menu, VariableParameters parameters, long time) {
     if (menu.menuState.changedMenu) {
         menu.lcd->clear();
-        printMenu(menu, parameters, sensorData, time);
+        printMenu(menu, parameters, time);
         menu.menuState.changedMenu = false;
     } else {
         DisplayValue previousValue = getValueToDisplay(menu.menuState.previousCursorCode, parameters, menu.menuState);
@@ -274,17 +274,17 @@ void displayMenu(MenuV2& menu, VariableParameters parameters, SensorData sensorD
     }
 }
 
-void checkEncoder(MenuV2& menu, VariableParameters& parameters, SensorData& sensorData, long time) {
+void checkEncoder(MenuV2& menu, VariableParameters& parameters, long time) {
     long diff = time - menu.keyboardState.lastKeyPressedTime;
     bool somethingChanged = diff < 100;
 
     if (somethingChanged) {
         checkKeyboardActions(menu.keyboardState, menu.menuState, parameters);
-        displayMenu(menu, parameters, sensorData, time);
+        displayMenu(menu, parameters, time);
     }
 }
 
-void setupMenu(MenuV2& menuV2, VariableParameters& parameters, SensorData& sensorData, long time) {
+void setupMenu(MenuV2& menuV2, VariableParameters& parameters, long time) {
     menuV2.menuState.menu = PARAMETER;
     menuV2.menuState.cursorCode = INIT_PARAM_MENU[0];
     menuV2.menuState.changedMenu = false;
@@ -293,10 +293,9 @@ void setupMenu(MenuV2& menuV2, VariableParameters& parameters, SensorData& senso
     do {
         checkKeyboard(menuV2.keyboardState, time);
         bool somethingChanged = millis() - menuV2.keyboardState.lastKeyPressedTime < 500;
-        Serial.println("time diff " + String(millis() - menuV2.keyboardState.lastKeyPressedTime));
         if (somethingChanged) {
             checkKeyboardActionForSetup(menuV2.keyboardState, menuV2.menuState, parameters);
-            displayMenu(menuV2, parameters, sensorData, millis());
+            displayMenu(menuV2, parameters, millis());
         }
         delay(150);
     } while (!menuV2.menuState.setupReady);

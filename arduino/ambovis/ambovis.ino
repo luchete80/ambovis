@@ -17,6 +17,7 @@
 float temp;
 #endif
 
+byte Cdyn;
 bool filter;
 bool sleep_mode;
 bool put_to_sleep, wake_up;
@@ -32,6 +33,7 @@ Adafruit_ADS1115 ads;
 float Voltage = 0.0;
 float _mlInsVol = 0;
 float _mlExsVol = 0;
+int _mllastInsVol, _mllastExsVol;
 unsigned long mute_count;
 
 void read_memory(); //Lee la EEPROM, usa variables externas, quiza deberian englobarse en un vector dinamico todos los offsets
@@ -53,6 +55,7 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 
 byte vcorr_count = 0;
 float pressure_p;
+float last_pressure_max, last_pressure_min;
 float _flux;
 float flow_f;
 float _flux_fil[5];
@@ -93,7 +96,6 @@ KeyboardState keyboardState;
 MenuState menuState;
 MenuV2 menuV2;
 VariableParameters varParams;
-SensorData sensorData;
 // END MENU V2
 
 //MENU
@@ -136,12 +138,6 @@ void setup() {
 
   read_memory();
 
-  //init keyboard
-  keyboardState.lastUpState = digitalRead(PIN_MENU_UP);
-  keyboardState.lastDownState = digitalRead(PIN_MENU_DN);
-  keyboardState.lastOKState = digitalRead(PIN_MENU_EN);
-  keyboardState.lastBackState = digitalRead(PIN_MENU_BCK);
-
   // Init Menu V2
   menuV2.lcd = &lcd;
   menuV2.keyboardState = keyboardState;
@@ -160,8 +156,8 @@ void setup() {
   varParams.filter = filter ? 1 : 0;
 
   // sensor values
-  sensorData._mlLastInsVol = 0;
-  sensorData._mlLastExsVol = 10;
+  _mllastInsVol = 0;
+  _mllastExsVol = 10;
   // end init menu v2
 
   initDisplay(menuV2);
@@ -230,7 +226,7 @@ void setup() {
   vsupply_0 /= 100.;
 
   ////// ANTES DE CONFIGURAR LA VENTILACION Y CHEQUEAR EL FIN DE CARRERA INICIO LOS MENUES
-  setupMenu(menuV2, varParams, sensorData, millis());
+  setupMenu(menuV2, varParams, millis());
 
   /////////////////// CALIBRACION /////////////////////////////////////
   bool fin = false;
@@ -267,7 +263,7 @@ void setup() {
   ventilation->setVarParams(&varParams);
   ventilation->updateParameters();
   ventilation->start();
-  ventilation->update(sensorData);
+  ventilation->update();
 
   lcd.clear();
   writeLine(menuV2, 1, "Iniciando...", 0);
@@ -298,7 +294,7 @@ void setup() {
   position = stepper->currentPosition();
 #endif
 
-//  printMenu(menuV2, varParams, sensorData); TODO : maybe this can be removed
+//  printMenu(menuV2, varParams); TODO : maybe this can be removed
 
   pinMode(PIN_ENC_SW, INPUT_PULLUP);
 
@@ -374,14 +370,14 @@ void loop() {
       digitalWrite(LCD_SLEEP, HIGH);
       lcd.clear();
       initDisplay(menuV2);
-      printMenu(menuV2, varParams, sensorData, millis());
+      printMenu(menuV2, varParams, millis());
       tft.begin();
       tft.fillScreen(ILI9341_BLACK);
       wake_up = false;
       ventilation->forceStart();
     }
 
-    checkEncoder(menuV2, varParams, sensorData, time);
+    checkEncoder(menuV2, varParams, time);
 
     time = millis();
     check_buzzer_mute();
@@ -395,7 +391,7 @@ void loop() {
     if ( time > lastShowSensor + TIME_SHOW ) {
       lastShowSensor = time;
 
-      tft_draw(varParams, sensorData);
+      tft_draw(varParams);
     }
 
 
@@ -459,11 +455,11 @@ void loop() {
     }//Read Sensor
 
     if ( ventilation -> getCycleNum () != last_cycle ) {
-        int vt = (sensorData._mlLastInsVol + sensorData._mlLastInsVol) / 2;
+        int vt = (_mllastInsVol + _mllastInsVol) / 2;
       if (vt < varParams.alarm_vt)  isalarmvt_on = 1;
       else              isalarmvt_on = 0;
-      if ( sensorData.last_pressure_max > varParams.alarm_max_pressure + 1 ) {
-          if ( sensorData.last_pressure_min < varParams.alarm_peep_pressure - 1) {
+      if ( last_pressure_max > varParams.alarm_max_pressure + 1 ) {
+          if ( last_pressure_min < varParams.alarm_peep_pressure - 1) {
           if (!isalarmvt_on)  alarm_state = 3;
           else                alarm_state = 13;
         } else {
@@ -471,7 +467,7 @@ void loop() {
           else                alarm_state = 12;
         }
       } else {
-          if ( sensorData.last_pressure_min < varParams.alarm_peep_pressure - 1 ) {
+          if ( last_pressure_min < varParams.alarm_peep_pressure - 1 ) {
           if (!isalarmvt_on) alarm_state = 1;
           else               alarm_state = 11;
         } else {
@@ -483,7 +479,7 @@ void loop() {
       last_cycle = ventilation->getCycleNum();
 
       if (!calibration_run) {
-          printMenu(menuV2, varParams, sensorData, millis());
+          printMenu(menuV2, varParams, millis());
           last_update_display = time;
       } else {
           lcd.clear();
@@ -547,7 +543,7 @@ void loop() {
 
     if (!calibration_run) {
       if (display_needs_update) {
-        printMenu(menuV2, varParams, sensorData, millis());
+        printMenu(menuV2, varParams, millis());
         display_needs_update = false;
       }
     }
@@ -560,7 +556,7 @@ void loop() {
     //HERE changed_options flag is not updating until cycle hcanges
     if (!calibration_run) {
         if (show_changed_options && ((millis() - last_update_display) > TIME_UPDATE_DISPLAY) ) {
-        printMenu(menuV2, varParams, sensorData, millis());
+        printMenu(menuV2, varParams, millis());
         last_update_display = millis();
         show_changed_options = false;
       }
@@ -621,7 +617,7 @@ void loop() {
 }//LOOP
 
 void timer1Isr(void) {
-  ventilation->update(sensorData);
+  ventilation->update();
   //alarms->update(ventilation->getPeakInspiratoryPressure());
 }
 
