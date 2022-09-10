@@ -99,7 +99,6 @@ VariableParameters varParams;
 // END MENU V2
 
 //MENU
-unsigned long lastButtonPress;
 float verror, verror_sum, verror_sum_outcycle, vzero = 0.;  //verror sum is intra cycle, verror_sum_outcycle is inter-cycle
 
 //MAX FLUX IS IN INSPIRING POSITIVE (1st quad)
@@ -235,13 +234,14 @@ void setup() {
   writeLine(menuV2, 2, "y presione ok ", 0);
 
   delay (100); //Otherwise low enter button readed
-  lastButtonPress = millis();
+  unsigned long lastButtonPress = millis();
   while (!fin) {
-    if (digitalRead(PIN_MENU_EN) == LOW)  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
-    if (millis() - lastButtonPress > 50) {
-      fin = true;
-      lastButtonPress = millis();
-    }// if time > last button press
+      if (digitalRead(PIN_MENU_EN) == LOW) {
+          if (millis() - lastButtonPress > 50) {
+              fin = true;
+              lastButtonPress = millis();
+          }// if time > last button press
+      }
   }
 
   digitalWrite(PIN_STEPPER, HIGH);
@@ -254,13 +254,13 @@ void setup() {
 
   ventilation = new MechVentilation(
     stepper,
-    pid
+    pid,
+    &varParams
   );
 
   tft.fillScreen(ILI9341_BLACK);
 
   // configura la ventilación
-  ventilation->setVarParams(&varParams);
   ventilation->updateParameters();
   ventilation->start();
   ventilation->update();

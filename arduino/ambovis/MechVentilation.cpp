@@ -28,15 +28,15 @@ MechVentilation::MechVentilation(
       #else
         FlexyStepper *stepper,
       #endif
-    AutoPID *pid)
+    AutoPID *pid,
+    VariableParameters* parameters)
 {
 
-    _init(
-        stepper,
-        pid);
-        force_stop = false;
-        stopped = false;
-        force_start = false;
+    _init(stepper, pid);
+    this->variableParameters = parameters;
+    force_stop = false;
+    stopped = false;
+    force_start = false;
 }
 
 //TODO: use this method to play a beep in main loop, 1 second long for example.

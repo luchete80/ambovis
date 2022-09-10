@@ -62,7 +62,8 @@ public:
       #else
         FlexyStepper *_stepper,
       #endif
-        AutoPID *pid);
+        AutoPID *pid,
+        VariableParameters* variableParameters);
 
     boolean getStartWasTriggeredByPatient();
     void setVentilationCyle_WaitTime(float speedExsufflation);
@@ -97,10 +98,6 @@ public:
     unsigned long getCycleNum(){return _cyclenum;};
     void setCycleNum(unsigned long cyc){_cyclenum=cyc;}
     void updateParameters();
-
-    void setVarParams(VariableParameters* variableParameters) {
-        this->variableParameters = variableParameters;
-    }
 
     //LUCIANO 
     float getCurrentPressure();
