@@ -298,7 +298,6 @@ void setup() {
   position = stepper->currentPosition();
 #endif
 
-
 //  printMenu(menuV2, varParams, sensorData); TODO : maybe this can be removed
 
   pinMode(PIN_ENC_SW, INPUT_PULLUP);
@@ -375,7 +374,7 @@ void loop() {
       digitalWrite(LCD_SLEEP, HIGH);
       lcd.clear();
       initDisplay(menuV2);
-      printMenu(menuV2, varParams, sensorData);
+      printMenu(menuV2, varParams, sensorData, millis());
       tft.begin();
       tft.fillScreen(ILI9341_BLACK);
       wake_up = false;
@@ -484,8 +483,8 @@ void loop() {
       last_cycle = ventilation->getCycleNum();
 
       if (!calibration_run) {
-        printMenu(menuV2, varParams, sensorData);
-        last_update_display = time;
+          printMenu(menuV2, varParams, sensorData, millis());
+          last_update_display = time;
       } else {
           lcd.clear();
           writeLine(menuV2, 1, "Calibracion flujo", 0);
@@ -548,7 +547,7 @@ void loop() {
 
     if (!calibration_run) {
       if (display_needs_update) {
-        printMenu(menuV2, varParams, sensorData);
+        printMenu(menuV2, varParams, sensorData, millis());
         display_needs_update = false;
       }
     }
@@ -561,7 +560,7 @@ void loop() {
     //HERE changed_options flag is not updating until cycle hcanges
     if (!calibration_run) {
         if (show_changed_options && ((millis() - last_update_display) > TIME_UPDATE_DISPLAY) ) {
-        printMenu(menuV2, varParams, sensorData);
+        printMenu(menuV2, varParams, sensorData, millis());
         last_update_display = millis();
         show_changed_options = false;
       }

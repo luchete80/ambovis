@@ -144,14 +144,15 @@ void checkKeyboardActions(KeyboardState& keyboardState, MenuState& menuState, Va
         if (keyboardState.ok) {
             menuState.menu = menuState.cursorCode;
             menuState.changedMenu = true;
-            menuState.previousCursorCode = menuState.cursorCode;
-            menuState.cursorCode = getCursorCode(menuState.menu, 0);
             resetKeyboardState(keyboardState);
+        } else if (keyboardState.back) {
+            keyboardState.ok = false;
+            keyboardState.back = false;
         } else {
             keyboardState.count = validate(keyboardState.count, MAIN);
-            menuState.previousCursorCode = menuState.cursorCode;
-            menuState.cursorCode = getCursorCode(MAIN, keyboardState.count);
         }
+        menuState.previousCursorCode = menuState.cursorCode;
+        menuState.cursorCode = getCursorCode(menuState.menu, keyboardState.count);
     } else {
         if (menuState.isEditingParam) {
             editParameter(keyboardState, menuState, variables);

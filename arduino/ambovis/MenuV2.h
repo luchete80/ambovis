@@ -21,5 +21,5 @@ void initDisplay(MenuV2& menu);
 void setupMenu(MenuV2& menu, VariableParameters& parameters, SensorData& sensorData, long time);
 void writeLine(MenuV2& menu, int line, String message = "", int offsetLeft = 0);
 void checkEncoder(MenuV2& menu, VariableParameters& parameters, SensorData& sensorData, long time);
-void printMenu(MenuV2& menu, VariableParameters parameters, SensorData sensorData);
+void printMenu(MenuV2& menu, VariableParameters parameters, SensorData sensorData, long time);
 #endif

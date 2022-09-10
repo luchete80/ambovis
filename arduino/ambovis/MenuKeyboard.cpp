@@ -5,58 +5,64 @@
 
 void checkUPButtonPressed(KeyboardState & keyboardState, unsigned long time) {
     int currentState = digitalRead(PIN_MENU_UP);
-    if (currentState != keyboardState.lastUpState) {
-        if (currentState == 0) {
-            keyboardState.count = keyboardState.count + 1;
-            keyboardState.lastKeyPressedTime = time;
-        }
-        keyboardState.lastUpState = currentState;
+    unsigned long timeDiff = time - keyboardState.lastKeyPressedTime;
+    if (currentState == 0 && timeDiff > 150) {
+        keyboardState.count = keyboardState.count - 1;
+        keyboardState.lastKeyPressedTime = time;
+        Serial.println("Key UP");
     }
 }
 
 void checkDOWNButtonPressed(KeyboardState& keyboardState, unsigned long time) {
     int currentState = digitalRead(PIN_MENU_DN);
-    if (currentState != keyboardState.lastDownState) {
-        if (currentState == 0) {
-            keyboardState.count = keyboardState.count - 1;
-            keyboardState.lastKeyPressedTime = time;
-        }
-        keyboardState.lastDownState = currentState;
+    unsigned long timeDiff = time - keyboardState.lastKeyPressedTime;
+    if (currentState == 0 && timeDiff > 150) {
+        keyboardState.count = keyboardState.count + 1;
+        keyboardState.lastKeyPressedTime = time;
+        Serial.println("Key DOWN");
     }
 }
 
 void checkOKButtonPressed(KeyboardState& keyboardState, unsigned long time) {
     int currentState = digitalRead(PIN_MENU_EN);
-    if (currentState != keyboardState.lastOKState) {
-        if (currentState == 0) {
-            keyboardState.ok = true;
-            keyboardState.lastKeyPressedTime = time;
-        }
-        keyboardState.lastOKState = currentState;
+    unsigned long timeDiff = time - keyboardState.lastKeyPressedTime;
+    if (currentState == 0 && timeDiff > 100) {
+        keyboardState.ok = true;
+        keyboardState.lastKeyPressedTime = time;
+        Serial.println("Key OK");
+    }
+}
+
+void updateState(KeyboardState& keyboardState, int currentState, long time) {
+    if (currentState == LOW) {
+        keyboardState.backHoldTime = 0;
+    } else {
+        keyboardState.backHoldTime = time - keyboardState.backPressStart;
     }
 }
 
 void checkBackButtonPressed(KeyboardState& keyboardState, unsigned long time) {
     int currentState = digitalRead(PIN_MENU_BCK);
+    unsigned long timeDiff = time - keyboardState.lastKeyPressedTime;
     if (currentState != keyboardState.lastBackState) {
-        keyboardState.backHoldTime = 0;
-        if (currentState == 0) {
+        updateState(keyboardState, currentState, time);
+        if (currentState == 0 && timeDiff > 150) {
             keyboardState.back = true;
             keyboardState.lastKeyPressedTime = time;
             keyboardState.backHoldTime = 200;
+            Serial.println("Key BACK");
         }
-        keyboardState.lastBackState = currentState;
+    } else {
+         if (currentState == 0) {
+            keyboardState.backHoldTime += 100;
+         }
     }
-//    else {
-//        if (currentState == 0) {
-//            keyboardState.backHoldTime += 100;
-//        }
-//    }
+    keyboardState.lastBackState = currentState;
 }
 
 void checkKeyboard(KeyboardState & keyboardState, unsigned long time) {
-    checkUPButtonPressed(keyboardState, time);
-    checkDOWNButtonPressed(keyboardState, time);
-    checkOKButtonPressed(keyboardState, time);
-    checkBackButtonPressed(keyboardState, time);
+    checkUPButtonPressed(keyboardState, millis());
+    checkDOWNButtonPressed(keyboardState, millis());
+    checkOKButtonPressed(keyboardState, millis());
+    checkBackButtonPressed(keyboardState, millis());
 }

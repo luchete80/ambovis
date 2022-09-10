@@ -46,22 +46,6 @@ void printDigits(MenuV2& menu, int x, int y, String s) {
     menu.lcd->print(s);
 }
 
-void displayMainMenu(MenuV2& menu) {
-    int x, y = 0;
-    switch (menu.menuState.cursorCode) {
-        case PARAMETER:
-            y = 0; break;
-        case ALARM:
-            y = 1; break;
-        case SETTINGS:
-            y = 2; break;
-    }
-    printDigits(menu, x, y , ">");
-    writeLine(menu, 0, "Parametros", 1);
-    writeLine(menu, 1, "Alarmas", 1);
-    writeLine(menu, 2, "Ajustes", 1);
-}
-
 DisplayValue buildConfiguration(int line, int cursorOffset, int valueSize, String label, String value) {
     DisplayValue displayValue;
     displayValue.line = line;
@@ -202,8 +186,27 @@ void displaySensorValues(int line, MenuV2& menu, VariableParameters parameters, 
     dtostrf(sensorData.last_pressure_min, 2, 0, tempStr);
     writeLine(menu, line, "PEEP:" + String(tempStr), 0);
 
+    dtostrf(sensorData.last_pressure_max, 2, 0, tempStr);
+    writeLine(menu, line, "PIP:" + String(tempStr), 7);
+
     dtostrf((sensorData._mlLastInsVol + sensorData._mlLastExsVol)/2.*parameters.respiratoryRate*0.001, 2, 1, tempStr);
-    writeLine(menu, line, "VM:" + String(tempStr), 10);
+    writeLine(menu, line, "VM:" + String(tempStr), 14);
+}
+
+void displayMainMenu(MenuV2& menu, VariableParameters parameters, SensorData sensorData) {
+    int x, y = 0;
+    switch (menu.menuState.cursorCode) {
+        case PARAMETER:
+            y = 0; break;
+            case ALARM:
+                y = 1; break;
+                case SETTINGS:
+                    y = 2; break;
+    }
+    printDigits(menu, x, y , ">");
+    writeLine(menu, 0, "Parametros", 1);
+    writeLine(menu, 1, "Alarmas", 1);
+    writeLine(menu, 2, "Ajustes", 1);
 }
 
 void displayInitialParametersSettings(MenuV2& menu, VariableParameters parameters) {
@@ -238,9 +241,14 @@ void displaySettings(MenuV2& menu, VariableParameters parameters, SensorData sen
     writeLine(menu, 2, "CD:" + String(temp), 1);
 }
 
-void printMenu(MenuV2& menu, VariableParameters parameters, SensorData sensorData) {
+void printMenu(MenuV2& menu, VariableParameters parameters, SensorData sensorData, long time) {
+    long diff = time - menu.keyboardState.lastKeyPressedTime;
+    if (diff > 15000 && menu.menuState.menu != PARAMETER && menu.menuState.setupReady) {
+        menu.lcd->clear();
+        menu.menuState.menu = PARAMETER;
+    }
     if ( menu.menuState.menu == MAIN ) {
-        displayMainMenu(menu);
+        displayMainMenu(menu, parameters, sensorData);
     } else if ( menu.menuState.menu == PARAMETER ) {
         if (!menu.menuState.setupReady) {
             displayInitialParametersSettings(menu, parameters);
@@ -254,10 +262,10 @@ void printMenu(MenuV2& menu, VariableParameters parameters, SensorData sensorDat
     }
 }
 
-void displayMenu(MenuV2& menu, VariableParameters parameters, SensorData sensorData) {
+void displayMenu(MenuV2& menu, VariableParameters parameters, SensorData sensorData, long time) {
     if (menu.menuState.changedMenu) {
         menu.lcd->clear();
-        printMenu(menu, parameters, sensorData);
+        printMenu(menu, parameters, sensorData, time);
         menu.menuState.changedMenu = false;
     } else {
         DisplayValue previousValue = getValueToDisplay(menu.menuState.previousCursorCode, parameters, menu.menuState);
@@ -267,11 +275,12 @@ void displayMenu(MenuV2& menu, VariableParameters parameters, SensorData sensorD
 }
 
 void checkEncoder(MenuV2& menu, VariableParameters& parameters, SensorData& sensorData, long time) {
-    bool somethingChanged = menu.keyboardState.lastKeyPressedTime - time < 500;
+    long diff = time - menu.keyboardState.lastKeyPressedTime;
+    bool somethingChanged = diff < 100;
 
     if (somethingChanged) {
         checkKeyboardActions(menu.keyboardState, menu.menuState, parameters);
-        displayMenu(menu, parameters, sensorData);
+        displayMenu(menu, parameters, sensorData, time);
     }
 }
 
@@ -283,10 +292,11 @@ void setupMenu(MenuV2& menuV2, VariableParameters& parameters, SensorData& senso
     displayInitialParametersSettings(menuV2, parameters);
     do {
         checkKeyboard(menuV2.keyboardState, time);
-        bool somethingChanged = menuV2.keyboardState.lastKeyPressedTime - time < 500;
+        bool somethingChanged = millis() - menuV2.keyboardState.lastKeyPressedTime < 500;
+        Serial.println("time diff " + String(millis() - menuV2.keyboardState.lastKeyPressedTime));
         if (somethingChanged) {
             checkKeyboardActionForSetup(menuV2.keyboardState, menuV2.menuState, parameters);
-            displayMenu(menuV2, parameters, sensorData);
+            displayMenu(menuV2, parameters, sensorData, millis());
         }
         delay(150);
     } while (!menuV2.menuState.setupReady);

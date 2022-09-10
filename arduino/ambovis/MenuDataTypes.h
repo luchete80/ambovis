@@ -10,9 +10,6 @@
 #include "pinout.h"
 
 typedef struct keyboard_state {
-    int lastUpState = 0;
-    int lastDownState = 0;
-    int lastOKState = 0;
     int lastBackState = 0;
     int previousCount = 0;
     int count = 0;
@@ -20,6 +17,7 @@ typedef struct keyboard_state {
     bool back = false;
     unsigned long lastKeyPressedTime = 0;
     unsigned long backHoldTime = 0;
+    unsigned long backPressStart = 0;
 } KeyboardState;
 
 typedef struct menu_state {
