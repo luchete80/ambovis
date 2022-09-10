@@ -21,7 +21,7 @@ int yvt[2];
 char buffer[10];
 
 
-void tft_draw(VariableParameters variableParameters) {
+void tft_draw() {
     byte last_x=cycle_pos;
     rx[valsreaded]=cycle_pos;
     ry[valsreaded]=pressure_p*2.;     

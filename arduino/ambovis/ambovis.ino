@@ -95,7 +95,7 @@ int alarm_vt = 200;
 KeyboardState keyboardState;
 MenuState menuState;
 MenuV2 menuV2;
-VariableParameters varParams;
+VentilationParameters varParams;
 // END MENU V2
 
 //MENU
@@ -391,7 +391,7 @@ void loop() {
     if ( time > lastShowSensor + TIME_SHOW ) {
       lastShowSensor = time;
 
-      tft_draw(varParams);
+      tft_draw();
     }
 
 

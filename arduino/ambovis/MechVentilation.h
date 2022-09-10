@@ -63,7 +63,7 @@ public:
         FlexyStepper *_stepper,
       #endif
         AutoPID *pid,
-        VariableParameters* variableParameters);
+        VentilationParameters* ventilationParameters);
 
     boolean getStartWasTriggeredByPatient();
     void setVentilationCyle_WaitTime(float speedExsufflation);
@@ -182,7 +182,7 @@ private:
     bool _sensor_error_detected;
     bool _startWasTriggeredByPatient = false;
     float timeoutCycle;
-    VariableParameters* variableParameters;
+    VentilationParameters* ventilationParameters;
 };
 
 extern unsigned int _timeoutIns;

@@ -108,7 +108,7 @@ DisplayValue getSetupReadyConfig() {
     return buildConfiguration(3, 0, 6, "READY", "");
 }
 
-DisplayValue getValueToDisplay(int code, VariableParameters parameters, MenuState& menuState) {
+DisplayValue getValueToDisplay(int code, VentilationParameters parameters, MenuState& menuState) {
     bool useEditedParam = menuState.cursorCode == code && menuState.isEditingParam;
     DisplayValue displayValue;
     int value;
@@ -165,7 +165,7 @@ DisplayValue getValueToDisplay(int code, VariableParameters parameters, MenuStat
     return displayValue;
 }
 
-void printCursor(MenuV2& menu, int cursorCode, VariableParameters parameters) {
+void printCursor(MenuV2& menu, int cursorCode, VentilationParameters parameters) {
     DisplayValue displayValue = getValueToDisplay(cursorCode, parameters, menu.menuState);
 
     clearCursor(menu, displayValue.cursorOffset, displayValue.line);
@@ -181,7 +181,7 @@ void printCursor(MenuV2& menu, int cursorCode, VariableParameters parameters) {
     printDigits(menu, displayValue.valueOffset, displayValue.line, displayValue.label + displayValue.strValue);
 }
 
-void displaySensorValues(int line, MenuV2& menu, VariableParameters parameters) {
+void displaySensorValues(int line, MenuV2& menu, VentilationParameters parameters) {
     char tempStr[5];
     dtostrf(last_pressure_min, 2, 0, tempStr);
     writeLine(menu, line, "PEEP:" + String(tempStr), 0);
@@ -209,7 +209,7 @@ void displayMainMenu(MenuV2& menu) {
     writeLine(menu, 2, "Ajustes", 1);
 }
 
-void displayInitialParametersSettings(MenuV2& menu, VariableParameters parameters) {
+void displayInitialParametersSettings(MenuV2& menu, VentilationParameters parameters) {
     writeLine(menu, 0, "Parametros inic", 1);
     writeLine(menu, 1, "MOD:MAN", 1);
     printCursor(menu, BPM_OPT, parameters);
@@ -217,7 +217,7 @@ void displayInitialParametersSettings(MenuV2& menu, VariableParameters parameter
     printCursor(menu, END_SETUP, parameters);
 }
 
-void displayParametersSettings(MenuV2& menu, VariableParameters parameters) {
+void displayParametersSettings(MenuV2& menu, VentilationParameters parameters) {
     writeLine(menu, 0, "MOD:MAN", 1);
     printCursor(menu, PERC_V_OPT, parameters);
     printCursor(menu, BPM_OPT, parameters);
@@ -226,13 +226,13 @@ void displayParametersSettings(MenuV2& menu, VariableParameters parameters) {
     displaySensorValues(3, menu, parameters);
 }
 
-void displayAlarmSettings(MenuV2& menu, VariableParameters parameters) {
+void displayAlarmSettings(MenuV2& menu, VentilationParameters parameters) {
     printCursor(menu, PIP_ALARM_OPT, parameters);
     printCursor(menu, PEEP_ALARM_OPT, parameters);
     printCursor(menu, VT_ALARM_OPT, parameters);
 }
 
-void displaySettings(MenuV2& menu, VariableParameters parameters) {
+void displaySettings(MenuV2& menu, VentilationParameters parameters) {
     printCursor(menu, FIL_OPT, parameters);
     printCursor(menu, AUTO_OPT, parameters);
 
@@ -241,7 +241,7 @@ void displaySettings(MenuV2& menu, VariableParameters parameters) {
     writeLine(menu, 2, "CD:" + String(temp), 1);
 }
 
-void printMenu(MenuV2& menu, VariableParameters parameters, long time) {
+void printMenu(MenuV2& menu, VentilationParameters parameters, long time) {
     long diff = time - menu.keyboardState.lastKeyPressedTime;
     if (diff > 15000 && menu.menuState.menu != PARAMETER && menu.menuState.setupReady) {
         menu.lcd->clear();
@@ -262,7 +262,7 @@ void printMenu(MenuV2& menu, VariableParameters parameters, long time) {
     }
 }
 
-void displayMenu(MenuV2& menu, VariableParameters parameters, long time) {
+void displayMenu(MenuV2& menu, VentilationParameters parameters, long time) {
     if (menu.menuState.changedMenu) {
         menu.lcd->clear();
         printMenu(menu, parameters, time);
@@ -274,7 +274,7 @@ void displayMenu(MenuV2& menu, VariableParameters parameters, long time) {
     }
 }
 
-void checkEncoder(MenuV2& menu, VariableParameters& parameters, long time) {
+void checkEncoder(MenuV2& menu, VentilationParameters& parameters, long time) {
     long diff = time - menu.keyboardState.lastKeyPressedTime;
     bool somethingChanged = diff < 100;
 
@@ -284,7 +284,7 @@ void checkEncoder(MenuV2& menu, VariableParameters& parameters, long time) {
     }
 }
 
-void setupMenu(MenuV2& menuV2, VariableParameters& parameters, long time) {
+void setupMenu(MenuV2& menuV2, VentilationParameters& parameters, long time) {
     menuV2.menuState.menu = PARAMETER;
     menuV2.menuState.cursorCode = INIT_PARAM_MENU[0];
     menuV2.menuState.changedMenu = false;

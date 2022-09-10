@@ -31,7 +31,7 @@ typedef struct menu_state {
     bool updatedOptions = false;
 } MenuState;
 
-typedef struct variable_parameters {
+typedef struct ventilation_parameters {
     int vent_mode;
     int alarm_max_pressure;
     int respiratoryRate;
@@ -42,7 +42,7 @@ typedef struct variable_parameters {
     int percVolume;
     int autopid;
     int filter;
-} VariableParameters;
+} VentilationParameters;
 
 static int MAIN_MENU[] = {PARAMETER, ALARM, SETTINGS};
 static int INIT_PARAM_MENU[] = {BPM_OPT, IE_OPT, END_SETUP};

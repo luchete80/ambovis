@@ -19,7 +19,7 @@ int getCursorCode(int menu, int i) {
     }
 }
 
-int* getValueToEdit(int code, VariableParameters& parameters) {
+int* getValueToEdit(int code, VentilationParameters& parameters) {
     switch (code) {
         case PERC_V_OPT:
             return &parameters.percVolume;
@@ -89,7 +89,7 @@ int validate(int val, int cursorCode) {
     }
 }
 
-void editParameter(KeyboardState& keyboardState, MenuState& menuState, VariableParameters& variables) {
+void editParameter(KeyboardState& keyboardState, MenuState& menuState, VentilationParameters& variables) {
     if (keyboardState.ok) {
         *getValueToEdit(menuState.cursorCode, variables) = menuState.editedParameter;
         menuState.isEditingParam = false;
@@ -108,7 +108,7 @@ void editParameter(KeyboardState& keyboardState, MenuState& menuState, VariableP
     }
 }
 
-void moveCursor(KeyboardState& keyboardState, MenuState& menuState, VariableParameters& variables, bool isInitialMenu = false) {
+void moveCursor(KeyboardState& keyboardState, MenuState& menuState, VentilationParameters& variables, bool isInitialMenu = false) {
     if (keyboardState.ok) {
         if (menuState.cursorCode == END_SETUP) {
             menuState.setupReady = true;
@@ -131,7 +131,7 @@ void moveCursor(KeyboardState& keyboardState, MenuState& menuState, VariablePara
     }
 }
 
-void checkKeyboardActionForSetup(KeyboardState& keyboardState, MenuState& menuState, VariableParameters& variables) {
+void checkKeyboardActionForSetup(KeyboardState& keyboardState, MenuState& menuState, VentilationParameters& variables) {
     if (menuState.isEditingParam) {
         editParameter(keyboardState, menuState, variables);
     } else {
@@ -139,7 +139,7 @@ void checkKeyboardActionForSetup(KeyboardState& keyboardState, MenuState& menuSt
     }
 }
 
-void checkKeyboardActions(KeyboardState& keyboardState, MenuState& menuState, VariableParameters& variables) {
+void checkKeyboardActions(KeyboardState& keyboardState, MenuState& menuState, VentilationParameters& variables) {
     if (menuState.menu == MAIN) {
         if (keyboardState.ok) {
             menuState.menu = menuState.cursorCode;

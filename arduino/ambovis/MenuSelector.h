@@ -9,7 +9,7 @@
 #include "defaults.h"
 #include "MenuDataTypes.h"
 
-void checkKeyboardActions(KeyboardState& keyboardState, MenuState& menuState, VariableParameters& variables);
-void checkKeyboardActionForSetup(KeyboardState& keyboardState, MenuState& menuState, VariableParameters& variables);
+void checkKeyboardActions(KeyboardState& keyboardState, MenuState& menuState, VentilationParameters& variables);
+void checkKeyboardActionForSetup(KeyboardState& keyboardState, MenuState& menuState, VentilationParameters& variables);
 
 #endif //MENUSELECTOR_H

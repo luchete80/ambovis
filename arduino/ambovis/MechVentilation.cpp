@@ -29,11 +29,11 @@ MechVentilation::MechVentilation(
         FlexyStepper *stepper,
       #endif
     AutoPID *pid,
-    VariableParameters* parameters)
+    VentilationParameters * parameters)
 {
 
     _init(stepper, pid);
-    this->variableParameters = parameters;
+    this->ventilationParameters = parameters;
     force_stop = false;
     stopped = false;
     force_start = false;
@@ -217,7 +217,7 @@ void MechVentilation :: update()
         _stepper->setSpeedInStepsPerSecond(STEPPER_SPEED_DEFAULT);
         _stepper->setAccelerationInStepsPerSecondPerSecond(STEPPER_ACC_INSUFFLATION);
 
-        if (this->variableParameters->vent_mode!=VENTMODE_MAN)  //VCL && PCL
+        if (this->ventilationParameters->vent_mode!=VENTMODE_MAN)  //VCL && PCL
           _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
         else { //MANUAL MODE
           _stepper->setTargetPositionInSteps(int (STEPPER_HIGHEST_POSITION*(float)_percVol/100.));
@@ -649,9 +649,9 @@ void MechVentilation::_setAlarm(Alarm alarm)
 }
 
 void MechVentilation::updateParameters() {
-    _rpm = variableParameters->respiratoryRate;
-    _percIE= byte(variableParameters->percInspEsp);
-    _percVol= byte(variableParameters->percVolume);
+    _rpm = ventilationParameters->respiratoryRate;
+    _percIE= byte(ventilationParameters->percInspEsp);
+    _percVol= byte(ventilationParameters->percVolume);
     _setInspiratoryCycle();
     Serial.println("params updated");
 }
