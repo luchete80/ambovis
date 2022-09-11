@@ -33,9 +33,6 @@ bool drawing_cycle = 0;
 #include <Adafruit_ADS1X15.h>
 Adafruit_ADS1115 ads;
 
-//float Voltage = 0.0;
-//float _mlInsVol = 0;
-//float _mlExsVol = 0;
 int _mllastInsVol, _mllastExsVol;
 unsigned long mute_count;
 
@@ -80,7 +77,6 @@ unsigned long last_update_display;
 
 unsigned long time;
 byte cycle_pos;
-//int16_t adc0;
 
 SensorData sensorData;
 
