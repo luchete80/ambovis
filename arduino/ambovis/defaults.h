@@ -118,7 +118,7 @@ extern unsigned long time;
 //Battery level voltage dividers
 #define BATDIV_R1           12000
 #define BATDIV_R2           470
-extern float vlevel;
+#define BATTERY_READ 5
 #define BAT_TEST
 #define TIME_SHOW_BAT   15000 //MSECS
 #define TEMP_TEST

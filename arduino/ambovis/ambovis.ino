@@ -8,7 +8,7 @@
 #include "pinout.h"
 #include "MechVentilation.h"
 #include "initialactions.h"
-#include <EEPROM.h>
+#include "data_persistence.h"
 
 #define CALIB_CYCLES  5
 
@@ -25,7 +25,6 @@ bool sleep_mode;
 bool put_to_sleep, wake_up;
 unsigned long print_bat_time;
 bool motor_stopped;
-
 bool drawing_cycle = 0;
 
 // FOR ADS
@@ -38,9 +37,6 @@ float _mlInsVol = 0;
 float _mlExsVol = 0;
 int _mllastInsVol, _mllastExsVol;
 unsigned long mute_count;
-
-void read_memory(); //Lee la EEPROM, usa variables externas, quiza deberian englobarse en un vector dinamico todos los offsets
-void write_memory();
 
 AccelStepper *stepper;
 
@@ -149,6 +145,8 @@ int holdTime ;        // how long the button was hold
 int idleTime ;        // how long the button was idle
 
 float vlevel = 0.;
+float fdiv = (float)(BATDIV_R1 + BATDIV_R2)/(float)BATDIV_R2;
+float fac = 1.1/1024.*fdiv;
 
 #ifdef TEMP_TEST
 OneWire           oneWire(PIN_TEMP);
@@ -256,7 +254,11 @@ void setup() {
   Timer1.initialize(TIME_BASE_MICROS);  //BEFORE WERE 20...
   Timer1.attachInterrupt(timer1Isr);
 
-  read_memory();
+  SystemConfiguration_t systemConfiguration = read_memory();
+  alarm_vt = systemConfiguration.alarm_vt;
+  filter = systemConfiguration.filter;
+  autopid = systemConfiguration.autopid;
+  last_cycle = systemConfiguration.last_cycle;
 
   f_acc = (float)f_acc_b / 10.;
   dpip = (float)dpip_b / 10.;
@@ -313,15 +315,18 @@ void loop() {
     check_buzzer_mute();
 
     if (time > lastSave + TIME_SAVE) {
-      write_memory();
-
-      lastSave = millis();
+        SystemConfiguration_t toPersist;
+        toPersist.last_cycle = last_cycle;
+        toPersist.alarm_vt = alarm_vt;
+        toPersist.autopid = autopid;
+        toPersist.filter = filter;
+        write_memory(toPersist);
+        lastSave = millis();
     }
 
     if ( time > lastShowSensor + TIME_SHOW ) {
-      lastShowSensor = time;
-
-      tft_draw();
+        tft_draw(tft, drawing_cycle, fac);
+        lastShowSensor = time;
     }
 
 
@@ -443,14 +448,14 @@ void loop() {
     } 
 
     #ifdef TEMP_TEST
-    if (time > lastReadTemp + TIME_READ_TEMP){
+    if (time > lastReadTemp + TIME_READ_TEMP) {
       lastReadTemp = time;
       sensors.requestTemperatures();
       temp=sensors.getTempCByIndex(0);
       //Serial.println ("Temp: " + String(temp));
     }
     tft.fillRect(200,100,20,40, ILI9341_BLUE);    
-    print_float(100,200,temp);
+    print_float(tft, 100,200,temp);
     #endif TEMP_TEST+
 
     }//change cycle
@@ -503,7 +508,7 @@ void loop() {
       digitalWrite(PIN_LCD_EN, HIGH);
       put_to_sleep = false;
       print_bat_time = time;
-      print_bat();
+      print_bat(tft, fac);
       digitalWrite(LCD_SLEEP, LOW);
       digitalWrite(TFT_SLEEP, LOW);
       //digitalWrite(PIN_STEPPER, LOW); //TODO: call it here (now is inside stepper)
@@ -512,21 +517,21 @@ void loop() {
       lcd.clear();
     }
     if (time > print_bat_time + 5000) {
-      print_bat();
-      print_bat_time = time;
+        print_bat(tft, fac);
+        print_bat_time = time;
     }
     time = millis();
     check_bck_state();
   }
 
-  #ifdef BAT_TEST
-  if ( time > lastShowBat + TIME_SHOW_BAT ){
-    lastShowBat = time;
-    Serial.println("last show bat " + String(lastShowBat));
-    float level = calc_bat(5);
-    Serial.println(String(time)+", " +String(level));
-  }
-  #endif BAT_TEST
+    #ifdef BAT_TEST
+    if ( time > lastShowBat + TIME_SHOW_BAT ) {
+        lastShowBat = time;
+        Serial.println("last show bat " + String(lastShowBat));
+        float level = calc_bat(5, fac);
+        Serial.println(String(time)+", " +String(level));
+    }
+    #endif BAT_TEST
 
 }//LOOP
 
@@ -592,56 +597,4 @@ void initOptions(VentilationOptions_t& options) {
     options.hasTrigger = false;
     options.tidalVolume = 300; // TODO: might be removed
     options.percVolume = 100; //1 to 10
-}
-
-void read_memory() {
-  int eeAddress = 0;
-  EEPROM.get(0, last_cycle); eeAddress += sizeof(unsigned long);
-  EEPROM.get(eeAddress, p_trim);    eeAddress += sizeof(p_trim);
-  EEPROM.get(eeAddress, autopid);   eeAddress += sizeof(autopid);
-  EEPROM.get(eeAddress, min_cd);    eeAddress += sizeof(min_cd);
-  EEPROM.get(eeAddress, max_cd);    eeAddress += sizeof(max_cd);
-  EEPROM.get(eeAddress, min_speed); eeAddress += sizeof(min_speed);
-  EEPROM.get(eeAddress, max_speed); eeAddress += sizeof(max_speed);
-  EEPROM.get(eeAddress, min_accel); eeAddress += sizeof(min_accel);
-  EEPROM.get(eeAddress, max_accel); eeAddress += sizeof(max_accel);
-  EEPROM.get(eeAddress, min_pidk);  eeAddress += sizeof(min_pidk);
-  EEPROM.get(eeAddress, max_pidk);  eeAddress += sizeof(max_pidk);
-  EEPROM.get(eeAddress, alarm_vt);  eeAddress += sizeof(alarm_vt);
-  EEPROM.get(eeAddress, filter);    eeAddress += sizeof(filter);
-  EEPROM.get(eeAddress, pfmin);     eeAddress += sizeof(pfmin);
-  EEPROM.get(eeAddress, pfmax);     eeAddress += sizeof(pfmax);
-  EEPROM.get(eeAddress, dpip_b);    eeAddress += sizeof(dpip_b);
-  EEPROM.get(eeAddress, min_pidi);  eeAddress += sizeof(min_pidi);
-  EEPROM.get(eeAddress, max_pidi);  eeAddress += sizeof(max_pidi);
-  EEPROM.get(eeAddress, min_pidd);  eeAddress += sizeof(min_pidd);
-  EEPROM.get(eeAddress, max_pidd);  eeAddress += sizeof(max_pidd);
-  EEPROM.get(eeAddress, p_acc);      eeAddress += sizeof(p_acc);
-  EEPROM.get(eeAddress, f_acc_b);    eeAddress += sizeof(f_acc_b);
-}
-
-void write_memory() {
-  int eeAddress = 0;
-  EEPROM.put(0, last_cycle);        eeAddress += sizeof(unsigned long);
-  EEPROM.put(eeAddress, p_trim);    eeAddress += sizeof(p_trim);
-  EEPROM.put(eeAddress, autopid);   eeAddress += sizeof(autopid);
-  EEPROM.put(eeAddress, min_cd);    eeAddress += sizeof(min_cd);
-  EEPROM.put(eeAddress, max_cd);    eeAddress += sizeof(max_cd);
-  EEPROM.put(eeAddress, min_speed); eeAddress += sizeof(min_speed);
-  EEPROM.put(eeAddress, max_speed); eeAddress += sizeof(max_speed);
-  EEPROM.put(eeAddress, min_accel); eeAddress += sizeof(min_accel);
-  EEPROM.put(eeAddress, max_accel); eeAddress += sizeof(max_accel);
-  EEPROM.put(eeAddress, min_pidk);  eeAddress += sizeof(min_pidk);
-  EEPROM.put(eeAddress, max_pidk);  eeAddress += sizeof(max_pidk);
-  EEPROM.put(eeAddress, alarm_vt);  eeAddress += sizeof(alarm_vt);
-  EEPROM.put(eeAddress, filter);    eeAddress += sizeof(filter);
-  EEPROM.put(eeAddress, pfmin);     eeAddress += sizeof(pfmin);
-  EEPROM.put(eeAddress, pfmax);     eeAddress += sizeof(pfmax);
-  EEPROM.put(eeAddress, dpip_b);    eeAddress += sizeof(dpip_b);
-  EEPROM.put(eeAddress, min_pidi);  eeAddress += sizeof(min_pidi);
-  EEPROM.put(eeAddress, max_pidi);  eeAddress += sizeof(max_pidi);
-  EEPROM.put(eeAddress, min_pidd);  eeAddress += sizeof(min_pidd);
-  EEPROM.put(eeAddress, max_pidd);  eeAddress += sizeof(max_pidd);
-  EEPROM.put(eeAddress, p_acc);      eeAddress += sizeof(p_acc);
-  EEPROM.put(eeAddress, f_acc_b);    eeAddress += sizeof(f_acc_b);
 }
