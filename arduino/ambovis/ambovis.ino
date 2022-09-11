@@ -7,6 +7,7 @@
 #include "display.h"
 #include "pinout.h"
 #include "MechVentilation.h"
+#include "alarms.h"
 #include "sensorcalculation.h"
 #include "initialactions.h"
 #include "data_persistence.h"
@@ -38,7 +39,7 @@ unsigned long mute_count;
 
 AccelStepper *stepper;
 
-byte alarm_state = 0; //0: No alarm 1: peep 2: pip 3:both
+short alarm_state = 0; //0: No alarm 1: peep 2: pip 3:both
 
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
 
@@ -47,6 +48,7 @@ bool last_mute, curr_mute;
 bool buzzmuted;
 unsigned long timebuzz = 0;
 bool isbuzzeron = false;
+bool is_alarm_vt_on;
 
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 
@@ -336,31 +338,15 @@ void loop() {
 
     if ( ventilation -> getCycleNum () != last_cycle ) {
       int vt = (_mllastInsVol + _mllastInsVol) / 2;
-      if (vt < alarm_vt)  isalarmvt_on = 1;
-      else              isalarmvt_on = 0;
-      if ( last_pressure_max > alarm_max_pressure + 1 ) {
-        if ( last_pressure_min < alarm_peep_pressure - 1) {
-          if (!isalarmvt_on)  alarm_state = 3;
-          else                alarm_state = 13;
-        } else {
-          if (!isalarmvt_on)  alarm_state = 2;
-          else                alarm_state = 12;
-        }
-      } else {
-        if ( last_pressure_min < alarm_peep_pressure - 1 ) {
-          if (!isalarmvt_on) alarm_state = 1;
-          else               alarm_state = 11;
-        } else {
-          if (!isalarmvt_on)  alarm_state = 0;
-          else                alarm_state = 10;
-        }
-      }
+      is_alarm_vt_on = vt < alarm_vt;
+      alarm_state = getAlarmState(last_pressure_max, last_pressure_min,
+                                  alarm_max_pressure, alarm_peep_pressure);
 
       last_cycle = ventilation->getCycleNum();
 
       if (!calibration_run) {
-        display_lcd();
-        last_update_display = time;
+         display_lcd();
+         last_update_display = time;
       } else {
           lcd.clear();
           writeLine(1, "Calibracion flujo", 0);

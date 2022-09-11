@@ -104,50 +104,59 @@ void printMessageWhenEndedWhileStepperMoving(Adafruit_ILI9341& tft) {
     }
 }
 
+void showVTAlarm(Adafruit_ILI9341& tft) {
+    digitalWrite(RED_LED,HIGH);
+    digitalWrite(GREEN_LED,LOW);
+    tft.setRotation(0);
+    tft.setTextColor(ILI9341_RED);
+    tft.setTextSize(2);
+    tft.setCursor(150, 40);
+    tft.println("VT AL");
+}
+
+void showPeepAlarm(Adafruit_ILI9341& tft) {
+    digitalWrite(GREEN_LED,LOW);
+    digitalWrite(RED_LED,HIGH);
+    tft.setRotation(0);
+    tft.setTextColor(ILI9341_RED);
+    tft.setTextSize(2);
+    tft.setCursor(150, 20);
+    tft.println("PEEP AL");
+}
+
+void showPipAlarm(Adafruit_ILI9341& tft) {
+    digitalWrite(GREEN_LED,LOW);
+    digitalWrite(RED_LED,HIGH);
+    tft.setRotation(0);
+    tft.setTextColor(ILI9341_RED);
+    tft.setTextSize(2);
+    tft.setCursor(150, 0);
+    tft.println("PIP AL");
+}
+
 void check_alarms(Adafruit_ILI9341& tft) {
-  
-    if (alarm_state>9) {
-        digitalWrite(RED_LED,HIGH);
-        digitalWrite(GREEN_LED,LOW);
-        tft.setRotation(0);
-        tft.setTextColor(ILI9341_RED); tft.setTextSize(2); 
-        tft.setCursor(150, 40);   
-        tft.println("VT AL");
-        state_r=alarm_state-10;
+    if (is_alarm_vt_on) {
+        showVTAlarm(tft);
     } else {
-        digitalWrite(RED_LED,LOW);  
-        state_r=alarm_state;
+        digitalWrite(RED_LED,LOW);
     }
-    switch (state_r) {
+    switch (alarm_state) {
         case NO_ALARM:
-            if (alarm_state==0) { //state_r!=10
-                digitalWrite(GREEN_LED,HIGH); digitalWrite(RED_LED,LOW);
+            if (!is_alarm_vt_on) {
+                digitalWrite(GREEN_LED,HIGH);
+                digitalWrite(RED_LED,LOW);
             }
-        break;
+            break;
         case PEEP_ALARM:
-            digitalWrite(GREEN_LED,LOW); digitalWrite(RED_LED,HIGH);
-            tft.setRotation(0);
-            tft.setTextColor(ILI9341_RED); tft.setTextSize(2);
-            tft.setCursor(150, 20);
-            tft.println("PEEP AL");
-        break;
+            showPeepAlarm(tft);
+            break;
         case PIP_ALARM:
-            digitalWrite(GREEN_LED,LOW); digitalWrite(RED_LED,HIGH);
-            tft.setRotation(0);
-            tft.setTextColor(ILI9341_RED); tft.setTextSize(2);
-            tft.setCursor(150, 0);
-            tft.println("PIP AL");
-        break;
+            showPipAlarm(tft);
+            break;
         case PEEP_PIP_ALARM:
-            digitalWrite(GREEN_LED,LOW); digitalWrite(RED_LED,HIGH);
-            tft.setRotation(0);
-            tft.setTextColor(ILI9341_RED); tft.setTextSize(2);
-            tft.setCursor(150, 0);
-            tft.println("PIP AL");
-            tft.setTextColor(ILI9341_RED); tft.setTextSize(2);
-            tft.setCursor(150, 20);
-            tft.println("PEEP AL");
-        break;
+            showPipAlarm(tft);
+            showPeepAlarm(tft);
+            break;
     }
 }
 
