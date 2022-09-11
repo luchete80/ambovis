@@ -224,7 +224,7 @@ void setup() {
     options
   );
 
-//  tft.fillScreen(ILI9341_BLACK);
+  tft.fillScreen(ILI9341_BLACK);
 
   // configura la ventilación
   ventilation -> start();
