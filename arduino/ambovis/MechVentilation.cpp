@@ -142,7 +142,7 @@ void MechVentilation::deactivateRecruitment(void)
 /**
  * It's called from timer1Isr
  */
-void MechVentilation :: update ( void )
+void MechVentilation :: update ( SensorData& sensorData )
 {
 
     static int totalCyclesInThisState = 0;
@@ -160,17 +160,6 @@ void MechVentilation :: update ( void )
   if (_currentState == State_Exsufflation) extra_time=_timeoutIns;
   cycle_pos=byte( (float) ( (_msecTimerCnt+(float)extra_time)/(float)timeoutCycle * 127.0f) );
 
-//    if (pressures.state != SensorStateOK)
-//    {                                  // Sensor error detected: return to zero position and continue from there
-//        _sensor_error_detected = true; //An error was detected in sensors
-//        /* Status update, for this time */
-//        // TODO: SAVE PREVIOUS CYCLE IN MEMORY AND RERUN IT
-//        Serial.println("fail sensor");
-//        _setState(State_Exsufflation);
-//    }
-//    else {
-//        _sensor_error_detected = false; //clear flag
-//    }
     if (force_start) {
       stopped=false;
       force_start = false;
@@ -202,11 +191,11 @@ void MechVentilation :: update ( void )
         for (int i=0;i<2;i++) Cdyn_pass[i]=Cdyn_pass[i+1];
         Cdyn_pass[2]=_mllastInsVol/(last_pressure_max-last_pressure_min);
         Cdyn=(Cdyn_pass[0]+Cdyn_pass[1]+Cdyn_pass[2])/3.;
-        _mllastInsVol=int(_mlInsVol);
-        _mllastExsVol=int(fabs(_mlExsVol));
+        _mllastInsVol=int(sensorData.ml_ins_vol);
+        _mllastExsVol=int(fabs(sensorData.ml_exs_vol));
         
-        _mlInsVol=0.;
-        _mlExsVol=0.;
+        sensorData.ml_ins_vol=0.;
+        sensorData.ml_exs_vol=0.;
         
         wait_NoMove=false;
         /* Stepper control: set acceleration and end-position */
