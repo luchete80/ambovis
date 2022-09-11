@@ -24,7 +24,6 @@ bool sleep_mode;
 bool put_to_sleep, wake_up;
 unsigned long print_bat_time;
 bool motor_stopped;
-
 bool drawing_cycle = 0;
 
 // FOR ADS
@@ -410,7 +409,7 @@ void loop() {
     }
 
     if ( time > lastShowSensor + TIME_SHOW ) {
-        tft_draw(tft, fac);
+        tft_draw(tft, drawing_cycle, fac);
         lastShowSensor = time;
     }
 
@@ -626,14 +625,14 @@ void loop() {
     check_bck_state();
   }
 
-  #ifdef BAT_TEST
-  if ( time > lastShowBat + TIME_SHOW_BAT ){
-    lastShowBat = time;
-    Serial.println("last show bat " + String(lastShowBat));
-    float level = calc_bat(5, fac);
-    Serial.println(String(time)+", " +String(level));
-  }
-  #endif BAT_TEST
+    #ifdef BAT_TEST
+    if ( time > lastShowBat + TIME_SHOW_BAT ) {
+        lastShowBat = time;
+        Serial.println("last show bat " + String(lastShowBat));
+        float level = calc_bat(5, fac);
+        Serial.println(String(time)+", " +String(level));
+    }
+    #endif BAT_TEST
 
 }//LOOP
 
