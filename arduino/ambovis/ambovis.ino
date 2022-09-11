@@ -7,6 +7,7 @@
 #include "display.h"
 #include "pinout.h"
 #include "MechVentilation.h"
+#include "initialactions.h"
 #include "data_persistence.h"
 
 #define CALIB_CYCLES  5
@@ -127,11 +128,12 @@ byte max_sel, min_sel; //According to current selection
 
 void check_buzzer_mute();
 void check_sleep_mode();  //Batt charge only
+void initTft(Adafruit_ILI9341& tft);
+void initOptions(VentilationOptions_t& options);
 
 bool isitem_sel =false;
 
 AutoPID * pid;
-
 MechVentilation * ventilation;
 VentilationOptions_t options;
 
@@ -142,7 +144,6 @@ int endPressed ;      // the moment the button was released
 int holdTime ;        // how long the button was hold
 int idleTime ;        // how long the button was idle
 
-float vsupply_0 = 0.;
 float vlevel = 0.;
 float fdiv = (float)(BATDIV_R1 + BATDIV_R2)/(float)BATDIV_R2;
 float fac = 1.1/1024.*fdiv;
@@ -153,29 +154,13 @@ DallasTemperature sensors(&oneWire);
 #endif
   
 void setup() {
-
-  pinMode(PIN_STEPPER, OUTPUT);
-  digitalWrite(PIN_STEPPER, LOW);
-  
   Serial.begin(115200);
   
   analogReference(INTERNAL1V1); // use AREF for reference voltage
 
   init_display();
 
-  pinMode(TFT_SLEEP, OUTPUT); //Set buzzerPin as output
-  digitalWrite(TFT_SLEEP, HIGH); //LOW, INVERTED
-
-  pinMode(LCD_SLEEP, OUTPUT); //Set buzzerPin as output
-  digitalWrite(LCD_SLEEP, HIGH); //LOW, INVERTED
-  
-  pinMode(PIN_BUZZER, OUTPUT); //Set buzzerPin as output
-  pinMode(GREEN_LED,  OUTPUT); //Set buzzerPin as output
-  pinMode(BCK_LED,    OUTPUT); //Set buzzerPin as output
-  pinMode(YELLOW_LED, OUTPUT); //Set buzzerPin as output
-  pinMode(RED_LED, OUTPUT); //Set buzzerPin as output
-
-  digitalWrite(PIN_BUZZER, BUZZER_LOW); //LOW, INVERTED
+  initPins();
 
   // PID
   pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
@@ -192,28 +177,7 @@ void setup() {
   max_accel = 600;
   min_accel = 200;
 
-  // Parte motor
-  pinMode(PIN_MUTE, INPUT_PULLUP);
-  pinMode(PIN_POWEROFF, INPUT);
-  pinMode(PIN_EN, OUTPUT);
-
-  pinMode(PIN_MENU_UP, INPUT_PULLUP);
-  pinMode(PIN_MENU_DN, INPUT_PULLUP);
-  pinMode(PIN_MENU_EN, INPUT_PULLUP);
-  pinMode(PIN_MENU_BCK, INPUT_PULLUP);
-  pinMode(PIN_BAT_LEV, INPUT);
-  pinMode(PIN_MPX_LEV, INPUT);
-
-  digitalWrite(PIN_EN, HIGH);
-
-  options.respiratoryRate = DEFAULT_RPM;
-  options.percInspEsp = 2; //1:1 to 1:4, is denom
-  options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
-  options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
-  options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
-  options.hasTrigger = false;
-  options.tidalVolume = 300; // TODO: might be removed
-  options.percVolume = 100; //1 to 10
+  initOptions(options);
 
   delay(100);
 
@@ -228,44 +192,23 @@ void setup() {
   writeLine(1, "RespirAR FIUBA", 4);
   writeLine(2, "v2.0.2", 8);
 
-  tft.begin();
-  tft.fillScreen(ILI9341_BLACK);
-  tft.setTextColor(ILI9341_BLUE);
-  tft.setTextSize(4); 
-  tft.setCursor(10, 40);     tft.println("RespirAR");   
-  tft.setCursor(10, 80);     tft.println("FIUBA");
+  initTft(tft);
 
   ads.begin();
-  for (int i = 0; i < 100; i++) {
-      vsupply_0 += float(analogRead(PIN_MPX_LEV))/1024.*1.1*VOLTAGE_CONV;
-      delay(10);
-  }
-  vsupply_0 /= 100.;
 
-  ////// ANTES DE CONFIGURAR LA VENTILACION Y CHEQUEAR EL FIN DE CARRERA INICIO LOS MENUES
   byte bpm = DEFAULT_RPM;
   byte i_e = 2;
   Menu_inic menuini(&vent_mode, &bpm, &i_e);
 
   options.respiratoryRate = bpm;
   options.percInspEsp = i_e; //1:1 to 1:4, is denom
-  vent_mode = VENTMODE_MAN; // TODO: always starts with MANUAL mode?
+  vent_mode = VENTMODE_MAN;
 
   /////////////////// CALIBRACION /////////////////////////////////////
-  bool fin = false;
   lcd.clear();
   writeLine(1, "Desconecte flujo", 0);
   writeLine(2, "y presione ok ", 0);
-
-  delay (100); //Otherwise low enter button readed
-  lastButtonPress = millis();
-  while (!fin) {
-    if (digitalRead(PIN_MENU_EN) == LOW)
-        if (millis() - lastButtonPress > 50) {
-            fin = true;
-            lastButtonPress = millis();
-        }// if time > last button press
-  }
+  waitForFluxDisconnected();
 
   digitalWrite(PIN_STEPPER, HIGH);
   delay(1000);
@@ -291,37 +234,12 @@ void setup() {
   writeLine(1, "Iniciando...", 0);
 
 #ifdef ACCEL_STEPPER
-  stepper->setSpeed(STEPPER_HOMING_SPEED);
-
-  long initial_homing = -1;
-
-  while (digitalRead(PIN_ENDSTOP)) {  // Make the Stepper move CCW until the switch is activated
-    stepper->moveTo(initial_homing);  // Set the position to move to
-    initial_homing--;  // Decrease by 1 for next move if needed
-    stepper->run();  // Start moving the stepper
-    delay(5);
-  }
-  stepper->setCurrentPosition(0);  // Set the current position as zero for now
-  initial_homing = 1;
-
-  while (!digitalRead(PIN_ENDSTOP)) { // Make the Stepper move CW until the switch is deactivated
-    stepper->moveTo(initial_homing);
-    stepper->run();
-    initial_homing++;
-    delay(5);
-  }
-
-  long position = stepper->currentPosition();
-  stepper->setCurrentPosition(STEPPER_LOWEST_POSITION);
-  position = stepper->currentPosition();
+  searchHomePosition(stepper);
 #endif
 
   display_lcd();
 
-  //ENCODER
-  curr_sel = old_curr_sel = 1; //COMPRESSION
-
-  pinMode(PIN_ENC_SW, INPUT_PULLUP);
+  curr_sel = old_curr_sel = 1;
 
   lastReadSensor =  lastShowSensor = last_update_display = millis();
 
@@ -362,8 +280,6 @@ void setup() {
   put_to_sleep = false;
   wake_up = false;
 
-  //Serial.println("Vcc & Out MPX: " + String(analogRead(PIN_MPX_LEV)) + String(", ") + String(Voltage));
-    
   Serial.println("Exiting setup");
   //TODO: CALIBRATION RUN ALSO SHOULD BE HERE
 
@@ -510,23 +426,7 @@ void loop() {
           writeLine(1, "Calibracion flujo", 0);
           writeLine(2, "Ciclo: " + String(calib_cycle+1) + "/" + String(CALIB_CYCLES), 0);
       }
-      
-//#ifdef DEBUG_PID
-//      if (vent_mode = VENTMODE_PCL) {
-//        float err = (float)(pressure_max - options.peakInspiratoryPressure) / options.peakInspiratoryPressure;
-//        errpid_prom += fabs(err);
-//        errpid_prom_sig += err;
-//        Serial.println("Error PID: "); Serial.print(err, 5);
-//        ciclo_errpid++;
-//
-//        if (ciclo_errpid > 4) {
-//          errpid_prom /= 5.; errpid_prom_sig /= 5.;
-//          Serial.print(options.peakInspiratoryPressure); Serial.print(" "); Serial.print(errpid_prom, 5); Serial.print(" "); Serial.println(errpid_prom_sig, 5);
-//          errpid_prom = 0.; errpid_prom_sig = 0.;
-//          ciclo_errpid = 0;
-//        }
-//      }
-//#endif
+
       if (!digitalRead(PIN_POWEROFF)) {
         digitalWrite(YELLOW_LED, HIGH);
       } else {
@@ -544,7 +444,6 @@ void loop() {
           Serial.println("Calibration verror: " + String(vzero));
           lcd.clear();
           tft.fillScreen(ILI9341_BLACK);
-
       }
     } 
 
@@ -678,4 +577,24 @@ void check_buzzer_mute() {
     if (time > mute_count  + TIME_MUTE)  //each count is every 500 ms
       buzzmuted = false;
   }
+}
+
+void initTft(Adafruit_ILI9341& tft) {
+    tft.begin();
+    tft.fillScreen(ILI9341_BLACK);
+    tft.setTextColor(ILI9341_BLUE);
+    tft.setTextSize(4);
+    tft.setCursor(10, 40);     tft.println("RespirAR");
+    tft.setCursor(10, 80);     tft.println("FIUBA");
+}
+
+void initOptions(VentilationOptions_t& options) {
+    options.respiratoryRate = DEFAULT_RPM;
+    options.percInspEsp = 2; //1:1 to 1:4, is denom
+    options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
+    options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
+    options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
+    options.hasTrigger = false;
+    options.tidalVolume = 300; // TODO: might be removed
+    options.percVolume = 100; //1 to 10
 }
