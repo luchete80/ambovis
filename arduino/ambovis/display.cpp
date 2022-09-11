@@ -22,15 +22,15 @@ void drawY2(Adafruit_ILI9341& tft, bool drawing_cycle, uint16_t color);
 void print_vols(Adafruit_ILI9341& tft);
 void printMessageWhenEndedWhileStepperMoving(Adafruit_ILI9341& tft);
 
-void tft_draw(Adafruit_ILI9341& tft, bool& drawing_cycle, float fac) {
+void tft_draw(Adafruit_ILI9341& tft, SensorData& sensorData, bool& drawing_cycle, float fac) {
     byte last_x=cycle_pos;
     rx[valsreaded]=cycle_pos;
-    ry[valsreaded]=pressure_p*2.;
+    ry[valsreaded]=sensorData.pressure_p*2.;
 
     yflux[0]=yflux[1];
-    yflux[1]=int(flow_f*0.035);
+    yflux[1]=int(sensorData.flow_f*0.035);
     yvt[0]=yvt[1];
-    yvt[1]=int((_mlInsVol - _mlExsVol)*0.1);
+    yvt[1]=int((sensorData.ml_ins_vol - sensorData.ml_exs_vol)*0.1);
 
     tft.setRotation(1);
     if (valsreaded > 0) {
@@ -50,7 +50,7 @@ void tft_draw(Adafruit_ILI9341& tft, bool& drawing_cycle, float fac) {
             tft.println("CORTE ENERGIA");
         }
         
-        dtostrf(vlevel, 1, 2, buffer);
+        dtostrf(sensorData.v_level, 1, 2, buffer);
         tft.setCursor(100, 80);tft.println("Vmpx:");
         tft.fillRect(180,80,50,50, ILI9341_BLACK);
         tft.setCursor(180, 80);tft.println(buffer);
