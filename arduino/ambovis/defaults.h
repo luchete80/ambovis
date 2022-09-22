@@ -47,7 +47,7 @@
 #define STEPPER_HOMING_SPEED        (STEPPER_MICROSTEPS * 600)   // Steps/s
 //#define STEPPER_LOWEST_POSITION     (STEPPER_MICROSTEPS *  -100)   // Steps
 //#define STEPPER_HIGHEST_POSITION    (STEPPER_MICROSTEPS *   100)   // Steps
-#define STEPPER_LOWEST_POSITION     (-5)   // Steps
+#define STEPPER_LOWEST_POSITION     (0)   // Steps
 #define STEPPER_HIGHEST_POSITION    ( 183 * STEPPER_MICROSTEPS)   //270º ,2500 for 270º, 2850 for 220º, 2930 for 330º
 #define STEPPER_SPEED_DEFAULT       (STEPPER_MICROSTEPS *  1500)   // Steps/s
 extern int STEPPER_SPEED_MAX;       //(14000)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
@@ -161,7 +161,7 @@ extern float vlevel;
 
 #define BAT_TEST
 #define TIME_SHOW_BAT   15000 //MSECS
-#define TEMP_TEST
+//#define TEMP_TEST
 #define TIME_READ_TEMP  15000 //MSECS
 
 #endif // DEFAULTS_H

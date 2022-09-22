@@ -405,7 +405,7 @@ stepper = new FlexyStepper();
   }
   long position = stepper->currentPosition();
   Serial.print("Position "); Serial.print(position);
-  stepper->setCurrentPosition(STEPPER_LOWEST_POSITION);
+  stepper->setCurrentPosition(STEPPER_LOWEST_POSITION+40);
   position = stepper->currentPosition();
   Serial.print("Position "); Serial.print(position);
 
