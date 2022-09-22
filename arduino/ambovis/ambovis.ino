@@ -292,7 +292,6 @@ void setup() {
   lcd.clear();
   writeLine(1, "Iniciando...", 0);
 
-#ifdef ACCEL_STEPPER
   stepper->setSpeed(STEPPER_HOMING_SPEED);
 
   long initial_homing = -1;
