@@ -23,29 +23,28 @@ float temp;
 byte Cdyn;
 bool autopid;
 bool filter;
-bool sleep_mode;
-bool put_to_sleep, wake_up;
+bool sleep_mode = false;
+bool put_to_sleep = false;
+bool wake_up = false;
 unsigned long print_bat_time;
-bool motor_stopped;
 bool drawing_cycle = 0;
 
 // FOR ADS
 #include <Wire.h>
 #include <Adafruit_ADS1X15.h>
 Adafruit_ADS1115 ads;
-
 int _mllastInsVol, _mllastExsVol;
-unsigned long mute_count;
 
 AccelStepper *stepper;
 
-short alarm_state = 0; //0: No alarm 1: peep 2: pip 3:both
-
+short alarm_state = 0;
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
 
 //MUTE
-bool last_mute, curr_mute;
+bool last_mute;
 bool buzzmuted;
+unsigned long mute_count;
+
 unsigned long timebuzz = 0;
 bool isbuzzeron = false;
 bool is_alarm_vt_on;
@@ -54,7 +53,6 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 
 byte vcorr_count = 0;
 byte p_trim = 100;
-float pressure_p;   //EXTERN!!
 float last_pressure_max, last_pressure_min;
 
 byte vent_mode = VENTMODE_MAN; //0
@@ -93,11 +91,9 @@ float peep_fac;
 int min_cd, max_cd;
 
 unsigned long last_cycle;
-
 unsigned int _timeoutIns, _timeoutEsp; //In ms
 
 byte menu_number = 0;
-//TODO: READ FROM EEPROM
 byte alarm_max_pressure = 35;
 byte alarm_peep_pressure = 5;
 byte isalarmvt_on;
@@ -112,8 +108,6 @@ byte oldEncPos = 1; //stores the last encoder position value so we can compare t
 
 byte max_sel, min_sel; //According to current selection
 
-void check_buzzer_mute();
-void check_sleep_mode();  //Batt charge only
 void initTft(Adafruit_ILI9341& tft);
 void initOptions(VentilationOptions_t& options);
 
@@ -129,7 +123,6 @@ int startPressed ;    // the moment the button was pressed
 int endPressed ;      // the moment the button was released
 int holdTime ;        // how long the button was hold
 int idleTime ;        // how long the button was idle
-
 
 float fdiv = (float)(BATDIV_R1 + BATDIV_R2)/(float)BATDIV_R2;
 float fac = 1.1/1024.*fdiv;
@@ -148,13 +141,7 @@ void setup() {
 
   initPins();
 
-  // PID
   pid = new AutoPID(PID_MIN, PID_MAX, PID_KP, PID_KI, PID_KD);
-  // if pressure is more than PID_BANGBANG below or above setpoint,
-  // output will be set to min or max respectively
-  pid -> setBangBang(PID_BANGBANG);
-  // set PID update interval
-  pid -> setTimeStep(PID_TS);
 
   max_cd = 40; //T MODIFY: READ FROM MEM
   min_cd = 10;
@@ -184,13 +171,10 @@ void setup() {
 
   byte bpm = DEFAULT_RPM;
   byte i_e = 2;
-  Menu_inic menuini(&vent_mode, &bpm, &i_e);
+  Menu_inic menuini(&vent_mode, &options.respiratoryRate, &options.percInspEsp);
 
-  options.respiratoryRate = bpm;
-  options.percInspEsp = i_e; //1:1 to 1:4, is denom
   vent_mode = VENTMODE_MAN;
 
-  /////////////////// CALIBRACION /////////////////////////////////////
   lcd.clear();
   writeLine(1, "Desconecte flujo", 0);
   writeLine(2, "y presione ok ", 0);
@@ -210,12 +194,10 @@ void setup() {
     options
   );
 
-  tft.fillScreen(ILI9341_BLACK);
-
-  // configura la ventilación
   ventilation -> start();
   ventilation -> update(sensorData);
 
+  tft.fillScreen(ILI9341_BLACK);
   lcd.clear();
   writeLine(1, "Iniciando...", 0);
 
@@ -227,8 +209,7 @@ void setup() {
 
   curr_sel = old_curr_sel = 1;
 
-  lastShowSensor = last_update_display = millis();
-  sensorData.last_read_sensor = millis();
+  lastShowSensor = last_update_display = sensorData.last_read_sensor = millis();
 
   #ifdef BAT_TEST
   lastShowBat = millis();
@@ -263,10 +244,6 @@ void setup() {
   pf_max = (float)pfmax / 50.;
   peep_fac = -(pf_max - pf_min) / 15.*last_pressure_min + pf_max;
 
-  sleep_mode = false;
-  put_to_sleep = false;
-  wake_up = false;
-
   Serial.println("Exiting setup");
   //TODO: CALIBRATION RUN ALSO SHOULD BE HERE
 
@@ -275,8 +252,8 @@ void setup() {
   #endif
 }
 
-bool  calibration_run = true;
-byte  calib_cycle = 0;
+bool calibration_run = true;
+byte calib_cycle = 0;
 ////////////////////////////////////////
 ////////////// MAIN LOOP ///////////////
 ////////////////////////////////////////
@@ -299,7 +276,7 @@ void loop() {
     check_encoder();
 
     time = millis();
-    check_buzzer_mute();
+    check_buzzer_mute(last_mute, mute_count, buzzmuted, time);
 
     if (time > lastSave + TIME_SAVE) {
         SystemConfiguration_t toPersist;
@@ -312,7 +289,7 @@ void loop() {
     }
 
     if ( time > lastShowSensor + TIME_SHOW ) {
-        tft_draw(tft, sensorData, drawing_cycle, fac);
+        tft_draw(tft, sensorData, drawing_cycle, fac, alarm_state);
         lastShowSensor = time;
     }
 
@@ -324,10 +301,10 @@ void loop() {
         vs = sensorData.v_level;
 
       //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
-      if (pressure_p > pressure_max) {
+      if (sensorData.pressure_p > pressure_max) {
           pressure_max = sensorData.pressure_p;
       }
-      if (pressure_p < pressure_min) {
+      if (sensorData.pressure_p < pressure_min) {
           pressure_min = sensorData.pressure_p;
       }
       if (calibration_run) {
@@ -370,19 +347,19 @@ void loop() {
           Serial.println("Calibration verror: " + String(vzero));
           lcd.clear();
           tft.fillScreen(ILI9341_BLACK);
+        }
       }
-    } 
 
-    #ifdef TEMP_TEST
-    if (time > lastReadTemp + TIME_READ_TEMP) {
-      lastReadTemp = time;
-      sensors.requestTemperatures();
-      temp=sensors.getTempCByIndex(0);
-      //Serial.println ("Temp: " + String(temp));
-    }
-    tft.fillRect(200,100,20,40, ILI9341_BLUE);    
-    print_float(tft, 100,200,temp);
-    #endif TEMP_TEST+
+      #ifdef TEMP_TEST
+      if (time > lastReadTemp + TIME_READ_TEMP) {
+          lastReadTemp = time;
+          sensors.requestTemperatures();
+          temp=sensors.getTempCByIndex(0);
+          //Serial.println ("Temp: " + String(temp));
+      }
+      tft.fillRect(200,100,20,40, ILI9341_BLUE);
+      print_float(tft, 100,200,temp);
+      #endif
 
     }//change cycle
 
@@ -394,13 +371,13 @@ void loop() {
     }
   
     if ( update_options ) {
-      ventilation->change_config(options);
-      update_options = false;
+        ventilation->change_config(options);
+        update_options = false;
     }
 
     if (!calibration_run) {
         if (show_changed_options && ((millis() - last_update_display) > TIME_UPDATE_DISPLAY) ) {
-            display_lcd();  //WITHOUT CLEAR!
+            display_lcd();
             last_update_display = millis();
             show_changed_options = false;
         }
@@ -430,7 +407,6 @@ void loop() {
     //! sleep_mode
   } else {
     if (put_to_sleep) {
-      //tft.fillScreen(ILI9341_BLACK);
       digitalWrite(PIN_LCD_EN, HIGH);
       put_to_sleep = false;
       print_bat_time = time;
@@ -461,35 +437,12 @@ void loop() {
 
 }//LOOP
 
-void timer1Isr(void) {
-  ventilation->update(sensorData);
-  //alarms->update(ventilation->getPeakInspiratoryPressure());
+void timer1Isr() {
+    ventilation->update(sensorData);
 }
 
-void timer3Isr(void) {
-  stepper->run();
-}
-
-bool debounce(bool last, int pin) {
-  bool current = digitalRead(pin);
-  if (last != current) {
-    delay(50);
-    current = digitalRead(pin);
-  }
-  return current;
-}
-
-void check_buzzer_mute() {
-  curr_mute = debounce ( last_mute, PIN_MUTE );         //Debounce for Up button
-  if (last_mute == HIGH && curr_mute == LOW && !buzzmuted) {
-    mute_count = time;
-    buzzmuted = true;
-  }
-  last_mute = curr_mute;
-  if (buzzmuted) {
-    if (time > mute_count  + TIME_MUTE)  //each count is every 500 ms
-      buzzmuted = false;
-  }
+void timer3Isr() {
+    stepper->run();
 }
 
 void initTft(Adafruit_ILI9341& tft) {

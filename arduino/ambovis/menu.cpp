@@ -631,7 +631,7 @@ void display_lcd ( ) {
 /////// MENU INICIAL /////////////////
 //////////////////////////////////////
 
-Menu_inic::Menu_inic(byte *mode, byte *bpm, byte *i_e){
+Menu_inic::Menu_inic(byte *mode, short *bpm, byte *i_e){
     _mod=*mode;_bpm=*bpm;_i_e=*i_e;
     clear_all_display=false;
     fin=false;

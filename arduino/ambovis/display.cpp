@@ -17,12 +17,12 @@ int yflux[2];
 int yvt[2];
 char buffer[10];
 
-void check_alarms(Adafruit_ILI9341& tft);
+void check_alarms(Adafruit_ILI9341& tft, short alarm_state);
 void drawY2(Adafruit_ILI9341& tft, bool drawing_cycle, uint16_t color);
 void print_vols(Adafruit_ILI9341& tft);
 void printMessageWhenEndedWhileStepperMoving(Adafruit_ILI9341& tft);
 
-void tft_draw(Adafruit_ILI9341& tft, SensorData& sensorData, bool& drawing_cycle, float fac) {
+void tft_draw(Adafruit_ILI9341& tft, SensorData& sensorData, bool& drawing_cycle, float fac, short alarm_state) {
     byte last_x=cycle_pos;
     rx[valsreaded]=cycle_pos;
     ry[valsreaded]=sensorData.pressure_p*2.;
@@ -68,7 +68,7 @@ void tft_draw(Adafruit_ILI9341& tft, SensorData& sensorData, bool& drawing_cycle
         lcd_cleaned=false;
     }
 
-    check_alarms(tft);
+    check_alarms(tft, alarm_state);
 }
 
 void drawY2(Adafruit_ILI9341& tft, bool drawing_cycle, uint16_t color) {// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
@@ -134,7 +134,7 @@ void showPipAlarm(Adafruit_ILI9341& tft) {
     tft.println("PIP AL");
 }
 
-void check_alarms(Adafruit_ILI9341& tft) {
+void check_alarms(Adafruit_ILI9341& tft, short alarm_state) {
     if (is_alarm_vt_on) {
         showVTAlarm(tft);
     } else {
