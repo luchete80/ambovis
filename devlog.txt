@@ -26,3 +26,4 @@
 20220825 - Se agrega test de temperatura y baterial. Se limpia serial. 
 			RESTANTE: MODO SLEEP, BATERIAS.
 			Ahora el sleep apaga el motor en el momento correcto (inicio insuff).
+20221013 - Problemas con el nuevo respirador.  (Ver log baterias)
