@@ -477,8 +477,8 @@ void check_encoder ( ) {
           }//Valid range
 
     old_curr_sel = curr_sel;
-    if (menu_number==2)
-      change_pid_params=true;
+//    if (menu_number==2)
+//      change_pid_params=true;
     }//oldEncPos != encoderPos and valid between range
   }
 }
