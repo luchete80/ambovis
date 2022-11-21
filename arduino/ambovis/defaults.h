@@ -11,6 +11,7 @@
 //#define FILTER_FLUX 1
 #define DEBUG_OFF 1 //Release version
 #define BUZZER_LOW 0
+#define BUZZER_HIGH 1
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE                 20                                          // msec
