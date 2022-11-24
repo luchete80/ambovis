@@ -1,10 +1,6 @@
-#include <arduino.h>
-#include "pinout.h"
 #include "menu.h"
-#include "MechVentilation.h"  //options
 
 static bool clear_all_display;
-
 bool change_sleep;
 int pressed=0;  //0 nothing , 1 enter, 2 bck
 
@@ -19,68 +15,77 @@ byte back[8] = {
   0b11111
 };
 
-void updateState() {
-  // the button has been just pressed
-  if (bck_state == LOW) {
-      startPressed = time;
-      idleTime = startPressed - endPressed;
-      change_sleep=false;
-      // the button has been just released
-  } else {
-      endPressed = time;
-      holdTime = endPressed - startPressed;
-  }
-}
-
-void updateCounter() {
-  // the button is still pressed
-  if (bck_state == LOW) {
-      holdTime = time - startPressed;
-  // the button is still released
-  } else {
-      idleTime = time - endPressed;
-  }
-}
-
 void init_display() {
-  lcd.begin(20, 4);
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.createChar(0,back);
+    lcd.begin(20, 4);
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.createChar(0,back);
 }
 
 void writeLine(int line, String message = "", int offsetLeft = 0) {
-  lcd.setCursor(0, line);
-  lcd.print("");
-  lcd.setCursor(offsetLeft, line);
-  lcd.print(message);
+    lcd.setCursor(0, line);
+    lcd.print("");
+    lcd.setCursor(offsetLeft, line);
+    lcd.print(message);
+}
+
+void updateState(Keyboard_data_t& keyboard_data) {
+    if (keyboard_data.bck_state == LOW) {
+        keyboard_data.start_pressed = time;
+        keyboard_data.change_sleep=false;
+    } else {
+        keyboard_data.end_pressed = time;
+        keyboard_data.hold_time = keyboard_data.end_pressed - keyboard_data.start_pressed;
+    }
+}
+
+void updateCounter(Keyboard_data_t& keyboard_data) {
+    if (keyboard_data.bck_state == LOW) {
+        keyboard_data.hold_time = time - keyboard_data.start_pressed;
+    }
 }
 
 void lcd_clearxy(int x, int y,int pos=1) {
-  for (int i=0;i<pos;i++) {
-      lcd.setCursor(x+i, y);
-      lcd.print(" ");
-  }
-}
-void lcd_selxy(int x, int y) {
-  lcd.setCursor(x, y);
-  if (!isitem_sel)
-      lcd.print(">");
-  else 
-      lcd.write(byte(0));
-}
-
-void check_updn_button(int pin, byte *var, bool incr_decr) {
-    if (digitalRead(pin)==LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
-      if (time - lastButtonPress > 150) {
-          if (incr_decr)
-              *var=*var+1;
-          else
-              *var=*var-1;
-          lastButtonPress = time;
-      }// if time > last button press
+    for (int i=0;i<pos;i++) {
+        lcd.setCursor(x+i, y);
+        lcd.print(" ");
     }
 }
+
+void lcd_selxy(int x, int y, bool isItemSelected) {
+    lcd.setCursor(x, y);
+    if (!isItemSelected) {
+        lcd.print(">");
+    } else {
+        lcd.write(byte(0));
+    }
+}
+
+void check_buttons(unsigned long time, Keyboard_data_t& keyboard_data) {
+    if (digitalRead(PIN_MENU_DN) == LOW) {
+        if (time - keyboard_data.last_button_pressed > 150) {
+            keyboard_data.selection+=1;
+            keyboard_data.last_button_pressed = time;
+        }
+    }
+
+    if (digitalRead(PIN_MENU_UP) == LOW) {
+        if (time - keyboard_data.last_button_pressed > 150) {
+            keyboard_data.selection-=1;
+            keyboard_data.last_button_pressed = time;
+        }
+    }
+
+    keyboard_data.pressed = 0;
+    if (digitalRead(PIN_MENU_EN) == LOW) {  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
+        if (time - keyboard_data.last_button_press > 50) {
+            keyboard_data.pressed = 1;
+            keyboard_data.is_item_selected = true;
+            keyboard_data.last_button_press = time;
+        }
+    }
+}
+
 void check_bck_state() {
     bck_state=digitalRead(PIN_MENU_BCK);
 
@@ -114,45 +119,38 @@ void check_bck_state() {
   
   }
   
-void check_encoder() {
-  check_updn_button(PIN_MENU_DN,&encoderPos,true);   //Increment
-  check_updn_button(PIN_MENU_UP,&encoderPos,false);  //Decrement
-  pressed=0;  //0 nothing , 1 enter, 2 bck
-
-    if (digitalRead(PIN_MENU_EN) == LOW)  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
-    if (time - lastButtonPress > 50) {
-      pressed = 1;
-      isitem_sel=true; 
-      lastButtonPress = time;
-    }// if time > last button press
+void check_encoder(Keyboard_data_t& keyboard_data, unsigned long time) {
+    check_buttons(time, keyboard_data);
 
     check_bck_state();
 
-    if (pressed > 0) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
-      if (!isitem_sel) {
-        curr_sel=oldEncPos=encoderPos=old_curr_sel;
-      }
+    if (keyboard_data.pressed > 0) {
+        if (!keyboard_data.is_item_selected) {
+            keyboard_data.curr_sel=keyboard_data.old_selection=keyboard_data.selection=keyboard_data.old_curr_sel;
+        }
                   
-      if (isitem_sel) {
-          switch (curr_sel){
-            case 1: 
-             if ( menu_number == 0 ) {
-                    min_sel=1;max_sel=2;
-                    encoderPos=oldEncPos=vent_mode;
-                } else if ( menu_number == 1 ) {
-                    min_sel=20;max_sel=50;
-                    encoderPos=oldEncPos=alarm_max_pressure;            
-             } else if ( menu_number == 2 ) {
-                //encoderPos=min_cd;
-                encoderPos = STEPPER_ACCEL_MAX/200;
-                min_sel=0;max_sel=8000;
-             } else if ( menu_number == 3 ) {
-                encoderPos=dpip_b;
-                min_sel=10;max_sel=40;
-             }
-            break;
-            case 2: 
-                if ( menu_number == 0 ) {
+        if (keyboard_data.is_item_selected) {
+            switch (keyboard_data.curr_sel) {
+                case 1:
+                    if (menu_number == 0) {
+                        keyboard_data.min_sel=1;
+                        keyboard_data.max_sel=2;
+                        keyboard_data.selection=keyboard_data.old_selection=vent_mode;
+                    } else if (menu_number == 1) {
+                        keyboard_data.min_sel=20;
+                        keyboard_data.max_sel=50;
+                        keyboard_data.selection=keyboard_data.old_selection=alarm_max_pressure;
+                    } else if (menu_number == 2) {
+                        keyboard_data.min_sel=0;
+                        keyboard_data.max_sel=8000;
+                        keyboard_data.selection = STEPPER_ACCEL_MAX/200;
+                    } else if (menu_number == 3) {
+                        encoderPos=dpip_b;
+                        min_sel=10;max_sel=40;
+                    }
+                    break;
+                case 2:
+                    if ( menu_number == 0 ) {
                     encoderPos=oldEncPos=options.respiratoryRate;
                     min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
                     } else if ( menu_number == 1 ) {
@@ -433,7 +431,7 @@ void check_encoder() {
   }
 }
 
-void clear_n_sel(int menu){
+void clear_n_sel(int menu) {
     if (menu==0) {  
         lcd_clearxy(0,0);
         lcd_clearxy(0,1);lcd_clearxy(9,0);
@@ -521,110 +519,108 @@ void clear_n_sel(int menu){
     }//menu number 
 }
 
-void display_lcd ( ) {
-    if (clear_all_display)
-        lcd.clear();        
-  clear_n_sel(menu_number);
-  if (menu_number==0) {  
-    lcd_clearxy(12,0,4);
-    lcd_clearxy(5,1,3); lcd_clearxy(14,1,2);
-    lcd_clearxy(5,2,2); lcd_clearxy(13,2,2);
-  
-    switch (vent_mode){
-      case VENTMODE_VCL:
-        writeLine(0, "MOD:VCV", 1); writeLine(0, "V:" + String(options.tidalVolume), 10);    
-        writeLine(1, "PIP: -", 9);
-      break;
-      case VENTMODE_PCL:
-        writeLine(0, "MOD:PCV", 1); 
-        writeLine(1, "PIP:" + String(options.peakInspiratoryPressure), 9);
-        writeLine(0, "V: -", 10);
-      break;    
-      case VENTMODE_MAN:
-        writeLine(0, "MOD:VCV", 1); 
-        writeLine(0, "V:" + String(options.percVolume)+"%", 10);    
-        writeLine(1, "PIP: -", 9);
-      break;
+void display_lcd(Keyboard_data_t& keyboard_data) {
+    if (clear_all_display) {
+        lcd.clear();
     }
+    clear_n_sel(menu_number);
+    if (menu_number == 0) {
+        lcd_clearxy(12,0,4);
+        lcd_clearxy(5,1,3); lcd_clearxy(14,1,2);
+        lcd_clearxy(5,2,2); lcd_clearxy(13,2,2);
+  
+        switch (vent_mode) {
+            case VENTMODE_VCL:
+                writeLine(0, "MOD:VCV", 1); writeLine(0, "V:" + String(options.tidalVolume), 10);
+                writeLine(1, "PIP: -", 9);
+                break;
+            case VENTMODE_PCL:
+                writeLine(0, "MOD:PCV", 1);
+                writeLine(1, "PIP:" + String(options.peakInspiratoryPressure), 9);
+                writeLine(0, "V: -", 10);
+                break;
+            case VENTMODE_MAN:
+                writeLine(0, "MOD:VCV", 1);
+                writeLine(0, "V:" + String(options.percVolume)+"%", 10);
+                writeLine(1, "PIP: -", 9);
+                break;
+        }
      
       
-    writeLine(1, "BPM:" + String(options.respiratoryRate), 1);
-    writeLine(2, "IE:1:", 1);
+        writeLine(1, "BPM:" + String(options.respiratoryRate), 1);
+        writeLine(2, "IE:1:", 1);
   
-    dtostrf((_mllastInsVol+_mllastExsVol)/2, 4, 0, tempstr);
-    writeLine(0, String(tempstr), 16);
+        dtostrf((_mllastInsVol+_mllastExsVol)/2, 4, 0, tempstr);
+        writeLine(0, String(tempstr), 16);
   
-    writeLine(2, String(options.percInspEsp), 6);
+        writeLine(2, String(options.percInspEsp), 6);
 
-    dtostrf(last_pressure_max, 2, 0, tempstr);
-    writeLine(1, String(tempstr), 16);  
+        dtostrf(last_pressure_max, 2, 0, tempstr);
+        writeLine(1, String(tempstr), 16);
 
-    writeLine(2, "PEEP: ", 11);
-    dtostrf(last_pressure_min, 2, 0, tempstr);
-    writeLine(2, String(tempstr), 16);  
+        writeLine(2, "PEEP: ", 11);
+        dtostrf(last_pressure_min, 2, 0, tempstr);
+        writeLine(2, String(tempstr), 16);
     
-    dtostrf((_mllastInsVol + _mllastExsVol)/2.*options.respiratoryRate*0.001, 2, 1, tempstr);
-    writeLine(3, "VM:" + String(tempstr), 0);
+        dtostrf((_mllastInsVol + _mllastExsVol)/2.*options.respiratoryRate*0.001, 2, 1, tempstr);
+        writeLine(3, "VM:" + String(tempstr), 0);
     
-    dtostrf(_timeoutIns*0.001, 1, 1, tempstr);
-    writeLine(3, "I:" + String(tempstr), 9); 
-    dtostrf(_timeoutEsp*0.001, 1, 1, tempstr);
-    writeLine(3, "E:" + String(tempstr), 15); 
-      
-  } else if (menu_number ==1 ) {//OTHER SETTINGS
-                        lcd_clearxy(12,0,8);
-    lcd_clearxy(8,1,2); lcd_clearxy(16,1,3);
-                        lcd_clearxy(15,2,3);
+        dtostrf(_timeoutIns*0.001, 1, 1, tempstr);
+        writeLine(3, "I:" + String(tempstr), 9);
+        dtostrf(_timeoutEsp*0.001, 1, 1, tempstr);
+        writeLine(3, "E:" + String(tempstr), 15);
+    } else if (menu_number == 1) {//OTHER SETTINGS
+        lcd_clearxy(12,0,8);
+        lcd_clearxy(8,1,2); lcd_clearxy(16,1,3);
+        lcd_clearxy(15,2,3);
         
-    writeLine(0, "PIPAL:" + String(alarm_max_pressure), 1); 
+        writeLine(0, "PIPAL:" + String(alarm_max_pressure), 1);
+        dtostrf(Cdyn*1.01972, 2, 1, tempstr);
+        writeLine(0, "CD:" + String(tempstr), 10);
     
-    dtostrf(Cdyn*1.01972, 2, 1, tempstr);
-    writeLine(0, "CD:" + String(tempstr), 10); 
+        writeLine(1, "PEEPAL:" + String(alarm_peep_pressure), 1);
+        writeLine(1, "VTAL:" + String(alarm_vt), 11);
     
-    writeLine(1, "PEEPAL:" + String(alarm_peep_pressure), 1); 
-    writeLine(1, "VTAL:" + String(alarm_vt), 11);
-    
-    dtostrf((float(p_trim-100)), 2, 0, tempstr);
-    writeLine(2, "TRIM:" + String(tempstr) + "e-3", 1); 
+        dtostrf((float(p_trim-100)), 2, 0, tempstr);
+        writeLine(2, "TRIM:" + String(tempstr) + "e-3", 1);
 
-    writeLine(2, "F:" , 13);
-    if (filter)     writeLine(2, "ON", 15);
-    else            writeLine(2, "OFF", 15);    
+        writeLine(2, "F:" , 13);
+        if (filter)     writeLine(2, "ON", 15);
+        else            writeLine(2, "OFF", 15);
          
-    writeLine(3, "AUTO: ", 1);
-    if (autopid)    writeLine(3, "ON", 6);
-    else            writeLine(3, "OFF", 6);    
+        writeLine(3, "AUTO: ", 1);
+        if (autopid)    writeLine(3, "ON", 6);
+        else            writeLine(3, "OFF", 6);
 
-    writeLine(3, "C:", 10);
-    writeLine(3, String(last_cycle), 12);
-  } else if (menu_number ==2 ){//PID
+        writeLine(3, "C:", 10);
+        writeLine(3, String(last_cycle), 12);
+    } else if (menu_number == 2) {//PID
 
-    for (int i=0;i<3;i++){
-        lcd_clearxy(3,i,3); lcd_clearxy(9,i,3);lcd_clearxy(15,i,3);
-      }
+        for (int i=0;i<3;i++){
+            lcd_clearxy(3,i,3); lcd_clearxy(9,i,3);lcd_clearxy(15,i,3);
+        }
 
-    writeLine(0, "a:" + String(STEPPER_ACCEL_MAX), 1); 
-    writeLine(0, "s:" + String(STEPPER_SPEED_MAX), 10); 
-    writeLine(1, "fs:" + String(STEPPER_SPEED_MAX), 1);     
+        writeLine(0, "a:" + String(STEPPER_ACCEL_MAX), 1);
+        writeLine(0, "s:" + String(STEPPER_SPEED_MAX), 10);
+        writeLine(1, "fs:" + String(STEPPER_SPEED_MAX), 1);
     
-  } else if (menu_number ==3 ){//PID Config 2
-    lcd_clearxy(3,0,2); lcd_clearxy(9,0,3);lcd_clearxy(15,0,3);
-    lcd_clearxy(3,1,2); lcd_clearxy(9,1,3);lcd_clearxy(15,1,3);
-    lcd_clearxy(3,2,3); 
-    lcd_clearxy(3,3,3);
+    } else if (menu_number == 3) {//PID Config 2
+        lcd_clearxy(3,0,2); lcd_clearxy(9,0,3);lcd_clearxy(15,0,3);
+        lcd_clearxy(3,1,2); lcd_clearxy(9,1,3);lcd_clearxy(15,1,3);
+        lcd_clearxy(3,2,3);
+        lcd_clearxy(3,3,3);
         
-    writeLine(0, "dp:" + String(dpip), 1); 
+        writeLine(0, "dp:" + String(dpip), 1);
         
-    dtostrf(pf_min, 1, 2, tempstr);writeLine(1, "f:"   + String(tempstr), 1); 
-    dtostrf(pf_max, 1, 2, tempstr);writeLine(1, "F:"   + String(tempstr), 8); 
+        dtostrf(pf_min, 1, 2, tempstr);writeLine(1, "f:"   + String(tempstr), 1);
+        dtostrf(pf_max, 1, 2, tempstr);writeLine(1, "F:"   + String(tempstr), 8);
 
-    writeLine(2, "pa:" + String(p_acc), 1); 
-    dtostrf(f_acc, 1, 2, tempstr);writeLine(2, "fa:"   + String(tempstr), 8); 
+        writeLine(2, "pa:" + String(p_acc), 1);
+        dtostrf(f_acc, 1, 2, tempstr);writeLine(2, "fa:"   + String(tempstr), 8);
     
-  }//menu_number
+    }
   
-  clear_all_display=false;
-
+    clear_all_display=false;
 }
 
 //////////////////////////////////////
