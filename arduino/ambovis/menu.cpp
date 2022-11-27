@@ -1,8 +1,6 @@
 #include "menu.h"
 
 static bool clear_all_display;
-bool change_sleep;
-int pressed=0;  //0 nothing , 1 enter, 2 bck
 
 byte back[8] = {
   0b00100,
@@ -29,22 +27,6 @@ void writeLine(int line, String message = "", int offsetLeft = 0) {
     lcd.print(message);
 }
 
-void updateState(Keyboard_data_t& keyboard_data) {
-    if (keyboard_data.bck_state == LOW) {
-        keyboard_data.start_pressed = time;
-        keyboard_data.change_sleep=false;
-    } else {
-        keyboard_data.end_pressed = time;
-        keyboard_data.hold_time = keyboard_data.end_pressed - keyboard_data.start_pressed;
-    }
-}
-
-void updateCounter(Keyboard_data_t& keyboard_data) {
-    if (keyboard_data.bck_state == LOW) {
-        keyboard_data.hold_time = time - keyboard_data.start_pressed;
-    }
-}
-
 void lcd_clearxy(int x, int y,int pos=1) {
     for (int i=0;i<pos;i++) {
         lcd.setCursor(x+i, y);
@@ -61,7 +43,42 @@ void lcd_selxy(int x, int y, bool isItemSelected) {
     }
 }
 
-void check_buttons(unsigned long time, Keyboard_data_t& keyboard_data) {
+void check_bck_state(Keyboard_data_t& keyboard_data, unsigned long time) {
+    keyboard_data.bck_state=digitalRead(PIN_MENU_BCK);
+
+    if (keyboard_data.bck_state != keyboard_data.last_bck_state) {
+        if (keyboard_data.bck_state == LOW) {
+            keyboard_data.start_pressed = time;
+            keyboard_data.change_sleep = false;
+            if (time - keyboard_data.last_button_pressed > 150) {
+                keyboard_data.pressed = 2;
+                keyboard_data.is_item_selected = false;
+                keyboard_data.last_button_pressed = time;
+            }
+        } else {
+            keyboard_data.end_pressed = time;
+            keyboard_data.hold_time = keyboard_data.end_pressed - keyboard_data.start_pressed;
+        }
+    } else {
+        if (keyboard_data.bck_state == LOW) {
+            keyboard_data.hold_time = time - keyboard_data.start_pressed;
+        } // button state not changed. It runs in a loop.
+        if (keyboard_data.hold_time > 2000 && !keyboard_data.change_sleep) {
+            if (!sleep_mode) {
+                sleep_mode=true;
+                put_to_sleep=true;
+            } else {
+                sleep_mode=false;
+                wake_up=true;
+            }
+            keyboard_data.change_sleep=true;
+            Serial.print("Sleep Mode");Serial.println(sleep_mode);
+        }
+    }
+    keyboard_data.last_bck_state = keyboard_data.bck_state;
+}
+
+void check_buttons(Keyboard_data_t& keyboard_data, unsigned long time) {
     if (digitalRead(PIN_MENU_DN) == LOW) {
         if (time - keyboard_data.last_button_pressed > 150) {
             keyboard_data.selection+=1;
@@ -77,763 +94,338 @@ void check_buttons(unsigned long time, Keyboard_data_t& keyboard_data) {
     }
 
     keyboard_data.pressed = 0;
-    if (digitalRead(PIN_MENU_EN) == LOW) {  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
-        if (time - keyboard_data.last_button_press > 50) {
+    if (digitalRead(PIN_MENU_EN) == LOW) {
+        if (time - keyboard_data.last_button_pressed > 50) {
             keyboard_data.pressed = 1;
             keyboard_data.is_item_selected = true;
-            keyboard_data.last_button_press = time;
+            keyboard_data.last_button_pressed = time;
         }
     }
+
+    check_bck_state(keyboard_data, time);
 }
 
-void check_bck_state() {
-    bck_state=digitalRead(PIN_MENU_BCK);
-
-    if (bck_state != last_bck_state) { 
-       updateState(); // button state changed. It runs only once.
-        if (bck_state == LOW ) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
-            if (time - lastButtonPress > 150) {
-              pressed = 2;
-              isitem_sel=false; 
-              lastButtonPress = time;
-            }// if time > last button press
-        } else {  //Button released
-          }
-    } else {
-       updateCounter(); // button state not changed. It runs in a loop.
-       if (holdTime > 2000 && !change_sleep){
-        Serial.println("Activando Sleep Mode");
-        if (!sleep_mode){
-            
-            sleep_mode=true;
-            put_to_sleep=true;
-        } else {
-           sleep_mode=false;
-           wake_up=true;   
-        }
-        change_sleep=true;
-        Serial.print("Sleep Mode");Serial.println(sleep_mode);
-        }
-    }
-    last_bck_state = bck_state;
-  
-  }
-  
-void check_encoder(Keyboard_data_t& keyboard_data, unsigned long time) {
-    check_buttons(time, keyboard_data);
-
-    check_bck_state();
-
-    if (keyboard_data.pressed > 0) {
-        if (!keyboard_data.is_item_selected) {
-            keyboard_data.curr_sel=keyboard_data.old_selection=keyboard_data.selection=keyboard_data.old_curr_sel;
-        }
-                  
-        if (keyboard_data.is_item_selected) {
-            switch (keyboard_data.curr_sel) {
-                case 1:
-                    if (menu_number == 0) {
-                        keyboard_data.min_sel=1;
-                        keyboard_data.max_sel=2;
-                        keyboard_data.selection=keyboard_data.old_selection=vent_mode;
-                    } else if (menu_number == 1) {
-                        keyboard_data.min_sel=20;
-                        keyboard_data.max_sel=50;
-                        keyboard_data.selection=keyboard_data.old_selection=alarm_max_pressure;
-                    } else if (menu_number == 2) {
-                        keyboard_data.min_sel=0;
-                        keyboard_data.max_sel=8000;
-                        keyboard_data.selection = STEPPER_ACCEL_MAX/200;
-                    } else if (menu_number == 3) {
-                        encoderPos=dpip_b;
-                        min_sel=10;max_sel=40;
-                    }
-                    break;
-                case 2:
-                    if ( menu_number == 0 ) {
-                    encoderPos=oldEncPos=options.respiratoryRate;
-                    min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
-                    } else if ( menu_number == 1 ) {
-                        min_sel=5;max_sel=30;
-                        encoderPos=oldEncPos=alarm_peep_pressure;                          
-                    } else if ( menu_number == 2 ){
-//                        encoderPos=min_speed/10;     
-                        encoderPos=STEPPER_SPEED_MAX/200;     
-                        min_sel=10;max_sel=8000;             
-                    } else if ( menu_number == 3 ){
-                        encoderPos=pfmin=50.*pf_min;
-                        min_sel=0;max_sel=99;
-                    }     
-            break;
-            case 3:
-              if ( menu_number == 0 ) {
-                  encoderPos=oldEncPos=options.percInspEsp;
-                  min_sel=1;max_sel=3;   
-              } else if ( menu_number == 1 ) {
-                    encoderPos=byte(0.1*float(alarm_vt));
-                    min_sel=10;max_sel=50;//vt
-              } else if ( menu_number == 2 ) {
-                    encoderPos=min_accel/10; 
-                    min_sel=10;max_sel=100; 
-              } else if ( menu_number == 3 ){
-                        encoderPos=pfmax=50.*pf_max;
-                        min_sel=0;max_sel=99;
-                    }  
-            break;
-            case 4: 
-                if ( menu_number == 0 ) {
-                    if ( vent_mode==VENTMODE_PCL){
- //                     encoderPos=oldEncPos=options.tidalVolume;
- //                     min_sel=200;max_sel=800;
-                        encoderPos=oldEncPos=options.peakInspiratoryPressure;
-                        min_sel=15;max_sel=30;
-                        Serial.print("pip: ");Serial.println(options.peakInspiratoryPressure);
-                        Serial.print("encoderpos: ");Serial.println(encoderPos);
-                    } else {//Manual
-                      encoderPos=oldEncPos=options.percVolume;
-                      min_sel=40;max_sel=100;            
-                    } 
-                } else if ( menu_number == 1 ) {//menu 0
-                    encoderPos=oldEncPos=p_trim;
-                    min_sel=0;max_sel=200;   
-                } else if ( menu_number == 2 ) {
-                    encoderPos=max_cd;
-                    min_sel=10;max_sel=80;
-                } else if ( menu_number == 3 ) {
-                    encoderPos=p_acc;
-                    min_sel=10;max_sel=40;
-                }
-                break;
-                  case 5: 
-                if ( menu_number == 0 ) {
-//                    encoderPos=oldEncPos=options.peakInspiratoryPressure;
-//                    min_sel=15;max_sel=30;
-                } else if ( menu_number == 1 ) {//menu 0
-                      min_sel=0;max_sel=1; 
-                } else if ( menu_number == 2 ){
-                    encoderPos=max_speed/10;
-                    min_sel=10;max_sel=100;
-                } else if ( menu_number == 3 ) {
-                    encoderPos=f_acc_b;
-                    min_sel=10;max_sel=40;
-                }
-                break;
-                case 6:
-                    if ( menu_number == 1 ){
-                        if (filter) encoderPos=1;
-                        else        encoderPos=0;
-                        min_sel=0;max_sel=1;
-                    } else if ( menu_number == 2 ){
-                        encoderPos=max_accel/10;
-                        min_sel=10;max_sel=100;
-                    }
-                    break;
-                case 7:
-                    if ( menu_number == 2 ){
-                        encoderPos=min_pidk/10;
-                        min_sel=10;max_sel=99;
-                    }
-                    break;
-                case 8:
-                    if ( menu_number == 2 ){
-                        encoderPos=byte(min_pidi/2);
-                        min_sel=2;max_sel=200;
-                    }                
-                break;
-                case 9:
-                    if ( menu_number == 2 ){
-                        encoderPos=byte(min_pidd/2);
-                        min_sel=2;max_sel=200;
-                    }
-                    break;
-                case 10:
-                    if ( menu_number == 2 ){
-                        encoderPos=max_pidk/10;
-                        min_sel=2;max_sel=200;
-                    }                
-                break;
-                case 11:
-                    if ( menu_number == 2 ){
-                        encoderPos=byte(max_pidi/2);
-                        min_sel=2;max_sel=200;
-                    }
-                    break;
-                case 12:
-                    if ( menu_number == 2 ){
-                        encoderPos=byte(max_pidd/2);
-                        min_sel=2;max_sel=200;
-                    }                
-                break;
-          }
-    
-        }//if switch select
-          show_changed_options = true;
-          update_options = true;
-  }//If selection
-  
-  if (oldEncPos != encoderPos) {
-    show_changed_options = true;
-
-    if (!isitem_sel) { //Selecting position
-          curr_sel=encoderPos;
-          encoderPos=oldEncPos=curr_sel;
-
-          if ( menu_number == 0 ) {
-              if (encoderPos > 4) {
-                  encoderPos=1;
-                  menu_number+=1;
-              } else if ( encoderPos < 1) {
-                  encoderPos=5;
-                  menu_number=3;
-              }
-          } else if (menu_number == 1) {
-               if (encoderPos > 6) {
-                  encoderPos=1;
-                  menu_number=2;         
-               } else if ( encoderPos < 1) {
-                  encoderPos=4;
-                  menu_number=0;
-              }
-          } else if (menu_number == 2) {
-             if (curr_sel > 2) {
-              encoderPos=1;
-              menu_number=3; 
-             } else if ( encoderPos < 1) {
-                  encoderPos=6;
-                  menu_number=1;
-              }
-          } else if (menu_number == 3) {
-             if (curr_sel > 5) {
-              encoderPos=1;
-              menu_number=0; 
-             } else if ( encoderPos < 1) {
-                  encoderPos=2;
-                  menu_number=2;
-              }
-          }
-          clear_all_display=true;
-          display_lcd();
-    } else {//inside a particular selection
-     
-      //if (curr_sel != 0) {
-        if ( encoderPos > max_sel ) {
-           encoderPos=oldEncPos=max_sel; 
-        } else if ( encoderPos < min_sel ) {
-            encoderPos=oldEncPos=min_sel;
-        } else {
-      
-        oldEncPos = encoderPos;
-
-            switch (curr_sel) {
-              case 1:
-                if ( menu_number == 0 )     vent_mode           = encoderPos;
-                else if (menu_number == 1)  alarm_max_pressure  = encoderPos;
-                else if (menu_number == 2)  {STEPPER_ACCEL_MAX  = int((float)encoderPos*200.);}
-                else if (menu_number == 3)  {dpip_b = encoderPos; dpip  = float(encoderPos)/10.;}
-                break;
-              case 2:
-                if ( menu_number == 0 )       options.respiratoryRate = encoderPos;
-                else  if (menu_number == 1)   alarm_peep_pressure     = encoderPos;
-                else  if (menu_number == 2)   STEPPER_SPEED_MAX  = int((float)encoderPos*200.);
-                else if ( menu_number == 3 ){
-                    Serial.print("encoderPos: ");Serial.println(encoderPos);
-                    pfmin=encoderPos;
-                    pf_min=(float)encoderPos/50.;
-                    peep_fac = -(pf_max-pf_min)/15.*last_pressure_min + pf_max;
-                }
-                break;
-              case 3:
-                if ( menu_number == 0 ) options.percInspEsp=encoderPos;
-                else    if (menu_number == 1) alarm_vt=int(10.*(float)encoderPos);
-                else    if (menu_number == 2) min_accel  = int((float)encoderPos*10.);
-                if ( menu_number == 3 ){
-                    pfmax=encoderPos;
-                    pf_max=(float)encoderPos/50.;
-                    peep_fac = -(pf_max-pf_min)/15.*last_pressure_min + pf_max;
-                }
-                break;
-              case 4:
-                if ( menu_number == 0 ) {
-                    if (vent_mode==VENTMODE_PCL){
-                      options.peakInspiratoryPressure = encoderPos;
-                        Serial.print("pip: ");Serial.println(options.peakInspiratoryPressure);
-                        Serial.print("encoderpos: ");Serial.println(encoderPos);
-                      } else { //manual
-                      options.percVolume = encoderPos;
-                    }
-                } else if (menu_number == 1) {
-                    p_trim=encoderPos;
-                } else if (menu_number == 2) {max_cd  = int(encoderPos);
-                } else if (menu_number == 3) {p_acc=encoderPos;}
-                    
-                break;
-              case 5:
-                if ( menu_number == 0 ) {
-                    //options.peakInspiratoryPressure = encoderPos;
-                } else if (menu_number == 1) {
-                    autopid=encoderPos;
-                } else if (menu_number == 2) {
-                    max_speed  = int((float)encoderPos*10.);
-                } else if (menu_number == 3) {f_acc_b=encoderPos;f_acc=(float)f_acc_b/10.;}
-                break;
-              case 6:
-                if ( menu_number == 0 )
-                  options.peakEspiratoryPressure = encoderPos;
-                else if ( menu_number == 1 )  //There is not 6 in menu 1
-                    if (encoderPos==1) filter  = true;
-                    else                filter=false;
-                else if ( menu_number == 2 )  //There is not 6 in menu 1
-                    max_accel  = int((float)encoderPos*10.);
-                break;
-            
-            case 7:
-                if ( menu_number == 2 ){
-                    min_pidk=encoderPos*10;
-                }
-                break;
-            case 8:
-                if ( menu_number == 2 ){
-                    min_pidi=encoderPos*10;
-                }
-                break;
-            case 9:
-                if ( menu_number == 2 ){
-                    min_pidd=encoderPos*2;
-                }
-                break;
-            case 10:
-                if ( menu_number == 2 ){
-                    max_pidk=encoderPos*2;
-                }
-                break;
-            case 11:
-                if ( menu_number == 2 ){
-                    max_pidi=int(encoderPos)*2;
-                    Serial.print("Max pid i:");Serial.println(max_pidi);
-                    Serial.print("Encoder pos:");Serial.println(encoderPos);
-                }
-                break;
-            case 12:
-                if ( menu_number == 2 ){
-                    max_pidd=encoderPos*2;
-                }
-                break;
-
-            }//switch
-            show_changed_options = true;
-            update_options=true;
-          }//Valid range
-
-    old_curr_sel = curr_sel;
-//    if (menu_number==2)
-//      change_pid_params=true;
-    }//oldEncPos != encoderPos and valid between range
-  }
-}
-
-void clear_n_sel(int menu) {
-    if (menu==0) {  
-        lcd_clearxy(0,0);
-        lcd_clearxy(0,1);lcd_clearxy(9,0);
-        lcd_clearxy(0,2);lcd_clearxy(8,1);
-         switch(curr_sel){
-              case 1: 
-                lcd_selxy(0,0);break;
-              case 2: 
-                lcd_selxy(0,1);break;
-              case 3:
-                lcd_selxy(0,2);break;
-              case 4: 
-                if ( vent_mode==VENTMODE_VCL || vent_mode==VENTMODE_PCL)  lcd_selxy(8,1);//pcl
-                else                                                      lcd_selxy(9,0);
-//              case 5: 
-//                lcd_selxy(8,1);break;
+void save_value(Menu_state_t& menu_state, byte selection) {
+    if (menu_state.menu_number == PARAMETERS_MENU) {
+        if (menu_state.is_initial_menu) {
+            if (menu_state.menu_position == 0) { // BPM
+                options.respiratoryRate = selection;
             }
-     } else if (menu==1){  
-      lcd_clearxy(0,0);
-      lcd_clearxy(0,1);lcd_clearxy(12,2);
-      lcd_clearxy(0,2);lcd_clearxy(0,3);
-      switch(curr_sel){
-          case 1: 
-            lcd_selxy(0,0);break;//PIP
-          case 2: 
-            lcd_selxy(0,1);break;//PEEP
-          case 3:
-            lcd_selxy(10,1);break;
-          case 4: 
-            lcd_selxy(0,2);break;
-          case 5: 
-            lcd_selxy(0,3);break;
-          case 6: 
-            lcd_selxy(12,2);break;
-      }
-    } else if (menu==2) {  
-      lcd_clearxy(0,0);lcd_clearxy(9,0);
-      lcd_clearxy(0,1);lcd_clearxy(6,1);
-      lcd_clearxy(0,2);
-      lcd_clearxy(0,3);
-      switch(curr_sel){
-          case 1: 
-            lcd_selxy(0,0);break;//PIP
-          case 2: 
-            lcd_selxy(9,0);break;//PEEP
-          case 3:
-            lcd_selxy(12,0);break;
-          case 4: 
-            lcd_selxy(0,1);break;//PIP
-          case 5: 
-            lcd_selxy(6,1);break;
-          case 6: 
-            lcd_selxy(12,1);break;  
-          case 7: 
-            lcd_selxy(0,2);break;
-          case 8: 
-            lcd_selxy(6,2);break;  
-          case 9: 
-            lcd_selxy(12,2);break;              
-          case 10: 
-            lcd_selxy(0,3);break;  
-          case 11: 
-            lcd_selxy(6,3);break;              
-          case 12: 
-            lcd_selxy(12,3);break;  
-      }
-    }//menu number 
-    else if (menu==3) {  
-      lcd_clearxy(0,0);lcd_clearxy(6,0);lcd_clearxy(12,0);
-      lcd_clearxy(0,1);lcd_clearxy(6,1);lcd_clearxy(12,1);
-      lcd_clearxy(0,2);
-      lcd_clearxy(0,3);
-      switch(curr_sel){
-          case 1: 
-            lcd_selxy(0,0);break;//PIP
-          case 2: 
-            lcd_selxy(0,1);break;//PEEP
-          case 3:
-            lcd_selxy(7,1);break;
-          case 4: 
-            lcd_selxy(0,2);break;//PIP
-          case 5: 
-            lcd_selxy(7,2);break;
-      }
-    }//menu number 
+            if (menu_state.menu_position == 1) { // IE
+                options.percInspEsp = selection;
+            }
+        } else {
+            if (menu_state.menu_position == 0) { // PERC_V_OPT
+                options.percVolume = selection;
+            }
+            if (menu_state.menu_position == 1) { // PIP_OPT
+                options.peakInspiratoryPressure = selection;
+            }
+            if (menu_state.menu_position == 2) { // BPM_OPT
+                options.respiratoryRate = selection;
+            }
+            if (menu_state.menu_position == 3) { // IE_OPT
+                options.percInspEsp = selection;
+            }
+        }
+    }
+    if (menu_state.menu_number == ALARMS_MENU) {
+        if (menu_state.menu_position == 0) { // PIP_ALARM_OPT
+            alarm_max_pressure = selection;
+        }
+        if (menu_state.menu_position == 1) { // PEEP_ALARM_OPT
+            alarm_peep_pressure = selection;
+        }
+        if (menu_state.menu_position == 2) { // VT_ALARM_OPT
+            alarm_vt = selection;
+        }
+    }
+    if (menu_state.menu_number == SETTINGS_MENU) {
+        if (menu_state.menu_position == 0) { // FIL_OPT
+            filter = selection == 1;
+        }
+        if (menu_state.menu_position == 1) { // AUTO_OPT
+            autopid = selection == 1;
+        }
+    }
 }
 
-void display_lcd(Keyboard_data_t& keyboard_data) {
+byte validate_boundaries(byte min, byte max, byte value) {
+    if (value < min) {
+        return min;
+    } else if (value > max) {
+        return max;
+    } else {
+        return value;
+    }
+}
+
+byte validate_parameter(Menu_state_t& menu_state, byte selection) {
+    if (menu_state.menu_number == PARAMETERS_MENU) {
+        if (menu_state.is_initial_menu) {
+            if (menu_state.menu_position == 0) { // BPM
+                return validate_boundaries(DEFAULT_MIN_RPM, DEFAULT_MAX_RPM, selection);
+            }
+            if (menu_state.menu_position == 1) { // IE
+                return validate_boundaries(1, 3, selection);
+            }
+            if (menu_state.menu_position == 2) { // READY
+                return selection;
+            }
+        } else {
+            if (menu_state.menu_position == 0) { // PERC_V_OPT
+                return validate_boundaries(40, 100, selection);
+            }
+            if (menu_state.menu_position == 1) { // PIP_OPT
+                return validate_boundaries(15, 30, selection);
+            }
+            if (menu_state.menu_position == 2) { // BPM_OPT
+                return validate_boundaries(DEFAULT_MIN_RPM, DEFAULT_MAX_RPM, selection);
+            }
+            if (menu_state.menu_position == 3) { // IE_OPT
+                return validate_boundaries(1, 3, selection);
+            }
+        }
+    }
+    if (menu_state.menu_number == ALARMS_MENU) {
+        if (menu_state.menu_position == 0) { // PIP_ALARM_OPT
+            return validate_boundaries(20, 50, selection);
+        }
+        if (menu_state.menu_position == 1) { // PEEP_ALARM_OPT
+            return validate_boundaries(5, 30, selection);
+        }
+        if (menu_state.menu_position == 2) { // VT_ALARM_OPT
+            return validate_boundaries(10, 50, selection);
+        }
+    }
+    if (menu_state.menu_number == SETTINGS_MENU) {
+        if (menu_state.menu_position == 0) { // FIL_OPT
+            return validate_boundaries(0, 1, selection);
+        }
+        if (menu_state.menu_position == 1) { // AUTO_OPT
+            return validate_boundaries(0, 1, selection);
+        }
+    }
+    return  -1;
+}
+
+byte validate_selection(byte& menu_number, byte selection) {
+    if (menu_number == MAIN_MENU) {
+        return validate_boundaries(0, 2, selection);
+    }
+    if (menu_number == PARAMETERS_MENU) {
+        return validate_boundaries(0, 2, selection);
+    }
+    if (menu_number == ALARMS_MENU) {
+        return validate_boundaries(0, 2, selection);
+    }
+    if (menu_number == SETTINGS_MENU) {
+        return validate_boundaries(0, 1, selection);
+    }
+    return -1;
+}
+  
+void check_encoder(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state, unsigned long time) {
+    check_buttons(keyboard_data, time);
+
+    if (menu_state.menu_number == MAIN_MENU) {
+        if (keyboard_data.pressed == 1) {
+            menu_state.old_menu_position = menu_state.menu_number;
+            menu_state.menu_number = keyboard_data.selection;
+            menu_state.menu_position = 0;
+            menu_state.show_changed_options = true;
+            clear_all_display = true;
+        } else if (keyboard_data.pressed == 2) {
+
+        } else {
+            menu_state.old_menu_position = menu_state.menu_position;
+            menu_state.menu_position = validate_selection(menu_state.menu_number, keyboard_data.selection);
+            menu_state.show_changed_options = menu_state.old_menu_position != menu_state.menu_position;
+        }
+    } else {
+        if (keyboard_data.is_item_selected) {
+            if (keyboard_data.pressed == 1) {
+                save_value(menu_state, keyboard_data.selection);
+                keyboard_data.is_item_selected = false;
+                menu_state.update_options = true;
+                menu_state.show_changed_options = true;
+            } else if (keyboard_data.pressed == 2) {
+                keyboard_data.is_item_selected = false;
+                menu_state.show_changed_options = true;
+            } else {
+                keyboard_data.old_selection = keyboard_data.selection;
+                keyboard_data.selection = validate_parameter(menu_state, keyboard_data.selection);
+                menu_state.show_changed_options = keyboard_data.old_selection != keyboard_data.selection;
+            }
+        } else {
+            if (keyboard_data.pressed == 1) {
+                keyboard_data.selection = 0;
+                keyboard_data.is_item_selected = true;
+                menu_state.show_changed_options = true;
+
+                if (menu_state.is_initial_menu && menu_state.menu_position == 2) {
+                    menu_state.initial_menu_completed = true;
+                }
+
+            } else if (keyboard_data.pressed == 2) {
+                keyboard_data.is_item_selected = false;
+                if (!menu_state.is_initial_menu) {
+                    menu_state.menu_number = MAIN_MENU;
+                    menu_state.menu_position = 0;
+                    menu_state.show_changed_options = true;
+                }
+            } else {
+                menu_state.old_menu_position = menu_state.menu_position;
+                menu_state.menu_position = validate_selection(menu_state.menu_number, keyboard_data.selection);
+                menu_state.show_changed_options = menu_state.old_menu_position != menu_state.menu_position;
+            }
+        }
+    }
+}
+
+void clear_n_sel(byte& menu_number, byte& menu_position, byte& old_menu_position, bool& is_initial_menu) {
+    if (menu_number == MAIN_MENU) {
+        switch(old_menu_position) {
+            case 0: lcd_clearxy(0, 0); break;
+            case 1: lcd_clearxy(0, 1); break;
+            case 2: lcd_clearxy(0, 2); break;
+        }
+    } else if (menu_number == PARAMETERS_MENU) {
+        if (is_initial_menu) {
+            switch(old_menu_position) {
+                case 0: lcd_clearxy(0, 1); break; //BPM
+                case 1: lcd_clearxy(7, 1); break; //IE
+                case 2: lcd_clearxy(0, 2); break; //READY
+            }
+            switch(menu_position) {
+                case 0: lcd_clearxy(6, 1, 3); break; //BPM:
+                case 1: lcd_clearxy(15, 1, 2); break; //IE:1:
+            }
+        } else {
+            switch(old_menu_position) {
+                case 0: lcd_clearxy(7, 0); break; //BPM
+                case 1: lcd_clearxy(0, 1); break; //IE
+                case 2: lcd_clearxy(0, 2); break; //READY
+            }
+            switch(menu_position) {
+                case 0: lcd_clearxy(3, 0, 3); break; //V:
+                case 1: lcd_clearxy(5, 1, 3); break; //BPM:
+                case 2: lcd_clearxy(7, 2, 1); break; //IE:1:
+            }
+        }
+    } else if (menu_number == ALARMS_MENU) {
+        switch(old_menu_position) {
+            case 0: lcd_clearxy(0, 0); break;//PIP
+            case 1: lcd_clearxy(0, 1); break;//PEEP
+            case 2: lcd_clearxy(0, 2); break; //VT
+        }
+        switch(menu_position) {
+            case 0: lcd_clearxy(7, 0, 3); break; //PIPAL:
+            case 1: lcd_clearxy(7, 1, 3); break; //PEEPAL:
+            case 2: lcd_clearxy(6, 2, 3); break; //VTAL:
+        }
+    } else if (menu_number == SETTINGS_MENU) {
+        switch(old_menu_position) {
+            case 0: lcd_clearxy(0, 0); break;//FILTER
+            case 1: lcd_clearxy(0, 1); break;//AUTOPID
+        }
+        switch(menu_position) {
+            case 0: lcd_clearxy(8, 0, 3); break; //FILTER:
+            case 1: lcd_clearxy(9, 1, 3); break; //AUTOPID:
+        }
+    }
+}
+
+void display_lcd(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state) {
     if (clear_all_display) {
+        clear_all_display = false;
         lcd.clear();
     }
-    clear_n_sel(menu_number);
-    if (menu_number == 0) {
-        lcd_clearxy(12,0,4);
-        lcd_clearxy(5,1,3); lcd_clearxy(14,1,2);
-        lcd_clearxy(5,2,2); lcd_clearxy(13,2,2);
-  
-        switch (vent_mode) {
-            case VENTMODE_VCL:
-                writeLine(0, "MOD:VCV", 1); writeLine(0, "V:" + String(options.tidalVolume), 10);
-                writeLine(1, "PIP: -", 9);
-                break;
-            case VENTMODE_PCL:
-                writeLine(0, "MOD:PCV", 1);
-                writeLine(1, "PIP:" + String(options.peakInspiratoryPressure), 9);
-                writeLine(0, "V: -", 10);
-                break;
-            case VENTMODE_MAN:
-                writeLine(0, "MOD:VCV", 1);
-                writeLine(0, "V:" + String(options.percVolume)+"%", 10);
-                writeLine(1, "PIP: -", 9);
-                break;
+    clear_n_sel(menu_state.menu_number, menu_state.menu_position, menu_state.old_menu_position, menu_state.is_initial_menu);
+    char temp_str[5];
+    if (menu_state.menu_number == MAIN_MENU) {
+        switch (menu_state.menu_position) {
+            case 0: lcd_selxy(0, 0, keyboard_data.is_item_selected); break;
+            case 1: lcd_selxy(1, 0, keyboard_data.is_item_selected); break;
+            case 2: lcd_selxy(2, 0, keyboard_data.is_item_selected); break;
         }
-     
-      
-        writeLine(1, "BPM:" + String(options.respiratoryRate), 1);
-        writeLine(2, "IE:1:", 1);
-  
-        dtostrf((_mllastInsVol+_mllastExsVol)/2, 4, 0, tempstr);
-        writeLine(0, String(tempstr), 16);
-  
-        writeLine(2, String(options.percInspEsp), 6);
+        writeLine(0, "PARAMETERS", 1);
+        writeLine(1, "ALARMS");
+        writeLine(2, "SETTINGS", 1);
+    } else if (menu_state.menu_number == PARAMETERS_MENU) {
+        switch (menu_state.menu_position) {
+            case 0: lcd_selxy(0, 9, keyboard_data.is_item_selected); break;
+            case 1: lcd_selxy(1, 0, keyboard_data.is_item_selected); break;
+            case 2: lcd_selxy(1, 7, keyboard_data.is_item_selected); break;
+        }
+        writeLine(0, "MOD:MAN", 1);
+        if (menu_state.is_initial_menu) {
+            writeLine(1, "BPM:" + String(options.respiratoryRate), 1);
+            writeLine(1, "IE:1:" + String(options.percInspEsp), 8);
+            writeLine(2, "READY", 1);
+        } else {
+            writeLine(0, "V:" + String(options.percVolume)+"%", 10);
+            writeLine(1, "BPM:" + String(options.respiratoryRate), 1);
+            writeLine(1, "IE:1:" + String(options.percInspEsp), 8);
 
-        dtostrf(last_pressure_max, 2, 0, tempstr);
-        writeLine(1, String(tempstr), 16);
+            dtostrf(last_pressure_max, 2, 0, temp_str);
+            writeLine(3, "PIP:" + String(temp_str), 0);
 
-        writeLine(2, "PEEP: ", 11);
-        dtostrf(last_pressure_min, 2, 0, tempstr);
-        writeLine(2, String(tempstr), 16);
-    
-        dtostrf((_mllastInsVol + _mllastExsVol)/2.*options.respiratoryRate*0.001, 2, 1, tempstr);
-        writeLine(3, "VM:" + String(tempstr), 0);
-    
-        dtostrf(_timeoutIns*0.001, 1, 1, tempstr);
-        writeLine(3, "I:" + String(tempstr), 9);
-        dtostrf(_timeoutEsp*0.001, 1, 1, tempstr);
-        writeLine(3, "E:" + String(tempstr), 15);
-    } else if (menu_number == 1) {//OTHER SETTINGS
-        lcd_clearxy(12,0,8);
-        lcd_clearxy(8,1,2); lcd_clearxy(16,1,3);
-        lcd_clearxy(15,2,3);
+            dtostrf(last_pressure_min, 2, 0, temp_str);
+            writeLine(3, "PEEP: " + String(temp_str), 6);
+
+            dtostrf((_mllastInsVol + _mllastExsVol)/2.*options.respiratoryRate*0.001, 2, 1, temp_str);
+            writeLine(3, "VM:" + String(temp_str), 16);
+        }
+    } else if (menu_state.menu_number == ALARMS_MENU) {
+        switch (menu_state.menu_position) {
+            case 0: lcd_selxy(0, 0, keyboard_data.is_item_selected); break;
+            case 1: lcd_selxy(1, 0, keyboard_data.is_item_selected); break;
+            case 2: lcd_selxy(2, 0, keyboard_data.is_item_selected); break;
+        }
         
         writeLine(0, "PIPAL:" + String(alarm_max_pressure), 1);
-        dtostrf(Cdyn*1.01972, 2, 1, tempstr);
-        writeLine(0, "CD:" + String(tempstr), 10);
+        dtostrf(Cdyn*1.01972, 2, 1, temp_str);
+        writeLine(0, "CD:" + String(temp_str), 10);
     
         writeLine(1, "PEEPAL:" + String(alarm_peep_pressure), 1);
-        writeLine(1, "VTAL:" + String(alarm_vt), 11);
+        writeLine(2, "VTAL:" + String(alarm_vt), 1);
     
-        dtostrf((float(p_trim-100)), 2, 0, tempstr);
-        writeLine(2, "TRIM:" + String(tempstr) + "e-3", 1);
+        writeLine(3, "CYCLE:" + String(last_cycle), 1);
 
-        writeLine(2, "F:" , 13);
-        if (filter)     writeLine(2, "ON", 15);
-        else            writeLine(2, "OFF", 15);
-         
-        writeLine(3, "AUTO: ", 1);
-        if (autopid)    writeLine(3, "ON", 6);
-        else            writeLine(3, "OFF", 6);
-
-        writeLine(3, "C:", 10);
-        writeLine(3, String(last_cycle), 12);
-    } else if (menu_number == 2) {//PID
-
-        for (int i=0;i<3;i++){
-            lcd_clearxy(3,i,3); lcd_clearxy(9,i,3);lcd_clearxy(15,i,3);
+    } else if (menu_state.menu_number == SETTINGS_MENU) {
+        switch (menu_state.menu_position) {
+            case 0: lcd_selxy(0, 0, keyboard_data.is_item_selected); break;
+            case 1: lcd_selxy(1, 0, keyboard_data.is_item_selected); break;
         }
+        writeLine(0, "FILTER:" , 1);
+        if (filter) writeLine(0, "ON", 9); else writeLine(0, "OFF", 9);
 
-        writeLine(0, "a:" + String(STEPPER_ACCEL_MAX), 1);
-        writeLine(0, "s:" + String(STEPPER_SPEED_MAX), 10);
-        writeLine(1, "fs:" + String(STEPPER_SPEED_MAX), 1);
-    
-    } else if (menu_number == 3) {//PID Config 2
-        lcd_clearxy(3,0,2); lcd_clearxy(9,0,3);lcd_clearxy(15,0,3);
-        lcd_clearxy(3,1,2); lcd_clearxy(9,1,3);lcd_clearxy(15,1,3);
-        lcd_clearxy(3,2,3);
-        lcd_clearxy(3,3,3);
-        
-        writeLine(0, "dp:" + String(dpip), 1);
-        
-        dtostrf(pf_min, 1, 2, tempstr);writeLine(1, "f:"   + String(tempstr), 1);
-        dtostrf(pf_max, 1, 2, tempstr);writeLine(1, "F:"   + String(tempstr), 8);
-
-        writeLine(2, "pa:" + String(p_acc), 1);
-        dtostrf(f_acc, 1, 2, tempstr);writeLine(2, "fa:"   + String(tempstr), 8);
-    
+        writeLine(1, "AUTOPID: ", 1);
+        if (autopid) writeLine(1, "ON", 9); else writeLine(1, "OFF", 9);
     }
-  
-    clear_all_display=false;
 }
 
-//////////////////////////////////////
-/////// MENU INICIAL /////////////////
-//////////////////////////////////////
+void initialize_menu(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state) {
+    menu_state.menu_number = PARAMETERS_MENU;
+    menu_state.menu_position = 0;
+    menu_state.old_menu_position = 0;
+    menu_state.is_initial_menu = true;
+    menu_state.initial_menu_completed = false;
 
-Menu_inic::Menu_inic(byte *mode, byte *bpm, byte *i_e){
-    _mod=*mode;_bpm=*bpm;_i_e=*i_e;
-    clear_all_display=false;
-    fin=false;
-    menu_number=0;
     lcd.clear();
-    
-    lastButtonPress=0;
-    m_curr_sel=1;
-    display_lcd();
-    //lcd_selxy(0,1);
-    last_update_display=millis();
-    while (!fin){
-        this->check_encoder();
+    keyboard_data.last_button_pressed = 0;
+    display_lcd(keyboard_data, menu_state);
+
+    unsigned long last_update_display = millis();
+    while (!menu_state.initial_menu_completed) {
         time=millis();
-        if (show_changed_options && ((millis() - last_update_display) > 50) ) {
-            display_lcd();  //WITHOUT CLEAR!
+        check_encoder(keyboard_data, menu_state, time);
+        if (menu_state.show_changed_options && (millis() - last_update_display) > 50) {
+            display_lcd(keyboard_data, menu_state);
             last_update_display = millis();
-            show_changed_options = false;
         }
     }
-    isitem_sel=false;
-    m_curr_sel=old_curr_sel=1;
-    Serial.println("bpm "+String(*bpm));
-    *mode=_mod;*bpm=_bpm;*i_e=_i_e;
-    switching_menus = false;
-
+    keyboard_data.is_item_selected = false;
+    menu_state.is_initial_menu = false;
 }
-
-void Menu_inic::check_encoder ( ) {
-    check_updn_button(PIN_MENU_DN,&encoderPos,true);   //Increment
-    check_updn_button(PIN_MENU_UP,&encoderPos,false);  //Decrement
-    pressed=0;  //0 nothing , 1 enter, 2 bck
-    if (digitalRead(PIN_MENU_EN) == LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
-        if (time - lastButtonPress > 150) {
-
-            pressed = 1;
-            isitem_sel=true; 
-            lastButtonPress = time;
-
-        }// if time > last button press
-    }
-    check_bck_state();
-
-    if (pressed > 0) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
-      if (!isitem_sel) {
-        m_curr_sel=oldEncPos=encoderPos=old_curr_sel;
-        Serial.println("Item sel, curr_sel"+String(m_curr_sel));
-      }
-                  
-      if (isitem_sel) {
-          switch (m_curr_sel) {
-            case 1:
-                min_sel=1;
-                max_sel=2;
-                encoderPos=oldEncPos=vent_mode;
-            break;
-            case 2:
-                encoderPos=oldEncPos=_bpm;
-                min_sel=DEFAULT_MIN_RPM;
-                max_sel=DEFAULT_MAX_RPM;
-            break;
-            case 3:
-                encoderPos=oldEncPos=options.percInspEsp;
-                min_sel=1;
-                max_sel=3;
-            break;
-            case 4:
-                fin=true;
-                break;
-          }
-    
-        }//if switch select
-        show_changed_options = true;
-        update_options = true;
-  }//If selection
-  
-  if (oldEncPos != encoderPos) {
-      show_changed_options = true;
-
-      if (!isitem_sel) { //Selecting position
-          m_curr_sel=encoderPos;
-          encoderPos=oldEncPos=m_curr_sel;
-
-          if (encoderPos > 4) {
-              encoderPos=4;
-          } else if ( encoderPos < 1) {
-              encoderPos=1;
-          }
-        clear_all_display=true;
-        display_lcd();
-  } else {//inside a particular selection
-
-      if ( encoderPos > max_sel ) {
-          encoderPos=oldEncPos=max_sel;
-      } else if ( encoderPos < min_sel ) {
-          encoderPos=oldEncPos=min_sel;
-      } else {
-        
-        oldEncPos = encoderPos;
-        
-            switch (m_curr_sel) {
-              case 1:
-                 _mod = encoderPos;
-                break;
-              case 2:
-                _bpm = encoderPos;
-                break;
-              case 3:
-                _i_e = encoderPos;
-                break;
-              case 4:
-                break;
-
-            }//switch
-            show_changed_options = true;
-            update_options=true;
-      }//Valid range
-
-      old_curr_sel = curr_sel;
-    }//oldEncPos != encoderPos and valid between range
-  }
-}
-
-void Menu_inic::clear_n_sel(int menu) {
-    if (menu==0) {  
-        lcd_clearxy(0,0);
-        lcd_clearxy(0,1);lcd_clearxy(9,0);
-        lcd_clearxy(0,2);lcd_clearxy(8,1);
-         switch(m_curr_sel){
-              case 1: 
-                lcd_selxy(0,1);break;
-              case 2: 
-                lcd_selxy(0,2);break;
-              case 3:
-                lcd_selxy(0,3);break;
-              case 4: 
-                lcd_selxy(9,3);break;//pcl
-            }
-     } 
-}
-
-void Menu_inic::display_lcd ( ) {
-  
-  if (clear_all_display)
-        lcd.clear();        
-  clear_n_sel(menu_number);
-  if (menu_number==0) {  
-    lcd_clearxy(6,1,3); 
-    lcd_clearxy(6,2,2); 
-    lcd_clearxy(6,3,2);  
-     
-    writeLine(0, "INGRESE PARAMS", 3);
-    writeLine(1, "MOD: ",1);
-    
-    Serial.println("modo: "+String(_mod));
-    if ( _mod == VENTMODE_MAN ) {
-        writeLine(1, "MAN", 6);
-    }
-    else if ( _mod == VENTMODE_PCL ) { 
-        writeLine(1, "PCL", 6);
-    }
-    writeLine(2, "BPM: " + String(_bpm), 1);
-    writeLine(3, "IE:  1:" + String(_i_e), 1);
-    writeLine(3, "FIN: ", 13);
-      
-  }
-
-  clear_all_display=false;
-
-}
-
-void Menu_inic::check_bck_state(){
-      bck_state=digitalRead(PIN_MENU_BCK);         
-       
-    if (bck_state != last_bck_state) { 
-       updateState(); // button state changed. It runs only once.
-        if (bck_state == LOW ) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
-            if (time - lastButtonPress > 150) {
-
-                  pressed = 2;
-                  lastButtonPress = time;
-                  if (isitem_sel){
-                      isitem_sel=false; 
-                  } else {
-                      switching_menus=true;
-                  }
-               
-            }// if time > last button press
-        } else {  //Button released
-          }
-    } else {
-       updateCounter(); // button state not changed. It runs in a loop.
-       if (holdTime > 2000 && !change_sleep){
-        Serial.println("Activando Sleep Mode");
-        if (!sleep_mode){
-            
-            sleep_mode=true;
-            put_to_sleep=true;
-        } else {
-           sleep_mode=false;
-           wake_up=true;   
-        }
-        change_sleep=true;
-        Serial.print("Sleep Mode");Serial.println(sleep_mode);
-        }
-    }
-    last_bck_state = bck_state;
-  
-  }

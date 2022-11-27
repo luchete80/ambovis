@@ -7,45 +7,51 @@
 #include <arduino.h>
 #include "pinout.h"
 
+static byte MAIN_MENU = 0;
+static byte PARAMETERS_MENU = 1;
+static byte ALARMS_MENU = 2;
+static byte SETTINGS_MENU = 3;
 extern LiquidCrystal lcd;
 //extern byte max_sel,min_sel; //According to current selection
 //extern unsigned long lastButtonPress;
 
 typedef struct keyboard_data {
     unsigned long last_button_pressed;
-    int bck_state;     // current state of the button
+    int bck_state;     // current state of the back button
     int last_bck_state; // previous state of the button
     int start_pressed;    // the moment the button was pressed
     int end_pressed;      // the moment the button was released
     int hold_time;        // how long the button was hold
-//    int idleTime;        // how long the button was idle
-    int curr_sel;
-    int old_curr_sel;
     byte selection;
     byte old_selection;
-    char temp_str[5];
-    byte max_sel;
-    byte min_sel;
     bool is_item_selected;
     bool change_sleep;
     int pressed;
 } Keyboard_data_t;
 
-//extern int curr_sel, old_curr_sel;
-//extern byte encoderPos; //this variable stores our current value of encoder position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
-//extern byte oldEncPos; //stores the last encoder position value so we can compare to the current reading and see if it has changed (so we know when to print to the serial monitor)
-extern bool show_changed_options; //Only for display
-extern bool update_options;
-//extern char tempstr[5];
-//extern bool isitem_sel;
-extern byte menu_number;
-extern byte p_trim;
+typedef struct menu_state {
+    bool show_changed_options; // Includes cursor change
+    bool update_options; // only when a parameter value is modified
+    byte menu_number;
+    byte menu_position;
+    byte old_menu_position;
+    bool initial_menu_completed;
+    bool is_initial_menu;
+} Menu_state_t;
+
+//extern bool show_changed_options; //Only for display
+//extern bool update_options;
+//extern byte menu_number;
+//extern byte menu_position;
+//extern byte old_menu_position;
+//extern bool initial_menu_completed;
 
 void writeLine(int line, String message = "", int offsetLeft = 0);
-void check_encoder(Keyboard_data_t& keyboard_data, unsigned long time);
-void display_lcd(Keyboard_data_t keyboard_data);
+void check_encoder(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state, unsigned long time);
+void display_lcd(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state);
 void init_display();
-//void check_bck_state(Keyboard_data_t keyboard_data);
+void initialize_menu(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state);
+void check_bck_state(Keyboard_data_t& keyboard_data, unsigned long time);
 
 //void check_updn_button(int pin, byte *var, bool incr_decr);
 
