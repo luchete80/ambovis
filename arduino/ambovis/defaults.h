@@ -73,8 +73,8 @@ extern int PID_KP,PID_KI,PID_KD;
 class VentilationOptions_t {
 
   public:
-  short respiratoryRate;
-  short peakInspiratoryPressure;
+  byte respiratoryRate;
+  byte peakInspiratoryPressure;
   short peakEspiratoryPressure;
   float triggerThreshold;
   byte percInspEsp;

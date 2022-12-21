@@ -21,8 +21,8 @@ float temp;
 #endif
 
 byte Cdyn;
-bool autopid;
-bool filter;
+byte autopid;
+byte filter;
 bool sleep_mode;
 bool put_to_sleep, wake_up;
 unsigned long print_bat_time;
@@ -59,9 +59,6 @@ float last_pressure_max, last_pressure_min;
 
 byte vent_mode = VENTMODE_MAN; //0
 
-//char tempstr[5];
-//int curr_sel, old_curr_sel;
-
 unsigned long lastShowSensor = 0;
 unsigned long lastSave = 0;
 bool display_needs_update = false;
@@ -72,8 +69,6 @@ unsigned long lastShowBat = 0;
 #ifdef TEMP_TEST
 unsigned lastReadTemp = 0;
 #endif
-//bool show_changed_options = false; //Only for display
-//bool update_options = false;
 
 unsigned long last_update_display;
 
@@ -96,45 +91,25 @@ unsigned long last_cycle;
 
 unsigned int _timeoutIns, _timeoutEsp; //In ms
 
-//byte menu_number = 0;
-//byte old_menu_position = 0;
-//byte menu_position = 0;
-
 Keyboard_data_t keyboard_data;
 Menu_state_t menu_state;
 //TODO: READ FROM EEPROM
 byte alarm_max_pressure = 35;
 byte alarm_peep_pressure = 5;
 byte isalarmvt_on;
-int alarm_vt = 200;
+byte alarm_vt = 200;
 
 //MENU
-//unsigned long lastButtonPress;
 float verror, verror_sum, verror_sum_outcycle, vzero = 0.;  //verror sum is intra cycle, verror_sum_outcycle is inter-cycle
-
-//byte encoderPos = 1; //this variable stores our current value of encoder position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
-//byte oldEncPos = 1; //stores the last encoder position value so we can compare to the current reading and see if it has changed (so we know when to print to the serial monitor)
-//
-//byte max_sel, min_sel; //According to current selection
 
 void check_buzzer_mute();
 void check_sleep_mode();  //Batt charge only
 void initTft(Adafruit_ILI9341& tft);
 void initOptions(VentilationOptions_t& options);
 
-//bool isitem_sel =false;
-
 AutoPID * pid;
 MechVentilation * ventilation;
 VentilationOptions_t options;
-
-//int bck_state ;     // current state of the button
-//int last_bck_state ; // previous state of the button
-//int startPressed ;    // the moment the button was pressed
-//int endPressed ;      // the moment the button was released
-//int holdTime ;        // how long the button was hold
-//int idleTime ;        // how long the button was idle
-
 
 float fdiv = (float)(BATDIV_R1 + BATDIV_R2)/(float)BATDIV_R2;
 float fac = 1.1/1024.*fdiv;
@@ -187,13 +162,7 @@ void setup() {
 
   ads.begin();
 
-//  byte bpm = DEFAULT_RPM;
-//  byte i_e = 2;
-//  Menu_inic menuini(&vent_mode, &bpm, &i_e);
-    initialize_menu(keyboard_data, menu_state);
-
-//  options.respiratoryRate = bpm;
-//  options.percInspEsp = i_e; //1:1 to 1:4, is denom
+  initialize_menu(keyboard_data, menu_state);
   vent_mode = VENTMODE_MAN;
 
   /////////////////// CALIBRACION /////////////////////////////////////
@@ -230,8 +199,6 @@ void setup() {
 #endif
 
   display_lcd(keyboard_data, menu_state);
-
-//  curr_sel = old_curr_sel = 1;
 
   lastShowSensor = last_update_display = millis();
   sensorData.last_read_sensor = millis();
@@ -274,7 +241,6 @@ void setup() {
   wake_up = false;
 
   Serial.println("Exiting setup");
-  //TODO: CALIBRATION RUN ALSO SHOULD BE HERE
 
   #ifdef TEMP_TEST
   sensors.begin();
@@ -393,15 +359,15 @@ void loop() {
     }//change cycle
 
     if (!calibration_run) {
-      if (display_needs_update) {
-          display_lcd(keyboard_data, menu_state);
-          display_needs_update = false;
-      }
+        if (display_needs_update) {
+            display_lcd(keyboard_data, menu_state);
+            display_needs_update = false;
+        }
     }
   
     if ( menu_state.update_options ) {
-      ventilation->change_config(options);
-      menu_state.update_options = false;
+        ventilation->change_config(options);
+        menu_state.update_options = false;
     }
 
     if (!calibration_run) {
@@ -459,9 +425,9 @@ void loop() {
     #ifdef BAT_TEST
     if ( time > lastShowBat + TIME_SHOW_BAT ) {
         lastShowBat = time;
-        Serial.println("last show bat " + String(lastShowBat));
+//        Serial.println("last show bat " + String(lastShowBat));
         float level = calc_bat(5, fac);
-        Serial.println(String(time)+", " +String(level));
+//        Serial.println(String(time)+", " +String(level));
     }
     #endif BAT_TEST
 
