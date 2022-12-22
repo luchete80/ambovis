@@ -26,7 +26,6 @@ byte filter;
 bool sleep_mode;
 bool put_to_sleep, wake_up;
 unsigned long print_bat_time;
-//bool motor_stopped;
 bool drawing_cycle = 0;
 
 // FOR ADS
@@ -135,14 +134,7 @@ void setup() {
   pid -> setBangBang(PID_BANGBANG);
   // set PID update interval
   pid -> setTimeStep(PID_TS);
-
-//  max_cd = 40; //T MODIFY: READ FROM MEM
-//  min_cd = 10;
-//  min_speed = 250;  // x microsteps
-//  max_speed = 750;  // x Microsteps, originally 16000 (with 16 ms = 750)
-//  max_accel = 600;
-//  min_accel = 200;
-
+  
   initOptions(options);
 
   delay(100);
