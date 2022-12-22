@@ -742,5 +742,5 @@ void MechVentilation::change_config(VentilationOptions_t options) {
     setRPM(_rpm); //Include set inspiratory cycle
     _percVol=options.percVolume;
 
-    _mode = options.modeCtl;
+    //_mode = options.modeCtl;
 }
