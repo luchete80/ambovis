@@ -9,10 +9,7 @@
 #include "MechVentilation.h"
 #include "alarms.h"
 #include "sensorcalculation.h"
-#include "initialactions.h"
 #include "data_persistence.h"
-
-#define CALIB_CYCLES  5
 
 #ifdef TEMP_TEST
 #include <OneWire.h>
@@ -109,7 +106,8 @@ byte oldEncPos = 1; //stores the last encoder position value so we can compare t
 byte max_sel, min_sel; //According to current selection
 
 void initTft(Adafruit_ILI9341& tft);
-void initOptions(VentilationOptions_t& options);
+void waitForFluxDisconnected();
+void searchHomePosition(AccelStepper* stepper);
 
 bool isitem_sel =false;
 
@@ -150,16 +148,7 @@ void setup() {
   max_accel = 600;
   min_accel = 200;
 
-  initOptions(options);
-
   delay(100);
-
-  if (!digitalRead(PIN_POWEROFF)) {
-    digitalWrite(YELLOW_LED, HIGH);
-    Serial.println("Poweroff");
-  }
-
-  // Habilita el motor
   digitalWrite(PIN_EN, LOW);
 
   writeLine(1, "RespirAR FIUBA", 4);
@@ -169,15 +158,9 @@ void setup() {
 
   ads.begin();
 
-  byte bpm = DEFAULT_RPM;
-  byte i_e = 2;
   Menu_inic menuini(&vent_mode, &options.respiratoryRate, &options.percInspEsp);
-
   vent_mode = VENTMODE_MAN;
 
-  lcd.clear();
-  writeLine(1, "Desconecte flujo", 0);
-  writeLine(2, "y presione ok ", 0);
   waitForFluxDisconnected();
 
   digitalWrite(PIN_STEPPER, HIGH);
@@ -233,7 +216,6 @@ void setup() {
 
   ventilation->setCycleNum(last_cycle);
 
-  digitalWrite(BCK_LED, LOW);
   buzzmuted = false;
   last_mute = HIGH;
   mute_count = 0;
@@ -243,9 +225,6 @@ void setup() {
   pf_min = (float)pfmin / 50.;
   pf_max = (float)pfmax / 50.;
   peep_fac = -(pf_max - pf_min) / 15.*last_pressure_min + pf_max;
-
-  Serial.println("Exiting setup");
-  //TODO: CALIBRATION RUN ALSO SHOULD BE HERE
 
   #ifdef TEMP_TEST
   sensors.begin();
@@ -261,6 +240,7 @@ void loop() {
 
   if (!sleep_mode) {
     if (wake_up) {
+        Serial.println("Is wake up executed at the beginning?");
       digitalWrite(PIN_STEPPER, HIGH);
       digitalWrite(TFT_SLEEP, HIGH);
       digitalWrite(LCD_SLEEP, HIGH);
@@ -272,7 +252,6 @@ void loop() {
       wake_up = false;
       ventilation->forceStart();
     }
-    State state = ventilation->getState();
     check_encoder();
 
     time = millis();
@@ -295,25 +274,25 @@ void loop() {
 
     float vs = 0.;
     if (time > sensorData.last_read_sensor + TIME_SENSOR) {
-
         int16_t adc0 = ads.readADC_SingleEnded(0);
         readSensor(sensorData, adc0, vzero, filter);
         vs = sensorData.v_level;
 
-      //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
-      if (sensorData.pressure_p > pressure_max) {
-          pressure_max = sensorData.pressure_p;
-      }
-      if (sensorData.pressure_p < pressure_min) {
-          pressure_min = sensorData.pressure_p;
-      }
-      if (calibration_run) {
-          vcorr_count ++;
-          verror_sum += ( sensorData.voltage - 0.04 * vs); //-5*0.04
-      }
+        //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
+        if (sensorData.pressure_p > pressure_max) {
+            pressure_max = sensorData.pressure_p;
+        }
+        if (sensorData.pressure_p < pressure_min) {
+            pressure_min = sensorData.pressure_p;
+        }
+        if (calibration_run) {
+            vcorr_count ++;
+            verror_sum += (sensorData.voltage - 0.04 * vs); //-5*0.04
+        }
+        Serial.println("vs: " + String(vs));
     }//Read Sensor
 
-    if ( ventilation -> getCycleNum () != last_cycle ) {
+    if ( ventilation -> getCycleNum() != last_cycle ) {
       int vt = (_mllastInsVol + _mllastInsVol) / 2;
       is_alarm_vt_on = vt < alarm_vt;
       alarm_state = getAlarmState(last_pressure_max, last_pressure_min,
@@ -454,13 +433,40 @@ void initTft(Adafruit_ILI9341& tft) {
     tft.setCursor(10, 80);     tft.println("FIUBA");
 }
 
-void initOptions(VentilationOptions_t& options) {
-    options.respiratoryRate = DEFAULT_RPM;
-    options.percInspEsp = 2; //1:1 to 1:4, is denom
-    options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
-    options.peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
-    options.triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
-    options.hasTrigger = false;
-    options.tidalVolume = 300; // TODO: might be removed
-    options.percVolume = 100; //1 to 10
+void searchHomePosition(AccelStepper* stepper) {
+    stepper->setSpeed(STEPPER_HOMING_SPEED);
+    long initial_homing = -1;
+    while (digitalRead(PIN_ENDSTOP)) {  // Make the Stepper move CCW until the switch is activated
+        stepper->moveTo(initial_homing);  // Set the position to move to
+        initial_homing--;  // Decrease by 1 for next move if needed
+        stepper->run();  // Start moving the stepper
+        delay(5);
+    }
+    stepper->setCurrentPosition(0);  // Set the current position as zero for now
+    initial_homing = 1;
+
+    while (!digitalRead(PIN_ENDSTOP)) { // Make the Stepper move CW until the switch is deactivated
+        stepper->moveTo(initial_homing);
+        stepper->run();
+        initial_homing++;
+        delay(5);
+    }
+    stepper->setCurrentPosition(STEPPER_LOWEST_POSITION);
+}
+
+void waitForFluxDisconnected() {
+    lcd.clear();
+    writeLine(1, "Desconecte flujo", 0);
+    writeLine(2, "y presione ok ", 0);
+    bool fin = false;
+    delay(100); //Otherwise low enter button readed
+    long lastButtonPress = millis();
+    while (!fin) {
+        if (digitalRead(PIN_MENU_EN) == LOW) {
+            if (millis() - lastButtonPress > 50) {
+                fin = true;
+                lastButtonPress = millis();
+            }
+        }
+    }
 }

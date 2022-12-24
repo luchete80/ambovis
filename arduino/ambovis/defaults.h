@@ -70,21 +70,16 @@ extern int PID_KP,PID_KI,PID_KD;
 #define PID_TS TIME_BASE
 #define PID_BANGBANG 8
 
-class VentilationOptions_t {
-
-  public:
-  short respiratoryRate;
-  short peakInspiratoryPressure;
-  short peakEspiratoryPressure;
-  float triggerThreshold;
-  byte percInspEsp;
-  bool hasTrigger;
-  short tidalVolume;  //in ml
-  byte percVolume;   //For manual mode: 1 to 10
-
-  VentilationOptions_t(){}
-  ~VentilationOptions_t(){}
-};
+typedef struct ventilation_options_t {
+    short respiratoryRate = DEFAULT_RPM;
+    short peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
+    short peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
+    float triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
+    byte percInspEsp = 2;
+    bool hasTrigger = false;
+    short tidalVolume = 300;  //in ml
+    byte percVolume = 100;
+} VentilationOptions_t;
 
 #define MODE_VOL_CTL 0
 #define MODE_VOL_CTL 1
@@ -120,5 +115,6 @@ extern unsigned long time;
 #define TIME_SHOW_BAT   15000 //MSECS
 #define TEMP_TEST
 #define TIME_READ_TEMP  15000 //MSECS
+#define CALIB_CYCLES  5
 
 #endif // DEFAULTS_H
