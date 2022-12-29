@@ -264,8 +264,6 @@ byte calib_cycle = 0;
 void loop() {
 
     time = millis();
-    check_bck_state();
-
     if (!sleep_mode) {
         if (wake_up) {
             digitalWrite(PIN_STEPPER, HIGH);
@@ -418,6 +416,7 @@ void loop() {
             print_bat(tft, fac);
             print_bat_time = time;
         }
+        check_bck_state();
     }
 
     #ifdef BAT_TEST
