@@ -42,7 +42,7 @@ short alarm_state = 0; //0: No alarm 1: peep 2: pip 3:both
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
 
 //MUTE
-bool last_mute, curr_mute;
+bool last_mute;
 bool buzzmuted;
 unsigned long timebuzz = 0;
 bool isbuzzeron = false;
@@ -110,7 +110,7 @@ byte oldEncPos = 1; //stores the last encoder position value so we can compare t
 byte max_sel, min_sel; //According to current selection
 bool isitem_sel =false;
 
-void check_buzzer_mute();
+//void check_buzzer_mute();
 void initTft(Adafruit_ILI9341& tft);
 void initOptions(VentilationOptions_t& options);
 
@@ -278,7 +278,7 @@ void loop() {
             ventilation->forceStart();
         }
 
-        check_buzzer_mute();
+        buzzmuted = check_buzzer_mute(last_mute, buzzmuted, mute_count, time);
 
         if (calibration_run) {
             if (time > sensorData.last_read_sensor + TIME_SENSOR) {
@@ -380,24 +380,7 @@ void loop() {
                 show_changed_options = false;
             }
 
-//            if (alarm_state > 0) {
-//                if (!buzzmuted) {
-//                    if (millis() > timebuzz + TIME_BUZZER) {
-//                        timebuzz=millis();
-//                        isbuzzeron=!isbuzzeron;
-//                        if (isbuzzeron) {
-//                            digitalWrite(PIN_BUZZER,BUZZER_LOW);
-//                        } else {
-//                            digitalWrite(PIN_BUZZER,BUZZER_HIGH);
-//                        }
-//                    }
-//                } else {  //buzz muted
-//                    digitalWrite(PIN_BUZZER,!BUZZER_LOW);
-//                }
-//            } else {//state > 0
-//                digitalWrite(PIN_BUZZER,!BUZZER_LOW);
-//                isbuzzeron=true;        //Inverted logic
-//            }
+            set_alarm_buzzer(alarm_state, buzzmuted, timebuzz, isbuzzeron);
         }
     } else {
         if (put_to_sleep) {
@@ -437,27 +420,6 @@ void timer1Isr(void) {
 
 void timer3Isr(void) {
     stepper->run();
-}
-
-bool debounce(bool last, int pin) {
-    bool current = digitalRead(pin);
-    if (last != current) {
-        delay(50);
-        current = digitalRead(pin);
-    }
-    return current;
-}
-
-void check_buzzer_mute() {
-    curr_mute = debounce(last_mute, PIN_MUTE); //Debounce for Up button
-    if (!buzzmuted && last_mute == HIGH && curr_mute == LOW) {
-        mute_count = time;
-        buzzmuted = true;
-    }
-    last_mute = curr_mute;
-    if (buzzmuted && (time > mute_count + TIME_MUTE)) { //each count is every 500 ms
-        buzzmuted = false;
-    }
 }
 
 void initTft(Adafruit_ILI9341& tft) {
