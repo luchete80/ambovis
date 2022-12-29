@@ -221,5 +221,6 @@ extern bool ended_whilemov;
 extern float pressure_max,pressure_min;
 //extern float pressure_p;
 extern float last_pressure_max,last_pressure_min;
+extern volatile bool updateLimitsForInitInsuf;
 
 #endif /* INC_MECHANICAL_VENTILATION_H */

@@ -25,6 +25,8 @@ bool put_to_sleep = false;
 bool wake_up = false;
 unsigned long print_bat_time;
 bool drawing_cycle = 0;
+volatile bool updateLimitsForInitInsuf = false;
+byte Cdyn_pass[3];
 
 // FOR ADS
 #include <Wire.h>
@@ -240,7 +242,6 @@ void loop() {
 
   if (!sleep_mode) {
     if (wake_up) {
-        Serial.println("Is wake up executed at the beginning?");
       digitalWrite(PIN_STEPPER, HIGH);
       digitalWrite(TFT_SLEEP, HIGH);
       digitalWrite(LCD_SLEEP, HIGH);
@@ -267,16 +268,16 @@ void loop() {
         lastSave = millis();
     }
 
-    if ( time > lastShowSensor + TIME_SHOW ) {
+    if ( millis() > lastShowSensor + TIME_SHOW ) {
         tft_draw(tft, sensorData, drawing_cycle, fac, alarm_state);
-        lastShowSensor = time;
+        lastShowSensor = millis();
     }
 
-    float vs = 0.;
+
     if (time > sensorData.last_read_sensor + TIME_SENSOR) {
         int16_t adc0 = ads.readADC_SingleEnded(0);
         readSensor(sensorData, adc0, vzero, filter);
-        vs = sensorData.v_level;
+        float vs = sensorData.v_level;
 
         //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
         if (sensorData.pressure_p > pressure_max) {
@@ -289,10 +290,24 @@ void loop() {
             vcorr_count ++;
             verror_sum += (sensorData.voltage - 0.04 * vs); //-5*0.04
         }
-        Serial.println("vs: " + String(vs));
     }//Read Sensor
 
-    if ( ventilation -> getCycleNum() != last_cycle ) {
+    if (updateLimitsForInitInsuf) {
+        last_pressure_max=pressure_max;
+        last_pressure_min=pressure_min;
+        pressure_max=0;
+        pressure_min=60;
+        for (int i=0;i<2;i++) Cdyn_pass[i]=Cdyn_pass[i+1];
+        Cdyn_pass[2]=_mllastInsVol/(last_pressure_max-last_pressure_min);
+        Cdyn=(Cdyn_pass[0]+Cdyn_pass[1]+Cdyn_pass[2])/3.;
+        _mllastInsVol=int(sensorData.ml_ins_vol);
+        _mllastExsVol=int(fabs(sensorData.ml_exs_vol));
+        sensorData.ml_ins_vol=0.;
+        sensorData.ml_exs_vol=0.;
+        updateLimitsForInitInsuf = false;
+    }
+
+    if ( ventilation->getCycleNum() != last_cycle ) {
       int vt = (_mllastInsVol + _mllastInsVol) / 2;
       is_alarm_vt_on = vt < alarm_vt;
       alarm_state = getAlarmState(last_pressure_max, last_pressure_min,

@@ -113,7 +113,7 @@ extern unsigned long time;
 #define BATTERY_READ 5
 #define BAT_TEST
 #define TIME_SHOW_BAT   15000 //MSECS
-#define TEMP_TEST
+//#define TEMP_TEST
 #define TIME_READ_TEMP  15000 //MSECS
 #define CALIB_CYCLES  5
 
