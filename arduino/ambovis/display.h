@@ -28,4 +28,12 @@ float calc_bat(const int &iter);
 void tft_draw();
 void print_vols();
 void check_alarms();
+
+extern byte cycle_pos;
+extern float pressure_p;
+extern float _flux, flow_f;
+extern float _mlInsVol,_mlExsVol;
+extern int _mllastInsVol,_mllastExsVol;
+extern bool ended_whilemov;
+
 #endif

@@ -103,7 +103,7 @@ extern bool sleep_mode;
 extern byte alarm_state;
 extern bool put_to_sleep, wake_up;
 extern float vlevel;
-extern unsigned long time;
+extern unsigned long time2;
 
 // 5v to 1.1v dividiver, in order to use 1.1 arduino vref (more stable)
 // Vo = V1 x R2/(R1 + R2)
@@ -120,7 +120,6 @@ extern unsigned long time;
 //Battery level voltage dividers
 #define BATDIV_R1           12000
 #define BATDIV_R2           470
-extern float vlevel;
 #define BAT_TEST
 #define TIME_SHOW_BAT   15000 //MSECS
 //#define TEMP_TEST

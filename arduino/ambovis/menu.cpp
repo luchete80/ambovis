@@ -26,7 +26,7 @@ byte back[8] = {
 void updateState() {
   // the button has been just pressed
   if (bck_state == LOW) {
-      startPressed = time;
+      startPressed = time2;
       idleTime = startPressed - endPressed;
       change_sleep=false;
 //      if (idleTime >= 500 && idleTime < 1000) {
@@ -39,7 +39,7 @@ void updateState() {
 
   // the button has been just released
   } else {
-      endPressed = time;
+      endPressed = time2;
       holdTime = endPressed - startPressed;
 
 //      if (holdTime >= 10 && holdTime < 1000) {
@@ -59,7 +59,7 @@ void updateState() {
 void updateCounter() {
   // the button is still pressed
   if (bck_state == LOW) {
-      holdTime = time - startPressed;
+      holdTime = time2 - startPressed;
 
 //      if (holdTime >= 1000) {
 //          Serial.println("Button is hold for more than a second"); 
@@ -67,7 +67,7 @@ void updateCounter() {
 
   // the button is still released
   } else {
-      idleTime = time - endPressed;
+      idleTime = time2 - endPressed;
 
 //      if (idleTime >= 1000) {
 //          Serial.println("Button is released for more than a second");  
@@ -110,12 +110,12 @@ void lcd_selxy(int x, int y) {
 
 void check_updn_button(int pin, byte *var, bool incr_decr) {
     if (digitalRead(pin)==LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
-      if (time - lastButtonPress > 150) {
+      if (time2 - lastButtonPress > 150) {
           if (incr_decr)
               *var=*var+1;
           else
               *var=*var-1;
-          lastButtonPress = time;
+          lastButtonPress = time2;
       }// if time > last button press
     }
 }
@@ -129,10 +129,10 @@ void check_bck_state(){
     if (bck_state != last_bck_state) { 
        updateState(); // button state changed. It runs only once.
         if (bck_state == LOW ) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
-            if (time - lastButtonPress > 150) {
+            if (time2 - lastButtonPress > 150) {
               pressed = 2;
               isitem_sel=false; 
-              lastButtonPress = time;
+              lastButtonPress = time2;
             }// if time > last button press
         } else {  //Button released
           }
@@ -162,10 +162,10 @@ void check_encoder ( ) {
   pressed=0;  //0 nothing , 1 enter, 2 bck
 
     if (digitalRead(PIN_MENU_EN) == LOW)  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
-    if (time - lastButtonPress > 50) {
+    if (time2 - lastButtonPress > 50) {
       pressed = 1;
       isitem_sel=true; 
-      lastButtonPress = time;
+      lastButtonPress = time2;
     }// if time > last button press
 
 // ORIGINAL BCK WITHOUT SLEEP MODE

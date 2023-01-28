@@ -128,7 +128,7 @@ extern float _mlInsVol, _mlExsVol;
 extern byte stepper_time = 50;
 unsigned long last_stepper_time;
 unsigned long last_vent_time;
-unsigned long time;
+unsigned long time2;
 byte cycle_pos;
 int16_t adc0;
 
@@ -518,7 +518,7 @@ void loop() {
     State state = ventilation->getState();
     check_encoder();
 
-    time = millis();
+    time2 = millis();
     check_buzzer_mute();
     //Serial.print("Carga: ");Serial.println(analogRead(PIN_BAT_LEV));
 
@@ -530,7 +530,7 @@ void loop() {
 
   
 
-    if ( time > lastShowSensor + TIME_SHOW ) {
+    if ( time2 > lastShowSensor + TIME_SHOW ) {
 
 #ifdef DEBUG_STEPPER
       //      unsigned long reltime = ventilation->getMSecTimerCnt();
