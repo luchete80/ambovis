@@ -5,13 +5,13 @@ jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v3
     - name: Setup
       run: |
         sudo apt update
         # sudo apt install -y libcurl4-openssl-dev
         cd ..
         git clone --depth 1 https://github.com/bxparks/AUnit
-        cd ..
         ls
         # cd ambovis/arduino/ambovis/tests/unit-tests
         # make
