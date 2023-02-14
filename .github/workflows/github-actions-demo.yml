@@ -12,9 +12,9 @@ jobs:
         # sudo apt install -y libcurl4-openssl-dev
         cd ..
         git clone --depth 1 https://github.com/bxparks/AUnit
-        cd ambovis/arduino/ambovis
+        cd ambovis/arduino
         ls
-        cd ambovis/arduino/ambovis/tests/unit-tests
+        cd ambovis/tests/unit-tests
         ls
 
     # - name: Verify examples
