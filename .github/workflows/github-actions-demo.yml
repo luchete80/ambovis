@@ -15,7 +15,6 @@ jobs:
         cd ambovis/arduino/ambovis
         ls
         cd ambovis/arduino/ambovis/tests/unit-tests
-#        make
         ls
 
     # - name: Verify examples
