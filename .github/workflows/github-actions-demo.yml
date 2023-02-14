@@ -12,10 +12,10 @@ jobs:
         # sudo apt install -y libcurl4-openssl-dev
         cd ..
         git clone --depth 1 https://github.com/bxparks/AUnit
-        cd ambovis/arduino
+        cd ambovis/arduino/EpoxyDuino
         ls
-        cd ambovis/tests/unit-tests
-        ls
+        cd ../ambovis/tests/unit-tests
+        make
 
     # - name: Verify examples
     #   run: |
