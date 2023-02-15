@@ -16,6 +16,7 @@ jobs:
         ls
         cd ../ambovis/tests/unit-tests
         make
+        ./dummyTest.out
 
     # - name: Verify examples
     #   run: |
