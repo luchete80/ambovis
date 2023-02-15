@@ -15,7 +15,7 @@ jobs:
         cd ambovis/arduino/EpoxyDuino2
         ls
         cd ../ambovis/tests/unit-tests
-        make
+        make > /dev/null
         ./dummyTest.out
 
     # - name: Verify examples
