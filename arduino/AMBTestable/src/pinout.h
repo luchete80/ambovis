@@ -1,0 +1,1 @@
+/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/pinout.h
