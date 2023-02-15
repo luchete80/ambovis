@@ -1,1 +1,0 @@
-/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/display.cpp
