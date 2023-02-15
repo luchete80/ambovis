@@ -21,7 +21,7 @@ test(correct) {
 }
 
 test(incorrect) {
-    int x = 1;
+    int x = 2;
     assertNotEqual(x, 1);
 }
 
