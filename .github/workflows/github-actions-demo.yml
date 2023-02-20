@@ -18,8 +18,8 @@ jobs:
         git clone --depth 1 https://github.com/arduino-libraries/LiquidCrystal.git
         ls
         cd ambovis/tests/unit-tests
-        # make > /dev/null
-        # ./dummyTest.out
+        make > /dev/null
+        ./dummyTest.out
 
     # - name: Verify examples
     #   run: |
