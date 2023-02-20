@@ -75,8 +75,8 @@ class Menu_inic:public Menu{
   public:
     Menu_inic(byte *mode, byte *bpm, byte *i_e);
     void clear_n_sel( int menu );
-    void Menu_inic::check_encoder ( );
-    void Menu_inic::display_lcd ( );
+    void check_encoder ( );
+    void display_lcd ( );
     void check_bck_state();
     
 };
