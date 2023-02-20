@@ -71,8 +71,8 @@
 #define SERIAL  0x0
 #define DISPLAY 0x1
 
-#define LSBFIRST 0
-#define MSBFIRST 1
+// #define LSBFIRST 0
+// #define MSBFIRST 1
 
 // Interrupt Modes
 #if defined(EPOXY_CORE_AVR)
