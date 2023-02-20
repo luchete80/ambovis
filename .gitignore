@@ -4,6 +4,8 @@ arduino/Paracambiarpornuevmenu/.idea/
 arduino/ambovis/CMakeLists.txt
 arduino/ambovis/cmake-build-debug/
 arduino/libs
+arduino/AUnit
+arduino/LiquidCrystal
 *.out
 *.o
 

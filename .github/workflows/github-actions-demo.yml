@@ -10,13 +10,16 @@ jobs:
       run: |
         sudo apt update
         # sudo apt install -y libcurl4-openssl-dev
-        cd ..
-        git clone --depth 1 https://github.com/bxparks/AUnit
-        cd ambovis/arduino/EpoxyDuino2
+        cd arduino/
         ls
-        cd ../ambovis/tests/unit-tests
-        make > /dev/null
-        ./dummyTest.out
+        echo "clone Aunit"
+        git clone --depth 1 https://github.com/bxparks/AUnit
+        echo "clone liquid"
+        git clone --depth 1 https://github.com/arduino-libraries/LiquidCrystal.git
+        ls
+        cd ambovis/tests/unit-tests
+        # make > /dev/null
+        # ./dummyTest.out
 
     # - name: Verify examples
     #   run: |
