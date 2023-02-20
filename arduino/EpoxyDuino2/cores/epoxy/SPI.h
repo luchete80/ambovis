@@ -63,6 +63,13 @@
   #define SPI_AVR_EIMSK  GIMSK
 #endif
 
+#ifndef LSBFIRST
+#define LSBFIRST 0
+#endif
+#ifndef MSBFIRST
+#define MSBFIRST 1
+#endif
+
 typedef enum _BitOrder {
   SPI_BITORDER_MSBFIRST = MSBFIRST,
   SPI_BITORDER_LSBFIRST = LSBFIRST,
