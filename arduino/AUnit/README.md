@@ -2,11 +2,6 @@
 
 [![AUnit Tests](https://github.com/bxparks/AUnit/actions/workflows/aunit_tests.yml/badge.svg)](https://github.com/bxparks/AUnit/actions/workflows/aunit_tests.yml)
 
-**New**: [GitHub Discussions](https://github.com/bxparks/AUnit/discussions)
-for this project is now active! Let's use that for general support questions,
-and reserve the [GitHub Issues](https://github.com/bxparks/AUnit/issues)
-section for bugs and feature requests.
-
 A unit testing framework for Arduino platforms inspired by by
 [ArduinoUnit](https://github.com/mmurdoch/arduinounit) and [Google
 Test](https://github.com/google/googletest/). The unit tests usually run on the
@@ -16,7 +11,7 @@ natively on Linux or MacOS using the
 [EpoxyDuino](https://github.com/bxparks/EpoxyDuino) companion project.
 
 AUnit is almost a drop-in replacement of ArduinoUnit with some advantages. AUnit
-supports timeouts and test fixtures. It somtimes consumes 50% less flash memory
+supports timeouts and test fixtures. It sometimes consumes 50% less flash memory
 on the AVR platform, and it has been tested to work on the AVR, SAMD21, STM32,
 ESP8266, ESP32 and Teensy platforms. Another companion project
 [AUniter](https://github.com/bxparks/AUniter) project provides command line
@@ -25,7 +20,7 @@ instead of having to go through the Arduino IDE. Both the AUniter and
 EpoxyDuino tools can be used in a continuous integration system like Jenkins,
 or with [GitHub Actions](https://github.com/features/actions).
 
-**Version**: 1.5.5 (2021-05-03)
+**Version**: 1.7.0 (2022-12-08)
 
 **Changelog**: [CHANGELOG.md](CHANGELOG.md)
 
@@ -45,6 +40,7 @@ or with [GitHub Actions](https://github.com/features/actions).
     * [Defining the Tests](#DefiningTests)
     * [Generated Class and Instance Names](#GeneratedClass)
     * [Binary Assertions](#BinaryAssertions)
+        * [Assertion Message Format](#AssertionMessageFormat)
         * [Supported Parameter Types](#SupportedParameterTypes)
         * [Parameter Types Must Match](#ParameterTypesMustMatch)
         * [Pointer Comparisons](#PointerComparisons)
@@ -57,7 +53,7 @@ or with [GitHub Actions](https://github.com/features/actions).
     * [Unconditional Termination](#UnconditionalTermination)
     * [Overridable Methods](#OverridableMethods)
     * [Running the Tests](#RunningTests)
-    * [Filering Test Cases](#FilteringTestCases)
+    * [Filtering Test Cases](#FilteringTestCases)
     * [Output Printer](#OutputPrinter)
     * [Controlling Verbosity](#ControllingVerbosity)
     * [Line Number Mismatch](#LineNumberMismatch)
@@ -71,11 +67,12 @@ or with [GitHub Actions](https://github.com/features/actions).
 * [Command Line Tools](#CommandLineTools)
     * [AUniter](#AUniter)
     * [EpoxyDuino](#EpoxyDuino)
+    * [Command Line Flags and Arguments](#CommandLineFlagsAndArguments)
 * [Continuous Integration](#ContinuousIntegration)
     * [Arduino IDE/CLI + Cloud](#IdePlusCloud)
     * [Arduino IDE/CLI + Jenkins](#IdePlusJenkins)
     * [EpoxyDuino + Jenkins](#EpoxyDuinoPlusJenkins)
-    * [EpoxyDuino + Cloud (Recommmended)](#EpoxyDuinoPlusCloud)
+    * [EpoxyDuino + Cloud (Recommended)](#EpoxyDuinoPlusCloud)
 * [Tips](#Tips)
     * [Debugging Assertions in Fixtures](#DebuggingFixtures)
     * [Class Hierarchy](#ClassHierarchy)
@@ -143,6 +140,10 @@ Most of the core macros are compatible between ArduinoUnit and AUnit:
 AUnit also supports exclude and include filters:
 * `TestRunner::exclude()`
 * `TestRunner::include()`
+
+Filters can be accessed through
+[Command Line Flags](##CommandLineFlagsAndArguments) on desktop machines using
+EpoxyDuino
 
 The various assertion and test status messages can be enabled or disabled using
 the `Verbosity` flags on per test basis:
@@ -263,17 +264,21 @@ In the `tests/` directory:
 * `SetupAndTeardownTest` - tests to verify that `setup()` and `teardown()` are
   called properly by the finite state machine
 
-Perhaps the best way to see AUnit in action through real life examples. I
-currently have 3 Arduino project using AUnit extensively
-(look under the `tests/` directory in each project).
+Perhaps the best way to see AUnit in action through real life examples. All my
+libraries use AUnit for testing and for continuous integration through
+EpoxyDuino. Here are some examples:
 
 * [AceButton](https://github.com/bxparks/AceButton)
-    * Originally created using ArduinoUnit 2.2, and I have kept those tests
-      backwards compatible. They do not use the new features of AUnit.
+    * My first Arduino library, which originally used ArduinoUnit 2.2.
+    * I kept many of the original ArduinoUnit tests for backwards compatibility
+      testing. But over time, I started to use nore AUnit features.
+* [AceCRC](https://github.com/bxparks/AceCRC)
+* [AceCommon](https://github.com/bxparks/AceCommon)
 * [AceRoutine](https://github.com/bxparks/AceRoutine)
-    * Demonstrates the full power of AUnit better.
+* [AceSegment](https://github.com/bxparks/AceSegment)
+* [AceSorting](https://github.com/bxparks/AceSorting)
+* [AceTimeClock](https://github.com/bxparks/AceTimeClock)
 * [AceTime](https://github.com/bxparks/AceTime)
-    * Demonstrates the full power of AUnit better.
 
 <a name="Usage"></a>
 ## Usage
@@ -497,6 +502,35 @@ are available. These are essentially identical to ArduinoUnit:
 * `assertLessOrEqual(a, b)`
 * `assertMoreOrEqual(a, b)`
 
+<a name="AssertionMessageFormat"></a>
+#### Assertion Message Format
+
+When the assertion passes, nothing is printed by default. This can be controlled
+by the `TestRunner::setVerbosity()` method. See [Controlling
+Verbosity](#ControllingVerbosity).
+
+When the assertion fails, an error message of the following format is printed:
+
+```
+SampleTest.ino:10: Assertion failed: (2) == (1)
+```
+
+The format of the assertion failure messages was changed in v1.7 to the
+following:
+```
+{filName}:{lineNumber}: Assertion failed: {expression}
+```
+
+This format is a widely used in many other programs, for example, the C compiler
+`gcc`, the C++ compiler `g++`, the Python 3 interpreter `python3`, `grep`, and
+the GNU Make program `make`. In particular, the
+[quickfix](https://vimhelp.org/quickfix.txt.html) feature in the `vim` text
+editor can parse this error format and jump directly to the `fileName` and
+`lineNumber` indicated by the error message. See the instructions in
+[EpoxyDuino](https://github.com/bxparks/EpoxyDuino) to see how to run unit tests
+on a Linux or MacOS machine inside the `vim` editor so that the editor jumps
+directly to the files and line numbers where the assertion failure occurred.
+
 <a name="SupportedParameterTypes"></a>
 #### Supported Parameter Types
 
@@ -523,7 +557,7 @@ following 18 combinations for their parameter types:
 * `(const __FlashStringHelper*, const String&)`
 * `(const __FlashStringHelper*, const __FlashStringHelper*)`
 
-The `assertEqual()` and `assertNotEqual()` support arbitary pointer types
+The `assertEqual()` and `assertNotEqual()` support arbitrary pointer types
 through implicit casts to `const void*`:
 
 * `(const void*, const void*)` (since v1.4)
@@ -639,7 +673,7 @@ test(voidPointer) {
 
 This test will fail with the following error message:
 ```
-Assertion failed: (aa=0x3FFFFF38) == (bb=0x3FFFFF30), file AUnitTest.ino, line 338.
+AUnitTest.ino:338: Assertion failed: (aa=0x3FFFFF38) == (bb=0x3FFFFF30).
 Test voidPointer failed.
 ```
 
@@ -652,10 +686,10 @@ test(nullPointer) {
 }
 ```
 
-prints the following:
+This will print the following:
 
 ```
-Assertion failed: (aa=0x3FFFFF58) == (nullptr=0x0), file AUnitTest.ino, line 348.
+AUnitTest.ino:348: Assertion failed: (aa=0x3FFFFF58) == (nullptr=0x0).
 Test nullPointer failed.
 ```
 
@@ -710,15 +744,15 @@ errors. Google Test provides
   `a` and `b` is within the given `error`
 
 Since floating point operations are relatively rare in Arduino programming,
-AUnit offers only the equilvalent of `ASSERT_NEAR()` function:
+AUnit offers only the equivalent of `ASSERT_NEAR()` function:
 
 * `assertNear(a, b, error)`
 * `assertNotNear(a, b, error)`
 
 Upon failure, the error messages will look something like:
 ```
-Assertion failed: |(1.00) - (1.10)| > (0.20), file AUnitTest.ino, line 517.
-Assertion failed: |(4.00) - (1.10)| <= (0.20), file AUnitTest.ino, line 527.
+AUnitTest.ino:517: Assertion failed: |(1.00) - (1.10)| > (0.20).
+AUnitTest.ino:527: Assertion failed: |(4.00) - (1.10)| <= (0.20).
 ```
 
 Unlike Google Test where `ASSERT_NEAR()` supports only the `double` type, both
@@ -761,7 +795,7 @@ The following boolean asserts are also available:
 
 When the unit tests become more complex, using test fixtures will allow you to
 place common data objects and methods into a class that can be shared among
-multiple test cases. This concept matches very closely to the the test fixtures
+multiple test cases. This concept matches very closely to the test fixtures
 in
 [Google Test](https://github.com/google/googletest/blob/master/googletest/docs/Primer.md).
 
@@ -940,10 +974,10 @@ and returns a `bool`. The execution continues even if `false`.
 The `assertTestXxx()` methods stops the unit test if the status check
 returns `false`, and prints assertion messages that look like this:
 ```
-Assertion passed: Test slow_pass is done, file AUnitTest.ino, line 366.
-Assertion passed: Test slow_pass is not failed, file AUnitTest.ino, line 372.
-Assertion passed: Test slow_skip is skipped, file AUnitTest.ino, line 448.
-Assertion passed: Test slow_skip is not timed out, file AUnitTest.ino, line 451.
+AUnitTest.ino:366: Assertion passed: Test slow_pass is done.
+AUnitTest.ino:372: Assertion passed: Test slow_pass is not failed.
+AUnitTest.ino:448: Assertion passed: Test slow_skip is skipped.
+AUnitTest.ino:451: Assertion passed: Test slow_skip is not timed out.
 ```
 (The human readable version of being `expired` will always be `timed out` or
 `not timed out` on the `Serial` output.)
@@ -962,8 +996,7 @@ available in AUnit. Also, the assertion messages are different. ArduinoUnit
 reuses the format used by the `assertXxx()` macros, so prints something like
 the following:_
 ```
-Assertion passed: (test_slow_skip_instance.state=2) >= (Test::DONE_SKIP=2), file
-AUnitTest.ino, line 439.
+AUnitTest.ino:439: Assertion passed: (test_slow_skip_instance.state=2) >= (Test::DONE_SKIP=2).
 ```
 
 _AUnit has a separate message handler to print a customized message for the
@@ -984,10 +1017,10 @@ fails.
 
 The messages look like:
 ```
-Status passed, file AUnitTest.ino, line 360.
-Status failed, file AUnitTest.ino, line 378.
-Status skipped, file AUnitTest.ino, line 380.
-Status timed out, file AUnitTest.ino, line 391.
+AUnitTest.ino:360: Status passed.
+AUnitTest.ino:378: Status failed.
+AUnitTest.ino:380: Status skipped.
+AUnitTest.ino:391: Status timed out.
 ```
 
 The following methods on the `Test` class also set the `status` of the test, but
@@ -1056,31 +1089,44 @@ only a single test case, then returns._
 <a name="FilteringTestCases"></a>
 ### Filtering Test Cases
 
-We can `exclude()` or `include()` test cases using a pattern match:
+Six filtering methods are available on the `TestRunner` class:
+* `TestRunner::include(pattern)` - prefix match
+* `TestRunner::include(testClass, pattern)` - prefix match
+* `TestRunner::exclude(pattern)` - prefix match
+* `TestRunner::exclude(testClass, pattern)` - prefix match
+* `TestRunner::includesub(substring)` - substring match (v1.6)
+* `TestRunner::excludesub(substring)` - substring match (v1.6)
 
-* `TestRunner::exclude(pattern)`
-* `TestRunner::exclude(testClass, pattern)`
-* `TestRunner::include(pattern)`
-* `TestRunner::include(testClass, pattern)`
-
-These methods are called from the global `setup()` method:
+These methods are called from the global `setup()` method, for example:
 
 ```C++
 void setup() {
-  TestRunner::exclude("*");
   TestRunner::include("looping*");
   TestRunner::exclude("CustomTestAgain", "*");
   TestRunner::include("CustomTestAgain", "test*");
+  TestRunner::include("CustomTestAgain", "test*");
+  TestRunner::includesub("net");
+  TestRunner::excludesub("net");
   ...
 }
 ```
 
-Excluded tests bypass their `setup()` and `teardown()` methods and terminate
-immidiately. For the purposes of reporting, however, excluded tests are
-counted as "skipped".
+Excluded tests bypass their `Test::setup()` and `Test::teardown()` methods and
+terminate immediately. For the purposes of reporting, excluded tests are counted
+as "skipped".
 
 The 2-argument versions of `include()` and `exclude()` correspond to the
 2 arguments of `testF()` and `testingF()`.
+
+The filtering methods are also available as command line flags and arguments
+(`--include`, `--exclude`, `--includesub` `--excludesub`) if the test
+program is compiled using EpoxyDuino under a Unix-like environment. See
+the [EpoxyDuino](#EpoxyDuino) section below.
+
+**Implicit Exclude All**: If the *first* filtering request is an "include" (i.e.
+`include(pattern)`, `include(testClass, pattern)`, `includesub(substring)`),
+all tests are excluded by default initially, instead of being included by
+default. Otherwise, the first "include" statement would have no effect.
 
 ***ArduinoUnit Compatibility***:
 _The equivalent versions in ArduinoUnit are `Test::exclude()` and
@@ -1225,7 +1271,7 @@ assertEquals(expected, counter);
 
 The error message (if enabled, which is the default) is:
 ```
-Assertion failed: (3) == (4), file AUnitTest.ino, line 134.
+AUnitTest.ino:134: Assertion failed: (3) == (4).
 ```
 
 Asserts with `bool` values produce customized messages, printing "true" or
@@ -1233,7 +1279,7 @@ Asserts with `bool` values produce customized messages, printing "true" or
 ```C++
 assertEquals(true, false);
 
-Assertion failed: (true) == (false), file AUnitTest.ino, line 134.
+AUnitTest.ino:134: Assertion failed: (true) == (false).
 ```
 
 Similarly, the `assertTrue()` and `assertFalse()` macros provide more customized
@@ -1242,7 +1288,7 @@ messages:
 bool ok = false;
 assertTrue(ok);
 
-Assertion failed: (false) is true, file AUnitTest.ino, line 134.
+AUnitTest.ino:134: Assertion failed: (false) is true.
 ```
 
 and
@@ -1250,7 +1296,7 @@ and
 bool ok = true;
 assertFalse(ok);
 
-Assertion failed: (true) is false, file AUnitTest.ino, line 134.
+AUnitTest.ino:134: Assertion failed: (true) is false.
 ```
 
 ***ArduinoUnit Compatibility***:
@@ -1258,7 +1304,7 @@ _ArduinoUnit captures the arguments of the `assertEqual()` macro
 and prints:_
 
 ```
-Assertion failed: (expected=3) == (counter=4), file AUnitTest.ino, line 134.
+AUnitTest.ino:134: Assertion failed: (expected=3) == (counter=4).
 ```
 
 _Each capture of the parameter string consumes flash memory space. If the unit
@@ -1280,13 +1326,20 @@ the assertion message will contain the string fragments of the arguments
 passed into the `assertXxx()` macros, like this:
 
 ```
-Assertion failed: (expected=3) == (counter=4), file AUnitTest.ino, line 134.
-Assertion failed: (ok=false) is true, file AUnitTest.ino, line 134.
+AUnitTest.ino:134: Assertion failed: (expected=3) == (counter=4).
+AUnitTest.ino:134: Assertion failed: (ok=false) is true.
+```
+
+instead of:
+
+```
+AUnitTest.ino:134: Assertion failed: (3) == (4).
+AUnitTest.ino:134: Assertion failed: (false) is true.
 ```
 
 ***ArduinoUnit Compatibility***:
-_The verbose mode produces the same messages as ArduinoUnit, at the cost of
-increased flash memory usage._
+_As of v1.7, the assertion message format is compatible with the vim editor
+and other Linux/MacOS/Unix tools, and no longer compatible with ArduinoUnit
 
 <a name="TestCaseSummary"></a>
 #### Test Case Summary
@@ -1398,7 +1451,7 @@ or
 ## Command Line Tools
 
 Each unit test is an independent `*.ino` program. You can run it using your
-Ardunio IDE. But there are 2 command line tools that can be used to run them.
+Arduino IDE. But there are 2 command line tools that can be used to run them.
 
 <a name="AUniter"></a>
 ### AUniter
@@ -1490,6 +1543,65 @@ EpoxyDuino, the test program will terminate at the end through the
 will call `exit(0)`. If there are any failing tests (i.e. failed or timed out),
 it will call `exit(1)`.
 
+<a name="CommandLineFlagsAndArguments"></a>
+### Command Line Flags and Arguments
+
+(Added in v1.6)
+
+The standard Arduino environment does not provide command line arguments, since
+a microcontroller does not normally provide a command line environment. However,
+if the AUnit test program is compiled under EpoxyDuino, the standard Unix
+command line parameters (`argc` and `argv`)  become available through the
+`extern int epoxy_argc` and `extern const char* const* epoxy_argv` global
+variables. These allow the `TestRunner` class to provide command line flags and
+arguments as follows:
+
+```bash
+$ ./test.out --help
+Usage: ./test.out [--help] [--include pattern,...] [--exclude pattern,...]
+   [--includesub substring,...] [--excludesub substring,...]
+   [--] [substring ...]
+```
+
+Example, the following runs all tests with substring "net" or "led" in its
+name, and skips all others:
+
+```bash
+$ ./test.out net led
+```
+
+Flags:
+
+* `--include pattern,...`
+    * Comma-separated list of patterns to pass to the
+      `TestRunner::include(pattern)` method
+* `--exclude pattern,...`
+    * Comma-separated list of patterns to pass to the
+      `TestRunner::exclude(pattern)` method
+* `--includesub substring,...`
+    * Comma-separated list of substrings to pass to the
+      `TestRunner::includesub(substring)` method
+* `--excludesub substring,...`
+    * Comma-separated list of substrings to pass to the
+      `TestRunner::excludesub(substring)` method
+
+Arguments:
+
+* Any **Space**-separated list of words after the optional flags are passed to
+  the `TestRunner::includesub(substring)` method.
+
+The command line flags and arguments are processed *after* any hardcoded calls
+to `TestRunner::include()` and `TestRunner::exclude()` methods in the global
+`setup()` method.
+
+The flags and command line arguments are processed *in order* of appearance
+on the command line.
+
+Similar to the hardcoded calls to `TestRunner::include()` and
+`TestRunner::exclude()`, if the first command line flag is an `--include` or
+`--includesub`, then all tests are *excluded* by default initially. Otherwise,
+the first include flag would have no effect.
+
 <a name="ContinuousIntegration"></a>
 ## Continuous Integration
 
@@ -1542,7 +1654,7 @@ Although I think it's theoretically possible, I have never actually verified
 that this can be done.
 
 <a name="IdePlusJenkins"></a>
-### Arduion IDE/CLI + Jenkins
+### Arduino IDE/CLI + Jenkins
 
 This setup is described in [Continuous Integration with
 Jenkins](https://github.com/bxparks/AUniter/tree/develop/jenkins), and it worked
@@ -1830,40 +1942,45 @@ The library is tested on the following boards:
 
 I will occasionally test on the following hardware as a sanity check:
 
+* Arduino Pro Mini (16 MHz ATmega328P)
 * Mini Mega 2560 (Arduino Mega 2560 compatible, 16 MHz ATmega2560)
 * Teensy LC (48 MHz ARM Cortex-M0+)
 
 The following boards are **not** supported:
 
-* megaAVR (e.g. Nano Every) using ArduinoCore-megaavr
-  (https://github.com/arduino/ArduinoCore-megaavr/)
-* SAMD21 boards (e.g. MKRZero) using ArduinoCore-samd
-  (https://github.com/arduino/ArduinoCore-samd) starting with
-  `arduino:samd` version >= 1.8.10
-* Raspberry Pi Pico (RP2040) using Arduino-Pico
-  (https://github.com/earlephilhower/arduino-pico)
-* Any other platform using the ArduinoCore-API
-  (https://github.com/arduino/ArduinoCore-api)
+* Any platform using the ArduinoCore-API
+  (https://github.com/arduino/ArduinoCore-api), such as:
+    * megaAVR (e.g. Nano Every) using ArduinoCore-megaavr
+      (https://github.com/arduino/ArduinoCore-megaavr/)
+    * SAMD21 boards (e.g. MKRZero) using ArduinoCore-samd
+      (https://github.com/arduino/ArduinoCore-samd) starting with
+      `arduino:samd` version >= 1.8.10
+    * Raspberry Pi Pico (RP2040) using Arduino-Pico
+      (https://github.com/earlephilhower/arduino-pico)
 
 <a name="ToolChain"></a>
 ### Tool Chain
 
 This library was validated using:
-* [Arduino IDE 1.8.13](https://www.arduino.cc/en/Main/Software)
-* [Arduino CLI 0.14.0](https://arduino.github.io/arduino-cli)
-* [Arduino AVR Boards 1.8.3](https://github.com/arduino/ArduinoCore-avr)
+
+* [Arduino IDE 1.8.19](https://www.arduino.cc/en/Main/Software)
+* [Arduino CLI 0.19.2](https://arduino.github.io/arduino-cli)
+* [Arduino AVR Boards 1.8.4](https://github.com/arduino/ArduinoCore-avr)
 * [Arduino SAMD Boards 1.8.9](https://github.com/arduino/ArduinoCore-samd)
 * [SparkFun AVR Boards 1.1.13](https://github.com/sparkfun/Arduino_Boards)
-* [SparkFun SAMD Boards 1.8.1](https://github.com/sparkfun/Arduino_Boards)
-* [STM32duino 1.9.0](https://github.com/stm32duino/Arduino_Core_STM32)
-* [ESP8266 Arduino 2.7.4](https://github.com/esp8266/Arduino)
-* [ESP32 Arduino 1.0.6](https://github.com/espressif/arduino-esp32)
-* [Teensyduino 1.53](https://www.pjrc.com/teensy/td_download.html)
+* [SparkFun SAMD Boards 1.8.6](https://github.com/sparkfun/Arduino_Boards)
+* [STM32duino 2.2.0](https://github.com/stm32duino/Arduino_Core_STM32)
+* [ESP8266 Arduino 3.0.2](https://github.com/esp8266/Arduino)
+* [ESP32 Arduino 2.0.2](https://github.com/espressif/arduino-esp32)
+* [Teensyduino 1.56](https://www.pjrc.com/teensy/td_download.html)
 
 This library is *not* compatible with:
-* [Arduino SAMD Boards >=1.8.10](https://github.com/arduino/ArduinoCore-samd)
-* [Arduino megaAVR](https://github.com/arduino/ArduinoCore-megaavr/)
-* [MegaCoreX](https://github.com/MCUdude/MegaCoreX)
+
+* Any platform using the
+  [ArduinoCore-API](https://github.com/arduino/ArduinoCore-api), for example:
+    * [Arduino SAMD Boards >=1.8.10](https://github.com/arduino/ArduinoCore-samd)
+    * [Arduino megaAVR](https://github.com/arduino/ArduinoCore-megaavr/)
+    * [MegaCoreX](https://github.com/MCUdude/MegaCoreX)
 
 (See [Issue #56](https://github.com/bxparks/AUnit/issues/56)
 and [Issue #66](https://github.com/bxparks/AUnit/issues/66)).
@@ -1871,10 +1988,14 @@ and [Issue #66](https://github.com/bxparks/AUnit/issues/66)).
 It should work with [PlatformIO](https://platformio.org/) but I have
 not tested it extensively.
 
+The library works under Linux or MacOS (using both g++ and clang++ compilers)
+using the EpoxyDuino (https://github.com/bxparks/EpoxyDuino) emulation layer.
+
 <a name="OperatingSystem"></a>
 ### Operating System
 
-I used MacOS 10.13.3, Ubuntu 18.04, and Ubuntu 20.04 for most of my development.
+I use Ubuntu 20.04 for the vast majority of my development. I expect that the
+library will work fine under MacOS and Windows, but I have not tested them.
 
 <a name="License"></a>
 ## License
@@ -1884,18 +2005,14 @@ I used MacOS 10.13.3, Ubuntu 18.04, and Ubuntu 20.04 for most of my development.
 <a name="FeedbackAndSupport"></a>
 ## Feedback and Support
 
-If you find this library useful, consider starring this project on GitHub. The
-stars will let me prioritize the more popular libraries over the less popular
-ones.
-
-If you have any questions, comments and other support questions about how to
-use this library, please use the
-[GitHub Discussions](https://github.com/bxparks/AUnit/discussions)
-for this project. If you have bug reports or feature requests, please file a
-ticket in [GitHub Issues](https://github.com/bxparks/AUnit/issues).
-I'd love to hear about how this software and its documentation can be improved.
-I can't promise that I will incorporate everything, but I will give your ideas
-serious consideration.
+If you have any questions, comments, or feature requests for this library,
+please use the [GitHub
+Discussions](https://github.com/bxparks/AUnit/discussions) for this project. If
+you have bug reports, please file a ticket in [GitHub
+Issues](https://github.com/bxparks/AUnit/issues). Feature requests should go
+into Discussions first because they often have alternative solutions which are
+useful to remain visible, instead of disappearing from the default view of the
+Issue tracker after the ticket is closed.
 
 Please refrain from emailing me directly unless the content is sensitive. The
 problem with email is that I cannot reference the email conversation when other

@@ -1,5 +1,5 @@
 #include "display.h"
-//#include "MechVentilation.h"
+#include "MechVentilation.h"
 
 #define MIN_CURVES_Y    60
 #define MAX_CURVES_Y    250

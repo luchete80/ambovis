@@ -22,15 +22,23 @@ then
 fi
 
 ARDUINO_LIBS="$ARDUINO_DIR/libraries"
-echo "Moving required dependencies to $ARDUINO_LIBS"
-cd $ARDUINO_LIBS
+# echo "Moving required dependencies to $ARDUINO_LIBS"
+# cd $ARDUINO_LIBS
 
-if [ ! -d "$ARDUINO_LIBS/AUnit" ];
+if [ ! -d "$CUR_DIR/AUnit" ];
 then
 	echo "AUnit not installed. Installing..."
 	git clone https://github.com/bxparks/AUnit.git --branch v1.7.0 > /dev/null 2>&1
 else
 	echo "AUnit already installed."
+fi
+
+if [ ! -d "$CUR_DIR/LiquidCrystal" ];
+then
+	echo "LiquidCrystal not installed. Installing..."
+	git clone https://github.com/arduino-libraries/LiquidCrystal.git > /dev/null 2>&1
+else
+	echo "LiquidCrystal already installed."
 fi
 
 if [ ! -d "$ARDUINO_LIBS/AMBTestable/src" ];
