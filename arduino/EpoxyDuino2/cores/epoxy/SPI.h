@@ -66,6 +66,11 @@
 #define LSBFIRST 0
 #define MSBFIRST 1
 
+typedef enum _BitOrder {
+  SPI_BITORDER_MSBFIRST = MSBFIRST,
+  SPI_BITORDER_LSBFIRST = LSBFIRST,
+} BitOrder;
+
 class SPISettings {
 public:
   SPISettings(uint32_t /*clock*/, uint8_t /*bitOrder*/, uint8_t /*dataMode*/)
