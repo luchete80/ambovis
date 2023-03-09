@@ -2,7 +2,6 @@
 #define _DISPLAY_H_
 
 #include "pinout.h"
-#include "defaults.h"
 #include "sensorcalculation.h"
 #include "Adafruit_GFX.h"
 #include "Adafruit_ILI9341.h"

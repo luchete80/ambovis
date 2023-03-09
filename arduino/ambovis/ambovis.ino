@@ -110,9 +110,8 @@ byte oldEncPos = 1; //stores the last encoder position value so we can compare t
 byte max_sel, min_sel; //According to current selection
 bool isitem_sel =false;
 
-//void check_buzzer_mute();
-void initTft(Adafruit_ILI9341& tft);
-void initOptions(VentilationOptions_t& options);
+void init_display_tft(Adafruit_ILI9341& tft);
+void init_ventilation_options(VentilationOptions_t& options);
 
 AutoPID * pid;
 MechVentilation * ventilation;
@@ -136,11 +135,8 @@ DallasTemperature sensors(&oneWire);
   
 void setup() {
     Serial.begin(115200);
-  
     analogReference(INTERNAL1V1); // use AREF for reference voltage
-
     init_display();
-
     initPins();
 
     // PID
@@ -158,7 +154,7 @@ void setup() {
     max_accel = 600;
     min_accel = 200;
 
-    initOptions(options);
+    init_ventilation_options(options);
 
     delay(100);
 
@@ -172,7 +168,7 @@ void setup() {
     writeLine(1, "RespirAR FIUBA", 4);
     writeLine(2, "v2.0.2", 8);
 
-    initTft(tft);
+    init_display_tft(tft);
 
     ads.begin();
 
@@ -422,7 +418,7 @@ void timer3Isr(void) {
     stepper->run();
 }
 
-void initTft(Adafruit_ILI9341& tft) {
+void init_display_tft(Adafruit_ILI9341& tft) {
     tft.begin();
     tft.fillScreen(ILI9341_BLACK);
     tft.setTextColor(ILI9341_BLUE);
@@ -431,7 +427,7 @@ void initTft(Adafruit_ILI9341& tft) {
     tft.setCursor(10, 80);     tft.println("FIUBA");
 }
 
-void initOptions(VentilationOptions_t& options) {
+void init_ventilation_options(VentilationOptions_t& options) {
     options.respiratoryRate = DEFAULT_RPM;
     options.percInspEsp = 2; //1:1 to 1:4, is denom
     options.peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;

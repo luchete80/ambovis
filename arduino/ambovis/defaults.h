@@ -123,4 +123,7 @@ extern unsigned long time;
 #define TEMP_TEST
 #define TIME_READ_TEMP  15000 //MSECS
 
+// Alarm state
+enum alarm_state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
+
 #endif // DEFAULTS_H
