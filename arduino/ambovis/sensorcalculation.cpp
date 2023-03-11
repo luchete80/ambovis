@@ -30,28 +30,24 @@ float findFlux(float p_dpt) {
     return flux;
 }
 
-void readSensor(SensorData& sensorData, int16_t adc0, float vzero, bool filter) {
+void readSensor(Adafruit_ADS1115& ads, SensorData& sensorData, float vzero, bool filter) {
+    int16_t adc0 = ads.readADC_SingleEnded(0);
 
-    sensorData.pressure_p = ( analogRead(PIN_PRESSURE)/ (1023.) - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
-
-    sensorData.v_level = float( analogRead(PIN_MPX_LEV) ) / 1024. * 1.1 * VOLTAGE_CONV;
-
+    sensorData.pressure_p = (analogRead(PIN_PRESSURE)/ (1023.) - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
+    sensorData.v_level = float(analogRead(PIN_MPX_LEV)) / 1024. * 1.1 * VOLTAGE_CONV;
     sensorData.voltage = (adc0 * 0.1875) * 0.001; //Volts
 
-    float p_dpt = ( (sensorData.voltage - vzero) / sensorData.v_level - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
-
+    float p_dpt = ((sensorData.voltage - vzero) / sensorData.v_level - 0.04) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
     sensorData.flux = findFlux(p_dpt);
 
     float flux_sum = 0.;
     if (filter) {
         for (int i = 0; i < 4; i++) {
             sensorData.flux_filter[i] = sensorData.flux_filter[i + 1];
-        }
-        sensorData.flux_filter[4] = sensorData.flux;
-
-        for (int i = 0; i < 5; i++) {
             flux_sum += sensorData.flux_filter[i];
         }
+        sensorData.flux_filter[4] = sensorData.flux;
+        flux_sum += sensorData.flux_filter[4];
 
         sensorData.flow_f = flux_sum / 5.;
     } else {
@@ -59,11 +55,10 @@ void readSensor(SensorData& sensorData, int16_t adc0, float vzero, bool filter) 
     }
 
     float vol = sensorData.flow_f * float((millis() - sensorData.last_read_sensor)) * 0.001;
-    if ( sensorData.flux > 0 ) {
+    if (sensorData.flux > 0) {
         sensorData.ml_ins_vol += vol;//flux in l and time in msec, results in ml
     } else {
         sensorData.ml_exs_vol -= vol; //flux in l and time in msec, results in ml
     }
-
     sensorData.last_read_sensor = millis();
 }

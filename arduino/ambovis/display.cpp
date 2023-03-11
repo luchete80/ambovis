@@ -9,8 +9,6 @@ bool lcd_cleaned=false;
 int axispos[]={130,200}; //from each graph, from 0 to 320 (display height, IN PORTRAIT MODE)
 byte state_r;
 
-enum _state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
-
 byte valsreaded=0;
 byte rx[128],ry[128];
 int yflux[2];
