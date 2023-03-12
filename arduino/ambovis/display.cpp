@@ -84,7 +84,7 @@ void tft_draw(Adafruit_ILI9341& tft, SensorData& sensorData, bool& drawing_cycle
         lcd_cleaned=false;
     }
 
-    check_alarms(tft, alarm_data.alarm_state);
+    check_alarms(tft, alarm_state);
 }
 
 void drawY2(Adafruit_ILI9341& tft, bool drawing_cycle, uint16_t color) {// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
@@ -156,7 +156,7 @@ void check_alarms(Adafruit_ILI9341& tft, short alarm_state) {
     } else {
         digitalWrite(RED_LED,LOW);
     }
-    switch (alarm_data.alarm_state) {
+    switch (alarm_state) {
         case NO_ALARM:
             if (!alarm_data.is_alarm_vt_on) {
                 digitalWrite(GREEN_LED,HIGH);
