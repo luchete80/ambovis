@@ -9,8 +9,6 @@ bool lcd_cleaned=false;
 int axispos[]={130,200}; //from each graph, from 0 to 320 (display height, IN PORTRAIT MODE)
 byte state_r;
 
-enum _state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
-
 byte valsreaded=0;
 byte rx[128],ry[128];
 int yflux[2];
@@ -21,6 +19,24 @@ void check_alarms(Adafruit_ILI9341& tft, short alarm_state);
 void drawY2(Adafruit_ILI9341& tft, bool drawing_cycle, uint16_t color);
 void print_vols(Adafruit_ILI9341& tft);
 void printMessageWhenEndedWhileStepperMoving(Adafruit_ILI9341& tft);
+
+void clean_tft(Adafruit_ILI9341& tft) {
+    tft.fillScreen(ILI9341_BLACK);
+}
+
+void init_empty_tft(Adafruit_ILI9341& tft) {
+    digitalWrite(TFT_SLEEP, HIGH);
+    tft.begin();
+    clean_tft(tft);
+}
+
+void init_display_tft(Adafruit_ILI9341& tft) {
+    init_empty_tft(tft);
+    tft.setTextColor(ILI9341_BLUE);
+    tft.setTextSize(4);
+    tft.setCursor(10, 40);     tft.println("RespirAR");
+    tft.setCursor(10, 80);     tft.println("FIUBA");
+}
 
 void tft_draw(Adafruit_ILI9341& tft, SensorData& sensorData, bool& drawing_cycle, float fac, short alarm_state) {
     byte last_x=cycle_pos;
@@ -68,7 +84,7 @@ void tft_draw(Adafruit_ILI9341& tft, SensorData& sensorData, bool& drawing_cycle
         lcd_cleaned=false;
     }
 
-    check_alarms(tft, alarm_state);
+    check_alarms(tft, alarm_data.alarm_state);
 }
 
 void drawY2(Adafruit_ILI9341& tft, bool drawing_cycle, uint16_t color) {// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
@@ -135,14 +151,14 @@ void showPipAlarm(Adafruit_ILI9341& tft) {
 }
 
 void check_alarms(Adafruit_ILI9341& tft, short alarm_state) {
-    if (is_alarm_vt_on) {
+    if (alarm_data.is_alarm_vt_on) {
         showVTAlarm(tft);
     } else {
         digitalWrite(RED_LED,LOW);
     }
-    switch (alarm_state) {
+    switch (alarm_data.alarm_state) {
         case NO_ALARM:
-            if (!is_alarm_vt_on) {
+            if (!alarm_data.is_alarm_vt_on) {
                 digitalWrite(GREEN_LED,HIGH);
                 digitalWrite(RED_LED,LOW);
             }

@@ -198,10 +198,7 @@ extern bool display_needs_update;
 extern VentilationOptions_t options;
 extern MechVentilation * ventilation;
 extern unsigned long last_cycle;
-extern byte alarm_max_pressure,alarm_peep_pressure;
-extern int alarm_vt;
 extern byte cycle_pos; //0 to 127
-extern byte Cdyn;
 extern bool autopid;
 extern bool filter;
 extern byte pfmin,pfmax;
@@ -218,9 +215,6 @@ extern byte f_acc_b;
 extern byte p_acc;
 
 extern bool ended_whilemov;
-extern float pressure_max,pressure_min;
-//extern float pressure_p;
-extern float last_pressure_max,last_pressure_min;
-extern volatile bool updateLimitsForInitInsuf;
+extern SensorData sensorData;
 
 #endif /* INC_MECHANICAL_VENTILATION_H */

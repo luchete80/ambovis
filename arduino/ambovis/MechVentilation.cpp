@@ -1,8 +1,5 @@
 #include "MechVentilation.h"
 
-float pressure_max;
-float pressure_min;
-
 unsigned long _msecTimerStartCycle;
 
 
@@ -163,7 +160,7 @@ void MechVentilation :: update( SensorData& sensorData )
     {
     case Init_Insufflation:
     {
-        updateLimitsForInitInsuf = true;
+        resetLimitsForInitInsufflation(_mllastInsVol, _mllastExsVol, sensorData);
 
         _msecTimerStartCycle=millis();
 

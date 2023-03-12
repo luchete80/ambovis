@@ -8,10 +8,10 @@ void initPins() {
     digitalWrite(PIN_STEPPER, LOW);
 
     pinMode(TFT_SLEEP, OUTPUT);
-    digitalWrite(TFT_SLEEP, HIGH);
+//    digitalWrite(TFT_SLEEP, HIGH);
 
     pinMode(LCD_SLEEP, OUTPUT);
-    digitalWrite(LCD_SLEEP, HIGH);
+//    digitalWrite(LCD_SLEEP, HIGH);
 
     pinMode(PIN_BUZZER, OUTPUT);
     digitalWrite(PIN_BUZZER, BUZZER_LOW);

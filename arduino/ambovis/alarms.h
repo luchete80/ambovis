@@ -7,9 +7,18 @@
 
 #include "Arduino.h"
 #include "pinout.h"
-#include "defaults.h"
 
-short getAlarmState(float last_pressure_max, float last_pressure_min, short alarm_max_pressure, short alarm_peep_pressure);
-void check_buzzer_mute(bool& last_mute, unsigned long& mute_count_time, bool& buzzmuted, unsigned long time);
+typedef struct alarm_data {
+    bool is_alarm_vt_on = false;
+    short alarm_state = 0;
+    byte alarm_max_pressure = 0;
+    byte alarm_peep_pressure = 0;
+    int alarm_vt = 0;
+} AlarmData;
+
+short get_alarm_state(float last_pressure_max, float last_pressure_min, byte alarm_max_pressure, byte alarm_peep_pressure);
+bool calc_alarm_vt_is_on(int ml_last_ins_vol, int ml_last_exp_vol, int alarm_vt_limit);
+bool check_buzzer_mute(bool last_mute, bool buzz_muted, unsigned long mute_count, unsigned long time);
+void set_alarm_buzzer(short alarm_state, bool buzz_muted, unsigned long& time_buzz, bool& is_buzzer_on);
 
 #endif //AMBOVIS_ALARMS_H

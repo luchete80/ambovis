@@ -6,11 +6,14 @@
 #define AMBOVIS_DPFLUX_H
 
 #include <Arduino.h>
-#include "defaults.h"
+#include <Wire.h>
+#include <Adafruit_ADS1X15.h>
 #include "pinout.h"
 
 typedef struct sensor_data {
     float pressure_p = 0.;
+    float pressure_max = 0;
+    float pressure_min = 0;
     float v_level = 0.;
     float voltage = 0.;
     float flux_filter[5] = {0.};
@@ -19,9 +22,15 @@ typedef struct sensor_data {
     float ml_ins_vol = 0.;
     float ml_exs_vol = 0.;
     unsigned long last_read_sensor = 0L;
+    float last_pressure_max;
+    float last_pressure_min;
+    float cdyn_pass[3] = {0.};
+    float cdyn_avg = 0.;
 } SensorData;
 
 float findFlux(float p_dpt);
-void readSensor(SensorData& result, int16_t adc0, float vzero, bool filter);
+void init_sensor(Adafruit_ADS1115& ads);
+void readSensor(Adafruit_ADS1115& ads, SensorData& result, float vzero, bool filter);
+void resetLimitsForInitInsufflation(int& _mlLastInsVol, int& _mlLastExpVol, SensorData& sensorData);
 
 #endif //AMBOVIS_DPFLUX_H

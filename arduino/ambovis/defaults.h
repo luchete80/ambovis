@@ -11,6 +11,7 @@
 //#define FILTER_FLUX 1
 #define DEBUG_OFF 1 //Release version
 #define BUZZER_LOW 0
+#define BUZZER_HIGH 1
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE                 20                                          // msec
@@ -111,10 +112,13 @@ extern unsigned long time;
 #define BATDIV_R1           12000
 #define BATDIV_R2           470
 #define BATTERY_READ 5
-#define BAT_TEST
+//#define BAT_TEST
 #define TIME_SHOW_BAT   15000 //MSECS
 //#define TEMP_TEST
 #define TIME_READ_TEMP  15000 //MSECS
 #define CALIB_CYCLES  5
+
+// Alarm state
+enum alarm_state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
 
 #endif // DEFAULTS_H

@@ -2,6 +2,7 @@
 #define _MENU_H_
 
 #include "defaults.h"
+#include "alarms.h"
 #include <LiquidCrystal.h>
 
 extern LiquidCrystal lcd;
@@ -23,7 +24,8 @@ extern bool update_options;
 extern char tempstr[5];
 extern byte menu_number;
 extern byte p_trim;
-
+extern AlarmData alarm_data;
+extern bool isitem_sel;
 
 void writeLine(int line, String message = "", int offsetLeft = 0);
 void lcd_clearxy(int x, int y,int pos=1);
@@ -34,8 +36,6 @@ void init_display();
 
 void check_updn_button(int pin, byte *var, bool incr_decr);
 void check_bck_state();
-
-extern bool isitem_sel;
 
 class Menu_inic {
   byte _mod,_bpm,_i_e;  
