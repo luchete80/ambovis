@@ -6,6 +6,8 @@
 #define AMBOVIS_DPFLUX_H
 
 #include <Arduino.h>
+#include <Wire.h>
+#include <Adafruit_ADS1X15.h>
 #include "defaults.h"
 #include "pinout.h"
 
@@ -22,6 +24,6 @@ typedef struct sensor_data {
 } SensorData;
 
 float findFlux(float p_dpt);
-void readSensor(SensorData& result, int16_t adc0, float vzero, bool filter);
+void readSensor(Adafruit_ADS1115& ads, SensorData& result, float vzero, bool filter);
 
 #endif //AMBOVIS_DPFLUX_H

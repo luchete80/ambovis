@@ -27,6 +27,15 @@ void lcd_clearxy(int x, int y,int pos=1) {
     }
 }
 
+void lcd_update_value(int x, int y, int pos, String msg) {
+    for (int i=0; i<pos; i++) {
+        lcd.setCursor(x+i, y);
+        lcd.print(" ");
+    }
+    lcd.setCursor(x, y);
+    lcd.print(msg);
+}
+
 void lcd_selxy(int x, int y, bool isItemSelected) {
     lcd.setCursor(x, y);
     if (!isItemSelected) {
@@ -87,13 +96,15 @@ void check_buttons(Keyboard_data_t& keyboard_data, unsigned long time) {
 
     keyboard_data.pressed = 0;
     if (digitalRead(PIN_MENU_EN) == LOW) {
-        if (time - keyboard_data.last_button_pressed > 150) {
+        if (millis() - keyboard_data.last_button_pressed > 120) {
             keyboard_data.pressed = ENTER_PRESSED;
-            keyboard_data.last_button_pressed = time;
+            keyboard_data.last_button_pressed = millis();
         }
     }
 
-    check_bck_state(keyboard_data, time);
+    if (keyboard_data.pressed == 0) {
+        check_bck_state(keyboard_data, time);
+    }
 }
 
 int8_t* get_value_to_edit(Menu_state_t& menu_state) {
@@ -191,7 +202,6 @@ int8_t validate_parameter(Menu_state_t& menu_state, int8_t selection) {
             return validate_boundaries(0, 1, selection);
         }
     }
-    Serial.println("Validate param error");
     return -1;
 }
 
@@ -208,13 +218,12 @@ int8_t validate_selection(int8_t& menu_number, int8_t selection) {
     if (menu_number == SETTINGS_MENU) {
         return validate_boundaries(0, 1, selection);
     }
-    Serial.println("Validate selection error");
     return -1;
 }
 
 bool forceGoToParametersMenuAfterWait(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state, unsigned long time) {
     if (menu_state.menu_number != PARAMETERS_MENU) {
-        if (time - keyboard_data.last_button_pressed > 10000) {
+        if (time - keyboard_data.last_button_pressed > 30000) {
             menu_state.menu_number = PARAMETERS_MENU;
             keyboard_data.edited_value = keyboard_data.selection = 0;
             keyboard_data.is_item_selected = false;
@@ -225,125 +234,6 @@ bool forceGoToParametersMenuAfterWait(Keyboard_data_t& keyboard_data, Menu_state
         }
     }
     return false;
-}
-  
-void check_encoder(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state, unsigned long time) {
-    keyboard_data.old_selection = keyboard_data.edited_value;
-
-    check_buttons(keyboard_data, time);
-
-    if (forceGoToParametersMenuAfterWait(keyboard_data, menu_state, time)) {
-        return;
-    }
-
-    if (keyboard_data.is_item_selected) {
-        if (keyboard_data.pressed == ENTER_PRESSED) {
-            *keyboard_data.value_to_edit = validate_parameter(menu_state, keyboard_data.selection);
-            keyboard_data.edited_value = 0;
-            keyboard_data.selection = menu_state.old_menu_position;
-            keyboard_data.is_item_selected = false;
-            menu_state.update_options = true;
-            menu_state.show_changed_options = true;
-        } else if (keyboard_data.pressed == BACK_PRESSED) {
-            keyboard_data.is_item_selected = false;
-            menu_state.show_changed_options = true;
-            keyboard_data.selection = 0;
-        } else {
-            keyboard_data.selection = validate_parameter(menu_state, keyboard_data.selection);
-            keyboard_data.edited_value = keyboard_data.selection;
-            menu_state.show_changed_options = keyboard_data.old_selection != keyboard_data.edited_value;
-        }
-    } else {
-        if (keyboard_data.pressed == ENTER_PRESSED) {
-            if (menu_state.menu_number == MAIN_MENU) {
-                menu_state.menu_number = MENU_NUMBER_LIST[keyboard_data.edited_value];
-                keyboard_data.selection = keyboard_data.edited_value = 0;
-                menu_state.menu_position = 0;
-            } else {
-                if (menu_state.is_initial_menu && menu_state.menu_position == 2) {
-                    keyboard_data.is_item_selected = false;
-                    menu_state.initial_menu_completed = true;
-                } else {
-                    keyboard_data.value_to_edit = get_value_to_edit(menu_state);
-                    keyboard_data.selection = keyboard_data.edited_value = *keyboard_data.value_to_edit;
-                    keyboard_data.is_item_selected = true;
-                }
-            }
-            menu_state.show_changed_options = true;
-            menu_state.clear_display = true;
-        } else if (keyboard_data.pressed == BACK_PRESSED) {
-            if (menu_state.menu_number != MAIN_MENU) {
-                keyboard_data.is_item_selected = false;
-                menu_state.show_changed_options = true;
-                menu_state.clear_display = true;
-
-                if (!menu_state.is_initial_menu) {
-                    menu_state.menu_number = MAIN_MENU;
-                    keyboard_data.selection = 0;
-                    menu_state.old_menu_position = menu_state.menu_position = 0;
-                }
-            }
-        } else {
-            keyboard_data.selection = validate_selection(menu_state.menu_number, keyboard_data.selection);
-            keyboard_data.edited_value = keyboard_data.selection;
-            menu_state.old_menu_position = menu_state.menu_position;
-            menu_state.menu_position = keyboard_data.edited_value;
-            menu_state.show_changed_options = menu_state.old_menu_position != menu_state.menu_position;
-        }
-    }
-}
-
-void clear_n_sel(int8_t& menu_number, int8_t& menu_position, int8_t& old_menu_position, bool& is_initial_menu) {
-    if (menu_number == MAIN_MENU) {
-        switch(old_menu_position) {
-            case 0: lcd_clearxy(0, 0); break;
-            case 1: lcd_clearxy(0, 1); break;
-            case 2: lcd_clearxy(0, 2); break;
-        }
-    } else if (menu_number == PARAMETERS_MENU) {
-        if (is_initial_menu) {
-            switch(old_menu_position) {
-                case 0: lcd_clearxy(0, 2); break; //BPM
-                case 1: lcd_clearxy(7, 2); break; //IE
-                case 2: lcd_clearxy(0, 3); break; //READY
-            }
-            switch(menu_position) {
-                case 0: lcd_clearxy(6, 2, 3); break; //BPM:
-                case 1: lcd_clearxy(15, 2, 2); break; //IE:1:
-            }
-        } else {
-            switch(old_menu_position) {
-                case 0: lcd_clearxy(9, 0); break; //V:
-                case 1: lcd_clearxy(0, 1); break; //BPM:
-                case 2: lcd_clearxy(0, 2); break; //IE:
-            }
-            switch(menu_position) {
-                case 0: lcd_clearxy(3, 0, 3); break; //V:
-                case 1: lcd_clearxy(5, 1, 3); break; //BPM:
-                case 2: lcd_clearxy(7, 2, 1); break; //IE:1:
-            }
-        }
-    } else if (menu_number == ALARMS_MENU) {
-        switch(old_menu_position) {
-            case 0: lcd_clearxy(0, 0); break;//PIP
-            case 1: lcd_clearxy(0, 1); break;//PEEP
-            case 2: lcd_clearxy(0, 2); break; //VT
-        }
-        switch(menu_position) {
-            case 0: lcd_clearxy(7, 0, 3); break; //PIPAL:
-            case 1: lcd_clearxy(8, 1, 3); break; //PEEPAL:
-            case 2: lcd_clearxy(6, 2, 3); break; //VTAL:
-        }
-    } else if (menu_number == SETTINGS_MENU) {
-        switch(old_menu_position) {
-            case 0: lcd_clearxy(0, 0); break;//FILTER
-            case 1: lcd_clearxy(0, 1); break;//AUTOPID
-        }
-        switch(menu_position) {
-            case 0: lcd_clearxy(8, 0, 3); break; //FILTER:
-            case 1: lcd_clearxy(9, 1, 3); break; //AUTOPID:
-        }
-    }
 }
 
 bool isEditing(int8_t m, int8_t p, bool is_item_selected, Menu_state_t& menu_state) {
@@ -378,46 +268,204 @@ String value_to_display(int8_t menu, int8_t position, Keyboard_data_t& keyboard,
             case 1: return isEditing(SETTINGS_MENU, 1, itemSel, menu_state) ? selection : String(autopid);
         }
     }
-    Serial.println("Value to display error");
     return String("ERR");
+}
+
+void update_edited_value(int8_t& menu_number, int8_t& menu_position, int8_t& old_menu_position, bool& is_initial_menu, Keyboard_data_t& keyboardData) {
+    if (menu_number == PARAMETERS_MENU) {
+        if (is_initial_menu) {
+            switch(menu_position) {
+                case 0:lcd_update_value(5, 2, 2, String(keyboardData.edited_value)); break;
+                case 1:lcd_update_value(13, 2, 2, String(keyboardData.edited_value)); break;
+            }
+        } else {
+            switch(menu_position) {
+                case 0:lcd_update_value(12, 0, 4, String(keyboardData.edited_value) + "%"); break;
+                case 1:lcd_update_value(5, 1, 3, String(keyboardData.edited_value)); break;
+                case 2:lcd_update_value(13, 1, 1, String(keyboardData.edited_value)); break;
+            }
+        }
+    } else if (menu_number == ALARMS_MENU) {
+        switch(menu_position) {
+            case 0:lcd_update_value(7, 0, 3, String(keyboardData.edited_value)); break;
+            case 1:lcd_update_value(8, 1, 3, String(keyboardData.edited_value)); break;
+            case 2:lcd_update_value(6, 2, 3, String(keyboardData.edited_value)); break;
+        }
+    } else if (menu_number == SETTINGS_MENU) {
+        switch(menu_position) {
+            case 0:lcd_update_value(8, 0, 3, String(keyboardData.edited_value) == "1" ? "ON" : "OFF"); break;
+            case 1:lcd_update_value(9, 1, 3, String(keyboardData.edited_value) == "1" ? "ON" : "OFF"); break;
+        }
+    }
+}
+
+void show_cursor(int8_t& menu_number, int8_t& menu_position, bool& is_item_selected, bool& is_initial_menu) {
+    if (menu_number == MAIN_MENU) {
+        switch(menu_position) {
+            case 0: lcd_selxy(0, 0, false); break;
+            case 1: lcd_selxy(0, 1, false); break;
+            case 2: lcd_selxy(0, 2, false); break;
+        }
+    } else if (menu_number == PARAMETERS_MENU) {
+        if (is_initial_menu) {
+            switch(menu_position) {
+                case 0: lcd_selxy(0, 2, is_item_selected); break;
+                case 1: lcd_selxy(7, 2, is_item_selected); break; //IE:1:
+                case 2: lcd_selxy(0, 3, is_item_selected); break; //READY
+            }
+        } else {
+            switch(menu_position) {
+                case 0: lcd_selxy(9, 0, is_item_selected); break; //V:
+                case 1: lcd_selxy(0, 1, is_item_selected); break; //BPM:
+                case 2: lcd_selxy(7, 1, is_item_selected); break; //IE:1:
+            }
+        }
+    } else if (menu_number == ALARMS_MENU) {
+        switch(menu_position) {
+            case 0: lcd_selxy(0, 0, is_item_selected); break; //PIPAL:
+            case 1: lcd_selxy(0, 1, is_item_selected); break; //PEEPAL:
+            case 2: lcd_selxy(0, 2, is_item_selected); break; //VTAL:
+        }
+    } else if (menu_number == SETTINGS_MENU) {
+        switch(menu_position) {
+            case 0: lcd_selxy(0, 0, is_item_selected); break; //FILTER:
+            case 1: lcd_selxy(0, 1, is_item_selected); break; //AUTOPID:
+        }
+    }
+}
+
+void move_cursor(int8_t& menu_number, int8_t& menu_position, int8_t& old_menu_position, bool& is_item_selected, bool& is_initial_menu) {
+    if (menu_number == MAIN_MENU) {
+        switch(old_menu_position) {
+            case 0: lcd_clearxy(0, 0); break;
+            case 1: lcd_clearxy(0, 1); break;
+            case 2: lcd_clearxy(0, 2); break;
+        }
+    } else if (menu_number == PARAMETERS_MENU) {
+        if (is_initial_menu) {
+            switch(old_menu_position) {
+                case 0: lcd_clearxy(0, 2); break; //BPM
+                case 1: lcd_clearxy(7, 2); break; //IE
+                case 2: lcd_clearxy(0, 3); break; //READY
+            }
+        } else {
+            switch(old_menu_position) {
+                case 0: lcd_clearxy(9, 0); break; //V:
+                case 1: lcd_clearxy(0, 1); break; //BPM:
+                case 2: lcd_clearxy(7, 1); break; //IE:
+            }
+        }
+    } else if (menu_number == ALARMS_MENU) {
+        switch(old_menu_position) {
+            case 0: lcd_clearxy(0, 0); break;//PIP
+            case 1: lcd_clearxy(0, 1); break;//PEEP
+            case 2: lcd_clearxy(0, 2); break; //VT
+        }
+    } else if (menu_number == SETTINGS_MENU) {
+        switch(old_menu_position) {
+            case 0: lcd_clearxy(0, 0); break;//FILTER
+            case 1: lcd_clearxy(0, 1); break;//AUTOPID
+        }
+    }
+    show_cursor(menu_number, menu_position, is_item_selected, is_initial_menu);
+}
+
+void check_encoder(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state, unsigned long time) {
+    keyboard_data.old_selection = keyboard_data.edited_value;
+    check_buttons(keyboard_data, time);
+
+    if (forceGoToParametersMenuAfterWait(keyboard_data, menu_state, time)) {
+        return;
+    }
+
+    if (time - keyboard_data.last_button_pressed > 3000) {
+        return;
+    }
+
+    if (keyboard_data.is_item_selected) {
+        if (keyboard_data.pressed == ENTER_PRESSED) {
+            *keyboard_data.value_to_edit = validate_parameter(menu_state, keyboard_data.selection);
+            keyboard_data.edited_value = 0;
+            keyboard_data.selection = menu_state.menu_position;
+            keyboard_data.is_item_selected = false;
+            menu_state.update_options = true;
+            menu_state.show_changed_options = true;
+            show_cursor(menu_state.menu_number, menu_state.menu_position,
+                        keyboard_data.is_item_selected, menu_state.is_initial_menu);
+        } else if (keyboard_data.pressed == BACK_PRESSED) {
+            keyboard_data.is_item_selected = false;
+            menu_state.show_changed_options = false;
+            keyboard_data.selection = menu_state.menu_position;
+            show_cursor(menu_state.menu_number, menu_state.menu_position,
+                        keyboard_data.is_item_selected, menu_state.is_initial_menu);
+        } else {
+            keyboard_data.selection = validate_parameter(menu_state, keyboard_data.selection);
+            keyboard_data.edited_value = keyboard_data.selection;
+            menu_state.show_changed_options = keyboard_data.old_selection != keyboard_data.edited_value;
+            update_edited_value(menu_state.menu_number, menu_state.menu_position, menu_state.old_menu_position,
+                                menu_state.is_initial_menu, keyboard_data);
+        }
+    } else {
+        if (keyboard_data.pressed == ENTER_PRESSED) {
+            if (menu_state.menu_number == MAIN_MENU) {
+                menu_state.menu_number = MENU_NUMBER_LIST[keyboard_data.edited_value];
+                keyboard_data.selection = keyboard_data.edited_value = 0;
+                menu_state.show_changed_options = true;
+                menu_state.menu_position = 0;
+                lcd.clear();
+            } else {
+                if (menu_state.is_initial_menu && menu_state.menu_position == 2) {
+                    menu_state.initial_menu_completed = true;
+                } else {
+                    keyboard_data.value_to_edit = get_value_to_edit(menu_state);
+                    keyboard_data.selection = keyboard_data.edited_value = *keyboard_data.value_to_edit;
+                    keyboard_data.is_item_selected = true;
+                    show_cursor(menu_state.menu_number, menu_state.menu_position,
+                                keyboard_data.is_item_selected, menu_state.is_initial_menu);
+                }
+            }
+        } else if (keyboard_data.pressed == BACK_PRESSED) {
+            if (menu_state.menu_number != MAIN_MENU) {
+                menu_state.clear_display = true;
+                menu_state.show_changed_options = true;
+                if (!menu_state.is_initial_menu) {
+                    menu_state.menu_number = MAIN_MENU;
+                    keyboard_data.selection = 0;
+                    menu_state.old_menu_position = menu_state.menu_position = 0;
+                }
+            }
+        } else {
+            keyboard_data.selection = validate_selection(menu_state.menu_number, keyboard_data.selection);
+            keyboard_data.edited_value = keyboard_data.selection;
+            menu_state.old_menu_position = menu_state.menu_position;
+            menu_state.menu_position = keyboard_data.edited_value;
+            menu_state.show_changed_options = menu_state.old_menu_position != menu_state.menu_position;
+            if (menu_state.show_changed_options) {
+                move_cursor(menu_state.menu_number, menu_state.menu_position, menu_state.old_menu_position,
+                            keyboard_data.is_item_selected, menu_state.is_initial_menu);
+            }
+        }
+    }
 }
 
 void display_lcd(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state) {
     if (menu_state.clear_display) {
         menu_state.clear_display = false;
         lcd.clear();
-    } else {
-        clear_n_sel(menu_state.menu_number, menu_state.menu_position, menu_state.old_menu_position, menu_state.is_initial_menu);
     }
     char temp_str[5];
-
     if (menu_state.menu_number == MAIN_MENU) {
-        switch (menu_state.menu_position) {
-            case 0: lcd_selxy(0, 0, keyboard_data.is_item_selected); break;
-            case 1: lcd_selxy(0, 1, keyboard_data.is_item_selected); break;
-            case 2: lcd_selxy(0, 2, keyboard_data.is_item_selected); break;
-        }
         writeLine(0, "PARAMETROS", 1);
         writeLine(1, "ALARMAS", 1);
         writeLine(2, "SETTINGS", 1);
     } else if (menu_state.menu_number == PARAMETERS_MENU) {
         if (menu_state.is_initial_menu) {
             writeLine(0, "Ingrese params", 1);
-            switch (menu_state.menu_position) {
-                case 0: lcd_selxy(0, 2, keyboard_data.is_item_selected); break;
-                case 1: lcd_selxy(7, 2, keyboard_data.is_item_selected); break;
-                case 2: lcd_selxy(0, 3, keyboard_data.is_item_selected); break;
-            }
             writeLine(1, "MOD:MAN", 1);
             writeLine(2, "BPM:" + value_to_display(PARAMETERS_MENU, 0, keyboard_data, menu_state), 1);
             writeLine(2, "IE:1:" + value_to_display(PARAMETERS_MENU, 1, keyboard_data, menu_state), 8);
             writeLine(3, "READY", 1);
         } else {
-            switch (menu_state.menu_position) {
-                case 0: lcd_selxy(9, 0, keyboard_data.is_item_selected); break;
-                case 1: lcd_selxy(0, 1, keyboard_data.is_item_selected); break;
-                case 2: lcd_selxy(7, 1, keyboard_data.is_item_selected); break;
-            }
             writeLine(0, "MOD:MAN", 1);
             writeLine(0, "V:" + value_to_display(PARAMETERS_MENU, 0, keyboard_data, menu_state)+"%", 10);
             writeLine(1, "BPM:" + value_to_display(PARAMETERS_MENU, 1, keyboard_data, menu_state), 1);
@@ -433,11 +481,6 @@ void display_lcd(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state) {
             writeLine(3, "VM:" + String(temp_str), 1);
         }
     } else if (menu_state.menu_number == ALARMS_MENU) {
-        switch (menu_state.menu_position) {
-            case 0: lcd_selxy(0, 0, keyboard_data.is_item_selected); break;
-            case 1: lcd_selxy(0, 1, keyboard_data.is_item_selected); break;
-            case 2: lcd_selxy(0, 2, keyboard_data.is_item_selected); break;
-        }
         writeLine(0, "PIPAL:" + value_to_display(ALARMS_MENU, 0, keyboard_data, menu_state), 1);
         dtostrf(Cdyn*1.01972, 2, 1, temp_str);
         writeLine(0, "CD:" + String(temp_str), 10);
@@ -448,10 +491,6 @@ void display_lcd(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state) {
         writeLine(3, "CYCLE:" + String(last_cycle), 1);
 
     } else if (menu_state.menu_number == SETTINGS_MENU) {
-        switch (menu_state.menu_position) {
-            case 0: lcd_selxy(0, 0, keyboard_data.is_item_selected); break;
-            case 1: lcd_selxy(0, 1, keyboard_data.is_item_selected); break;
-        }
         writeLine(0, "FILTER:" , 1);
         String filterStr = value_to_display(SETTINGS_MENU, 0, keyboard_data, menu_state);
         if (filterStr == "1") writeLine(0, "ON", 8); else writeLine(0, "OFF", 8);
@@ -460,6 +499,8 @@ void display_lcd(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state) {
         String autopidStr = value_to_display(SETTINGS_MENU, 1, keyboard_data, menu_state);
         if (autopidStr == "1") writeLine(1, "ON", 9); else writeLine(1, "OFF", 9);
     }
+    show_cursor(menu_state.menu_number, menu_state.menu_position,
+                keyboard_data.is_item_selected, menu_state.is_initial_menu);
 }
 
 void initialize_menu(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state) {
