@@ -87,10 +87,6 @@ class VentilationOptions_t {
   ~VentilationOptions_t(){}
 };
 
-#define MODE_VOL_CTL 0
-#define MODE_VOL_CTL 1
-#define MODE_MANUAL  2
-
 #define VENTMODE_VCL 0
 #define VENTMODE_PCL 1
 #define VENTMODE_MAN 2

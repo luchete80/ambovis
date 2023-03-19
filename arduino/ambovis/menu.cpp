@@ -28,10 +28,7 @@ void lcd_clearxy(int x, int y,int pos=1) {
 }
 
 void lcd_update_value(int x, int y, int pos, String msg) {
-    for (int i=0; i<pos; i++) {
-        lcd.setCursor(x+i, y);
-        lcd.print(" ");
-    }
+    lcd_clearxy(x, y, pos);
     lcd.setCursor(x, y);
     lcd.print(msg);
 }
@@ -52,7 +49,7 @@ void check_bck_state(Keyboard_data_t& keyboard_data, unsigned long time) {
         if (keyboard_data.bck_state == LOW) {
             keyboard_data.start_pressed = time;
             keyboard_data.change_sleep = false;
-            if (time - keyboard_data.last_button_pressed > 180) {
+            if (time - keyboard_data.last_button_pressed > 150) {
                 keyboard_data.pressed = BACK_PRESSED;
                 keyboard_data.last_button_pressed = time;
             }
@@ -205,7 +202,7 @@ int8_t validate_parameter(Menu_state_t& menu_state, int8_t selection) {
     return -1;
 }
 
-int8_t validate_selection(int8_t& menu_number, int8_t selection) {
+int8_t validate_menu_position(int8_t& menu_number, int8_t selection) {
     if (menu_number == MAIN_MENU) {
         return validate_boundaries(0, 2, selection);
     }
@@ -221,9 +218,9 @@ int8_t validate_selection(int8_t& menu_number, int8_t selection) {
     return -1;
 }
 
-bool forceGoToParametersMenuAfterWait(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state, unsigned long time) {
+bool forceParametersMenuAfterWait(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state, unsigned long time) {
     if (menu_state.menu_number != PARAMETERS_MENU) {
-        if (time - keyboard_data.last_button_pressed > 30000) {
+        if (time - keyboard_data.last_button_pressed > 10000) {
             menu_state.menu_number = PARAMETERS_MENU;
             keyboard_data.edited_value = keyboard_data.selection = 0;
             keyboard_data.is_item_selected = false;
@@ -271,30 +268,30 @@ String value_to_display(int8_t menu, int8_t position, Keyboard_data_t& keyboard,
     return String("ERR");
 }
 
-void update_edited_value(int8_t& menu_number, int8_t& menu_position, int8_t& old_menu_position, bool& is_initial_menu, Keyboard_data_t& keyboardData) {
+void update_edited_value(int8_t& menu_number, int8_t& menu_position, int8_t& old_menu_position, bool& is_initial_menu, int8_t& edited_value) {
     if (menu_number == PARAMETERS_MENU) {
         if (is_initial_menu) {
             switch(menu_position) {
-                case 0:lcd_update_value(5, 2, 2, String(keyboardData.edited_value)); break;
-                case 1:lcd_update_value(13, 2, 2, String(keyboardData.edited_value)); break;
+                case 0:lcd_update_value(5, 2, 2, String(edited_value)); break;
+                case 1:lcd_update_value(13, 2, 2, String(edited_value)); break;
             }
         } else {
             switch(menu_position) {
-                case 0:lcd_update_value(12, 0, 4, String(keyboardData.edited_value) + "%"); break;
-                case 1:lcd_update_value(5, 1, 3, String(keyboardData.edited_value)); break;
-                case 2:lcd_update_value(13, 1, 1, String(keyboardData.edited_value)); break;
+                case 0:lcd_update_value(12, 0, 4, String(edited_value) + "%"); break;
+                case 1:lcd_update_value(5, 1, 3, String(edited_value)); break;
+                case 2:lcd_update_value(13, 1, 1, String(edited_value)); break;
             }
         }
     } else if (menu_number == ALARMS_MENU) {
         switch(menu_position) {
-            case 0:lcd_update_value(7, 0, 3, String(keyboardData.edited_value)); break;
-            case 1:lcd_update_value(8, 1, 3, String(keyboardData.edited_value)); break;
-            case 2:lcd_update_value(6, 2, 3, String(keyboardData.edited_value)); break;
+            case 0:lcd_update_value(7, 0, 3, String(edited_value)); break;
+            case 1:lcd_update_value(8, 1, 3, String(edited_value)); break;
+            case 2:lcd_update_value(6, 2, 3, String(edited_value)); break;
         }
     } else if (menu_number == SETTINGS_MENU) {
         switch(menu_position) {
-            case 0:lcd_update_value(8, 0, 3, String(keyboardData.edited_value) == "1" ? "ON" : "OFF"); break;
-            case 1:lcd_update_value(9, 1, 3, String(keyboardData.edited_value) == "1" ? "ON" : "OFF"); break;
+            case 0:lcd_update_value(8, 0, 3, String(edited_value) == "1" ? "ON" : "OFF"); break;
+            case 1:lcd_update_value(9, 1, 3, String(edited_value) == "1" ? "ON" : "OFF"); break;
         }
     }
 }
@@ -302,9 +299,9 @@ void update_edited_value(int8_t& menu_number, int8_t& menu_position, int8_t& old
 void show_cursor(int8_t& menu_number, int8_t& menu_position, bool& is_item_selected, bool& is_initial_menu) {
     if (menu_number == MAIN_MENU) {
         switch(menu_position) {
-            case 0: lcd_selxy(0, 0, false); break;
-            case 1: lcd_selxy(0, 1, false); break;
-            case 2: lcd_selxy(0, 2, false); break;
+            case 0: lcd_selxy(0, 0, false); break; //PARAMETERS
+            case 1: lcd_selxy(0, 1, false); break; //ALARMS
+            case 2: lcd_selxy(0, 2, false); break; //SETTINGS
         }
     } else if (menu_number == PARAMETERS_MENU) {
         if (is_initial_menu) {
@@ -374,11 +371,11 @@ void check_encoder(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state, uns
     keyboard_data.old_selection = keyboard_data.edited_value;
     check_buttons(keyboard_data, time);
 
-    if (forceGoToParametersMenuAfterWait(keyboard_data, menu_state, time)) {
+    if (forceParametersMenuAfterWait(keyboard_data, menu_state, time)) {
         return;
     }
 
-    if (time - keyboard_data.last_button_pressed > 3000) {
+    if (time - keyboard_data.last_button_pressed > 2000) {
         return;
     }
 
@@ -386,15 +383,15 @@ void check_encoder(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state, uns
         if (keyboard_data.pressed == ENTER_PRESSED) {
             *keyboard_data.value_to_edit = validate_parameter(menu_state, keyboard_data.selection);
             keyboard_data.edited_value = 0;
+            menu_state.update_options = true;
             keyboard_data.selection = menu_state.menu_position;
             keyboard_data.is_item_selected = false;
-            menu_state.update_options = true;
             menu_state.show_changed_options = true;
             show_cursor(menu_state.menu_number, menu_state.menu_position,
                         keyboard_data.is_item_selected, menu_state.is_initial_menu);
         } else if (keyboard_data.pressed == BACK_PRESSED) {
             keyboard_data.is_item_selected = false;
-            menu_state.show_changed_options = false;
+            menu_state.show_changed_options = true;
             keyboard_data.selection = menu_state.menu_position;
             show_cursor(menu_state.menu_number, menu_state.menu_position,
                         keyboard_data.is_item_selected, menu_state.is_initial_menu);
@@ -402,8 +399,10 @@ void check_encoder(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state, uns
             keyboard_data.selection = validate_parameter(menu_state, keyboard_data.selection);
             keyboard_data.edited_value = keyboard_data.selection;
             menu_state.show_changed_options = keyboard_data.old_selection != keyboard_data.edited_value;
-            update_edited_value(menu_state.menu_number, menu_state.menu_position, menu_state.old_menu_position,
-                                menu_state.is_initial_menu, keyboard_data);
+            if (menu_state.show_changed_options) {
+                update_edited_value(menu_state.menu_number, menu_state.menu_position, menu_state.old_menu_position,
+                                    menu_state.is_initial_menu, keyboard_data.edited_value);
+            }
         }
     } else {
         if (keyboard_data.pressed == ENTER_PRESSED) {
@@ -435,7 +434,7 @@ void check_encoder(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state, uns
                 }
             }
         } else {
-            keyboard_data.selection = validate_selection(menu_state.menu_number, keyboard_data.selection);
+            keyboard_data.selection = validate_menu_position(menu_state.menu_number, keyboard_data.selection);
             keyboard_data.edited_value = keyboard_data.selection;
             menu_state.old_menu_position = menu_state.menu_position;
             menu_state.menu_position = keyboard_data.edited_value;
@@ -475,7 +474,7 @@ void display_lcd(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state) {
             writeLine(2, "PIP:" + String(temp_str), 1);
 
             dtostrf(last_pressure_min, 2, 0, temp_str);
-            writeLine(2, "PEEP:" + String(temp_str), 8);
+            writeLine(2, "PEEP:" + String(temp_str), 9);
 
             dtostrf((_mllastInsVol + _mllastExsVol)/2.*options.respiratoryRate*0.001, 2, 1, temp_str);
             writeLine(3, "VM:" + String(temp_str), 1);

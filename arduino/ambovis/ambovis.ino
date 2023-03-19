@@ -33,10 +33,6 @@ bool drawing_cycle = 0;
 #include <Adafruit_ADS1X15.h>
 Adafruit_ADS1115 ads;
 
-int _mllastInsVol, _mllastExsVol;
-
-AccelStepper *stepper;
-
 short alarm_state = 0; //0: No alarm 1: peep 2: pip 3:both
 
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
@@ -55,7 +51,6 @@ byte vcorr_count = 0;
 float verror, verror_sum, verror_sum_outcycle, vzero = 0.;  //verror sum is intra cycle, verror_sum_outcycle is inter-cycle
 
 float last_pressure_max, last_pressure_min;
-
 byte vent_mode = VENTMODE_MAN;
 
 unsigned long lastShowSensor = 0;
@@ -70,24 +65,12 @@ unsigned lastReadTemp = 0;
 #endif
 
 bool display_needs_update = false;
-bool show_changed_options = false; //Only for display
 bool update_options = false;
 
 unsigned long time;
 byte cycle_pos;
 
 SensorData sensorData;
-
-byte p_trim = 100;
-int max_accel, min_accel;
-int max_speed, min_speed;
-int min_pidk, max_pidk;
-int min_pidi, max_pidi;
-int min_pidd, max_pidd;
-byte pfmin, pfmax;
-float pf_min, pf_max;
-float peep_fac;
-int min_cd, max_cd;
 
 unsigned long last_cycle;
 unsigned int _timeoutIns, _timeoutEsp; //In ms
@@ -97,16 +80,7 @@ Menu_state_t menu_state;
 //TODO: READ FROM EEPROM
 byte alarm_max_pressure = 35;
 byte alarm_peep_pressure = 5;
-byte isalarmvt_on;
-byte alarm_vt = 200;
-
-//MENU
-//unsigned long lastButtonPress;
-
-//byte encoderPos = 1; //this variable stores our current value of encoder position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
-//byte oldEncPos = 1; //stores the last encoder position value so we can compare to the current reading and see if it has changed (so we know when to print to the serial monitor)
-//byte max_sel, min_sel; //According to current selection
-//bool isitem_sel =false;
+byte alarm_vt;
 
 void check_buzzer_mute();
 void check_sleep_mode();  //Batt charge only
@@ -114,20 +88,17 @@ void init_display_tft(Adafruit_ILI9341& tft);
 void init_ventilation_options(VentilationOptions_t& options);
 
 AutoPID * pid;
+int _mllastInsVol, _mllastExsVol;
+AccelStepper *stepper;
 MechVentilation * ventilation;
 VentilationOptions_t options;
-
-//int bck_state ;     // current state of the button
-//int last_bck_state ; // previous state of the button
-//int startPressed ;    // the moment the button was pressed
-//int endPressed ;      // the moment the button was released
-//int holdTime ;        // how long the button was hold
-//int idleTime ;        // how long the button was idle
 
 // TODO: move to constants
 float fdiv = (float)(BATDIV_R1 + BATDIV_R2)/(float)BATDIV_R2;
 float fac = 1.1/1024.*fdiv;
 
+bool calibration_run = true;
+byte calib_cycle = 0;
 #ifdef TEMP_TEST
 OneWire           oneWire(PIN_TEMP);
 DallasTemperature sensors(&oneWire);
@@ -147,13 +118,6 @@ void setup() {
     // set PID update interval
     pid -> setTimeStep(PID_TS);
 
-    max_cd = 40; //T MODIFY: READ FROM MEM
-    min_cd = 10;
-    min_speed = 250;  // x microsteps
-    max_speed = 750;  // x Microsteps, originally 16000 (with 16 ms = 750)
-    max_accel = 600;
-    min_accel = 200;
-
     init_ventilation_options(options);
 
     delay(100);
@@ -171,14 +135,8 @@ void setup() {
     init_display_tft(tft);
     ads.begin();
 
-//    byte bpm = DEFAULT_RPM;
-//    byte i_e = 2;
-//    Menu_inic menuini(&vent_mode, &bpm, &i_e);
     initialize_menu(keyboard_data, menu_state);
     vent_mode = VENTMODE_MAN;
-
-//    options.respiratoryRate = bpm;
-//    options.percInspEsp = i_e; //1:1 to 1:4, is denom
 
     lcd.clear();
     writeLine(1, "Desconecte flujo", 0);
@@ -201,11 +159,9 @@ void setup() {
     lcd.clear();
     writeLine(1, "Iniciando...", 0);
 
-//    searchHomePosition(stepper);
+    searchHomePosition(stepper);
 
     display_lcd(keyboard_data, menu_state);
-
-//    curr_sel = old_curr_sel = 1;
 
     lastShowSensor = last_update_display = millis();
     sensorData.last_read_sensor = millis();
@@ -227,9 +183,6 @@ void setup() {
     autopid = systemConfiguration.autopid;
     last_cycle = systemConfiguration.last_cycle;
 
-    f_acc = (float)f_acc_b / 10.;
-    dpip = (float)dpip_b / 10.;
-
     ventilation->setCycleNum(last_cycle);
 
     digitalWrite(BCK_LED, LOW);
@@ -238,10 +191,6 @@ void setup() {
     mute_count = 0;
 
     lcd.clear();
-
-    pf_min = (float)pfmin / 50.;
-    pf_max = (float)pfmax / 50.;
-    peep_fac = -(pf_max - pf_min) / 15.*last_pressure_min + pf_max;
 
     sleep_mode = false;
     put_to_sleep = false;
@@ -252,8 +201,6 @@ void setup() {
     #endif
 }
 
-bool calibration_run = true;
-byte calib_cycle = 0;
 ////////////////////////////////////////
 ////////////// MAIN LOOP ///////////////
 ////////////////////////////////////////
@@ -273,7 +220,7 @@ void loop() {
             ventilation->forceStart();
         }
 
-        check_encoder(keyboard_data, menu_state, millis());
+        check_encoder(keyboard_data, menu_state, time);
         buzzmuted = check_buzzer_mute(last_mute, buzzmuted, mute_count, time);
 
         if (calibration_run) {
@@ -401,9 +348,9 @@ void loop() {
     #ifdef BAT_TEST
     if ( time > lastShowBat + TIME_SHOW_BAT ) {
         lastShowBat = time;
-//        Serial.println("last show bat " + String(lastShowBat));
+        //Serial.println("last show bat " + String(lastShowBat));
         float level = calc_bat(5, fac);
-//        Serial.println(String(time)+", " +String(level));
+        //Serial.println(String(time)+", " +String(level));
     }
     #endif//BAT_TEST
 
@@ -411,7 +358,6 @@ void loop() {
 
 void timer1Isr(void) {
     ventilation->update(sensorData);
-    //alarms->update(ventilation->getPeakInspiratoryPressure());
 }
 
 void timer3Isr(void) {
