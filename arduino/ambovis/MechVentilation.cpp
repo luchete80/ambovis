@@ -13,8 +13,6 @@ int PID_KD=50.01;
 int STEPPER_ACC_INSUFFLATION = STEPPER_MICROSTEPS * 1500;
 int STEPPER_SPEED_MAX        = STEPPER_MICROSTEPS * 1500;
 int STEPPER_ACCEL_MAX        = STEPPER_MICROSTEPS * 1500;
-
-byte  p_acc;
 bool ended_whilemov;
 
 MechVentilation::MechVentilation(

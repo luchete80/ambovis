@@ -411,7 +411,7 @@ void check_encoder(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state, uns
                 keyboard_data.selection = keyboard_data.edited_value = 0;
                 menu_state.show_changed_options = true;
                 menu_state.menu_position = 0;
-                lcd.clear();
+                menu_state.clear_display = true;
             } else {
                 if (menu_state.is_initial_menu && menu_state.menu_position == 2) {
                     menu_state.initial_menu_completed = true;
