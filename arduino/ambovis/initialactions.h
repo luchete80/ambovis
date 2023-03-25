@@ -12,6 +12,5 @@
 
 void initPins();
 void waitForFluxDisconnected();
-void searchHomePosition(AccelStepper* stepper);
 
 #endif //AMBOVIS_INITIALACTIONS_H

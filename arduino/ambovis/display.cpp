@@ -10,23 +10,20 @@ int axispos[]={130,200}; //from each graph, from 0 to 320 (display height, IN PO
 byte valsreaded=0;
 byte rx[128],ry[128];
 int yflux[2];
-//int yvt[2];
 char buffer[10];
 
 void check_alarms(Adafruit_ILI9341& tft);
 void drawY2(Adafruit_ILI9341& tft, bool drawing_cycle, uint16_t color);
 void print_vols(Adafruit_ILI9341& tft, VentilationStatus status);
-void printMessageWhenEndedWhileStepperMoving(Adafruit_ILI9341& tft);
+void printMessageWhenEndedWhileStepperMoving(Adafruit_ILI9341& tft, VentilationStatus ventilationStatus);
 
-void tft_draw(Adafruit_ILI9341& tft, SensorData& sensorData, VentilationStatus status, bool& drawing_cycle, float fac) {
+void tft_draw(Adafruit_ILI9341& tft, SensorData& sensorData, VentilationStatus& status, bool& drawing_cycle, float fac) {
     byte last_x=status.cyclePosition;
     rx[valsreaded]=status.cyclePosition;
     ry[valsreaded]=sensorData.pressure_p*2.;
 
     yflux[0]=yflux[1];
     yflux[1]=int(sensorData.flow_f*0.035);
-//    yvt[0]=yvt[1];
-//    yvt[1]=int((sensorData.ml_ins_vol - sensorData.ml_exs_vol)*0.1);
 
     tft.setRotation(1);
     if (valsreaded > 0) {
@@ -54,7 +51,7 @@ void tft_draw(Adafruit_ILI9341& tft, SensorData& sensorData, VentilationStatus s
         drawing_cycle = !drawing_cycle;
         tft.fillRect(180,280,70,50, ILI9341_BLACK);
 
-        printMessageWhenEndedWhileStepperMoving(tft);
+        printMessageWhenEndedWhileStepperMoving(tft, status);
 
         tft.setRotation(1);
         tft.fillRect(0, 0, 60, 100, ILI9341_BLACK); //FOR ALARMS, UPPER RIGHT

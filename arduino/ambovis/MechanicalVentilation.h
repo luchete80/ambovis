@@ -3,6 +3,7 @@
 
 #include "pinout.h"
 #include "defaults.h"
+#include "sensorcalculation.h"
 #include "src/AccelStepper/AccelStepper.h"
 
 enum State {
@@ -14,25 +15,22 @@ enum State {
     State_Error = -1
 };
 
-typedef struct variable_parameters {
-    int alarm_max_pressure;
-    int alarm_peep_pressure;
-    int alarm_vt;
-} AlarmConfig;
-
 typedef struct ventilation_config {
-    short respiratoryRate;
+    byte vent_mode;
+    byte respiratoryRate;
     short peakInspiratoryPressure;
     short peakExpiratoryPressure;
     byte percIE;
     byte percVolume;
-    AlarmConfig alarmConfig;
+    int stepper_speed_max;
+    int stepper_accel_max;
 } VentilationConfig;
 
 typedef struct ventilation_status {
     volatile State currentState;
     volatile unsigned long msTimerCnt;
     unsigned long cycleNum;
+    unsigned long last_cycle;
     volatile byte cyclePosition;
     bool running;
     volatile float timeoutCycle;
@@ -42,10 +40,11 @@ typedef struct ventilation_status {
     int cDynPass[3];
     int mlLastInsVol;
     int mlLastExpVol;
+    float pressure_max;
+    float pressure_min;
     int lastMaxPressure;
     int lastMinPressure;
     float cDyn;
-    volatile bool newInsufflation;
     volatile bool endingWhileMoving;
     volatile bool endedWhileMoving;
     volatile bool updateDisplay;
@@ -57,14 +56,10 @@ typedef struct mechanical_ventilation {
     VentilationStatus ventilationStatus;
 } MechanicalVentilation;
 
-extern float pressure_max,pressure_min;
-extern float pressure_p;
-extern float _mlInsVol,_mlExsVol;
-
 void start(MechanicalVentilation& mechanicalVentilation);
 void stop(MechanicalVentilation& mechanicalVentilation);
-void update(MechanicalVentilation& mechanicalVentilation);
-void newInsufflationActions(VentilationStatus& status);
+void update(MechanicalVentilation& mechanicalVentilation, SensorData& sensor);
 void update_config(MechanicalVentilation& mechanicalVentilation);
+void search_home_position(AccelStepper* stepper);
 
 #endif /* MECHANICAL_VENTILATION_H */

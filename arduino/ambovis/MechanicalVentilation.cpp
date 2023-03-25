@@ -7,6 +7,7 @@ void initCycleTimes(MechanicalVentilation& mechanicalVentilation) {
     status->timeoutCycle = ((float) 60) * 1000.0f / (float) config->respiratoryRate;
     status->timeIns = status->timeoutCycle / (float(config->percIE + 1));
     status->timeExp = status->timeoutCycle - status->timeIns;
+    Serial.println(String(status->timeoutCycle) + " " + String(status->timeIns) + " " + String(status->timeExp));
 }
 
 void start(MechanicalVentilation& mechanicalVentilation) {
@@ -15,35 +16,34 @@ void start(MechanicalVentilation& mechanicalVentilation) {
 }
 
 void stop(MechanicalVentilation& mechanicalVentilation) {
+    Serial.println("Vent stop called ");
     mechanicalVentilation.ventilationStatus.running = false;
     digitalWrite(PIN_STEPPER, LOW);
 }
 
-void newInsufflationActions(VentilationStatus& status) {
-    status.lastMaxPressure = pressure_max;
-    status.lastMinPressure = pressure_min;
-    pressure_max = 0;
-    pressure_min = 60;
+void newInsufflationActions(VentilationStatus& status, SensorData& sensor) {
+    status.lastMaxPressure = status.pressure_max;
+    status.lastMinPressure = status.pressure_min;
+    status.pressure_max = 0;
+    status.pressure_min = 60;
 
     status.cDynPass[0] = status.cDynPass[1];
     status.cDynPass[1] = status.cDynPass[2];
     status.cDynPass[2] = status.mlLastInsVol/(status.lastMaxPressure - status.lastMinPressure);
 
     status.cDyn = (status.cDynPass[0] + status.cDynPass[1] + status.cDynPass[2]) / 3.;
-    status.mlLastInsVol = int(_mlInsVol);
-    status.mlLastExpVol = int(fabs(_mlExsVol));
+    status.mlLastInsVol = int(sensor.ml_ins_vol);
+    status.mlLastExpVol = int(fabs(sensor.ml_exs_vol));
+    Serial.println("New Insufflation - Max Press " + String(status.lastMaxPressure) + " LastMlInsVols " + String(status.mlLastInsVol) + " ml ins vol " + String(sensor.ml_ins_vol));
 
-    _mlInsVol=0.;
-    _mlExsVol=0.;
+    sensor.ml_ins_vol=0.;
+    sensor.ml_exs_vol=0.;
 }
 
-void update(MechanicalVentilation& mechanicalVentilation) {
+void update(MechanicalVentilation& mechanicalVentilation, SensorData& sensor) {
 
     VentilationStatus* status = &mechanicalVentilation.ventilationStatus;
-
-    if ( !status->running ) {
-        return;
-    }
+    VentilationConfig* config = &mechanicalVentilation.ventilationConfig;
 
     status->msTimerCnt = millis() - status->startCycleTimeInMs;
   
@@ -53,17 +53,17 @@ void update(MechanicalVentilation& mechanicalVentilation) {
     }
     status->cyclePosition = byte( (float) ( (status->msTimerCnt + extra_time) / (float) status->timeoutCycle * 127.0f) );
 
-    status->newInsufflation = false;
     switch (status->currentState) {
         case Init_Insufflation: {
-
-            status->newInsufflation = true;
+            if ( !status->running ) {
+                return;
+            }
+            newInsufflationActions(mechanicalVentilation.ventilationStatus, sensor);
             status->startCycleTimeInMs = millis();
 
-            mechanicalVentilation.stepper->setSpeed(STEPPER_SPEED_MAX);
+            mechanicalVentilation.stepper->setSpeed(config->stepper_speed_max);
             mechanicalVentilation.stepper->moveTo(-STEPPER_HIGHEST_POSITION);
-            mechanicalVentilation.stepper->setAcceleration(STEPPER_ACCEL_MAX);
-
+            mechanicalVentilation.stepper->setAcceleration(config->stepper_accel_max);
             status->currentState = State_Insufflation;
             status->updateDisplay = true;
             status->endingWhileMoving = false;
@@ -72,7 +72,7 @@ void update(MechanicalVentilation& mechanicalVentilation) {
         break;
         case State_Insufflation: {
             if (status->msTimerCnt > status->timeIns) {
-                if (mechanicalVentilation.stepper->distanceToGo() != 0 ) {
+                if (mechanicalVentilation.stepper->distanceToGo() != 0) {
                     status->endingWhileMoving = true;
                 }
                 status->currentState = Init_Exufflation;
@@ -82,7 +82,7 @@ void update(MechanicalVentilation& mechanicalVentilation) {
         case Init_Exufflation: {
             status->endedWhileMoving = status->endingWhileMoving;
             status->startCycleTimeInMs = millis();
-            mechanicalVentilation.stepper->setAcceleration(STEPPER_ACCEL_MAX);
+            mechanicalVentilation.stepper->setAcceleration(config->stepper_accel_max);
             mechanicalVentilation.stepper->setSpeed(STEPPER_SPEED_EXSUFF);
             mechanicalVentilation.stepper->moveTo(STEPPER_LOWEST_POSITION);
             status->currentState = State_Exufflation;
@@ -108,5 +108,31 @@ void update(MechanicalVentilation& mechanicalVentilation) {
 }
 
 void update_config(MechanicalVentilation& mechanicalVentilation) {
+    Serial.println("Vent update called ");
     initCycleTimes(mechanicalVentilation);
+}
+
+void search_home_position(AccelStepper* stepper) {
+    stepper->setSpeed(STEPPER_HOMING_SPEED);
+
+    long initial_homing = -1;
+
+    while (digitalRead(PIN_ENDSTOP)) {  // Make the Stepper move CCW until the switch is activated
+        stepper->moveTo(initial_homing);  // Set the position to move to
+        initial_homing--;  // Decrease by 1 for next move if needed
+        stepper->run();  // Start moving the stepper
+        delay(5);
+    }
+    stepper->setCurrentPosition(0);  // Set the current position as zero for now
+    initial_homing = 1;
+
+    while (!digitalRead(PIN_ENDSTOP)) { // Make the Stepper move CW until the switch is deactivated
+        stepper->moveTo(initial_homing);
+        stepper->run();
+        initial_homing++;
+        delay(5);
+        Serial.println("cw");
+    }
+
+    stepper->setCurrentPosition(STEPPER_LOWEST_POSITION);
 }

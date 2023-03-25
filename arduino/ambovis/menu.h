@@ -38,15 +38,17 @@ extern float dpip;
 extern byte dpip_b;
 extern bool autopid;
 extern bool filter;
-extern unsigned long last_cycle;
 extern float flow_f;
-extern float pressure_p;
+
+extern byte alarm_max_pressure;
+extern byte alarm_peep_pressure;
+extern int alarm_vt;
 
 void writeLine(int line, String message = "", int offsetLeft = 0);
 void lcd_clearxy(int x, int y,int pos=1);
 void lcd_selxy(int x, int y);
 void check_encoder(VentilationStatus status, VentilationConfig& config);
-void display_lcd (VentilationStatus status, VentilationConfig config);
+void display_lcd (VentilationStatus& status, VentilationConfig& config);
 void init_display();
 
 void check_updn_button(int pin, byte *var, bool incr_decr);
@@ -61,10 +63,10 @@ class Menu_inic {
   bool switching_menus;
   int m_curr_sel;
   public:
-    Menu_inic(byte *mode, byte *bpm, byte *i_e);
+    Menu_inic(VentilationConfig& vent_config);
     void clear_n_sel( int menu );
-    void Menu_inic::check_encoder ( );
-    void Menu_inic::display_lcd ( );
+    void Menu_inic::check_encoder (VentilationConfig& vent_config);
+    void Menu_inic::display_lcd (VentilationConfig& config);
     void check_bck_state();
 };
 
