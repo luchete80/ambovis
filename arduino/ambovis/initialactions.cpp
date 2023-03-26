@@ -4,30 +4,6 @@
 
 #include "initialactions.h"
 
-void searchHomePosition(AccelStepper* stepper) {
-    stepper->setSpeed(STEPPER_HOMING_SPEED);
-
-    long initial_homing = -1;
-
-    while (digitalRead(PIN_ENDSTOP)) {  // Make the Stepper move CCW until the switch is activated
-        stepper->moveTo(initial_homing);  // Set the position to move to
-        initial_homing--;  // Decrease by 1 for next move if needed
-        stepper->run();  // Start moving the stepper
-        delay(5);
-    }
-    stepper->setCurrentPosition(0);  // Set the current position as zero for now
-    initial_homing = 1;
-
-    while (!digitalRead(PIN_ENDSTOP)) { // Make the Stepper move CW until the switch is deactivated
-        stepper->moveTo(initial_homing);
-        stepper->run();
-        initial_homing++;
-        delay(5);
-    }
-
-    stepper->setCurrentPosition(STEPPER_LOWEST_POSITION);
-}
-
 void waitForFluxDisconnected() {
     bool fin = false;
     delay(100); //Otherwise low enter button readed
