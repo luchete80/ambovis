@@ -47,8 +47,8 @@ extern int alarm_vt;
 void writeLine(int line, String message = "", int offsetLeft = 0);
 void lcd_clearxy(int x, int y,int pos=1);
 void lcd_selxy(int x, int y);
-void check_encoder(VentilationStatus status, VentilationConfig& config);
-void display_lcd (VentilationStatus& status, VentilationConfig& config);
+void check_encoder(Ventilation_Status_t status, Ventilation_Config_t& config);
+void display_lcd (Ventilation_Status_t& status, Ventilation_Config_t& config);
 void init_display();
 
 void check_updn_button(int pin, byte *var, bool incr_decr);
@@ -63,10 +63,10 @@ class Menu_inic {
   bool switching_menus;
   int m_curr_sel;
   public:
-    Menu_inic(VentilationConfig& vent_config);
+    Menu_inic(Ventilation_Config_t& vent_config);
     void clear_n_sel( int menu );
-    void Menu_inic::check_encoder (VentilationConfig& vent_config);
-    void Menu_inic::display_lcd (VentilationConfig& config);
+    void Menu_inic::check_encoder (Ventilation_Config_t& vent_config);
+    void Menu_inic::display_lcd (Ventilation_Config_t& config);
     void check_bck_state();
 };
 

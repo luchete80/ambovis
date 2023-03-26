@@ -13,6 +13,8 @@
 
 typedef struct sensor_data {
     float pressure_p = 0.;
+    float pressure_max = 0.;
+    float pressure_min = 1000.;
     float v_level = 0.;
     float voltage = 0.;
     float flux_filter[5] = {0.};

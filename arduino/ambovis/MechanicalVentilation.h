@@ -17,49 +17,47 @@ enum State {
 
 typedef struct ventilation_config {
     byte vent_mode;
-    byte respiratoryRate;
-    short peakInspiratoryPressure;
-    short peakExpiratoryPressure;
-    byte percIE;
-    byte percVolume;
+    byte respiratory_rate;
+    short peak_ins_pressure;
+    short peak_exp_pressure;
+    byte perc_IE;
+    byte perc_volume;
     int stepper_speed_max;
     int stepper_accel_max;
-} VentilationConfig;
+} Ventilation_Config_t;
 
 typedef struct ventilation_status {
-    volatile State currentState;
-    volatile unsigned long msTimerCnt;
-    unsigned long cycleNum;
+    volatile State current_state;
+    volatile unsigned long ms_timer_cnt;
+    unsigned long cycle;
     unsigned long last_cycle;
-    volatile byte cyclePosition;
+    volatile byte cycle_pos;
     bool running;
-    volatile float timeoutCycle;
-    unsigned int timeIns;
-    unsigned int timeExp;
-    volatile unsigned long startCycleTimeInMs;
-    int cDynPass[3];
-    int mlLastInsVol;
-    int mlLastExpVol;
-    float pressure_max;
-    float pressure_min;
-    int lastMaxPressure;
-    int lastMinPressure;
-    float cDyn;
-    volatile bool endingWhileMoving;
-    volatile bool endedWhileMoving;
-    volatile bool updateDisplay;
-} VentilationStatus;
+    volatile float timeout_cycle;
+    unsigned int time_ins;
+    unsigned int time_exp;
+    volatile unsigned long start_cycle_time_ms;
+    int c_dyn_pass[3];
+    int ml_last_ins_vol;
+    int ml_last_exp_vol;
+    int last_max_pressure;
+    int last_min_pressure;
+    float c_dyn;
+    volatile bool ending_while_moving;
+    volatile bool ended_while_moving;
+    volatile bool update_display;
+} Ventilation_Status_t;
 
 typedef struct mechanical_ventilation {
     AccelStepper * stepper;
-    VentilationConfig ventilationConfig;
-    VentilationStatus ventilationStatus;
-} MechanicalVentilation;
+    Ventilation_Config_t config;
+    Ventilation_Status_t status;
+} Mechanical_Ventilation_t;
 
-void start(MechanicalVentilation& mechanicalVentilation);
-void stop(MechanicalVentilation& mechanicalVentilation);
-void update(MechanicalVentilation& mechanicalVentilation, SensorData& sensor);
-void update_config(MechanicalVentilation& mechanicalVentilation);
+void start(Mechanical_Ventilation_t& mech_vent);
+void stop(Mechanical_Ventilation_t& mech_vent);
+void update(Mechanical_Ventilation_t& mech_vent, SensorData& sensor);
+void update_config(Mechanical_Ventilation_t& mech_vent);
 void search_home_position(AccelStepper* stepper);
 
 #endif /* MECHANICAL_VENTILATION_H */
