@@ -121,14 +121,6 @@ void setup() {
     init_display_tft(tft);
     init_sensor(ads);
 
-//    mech_vent.config.vent_mode = VENTMODE_MAN;
-//    mech_vent.config.respiratory_rate = DEFAULT_RPM;
-//    mech_vent.config.perc_IE = 2;
-//    mech_vent.config.peak_ins_pressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
-//    mech_vent.config.peak_exp_pressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
-//    mech_vent.config.perc_volume = 100;
-//    mech_vent.config.stepper_speed_max = STEPPER_MICROSTEPS * 1500;
-//    mech_vent.config.stepper_accel_max= STEPPER_MICROSTEPS * 1500;
     mech_vent.status.running = true;
     mech_vent.status.current_state = State_Homing;
     mech_vent.status.start_cycle_time_ms = 0;
