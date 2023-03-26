@@ -11,6 +11,7 @@
 //#define FILTER_FLUX 1
 #define DEBUG_OFF 1 //Release version
 #define BUZZER_LOW 0
+#define BUZZER_HIGH 1
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE                 20                                          // msec
@@ -35,11 +36,8 @@
 #define STEPPER_LOWEST_POSITION     (0)   // Steps
 #define STEPPER_HIGHEST_POSITION    ( 183 * STEPPER_MICROSTEPS)   //270º ,2500 for 270º, 2850 for 220º, 2930 for 330º
 #define STEPPER_SPEED_DEFAULT       (STEPPER_MICROSTEPS *  1500)   // Steps/s
-extern int STEPPER_SPEED_MAX;       //(14000)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
-extern int STEPPER_ACCEL_MAX;       //(1500 * STEPPER_MICROSTEPS)
 #define STEPPER_SPEED_MAX_VCL       (75 * STEPPER_MICROSTEPS)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_SPEED_EXSUFF        (450 * STEPPER_MICROSTEPS)
-//#define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  2000)   // Steps/s2
 
 // Valores por defecto
 #define DEFAULT_FRAC_CYCLE_VCL_INSUFF 0.75
@@ -67,43 +65,18 @@ extern int STEPPER_ACCEL_MAX;       //(1500 * STEPPER_MICROSTEPS)
 #define PID_MIN -20000 // TODO: check direction implementation
 #define PID_MAX 20000
 
-extern int PID_KP,PID_KI,PID_KD;
-
 #define PID_TS TIME_BASE
 #define PID_BANGBANG 8
-
-class VentilationOptions_t {
-
-  public:
-  short respiratoryRate;
-  short peakInspiratoryPressure;
-  short peakEspiratoryPressure;
-  float triggerThreshold;
-  byte percInspEsp;
-  bool hasTrigger;
-  short tidalVolume;  //in ml
-//  byte modeCtl;
-  byte percVolume;   //For manual mode: 1 to 10
-
-  VentilationOptions_t(){}
-  ~VentilationOptions_t(){}
-};
-
-#define MODE_VOL_CTL 0
-#define MODE_VOL_CTL 1
-#define MODE_MANUAL  2
 
 #define VENTMODE_VCL 0
 #define VENTMODE_PCL 1
 #define VENTMODE_MAN 2
 
 //general variables
-extern byte vent_mode;
 extern bool sleep_mode;
-extern byte alarm_state;
+extern short alarm_state;
 extern bool put_to_sleep, wake_up;
-extern float vlevel;
-extern unsigned long time2;
+extern unsigned long time;
 
 // 5v to 1.1v dividiver, in order to use 1.1 arduino vref (more stable)
 // Vo = V1 x R2/(R1 + R2)
@@ -120,9 +93,13 @@ extern unsigned long time2;
 //Battery level voltage dividers
 #define BATDIV_R1           12000
 #define BATDIV_R2           470
-#define BAT_TEST
+#define BATTERY_READ 5
+//#define BAT_TEST
 #define TIME_SHOW_BAT   15000 //MSECS
 //#define TEMP_TEST
 #define TIME_READ_TEMP  15000 //MSECS
+
+// Alarm state
+enum alarm_state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
 
 #endif // DEFAULTS_H

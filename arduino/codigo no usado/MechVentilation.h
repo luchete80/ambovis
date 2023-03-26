@@ -11,6 +11,7 @@
 #include <inttypes.h>
 #include "pinout.h"
 #include "defaults.h"
+#include "sensorcalculation.h"
 #include "src/AutoPID/AutoPID.h"
 #include "Sensors.h"
 
@@ -73,7 +74,7 @@ public:
     void start(void);
     /** Stop mechanical ventilation. */
     void stop(void);
-    void update(void);
+    void update( SensorData& sensorData );
 
     /** Recruitment */
     void activateRecruitment(void);
@@ -196,10 +197,14 @@ private:
 
 extern unsigned int _timeoutIns;
 extern unsigned int _timeoutEsp;
+<<<<<<< HEAD:arduino/ambovis/MechVentilation.h
     
 extern byte stepper_time;
 extern unsigned long last_vent_time;
 extern float _mlInsVol,_mlExsVol;
+=======
+
+>>>>>>> RESP-develop:arduino/codigo no usado/MechVentilation.h
 extern int _mllastInsVol,_mllastExsVol;
 //_mlInsVol2;
 //extern float _stepperSpeed;
@@ -230,5 +235,11 @@ extern float f_acc;extern byte f_acc_b;
 extern byte p_acc;
 
 extern bool ended_whilemov;
+<<<<<<< HEAD:arduino/ambovis/MechVentilation.h
     
+=======
+extern float pressure_max,pressure_min;
+extern float last_pressure_max,last_pressure_min;
+
+>>>>>>> RESP-develop:arduino/codigo no usado/MechVentilation.h
 #endif /* INC_MECHANICAL_VENTILATION_H */
