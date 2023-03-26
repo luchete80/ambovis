@@ -247,7 +247,7 @@ byte calib_cycle = 0;
 ////////////////////////////////////////
 void loop() {
 
-    time = millis();
+    time2 = millis();
     if (!sleep_mode) {
         if (wake_up) {
             digitalWrite(TFT_SLEEP, HIGH);
@@ -260,12 +260,12 @@ void loop() {
             start(mech_vent);
         }
 
-        buzzmuted = check_buzzer_mute(last_mute, buzzmuted, mute_count, time);
+        buzzmuted = check_buzzer_mute(last_mute, buzzmuted, mute_count, time2);
         check_encoder(mech_vent.status, mech_vent.config);
         Ventilation_Status_t* vent_status = &mech_vent.status;
 
         if (calibration_run) {
-            if (time > sensorData.last_read_sensor + TIME_SENSOR) {
+            if (time2> sensorData.last_read_sensor + TIME_SENSOR) {
                 readSensor(ads, sensorData, vzero, filter);
                 vcorr_count++;
                 verror_sum += (sensorData.voltage - 0.04 * sensorData.v_level);
@@ -293,7 +293,7 @@ void loop() {
             }
         }
         else {
-            if (time > lastSave + TIME_SAVE) {
+            if (time2 > lastSave + TIME_SAVE) {
                 SystemConfiguration_t toPersist;
                 toPersist.last_cycle = vent_status->last_cycle;
                 toPersist.alarm_vt = alarm_vt;
@@ -303,12 +303,12 @@ void loop() {
                 lastSave = millis();
             }
 
-            if (time > lastShowSensor + TIME_SHOW) {
+            if (time2 > lastShowSensor + TIME_SHOW) {
                 tft_draw(tft, sensorData, mech_vent.status, drawing_cycle, fac);
                 lastShowSensor = time;
             }
 
-            if (time > sensorData.last_read_sensor + TIME_SENSOR) {
+            if (time2 > sensorData.last_read_sensor + TIME_SENSOR) {
                 readSensor(ads, sensorData, vzero, filter);
 
                 //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
@@ -339,8 +339,8 @@ void loop() {
                     digitalWrite(YELLOW_LED, LOW);
                 }
                 #ifdef TEMP_TEST
-                if (time > lastReadTemp + TIME_READ_TEMP) {
-                    lastReadTemp = time;
+                if (time2 > lastReadTemp + TIME_READ_TEMP) {
+                    lastReadTemp = time2;
                     sensors.requestTemperatures();
                     temp=sensors.getTempCByIndex(0);
                     //Serial.println ("Temp: " + String(temp));
@@ -373,7 +373,7 @@ void loop() {
         if (put_to_sleep) {
             digitalWrite(PIN_LCD_EN, HIGH);
             put_to_sleep = false;
-            print_bat_time = time;
+            print_bat_time = time2;
             print_bat(tft, fac);
             lcd.clear();
             digitalWrite(LCD_SLEEP, LOW);
@@ -381,19 +381,19 @@ void loop() {
             stop(mech_vent);
             //digitalWrite(PIN_BUZZER, !BUZZER_LOW); //Buzzer inverted
         }
-        if (time > print_bat_time + 5000) {
+        if (time2 > print_bat_time + 5000) {
             print_bat(tft, fac);
-            print_bat_time = time;
+            print_bat_time = time2;
         }
         check_bck_state();
     }
 
     #ifdef BAT_TEST
-    if ( time > lastShowBat + TIME_SHOW_BAT ) {
-        lastShowBat = time;
+    if ( time2 > lastShowBat + TIME_SHOW_BAT ) {
+        lastShowBat = time2;
         Serial.println("last show bat " + String(lastShowBat));
         float level = calc_bat(5, fac);
-        Serial.println(String(time)+", " +String(level));
+        Serial.println(String(time2)+", " +String(level));
     }
     #endif//BAT_TEST
 

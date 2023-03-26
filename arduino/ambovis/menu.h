@@ -1,7 +1,7 @@
 #ifndef _MENU_H_
 #define _MENU_H_
 
-#include <arduino.h>
+#include <Arduino.h>
 #include <LiquidCrystal.h>
 #include "MechanicalVentilation.h"
 
@@ -88,8 +88,8 @@ class Menu_inic:public Menu{
   public:
     Menu_inic(Ventilation_Config_t& vent_config);
     void clear_n_sel( int menu );
-    void Menu_inic::check_encoder (Ventilation_Config_t& vent_config);
-    void Menu_inic::display_lcd (Ventilation_Config_t& config);
+    void check_encoder (Ventilation_Config_t& vent_config);
+    void display_lcd (Ventilation_Config_t& config);
     void check_bck_state();
     
 };

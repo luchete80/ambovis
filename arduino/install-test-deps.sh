@@ -47,11 +47,11 @@ then
 else
 	echo "Clean old links"
 	cd "$ARDUINO_LIBS/AMBTestable/src"
-	# DIR_TO_DEL="$ARDUINO_LIBS/AMBTestable/src"
-	# for f in "$DIR_TO_DEL"/*.o
-	# do
-  	# rm "${f}"
-	# done
+	DIR_TO_DEL="$ARDUINO_LIBS/AMBTestable/src"
+	for f in "$DIR_TO_DEL"/*.o
+	do
+  	rm "${f}"
+	done
 	find . -type l -exec rm {} \;
 fi
 
@@ -60,11 +60,13 @@ ln -sf "$CUR_DIR/ambovis/pinout.h" "$ARDUINO_LIBS/AMBTestable/src/pinout.h"
 ln -sf "$CUR_DIR/ambovis/defaults.h" "$ARDUINO_LIBS/AMBTestable/src/defaults.h"
 ln -sf "$CUR_DIR/ambovis/display.h" "$ARDUINO_LIBS/AMBTestable/src/display.h"
 ln -sf "$CUR_DIR/ambovis/display.cpp" "$ARDUINO_LIBS/AMBTestable/src/display.cpp"
-ln -sf "$CUR_DIR/ambovis/MechVentilation.h" "$ARDUINO_LIBS/AMBTestable/src/MechVentilation.h"
-ln -sf "$CUR_DIR/ambovis/MechVentilation.cpp" "$ARDUINO_LIBS/AMBTestable/src/MechVentilation.cpp"
+ln -sf "$CUR_DIR/ambovis/MechanicalVentilation.h" "$ARDUINO_LIBS/AMBTestable/src/MechanicalVentilation.h"
+ln -sf "$CUR_DIR/ambovis/MechanicalVentilation.cpp" "$ARDUINO_LIBS/AMBTestable/src/MechanicalVentilation.cpp"
 ln -sf "$CUR_DIR/ambovis/menu.h" "$ARDUINO_LIBS/AMBTestable/src/menu.h"
 ln -sf "$CUR_DIR/ambovis/menu.cpp" "$ARDUINO_LIBS/AMBTestable/src/menu.cpp"
-ln -sf "$CUR_DIR/ambovis/PID.h" "$ARDUINO_LIBS/AMBTestable/src/PID.h"
-ln -sf "$CUR_DIR/ambovis/PID.cpp" "$ARDUINO_LIBS/AMBTestable/src/PID.cpp"
-ln -sf "$CUR_DIR/ambovis/Sensors.h" "$ARDUINO_LIBS/AMBTestable/src/Sensors.h"
-
+ln -sf "$CUR_DIR/ambovis/alarms.h" "$ARDUINO_LIBS/AMBTestable/src/alarms.h"
+ln -sf "$CUR_DIR/ambovis/alarms.cpp" "$ARDUINO_LIBS/AMBTestable/src/alarms.cpp"
+ln -sf "$CUR_DIR/ambovis/initialactions.h" "$ARDUINO_LIBS/AMBTestable/src/initialactions.h"
+ln -sf "$CUR_DIR/ambovis/initialactions.cpp" "$ARDUINO_LIBS/AMBTestable/src/initialactions.cpp"
+ln -sf "$CUR_DIR/ambovis/sensorcalculation.h" "$ARDUINO_LIBS/AMBTestable/src/sensorcalculation.h"
+ln -sf "$CUR_DIR/ambovis/sensorcalculation.cpp" "$ARDUINO_LIBS/AMBTestable/src/sensorcalculation.cpp"

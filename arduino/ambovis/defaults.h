@@ -74,9 +74,9 @@
 
 //general variables
 extern bool sleep_mode;
-extern short alarm_state;
+extern byte alarm_state;
 extern bool put_to_sleep, wake_up;
-extern unsigned long time;
+extern unsigned long time2;
 
 // 5v to 1.1v dividiver, in order to use 1.1 arduino vref (more stable)
 // Vo = V1 x R2/(R1 + R2)
