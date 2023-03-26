@@ -161,7 +161,7 @@ void setup() {
 
     searchHomePosition(stepper);
 
-    display_lcd(keyboard_data, menu_state);
+    display_lcd(menu_state);
 
     lastShowSensor = last_update_display = millis();
     sensorData.last_read_sensor = millis();
@@ -213,7 +213,7 @@ void loop() {
             digitalWrite(LCD_SLEEP, HIGH);
             lcd.clear();
             init_display();
-            display_lcd(keyboard_data, menu_state);
+            display_lcd(menu_state);
             tft.begin();
             tft.fillScreen(ILI9341_BLACK);
             wake_up = false;
@@ -307,7 +307,7 @@ void loop() {
             }//change cycle
 
             if (display_needs_update) {
-                display_lcd(keyboard_data, menu_state);
+                display_lcd(menu_state);
                 last_update_display = millis();
                 display_needs_update = false;
             }
@@ -318,7 +318,7 @@ void loop() {
             }
 
             if (menu_state.show_changed_options && ((millis() - last_update_display) > TIME_UPDATE_DISPLAY)) {
-                display_lcd(keyboard_data, menu_state);
+                display_lcd(menu_state);
                 last_update_display = millis();
                 menu_state.show_changed_options = false;
             }

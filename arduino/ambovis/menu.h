@@ -24,15 +24,15 @@ typedef struct keyboard_data {
     int end_pressed;      // the moment the button was released
     int hold_time;        // how long the button was hold
     int8_t selection;
-    int8_t edited_value;
-    int8_t* value_to_edit;
     int8_t old_selection;
-    bool is_item_selected;
     bool change_sleep;
     byte pressed;
 } Keyboard_data_t;
 
 typedef struct menu_state {
+    int8_t edited_value;
+    int8_t* value_to_edit;
+    bool is_item_selected;
     bool show_changed_options; // Includes cursor change
     bool update_options; // only when a parameter value is modified
     int8_t menu_number;
@@ -47,7 +47,7 @@ void init_display();
 void initialize_menu(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state);
 void writeLine(int line, String message = "", int offsetLeft = 0);
 void check_encoder(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state, unsigned long time);
-void display_lcd(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state);
+void display_lcd(Menu_state_t& menu_state);
 void check_bck_state(Keyboard_data_t& keyboard_data, unsigned long time);
 
 #endif

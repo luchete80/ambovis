@@ -218,12 +218,12 @@ int8_t validate_menu_position(int8_t& menu_number, int8_t selection) {
     return -1;
 }
 
-bool forceParametersMenuAfterWait(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state, unsigned long time) {
+bool forceParametersMenuAfterWait(long last_button_pressed, Menu_state_t& menu_state, unsigned long time) {
     if (menu_state.menu_number != PARAMETERS_MENU) {
-        if (time - keyboard_data.last_button_pressed > 10000) {
+        if (time - last_button_pressed > 10000) {
             menu_state.menu_number = PARAMETERS_MENU;
-            keyboard_data.edited_value = keyboard_data.selection = 0;
-            keyboard_data.is_item_selected = false;
+            menu_state.edited_value= 0;
+            menu_state.is_item_selected = false;
             menu_state.old_menu_position = menu_state.menu_position = 0;
             menu_state.show_changed_options = true;
             menu_state.clear_display = true;
@@ -237,9 +237,9 @@ bool isEditing(int8_t m, int8_t p, bool is_item_selected, Menu_state_t& menu_sta
     return is_item_selected && menu_state.menu_number == m && menu_state.menu_position == p;
 }
 
-String value_to_display(int8_t menu, int8_t position, Keyboard_data_t& keyboard, Menu_state_t& menu_state) {
-    bool itemSel = keyboard.is_item_selected;
-    String selection = String(keyboard.edited_value);
+String value_to_display(int8_t menu, int8_t position, Menu_state_t& menu_state) {
+    bool itemSel = menu_state.is_item_selected;
+    String selection = String(menu_state.edited_value);
     if (menu == PARAMETERS_MENU) {
         if (menu_state.is_initial_menu) {
             switch (position) {
@@ -268,7 +268,7 @@ String value_to_display(int8_t menu, int8_t position, Keyboard_data_t& keyboard,
     return String("ERR");
 }
 
-void update_edited_value(int8_t& menu_number, int8_t& menu_position, int8_t& old_menu_position, bool& is_initial_menu, int8_t& edited_value) {
+void update_edited_value(int8_t& menu_number, int8_t& menu_position, bool& is_initial_menu, int8_t& edited_value) {
     if (menu_number == PARAMETERS_MENU) {
         if (is_initial_menu) {
             switch(menu_position) {
@@ -306,7 +306,7 @@ void show_cursor(int8_t& menu_number, int8_t& menu_position, bool& is_item_selec
     } else if (menu_number == PARAMETERS_MENU) {
         if (is_initial_menu) {
             switch(menu_position) {
-                case 0: lcd_selxy(0, 2, is_item_selected); break;
+                case 0: lcd_selxy(0, 2, is_item_selected); break; //BPM:
                 case 1: lcd_selxy(7, 2, is_item_selected); break; //IE:1:
                 case 2: lcd_selxy(0, 3, is_item_selected); break; //READY
             }
@@ -368,47 +368,46 @@ void move_cursor(int8_t& menu_number, int8_t& menu_position, int8_t& old_menu_po
 }
 
 void check_encoder(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state, unsigned long time) {
-    keyboard_data.old_selection = keyboard_data.edited_value;
+    keyboard_data.old_selection = menu_state.edited_value;
     check_buttons(keyboard_data, time);
 
-    if (forceParametersMenuAfterWait(keyboard_data, menu_state, time)) {
+    if (forceParametersMenuAfterWait(keyboard_data.last_button_pressed, menu_state, time)) {
+        return;
+    }
+    if (time - keyboard_data.last_button_pressed > 3000) {
         return;
     }
 
-    if (time - keyboard_data.last_button_pressed > 2000) {
-        return;
-    }
-
-    if (keyboard_data.is_item_selected) {
+    if (menu_state.is_item_selected) {
         if (keyboard_data.pressed == ENTER_PRESSED) {
-            *keyboard_data.value_to_edit = validate_parameter(menu_state, keyboard_data.selection);
-            keyboard_data.edited_value = 0;
+            *menu_state.value_to_edit = validate_parameter(menu_state, keyboard_data.selection);
+            menu_state.edited_value = 0;
             menu_state.update_options = true;
             keyboard_data.selection = menu_state.menu_position;
-            keyboard_data.is_item_selected = false;
+            menu_state.is_item_selected = false;
             menu_state.show_changed_options = true;
             show_cursor(menu_state.menu_number, menu_state.menu_position,
-                        keyboard_data.is_item_selected, menu_state.is_initial_menu);
+                        menu_state.is_item_selected, menu_state.is_initial_menu);
         } else if (keyboard_data.pressed == BACK_PRESSED) {
-            keyboard_data.is_item_selected = false;
+            menu_state.is_item_selected = false;
             menu_state.show_changed_options = true;
             keyboard_data.selection = menu_state.menu_position;
             show_cursor(menu_state.menu_number, menu_state.menu_position,
-                        keyboard_data.is_item_selected, menu_state.is_initial_menu);
+                        menu_state.is_item_selected, menu_state.is_initial_menu);
         } else {
             keyboard_data.selection = validate_parameter(menu_state, keyboard_data.selection);
-            keyboard_data.edited_value = keyboard_data.selection;
-            menu_state.show_changed_options = keyboard_data.old_selection != keyboard_data.edited_value;
+            menu_state.edited_value = keyboard_data.selection;
+            menu_state.show_changed_options = keyboard_data.old_selection != menu_state.edited_value;
             if (menu_state.show_changed_options) {
-                update_edited_value(menu_state.menu_number, menu_state.menu_position, menu_state.old_menu_position,
-                                    menu_state.is_initial_menu, keyboard_data.edited_value);
+                update_edited_value(menu_state.menu_number, menu_state.menu_position,
+                                    menu_state.is_initial_menu, menu_state.edited_value);
             }
         }
     } else {
         if (keyboard_data.pressed == ENTER_PRESSED) {
             if (menu_state.menu_number == MAIN_MENU) {
-                menu_state.menu_number = MENU_NUMBER_LIST[keyboard_data.edited_value];
-                keyboard_data.selection = keyboard_data.edited_value = 0;
+                menu_state.menu_number = MENU_NUMBER_LIST[menu_state.edited_value];
+                keyboard_data.selection = menu_state.edited_value = 0;
                 menu_state.show_changed_options = true;
                 menu_state.menu_position = 0;
                 menu_state.clear_display = true;
@@ -416,11 +415,11 @@ void check_encoder(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state, uns
                 if (menu_state.is_initial_menu && menu_state.menu_position == 2) {
                     menu_state.initial_menu_completed = true;
                 } else {
-                    keyboard_data.value_to_edit = get_value_to_edit(menu_state);
-                    keyboard_data.selection = keyboard_data.edited_value = *keyboard_data.value_to_edit;
-                    keyboard_data.is_item_selected = true;
+                    menu_state.value_to_edit = get_value_to_edit(menu_state);
+                    keyboard_data.selection = menu_state.edited_value = *menu_state.value_to_edit;
+                    menu_state.is_item_selected = true;
                     show_cursor(menu_state.menu_number, menu_state.menu_position,
-                                keyboard_data.is_item_selected, menu_state.is_initial_menu);
+                                menu_state.is_item_selected, menu_state.is_initial_menu);
                 }
             }
         } else if (keyboard_data.pressed == BACK_PRESSED) {
@@ -435,19 +434,20 @@ void check_encoder(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state, uns
             }
         } else {
             keyboard_data.selection = validate_menu_position(menu_state.menu_number, keyboard_data.selection);
-            keyboard_data.edited_value = keyboard_data.selection;
+            menu_state.edited_value = keyboard_data.selection;
             menu_state.old_menu_position = menu_state.menu_position;
-            menu_state.menu_position = keyboard_data.edited_value;
+            menu_state.menu_position = menu_state.edited_value;
             menu_state.show_changed_options = menu_state.old_menu_position != menu_state.menu_position;
             if (menu_state.show_changed_options) {
+                Serial.println("move to menu pos  " + String(menu_state.menu_position));
                 move_cursor(menu_state.menu_number, menu_state.menu_position, menu_state.old_menu_position,
-                            keyboard_data.is_item_selected, menu_state.is_initial_menu);
+                            menu_state.is_item_selected, menu_state.is_initial_menu);
             }
         }
     }
 }
 
-void display_lcd(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state) {
+void display_lcd(Menu_state_t& menu_state) {
     if (menu_state.clear_display) {
         menu_state.clear_display = false;
         lcd.clear();
@@ -461,14 +461,14 @@ void display_lcd(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state) {
         if (menu_state.is_initial_menu) {
             writeLine(0, "Ingrese params", 1);
             writeLine(1, "MOD:MAN", 1);
-            writeLine(2, "BPM:" + value_to_display(PARAMETERS_MENU, 0, keyboard_data, menu_state), 1);
-            writeLine(2, "IE:1:" + value_to_display(PARAMETERS_MENU, 1, keyboard_data, menu_state), 8);
+            writeLine(2, "BPM:" + value_to_display(PARAMETERS_MENU, 0, menu_state), 1);
+            writeLine(2, "IE:1:" + value_to_display(PARAMETERS_MENU, 1, menu_state), 8);
             writeLine(3, "READY", 1);
         } else {
             writeLine(0, "MOD:MAN", 1);
-            writeLine(0, "V:" + value_to_display(PARAMETERS_MENU, 0, keyboard_data, menu_state)+"%", 10);
-            writeLine(1, "BPM:" + value_to_display(PARAMETERS_MENU, 1, keyboard_data, menu_state), 1);
-            writeLine(1, "IE:1:" + value_to_display(PARAMETERS_MENU, 2, keyboard_data, menu_state), 8);
+            writeLine(0, "V:" + value_to_display(PARAMETERS_MENU, 0, menu_state)+"%", 10);
+            writeLine(1, "BPM:" + value_to_display(PARAMETERS_MENU, 1, menu_state), 1);
+            writeLine(1, "IE:1:" + value_to_display(PARAMETERS_MENU, 2, menu_state), 8);
 
             dtostrf(last_pressure_max, 2, 0, temp_str);
             writeLine(2, "PIP:" + String(temp_str), 1);
@@ -480,26 +480,26 @@ void display_lcd(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state) {
             writeLine(3, "VM:" + String(temp_str), 1);
         }
     } else if (menu_state.menu_number == ALARMS_MENU) {
-        writeLine(0, "PIPAL:" + value_to_display(ALARMS_MENU, 0, keyboard_data, menu_state), 1);
+        writeLine(0, "PIPAL:" + value_to_display(ALARMS_MENU, 0, menu_state), 1);
         dtostrf(Cdyn*1.01972, 2, 1, temp_str);
         writeLine(0, "CD:" + String(temp_str), 10);
     
-        writeLine(1, "PEEPAL:" + value_to_display(ALARMS_MENU, 1, keyboard_data, menu_state), 1);
-        writeLine(2, "VTAL:" + value_to_display(ALARMS_MENU, 2, keyboard_data, menu_state), 1);
+        writeLine(1, "PEEPAL:" + value_to_display(ALARMS_MENU, 1, menu_state), 1);
+        writeLine(2, "VTAL:" + value_to_display(ALARMS_MENU, 2, menu_state), 1);
     
         writeLine(3, "CYCLE:" + String(last_cycle), 1);
 
     } else if (menu_state.menu_number == SETTINGS_MENU) {
         writeLine(0, "FILTER:" , 1);
-        String filterStr = value_to_display(SETTINGS_MENU, 0, keyboard_data, menu_state);
+        String filterStr = value_to_display(SETTINGS_MENU, 0, menu_state);
         if (filterStr == "1") writeLine(0, "ON", 8); else writeLine(0, "OFF", 8);
 
         writeLine(1, "AUTOPID: ", 1);
-        String autopidStr = value_to_display(SETTINGS_MENU, 1, keyboard_data, menu_state);
+        String autopidStr = value_to_display(SETTINGS_MENU, 1, menu_state);
         if (autopidStr == "1") writeLine(1, "ON", 9); else writeLine(1, "OFF", 9);
     }
     show_cursor(menu_state.menu_number, menu_state.menu_position,
-                keyboard_data.is_item_selected, menu_state.is_initial_menu);
+                menu_state.is_item_selected, menu_state.is_initial_menu);
 }
 
 void initialize_menu(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state) {
@@ -511,13 +511,13 @@ void initialize_menu(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state) {
 
     lcd.clear();
     keyboard_data.last_button_pressed = 0;
-    display_lcd(keyboard_data, menu_state);
+    display_lcd(menu_state);
 
     unsigned long last_update_display = millis();
     while (!menu_state.initial_menu_completed) {
         check_encoder(keyboard_data, menu_state, millis());
         if (menu_state.show_changed_options && (millis() - last_update_display) > 60) {
-            display_lcd(keyboard_data, menu_state);
+            display_lcd(menu_state);
             last_update_display = millis();
         }
     }
