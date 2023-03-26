@@ -161,9 +161,6 @@ void setup() {
     writeLine(2, "y presione ok ", 0);
     waitForFluxDisconnected();
 
-    digitalWrite(PIN_STEPPER, HIGH);
-    delay(1000);
-
     stepper = new AccelStepper(
         AccelStepper::DRIVER,
         PIN_STEPPER_STEP,
@@ -236,7 +233,6 @@ void loop() {
     time = millis();
     if (!sleep_mode) {
         if (wake_up) {
-            digitalWrite(PIN_STEPPER, HIGH);
             digitalWrite(TFT_SLEEP, HIGH);
             digitalWrite(LCD_SLEEP, HIGH);
             init_display();

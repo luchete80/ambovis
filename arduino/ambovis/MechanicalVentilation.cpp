@@ -11,6 +11,8 @@ void initCycleTimes(Mechanical_Ventilation_t& mech_vent) {
 }
 
 void start(Mechanical_Ventilation_t& mech_vent) {
+    digitalWrite(PIN_STEPPER, HIGH);
+    delay(1000);
     mech_vent.status.running = true;
     initCycleTimes(mech_vent);
 }
