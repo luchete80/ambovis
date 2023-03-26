@@ -34,11 +34,8 @@
 #define STEPPER_LOWEST_POSITION     (-5)   // Steps
 #define STEPPER_HIGHEST_POSITION    ( 183 * STEPPER_MICROSTEPS)   //270º ,2500 for 270º, 2850 for 220º, 2930 for 330º
 #define STEPPER_SPEED_DEFAULT       (STEPPER_MICROSTEPS *  1500)   // Steps/s
-extern int STEPPER_SPEED_MAX;       //(14000)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
-extern int STEPPER_ACCEL_MAX;       //(1500 * STEPPER_MICROSTEPS)
 #define STEPPER_SPEED_MAX_VCL       (75 * STEPPER_MICROSTEPS)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_SPEED_EXSUFF        (450 * STEPPER_MICROSTEPS)
-//#define STEPPER_ACC_EXSUFFLATION    (STEPPER_MICROSTEPS *  2000)   // Steps/s2
 
 // Valores por defecto
 #define DEFAULT_FRAC_CYCLE_VCL_INSUFF 0.75
@@ -66,32 +63,14 @@ extern int STEPPER_ACCEL_MAX;       //(1500 * STEPPER_MICROSTEPS)
 #define PID_MIN -20000 // TODO: check direction implementation
 #define PID_MAX 20000
 
-extern int PID_KP,PID_KI,PID_KD;
-
 #define PID_TS TIME_BASE
 #define PID_BANGBANG 8
-
-typedef struct ventilation_options_t {
-    short respiratoryRate = DEFAULT_RPM;
-    short peakInspiratoryPressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
-    short peakEspiratoryPressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
-    float triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
-    byte percInspEsp = 2;
-    bool hasTrigger = false;
-    short tidalVolume = 300;  //in ml
-    byte percVolume = 100;
-} VentilationOptions_t;
-
-#define MODE_VOL_CTL 0
-#define MODE_VOL_CTL 1
-#define MODE_MANUAL  2
 
 #define VENTMODE_VCL 0
 #define VENTMODE_PCL 1
 #define VENTMODE_MAN 2
 
 //general variables
-extern byte vent_mode;
 extern bool sleep_mode;
 extern bool put_to_sleep, wake_up;
 extern unsigned long time;
@@ -112,11 +91,18 @@ extern unsigned long time;
 #define BATDIV_R1           12000
 #define BATDIV_R2           470
 #define BATTERY_READ 5
+#define FDIV    (float)(BATDIV_R1 + BATDIV_R2)/(float)BATDIV_R2
+#define FAC     1.1/1024.*FDIV
 //#define BAT_TEST
 #define TIME_SHOW_BAT   15000 //MSECS
 //#define TEMP_TEST
 #define TIME_READ_TEMP  15000 //MSECS
 #define CALIB_CYCLES  5
+
+#define MIN_CURVES_Y    60
+#define CLEAN_Y         200
+#define LEGEND_Y        260 //Begining of the legend on Y AXIS
+#define ILI9341_DARKGREY 0x7BEF /* 128, 128, 128 */
 
 // Alarm state
 enum alarm_state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};

@@ -8,23 +8,17 @@ void initPins() {
     digitalWrite(PIN_STEPPER, LOW);
 
     pinMode(TFT_SLEEP, OUTPUT);
-//    digitalWrite(TFT_SLEEP, HIGH);
 
     pinMode(LCD_SLEEP, OUTPUT);
-//    digitalWrite(LCD_SLEEP, HIGH);
 
     pinMode(PIN_BUZZER, OUTPUT);
     digitalWrite(PIN_BUZZER, BUZZER_LOW);
 
     pinMode(GREEN_LED, OUTPUT);
     pinMode(BCK_LED, OUTPUT);
+    digitalWrite(BCK_LED, LOW);
     pinMode(YELLOW_LED, OUTPUT);
     pinMode(RED_LED, OUTPUT);
-
-    if (!digitalRead(PIN_POWEROFF)) {
-        digitalWrite(YELLOW_LED, HIGH);
-    }
-    digitalWrite(BCK_LED, LOW);
 
     pinMode(PIN_MUTE, INPUT_PULLUP);
     pinMode(PIN_POWEROFF, INPUT);

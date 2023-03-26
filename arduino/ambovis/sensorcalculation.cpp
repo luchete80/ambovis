@@ -34,7 +34,7 @@ float findFlux(float p_dpt) {
     return flux;
 }
 
-void readSensor(Adafruit_ADS1115& ads, SensorData& sensorData, float vzero, bool filter) {
+void read_sensor(Adafruit_ADS1115& ads, SensorData& sensorData, float vzero, bool filter) {
     int16_t adc0 = ads.readADC_SingleEnded(0);
 
     sensorData.pressure_p = (analogRead(PIN_PRESSURE)/ (1023.) - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
@@ -65,8 +65,10 @@ void readSensor(Adafruit_ADS1115& ads, SensorData& sensorData, float vzero, bool
         sensorData.ml_exs_vol -= vol; //flux in l and time in msec, results in ml
     }
     sensorData.last_read_sensor = millis();
+}
 
-    //CHECK PIP AND PEEP
+void eval_max_min_pressure(SensorData& sensorData) {
+    //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
     if (sensorData.pressure_p > sensorData.pressure_max) {
         sensorData.pressure_max = sensorData.pressure_p;
     }
@@ -75,19 +77,15 @@ void readSensor(Adafruit_ADS1115& ads, SensorData& sensorData, float vzero, bool
     }
 }
 
-void resetLimitsForInitInsufflation(int& _mlLastInsVol, int& _mlLastExpVol, SensorData& sensorData) {
-    sensorData.last_pressure_max=sensorData.pressure_max;
-    sensorData.last_pressure_min=sensorData.pressure_min;
-    sensorData.pressure_max=0;
-    sensorData.pressure_min=60;
-    for (int i=0;i<2;i++) {
-        sensorData.cdyn_pass[i]=sensorData.cdyn_pass[i+1];
-    }
-    sensorData.cdyn_pass[2]=_mlLastInsVol/(sensorData.last_pressure_max-sensorData.last_pressure_min);
-    sensorData.cdyn_avg=(sensorData.cdyn_pass[0]+sensorData.cdyn_pass[1]+sensorData.cdyn_pass[2])/3.;
-    _mlLastInsVol=int(sensorData.ml_ins_vol);
-    _mlLastExpVol=int(fabs(sensorData.ml_exs_vol));
-    sensorData.ml_ins_vol=0.;
-    sensorData.ml_exs_vol=0.;
+void update_cycle_verror_sum(Calibration_Data_t& calibration_data) {
+    float verror = calibration_data.verror_sum / float(calibration_data.vcorr_count);
+    calibration_data.vcorr_count = 0.;
+    calibration_data.verror_sum = 0.;
+    calibration_data.calib_cycle++;
+    calibration_data.verror_sum_outcycle += verror;
 }
 
+void update_verror_sum(Calibration_Data_t & calibration_data, SensorData sensorData) {
+    calibration_data.vcorr_count++;
+    calibration_data.verror_sum += (sensorData.voltage - 0.04 * sensorData.v_level);
+}
