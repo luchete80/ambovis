@@ -17,17 +17,17 @@ jobs:
         cd EpoxyDuino/cores/epoxy
         mv pins_arduino_avr.h pins_arduino.h
 
-        sed -i.bkp '65i #ifndef LSBFIRST
-        #define LSBFIRST 0
-        #endif
-        #ifndef MSBFIRST
-        #define MSBFIRST 1
-        #endif
-
-        typedef enum _BitOrder {
-          SPI_BITORDER_MSBFIRST = MSBFIRST,
-          SPI_BITORDER_LSBFIRST = LSBFIRST,
-        } BitOrder;' SPI.h
+        sed -i.bkp '65i #ifndef LSBFIRST' SPI.h
+        sed -i.bkp '66i #define LSBFIRST 0' SPI.h
+        sed -i.bkp '67i #endif' SPI.h
+        sed -i.bkp '68i #ifndef MSBFIRST' SPI.h
+        sed -i.bkp '69i #define MSBFIRST 1' SPI.h
+        sed -i.bkp '70i #endif' SPI.h
+        
+        sed -i.bkp '71i typedef enum _BitOrder {' SPI.h
+        sed -i.bkp '72i SPI_BITORDER_MSBFIRST = MSBFIRST,' SPI.h
+        sed -i.bkp '73i SPI_BITORDER_LSBFIRST = LSBFIRST,' SPI.h
+        sed -i.bkp '74i } BitOrder;' SPI.h
 
         cd ../../..
 
