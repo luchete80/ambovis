@@ -15,8 +15,8 @@ fi
 if [ -d "$EPOXY_DIR" ];
 then
     echo "$EPOXY_DIR directory exists."
-# else
-	# git clone https://github.com/bxparks/EpoxyDuino.git > /dev/null 2>&1
+else
+	git clone --branch v1.5.0 https://github.com/bxparks/EpoxyDuino.git > /dev/null 2>&1
 	# Some local adjustments were made on the downloaded EpoxyDuino project.
 	# beware if this is downloaded again, the tests won't work. 
 fi

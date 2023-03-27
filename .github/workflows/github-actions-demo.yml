@@ -12,6 +12,25 @@ jobs:
         # sudo apt install -y libcurl4-openssl-dev
         cd arduino/
         ls
+
+        git clone --branch v1.5.0 https://github.com/bxparks/EpoxyDuino.git
+        cd /EpoxyDuino/cores/epoxy
+        mv pins_arduino_avr.h pins_arduino.h
+
+        sed -i.bkp '65i #ifndef LSBFIRST
+        #define LSBFIRST 0
+        #endif
+        #ifndef MSBFIRST
+        #define MSBFIRST 1
+        #endif
+
+        typedef enum _BitOrder {
+          SPI_BITORDER_MSBFIRST = MSBFIRST,
+          SPI_BITORDER_LSBFIRST = LSBFIRST,
+        } BitOrder;' SPI.h
+
+        cd ../../..
+        
         echo "clone Aunit"
         git clone --depth 1 https://github.com/bxparks/AUnit
         echo "clone liquid"
