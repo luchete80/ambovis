@@ -14,7 +14,7 @@ jobs:
         ls
 
         git clone --branch v1.5.0 https://github.com/bxparks/EpoxyDuino.git
-        cd /EpoxyDuino/cores/epoxy
+        cd EpoxyDuino/cores/epoxy
         mv pins_arduino_avr.h pins_arduino.h
 
         sed -i.bkp '65i #ifndef LSBFIRST
@@ -30,7 +30,7 @@ jobs:
         } BitOrder;' SPI.h
 
         cd ../../..
-        
+
         echo "clone Aunit"
         git clone --depth 1 https://github.com/bxparks/AUnit
         echo "clone liquid"
