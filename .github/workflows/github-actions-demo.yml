@@ -15,6 +15,7 @@ jobs:
 
         git clone --branch v1.5.0 https://github.com/bxparks/EpoxyDuino.git
         cd EpoxyDuino/cores/epoxy
+        touch wiring_private.h
         cp pins_arduino_avr.h pins_arduino.h
 
         sed -i.bkp '65i #ifndef LSBFIRST' SPI.h
