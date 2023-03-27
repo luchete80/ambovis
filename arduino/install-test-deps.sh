@@ -41,6 +41,15 @@ else
 	echo "LiquidCrystal already installed."
 fi
 
+git clone --branch 2.3.0 https://github.com/adafruit/Adafruit_ADS1X15.git > /dev/null 2>&1
+git clone --branch 1.7.3 https://github.com/adafruit/Adafruit_BusIO.git > /dev/null 2>&1
+git clone --branch 1.10.9 https://github.com/adafruit/Adafruit-GFX-Library.git > /dev/null 2>&1
+git clone --branch 1.5.6 https://github.com/adafruit/Adafruit_ILI9341.git > /dev/null 2>&1
+        
+cd Adafruit_BusIO/
+sed -i.bak -e '31,32d' Adafruit_SPIDevice.h
+cd ../
+
 if [ ! -d "$ARDUINO_LIBS/AMBTestable/src" ];
 then
 	mkdir -p "$ARDUINO_LIBS/AMBTestable/src"

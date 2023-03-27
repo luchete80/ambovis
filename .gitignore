@@ -6,6 +6,7 @@ arduino/ambovis/cmake-build-debug/
 arduino/libs
 arduino/AUnit
 arduino/LiquidCrystal
+arduino/Adafruit*
 *.out
 *.o
 
