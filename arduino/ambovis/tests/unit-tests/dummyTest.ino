@@ -12,7 +12,7 @@ float _mlInsVol,_mlExsVol;
 int _mllastInsVol,_mllastExsVol;
 bool ended_whilemov;
 float vlevel;
-byte alarm_state;
+short alarm_state;
 bool drawing_cycle;
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 
