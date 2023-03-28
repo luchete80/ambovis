@@ -4,8 +4,6 @@ static bool clear_all_display;
 bool change_sleep;
 int pressed=0;  //0 nothing , 1 enter, 2 bck
 
-
-
 byte back[8] = {
   0b00100,
   0b01000,
@@ -23,30 +21,10 @@ void updateState() {
       startPressed = time2;
       idleTime = startPressed - endPressed;
       change_sleep=false;
-//      if (idleTime >= 500 && idleTime < 1000) {
-//          Serial.println("Button was idle for half a second");
-//      }
-//
-//      if (idleTime >= 1000) {
-//          Serial.println("Button was idle for one second or more"); 
-//      }
-
-  // the button has been just released
+      // the button has been just released
   } else {
       endPressed = time2;
       holdTime = endPressed - startPressed;
-
-//      if (holdTime >= 10 && holdTime < 1000) {
-//          Serial.println("Button was hold for half a second"); 
-//      }
-//      if (holdTime >= 500 && holdTime < 1000) {
-//          Serial.println("Button was hold for half a second"); 
-//      }
-//
-//      if (holdTime >= 1000) {
-//          Serial.println("Button was hold for one second or more"); 
-//      }
-
   }
 }
 
@@ -54,28 +32,14 @@ void updateCounter() {
   // the button is still pressed
   if (bck_state == LOW) {
       holdTime = time2 - startPressed;
-
-//      if (holdTime >= 1000) {
-//          Serial.println("Button is hold for more than a second"); 
-//      }
-
   // the button is still released
   } else {
       idleTime = time2 - endPressed;
-
-//      if (idleTime >= 1000) {
-//          Serial.println("Button is released for more than a second");  
-//      }
   }
 }
 
 void init_display() {
-  #ifdef LCD_I2C
-  lcd.begin(20, 4);  //I2C
-#else
-  lcd.begin(20, 4); //NO I2C
-#endif
-  //lcd.backlight();
+  lcd.begin(20, 4);
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.createChar(0,back);
@@ -113,13 +77,9 @@ void check_updn_button(int pin, byte *var, bool incr_decr) {
       }// if time > last button press
     }
 }
-void check_bck_state(){
-      bck_state=digitalRead(PIN_MENU_BCK);         
-//    Serial.print("holdTime:");Serial.println(holdTime);
-//    Serial.print("change_sleep:");Serial.println(change_sleep);
-//    Serial.print("bck_state:");Serial.println(bck_state);
-//    Serial.print("sleep_mode:");Serial.println(sleep_mode);
-        
+void check_bck_state() {
+    bck_state=digitalRead(PIN_MENU_BCK);
+
     if (bck_state != last_bck_state) { 
        updateState(); // button state changed. It runs only once.
         if (bck_state == LOW ) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
@@ -161,14 +121,6 @@ void check_bck_state(){
       isitem_sel=true; 
       lastButtonPress = time2;
     }// if time > last button press
-
-// ORIGINAL BCK WITHOUT SLEEP MODE
-//    if (digitalRead(PIN_MENU_BCK) == LOW )  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
-//        if (time - lastButtonPress > 150) {
-//          pressed = 2;
-//          isitem_sel=false; 
-//          lastButtonPress = time;
-//        }// if time > last button press
 
     check_bck_state();
 
@@ -366,7 +318,7 @@ void check_bck_state(){
            encoderPos=oldEncPos=max_sel; 
         } else if ( encoderPos < min_sel ) {
             encoderPos=oldEncPos=min_sel;
-          } else {
+        } else {
       
         oldEncPos = encoderPos;
 
@@ -602,12 +554,7 @@ void display_lcd (Ventilation_Status_t& status, Ventilation_Config_t& config) {
 
     dtostrf(status.last_max_pressure, 2, 0, tempstr);
     writeLine(1, String(tempstr), 16);
-    
-    #ifdef DEBUG_UPDATE
-      Serial.print("Max press conv: ");Serial.println(tempstr);
-      Serial.print("Min Max press");  Serial.print(pressure_min);Serial.print(" ");Serial.println(pressure_max);
-    #endif
-      
+
     writeLine(2, "PEEP: ", 11);
     dtostrf(status.last_min_pressure, 2, 0, tempstr);
     writeLine(2, String(tempstr), 16);  
@@ -676,8 +623,6 @@ void display_lcd (Ventilation_Status_t& status, Ventilation_Config_t& config) {
 
 }
 
-
-
 //////////////////////////////////////
 /////// MENU INICIAL /////////////////
 //////////////////////////////////////
@@ -711,7 +656,6 @@ Menu_inic::Menu_inic(Ventilation_Config_t& vent_config) {
 void Menu_inic::check_encoder(Ventilation_Config_t& vent_config) {
     check_updn_button(PIN_MENU_DN,&encoderPos,true);   //Increment
     check_updn_button(PIN_MENU_UP,&encoderPos,false);  //Decrement
-    Serial.println("Encoder Pos: " +String( encoderPos) );
     pressed=0;  //0 nothing , 1 enter, 2 bck
     if (digitalRead(PIN_MENU_EN) == LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
         if (time2 - lastButtonPress > 150) {
@@ -747,22 +691,20 @@ void Menu_inic::check_encoder(Ventilation_Config_t& vent_config) {
                 min_sel=1;
                 max_sel=3;
             break;
-            case 4: 
-                if ( menu_number == 0 ) {
-                    fin=true;
-                }
+            case 4:
+                fin=true;
                 break;
-      }
+          }
     
         }//if switch select
-          show_changed_options = true;
-          update_options = true;
+        show_changed_options = true;
+        update_options = true;
   }//If selection
   
   if (oldEncPos != encoderPos) {
-    show_changed_options = true;
+      show_changed_options = true;
 
-    if (!isitem_sel) { //Selecting position
+      if (!isitem_sel) { //Selecting position
           m_curr_sel=encoderPos;
           encoderPos=oldEncPos=m_curr_sel;
 
@@ -794,23 +736,19 @@ void Menu_inic::check_encoder(Ventilation_Config_t& vent_config) {
                   vent_config.perc_IE = encoderPos;
                 break;
               case 4:
-                if ( menu_number == 0 ) {
-
-                }  
                 break;
 
             }//switch
             show_changed_options = true;
             update_options=true;
-          }//Valid range
+      }//Valid range
 
-    old_curr_sel = curr_sel;
-
+      old_curr_sel = curr_sel;
     }//oldEncPos != encoderPos and valid between range
   }
 }
 
-void Menu_inic::clear_n_sel(int menu){
+void Menu_inic::clear_n_sel(int menu) {
     if (menu==0) {  
         lcd_clearxy(0,0);
         lcd_clearxy(0,1);lcd_clearxy(9,0);
@@ -852,8 +790,7 @@ void Menu_inic::display_lcd (Ventilation_Config_t& vent_config) {
     writeLine(3, "IE:  1:" + String(vent_config.perc_IE), 1);
     writeLine(3, "FIN: ", 13);
       
-  } 
-
+  }
 
   clear_all_display=false;
 

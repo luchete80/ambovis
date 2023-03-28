@@ -53,8 +53,7 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 byte vcorr_count = 0;
 float verror, verror_sum, verror_sum_outcycle, vzero = 0.;  //verror sum is intra cycle, verror_sum_outcycle is inter-cycle
 
-bool send_data = false;
-char tempstr[5], tempstr2[5];
+char tempstr[5];
 int curr_sel, old_curr_sel;
 
 unsigned long lastShowSensor = 0;
@@ -82,11 +81,7 @@ byte pfmin, pfmax;
 float pf_min, pf_max;
 float peep_fac;
 
-//min_pidk=250;
-//max_pidk=1000;
 int min_cd, max_cd;
-//max_cd=40;  //T MODIFY: READ FROM MEM
-//min_cd=10;
 
 //MENU
 byte menu_number = 0;

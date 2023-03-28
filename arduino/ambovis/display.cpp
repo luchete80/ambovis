@@ -5,24 +5,10 @@
 #define LEGEND_Y        260 //Begining of the legend on Y AXIS
 #define ILI9341_DARKGREY 0x7BEF /* 128, 128, 128 */
 bool lcd_cleaned=false;
-
-unsigned long time_last_show=0;
-
-char a[10],b[10];
-
-const byte numChars = 32;
-char receivedChars[numChars]; // an array to store the received data
-int last_t;
-int integerFromPC [5];
-float floatFromPC = 0.0;
 int axispos[]={130,200}; //from each graph, from 0 to 320 (display height, IN PORTRAIT MODE)
 
-char recvChar;
-char endMarker = '>';
-boolean newData = false;
 byte valsreaded=0;
 byte rx[128],ry[128];
-int  ry2[128];
 int yflux[2];
 char buffer[10];
 
