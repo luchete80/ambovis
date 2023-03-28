@@ -29,7 +29,7 @@ bool drawing_cycle = 0;//TOD: Move to class member
 Adafruit_ADS1115 ads;
 SensorData sensorData;
 
-short alarm_state = 0; //0: No alarm 1: peep 2: pip 3:both
+byte alarm_state = 0; //0: No alarm 1: peep 2: pip 3:both
 //////////////////////////
 // - EXTERNAL VARIABLES //
 //////////////////////////
@@ -305,7 +305,7 @@ void loop() {
 
             if (time2 > lastShowSensor + TIME_SHOW) {
                 tft_draw(tft, sensorData, mech_vent.status, drawing_cycle, fac);
-                lastShowSensor = time;
+                lastShowSensor = time2;
             }
 
             if (time2 > sensorData.last_read_sensor + TIME_SENSOR) {

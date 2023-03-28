@@ -695,7 +695,7 @@ Menu_inic::Menu_inic(Ventilation_Config_t& vent_config) {
     last_update_display=millis();
     while (!fin){
         this->check_encoder(vent_config);
-        time=millis();
+        time2=millis();
         if (show_changed_options && ((millis() - last_update_display) > 50) ) {
             display_lcd(vent_config);  //WITHOUT CLEAR!
             last_update_display = millis();
@@ -714,11 +714,11 @@ void Menu_inic::check_encoder(Ventilation_Config_t& vent_config) {
     Serial.println("Encoder Pos: " +String( encoderPos) );
     pressed=0;  //0 nothing , 1 enter, 2 bck
     if (digitalRead(PIN_MENU_EN) == LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
-        if (time - lastButtonPress > 150) {
+        if (time2 - lastButtonPress > 150) {
 
             pressed = 1;
             isitem_sel=true; 
-            lastButtonPress = time;
+            lastButtonPress = time2;
 
         }// if time > last button press
     }
@@ -865,10 +865,10 @@ void Menu_inic::check_bck_state(){
     if (bck_state != last_bck_state) { 
        updateState(); // button state changed. It runs only once.
         if (bck_state == LOW ) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
-            if (time - lastButtonPress > 150) {
+            if (time2 - lastButtonPress > 150) {
 
                   pressed = 2;
-                  lastButtonPress = time;
+                  lastButtonPress = time2;
                   if (isitem_sel){
                       isitem_sel=false; 
                   } else {
