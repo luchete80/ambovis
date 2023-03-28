@@ -1,6 +1,4 @@
-#include "pinout.h"
 #include "src/TimerOne/TimerOne.h"
-#include "src/TimerTwo/TimerTwo.h"
 #include "src/TimerThree/TimerThree.h"
 
 #include "menu.h"
@@ -24,20 +22,14 @@ bool sleep_mode;
 bool put_to_sleep, wake_up;
 unsigned long print_bat_time;
 
-bool drawing_cycle = 0;//TOD: Move to class member
+bool drawing_cycle = 0;
 
 Adafruit_ADS1115 ads;
 SensorData sensorData;
 
-byte alarm_state = 0; //0: No alarm 1: peep 2: pip 3:both
-//////////////////////////
-// - EXTERNAL VARIABLES //
-//////////////////////////
-#ifdef LCD_I2C
-LiquidCrystal_I2C lcd(0x3F, 20, 4);
-#else
+short alarm_state = 0; //0: No alarm 1: peep 2: pip 3:both
+
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
-#endif
 
 //MUTE
 bool last_mute;
@@ -46,7 +38,6 @@ unsigned long timebuzz = 0;
 bool isbuzzeron = false;
 unsigned long mute_count;
 bool is_alarm_vt_on;
-
 
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 
@@ -66,6 +57,7 @@ unsigned long lastShowBat = 0;
 #ifdef TEMP_TEST
 unsigned lastReadTemp = 0;
 #endif
+
 bool show_changed_options = false; //Only for display
 bool update_options = false;
 
@@ -80,7 +72,6 @@ int min_pidd, max_pidd;
 byte pfmin, pfmax;
 float pf_min, pf_max;
 float peep_fac;
-
 int min_cd, max_cd;
 
 //MENU
@@ -90,7 +81,6 @@ byte alarm_peep_pressure = 5;
 int alarm_vt = 200;
 
 unsigned long lastButtonPress;
-
 byte encoderPos = 1; //this variable stores our current value of encoder position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
 byte oldEncPos = 1; //stores the last encoder position value so we can compare to the current reading and see if it has changed (so we know when to print to the serial monitor)
 byte max_sel, min_sel; //According to current selection
@@ -100,7 +90,6 @@ Mechanical_Ventilation_t mech_vent;
 AccelStepper* stepper;
 
 void init_display_tft(Adafruit_ILI9341& tft);
-
 
 int bck_state ;     // current state of the button
 int last_bck_state ; // previous state of the button
@@ -176,7 +165,6 @@ void setup() {
         AccelStepper::DRIVER,
         PIN_STEPPER_STEP,
         PIN_STEPPER_DIRECTION);
-
 
     mech_vent.stepper = stepper;
     start(mech_vent);

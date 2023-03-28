@@ -31,7 +31,7 @@
 
 #define STEPPER_HOMING_DIRECTION    (1)
 #define STEPPER_HOMING_SPEED        (STEPPER_MICROSTEPS * 600)   // Steps/s
-#define STEPPER_LOWEST_POSITION (-5) // Steps
+#define STEPPER_LOWEST_POSITION     (-5)   // Steps
 #define STEPPER_HIGHEST_POSITION    ( 183 * STEPPER_MICROSTEPS)   //270º ,2500 for 270º, 2850 for 220º, 2930 for 330º
 #define STEPPER_SPEED_DEFAULT       (STEPPER_MICROSTEPS *  1500)   // Steps/s
 #define STEPPER_SPEED_MAX_VCL       (75 * STEPPER_MICROSTEPS)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
@@ -72,7 +72,7 @@
 
 //general variables
 extern bool sleep_mode;
-extern byte alarm_state;
+extern short alarm_state;
 extern bool put_to_sleep, wake_up;
 extern unsigned long time2;
 

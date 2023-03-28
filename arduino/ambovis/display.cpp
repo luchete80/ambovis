@@ -200,4 +200,3 @@ void print_vols(Adafruit_ILI9341& tft, Ventilation_Status_t vent_status) {
     tft.setCursor(0, LEGEND_Y + 40);
     tft.println("VT: ");tft.setCursor(40, LEGEND_Y + 40);tft.println(buffer);
 }
-

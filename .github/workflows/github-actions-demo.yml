@@ -35,8 +35,8 @@ jobs:
         echo "clone Aunit"
         git clone --depth 1 https://github.com/bxparks/AUnit
         echo "clone liquid"
-        git clone --depth 1 https://github.com/arduino-libraries/LiquidCrystal.git
-        echo "clone adafruit"
+        git clone --branch 1.0.7 --depth 1 https://github.com/arduino-libraries/LiquidCrystal.git
+        echo "clone adafruit set"
         git clone --branch 2.3.0 https://github.com/adafruit/Adafruit_ADS1X15.git
         git clone --branch 1.7.3 https://github.com/adafruit/Adafruit_BusIO.git
         git clone --branch 1.10.9 https://github.com/adafruit/Adafruit-GFX-Library.git
