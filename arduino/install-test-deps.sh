@@ -14,7 +14,7 @@ else
 	sed -i.bkp '188s/MODULE_SRCS_CPP += $(foreach module,$(EPOXY_MODULES),$(MODULE_EXPANSION_CPP))/MODULE_SRCS_CPP_T += $(foreach module,$(EPOXY_MODULES),$(MODULE_EXPANSION_CPP))/' EpoxyDuino.mk
 	sed -i.bkp '189i \
 FILTER_OUT_CPP_PATTERN= $(foreach v,$(2),$(if $(findstring $(1),$(v)),,$(v)))\
-EXCLUDE_CPP_PATTERN_1 := /ambovis/src/TimerOne \
+EXCLUDE_CPP_PATTERN_1 := /ambovis/src/TimerOne\
 MODULE_SRCS_CPP_TT = $(call FILTER_OUT_CPP_PATTERN,$(EXCLUDE_CPP_PATTERN_1),$(MODULE_SRCS_CPP_T))\
 EXCLUDE_CPP_PATTERN_2 := /ambovis/src/TimerTwo\
 MODULE_SRCS_CPP_TTT = $(call FILTER_OUT_CPP_PATTERN,$(EXCLUDE_CPP_PATTERN_2),$(MODULE_SRCS_CPP_TT))\
