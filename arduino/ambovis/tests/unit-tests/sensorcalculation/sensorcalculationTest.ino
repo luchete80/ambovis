@@ -50,11 +50,11 @@ static float test_dp[] = { 0.1, 0.2, 0.3, 0.4, 0.5 };
 static unsigned char test_po_flux[] = { 1, 2, 3, 5, 7 };
 
 test(find_flux) {
-    int pos = 5;
+    int pos = 3;
     float expected = test_po_flux[pos] - 100 + ( float (test_po_flux[pos + 1] - 100) - float (test_po_flux[pos] - 100) ) * ( 0.38 - float(test_dp[pos]) ) / (float)( test_dp[pos + 1] - test_dp[pos]);
     expected = expected * 16.6667;
 
-    float x = find_flux(0.38, test_dp, test_po_flux);
+    float x = find_flux(0.38, test_dp, test_po_flux, 5);
     assertEqual(x, expected);
 }
 

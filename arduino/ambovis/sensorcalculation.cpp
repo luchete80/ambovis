@@ -4,13 +4,11 @@
 
 #include "sensorcalculation.h"
 
-#define DP_LENGTH 55
-
-int findClosest(float target, float dp[]) {
-    int i = 0, j = DP_LENGTH - 1, mid = 0;
+int findClosest(float target, float _dp[], int size) {
+    int i = 0, j = size - 1, mid = 0;
     while ( j - i > 1 ) {
         mid = (i + j) / 2;
-        if (target < dp[mid]) {
+        if (target < _dp[mid]) {
             j = mid;
         } else {
             i = mid;
@@ -19,10 +17,10 @@ int findClosest(float target, float dp[]) {
     return i;
 }
 
-float find_flux(float p_dpt, float* dp, byte* po_flux) {
-    byte pos = findClosest(p_dpt, dp);
+float find_flux(float p_dpt, float _dp[], byte _po_flux[], int size) {
+    byte pos = findClosest(p_dpt, _dp, size);
     //flux should be shifted up (byte storage issue)
-    float flux = po_flux[pos] - 100 + ( float (po_flux[pos + 1] - 100) - float (po_flux[pos] - 100) ) * ( p_dpt - float(dp[pos]) ) / (float)( dp[pos + 1] - dp[pos]);
+    float flux = _po_flux[pos] - 100 + ( float (_po_flux[pos + 1] - 100) - float (_po_flux[pos] - 100) ) * ( p_dpt - float(_dp[pos]) ) / (float)( _dp[pos + 1] - _dp[pos]);
     flux *= 16.6667;
     return flux;
 }

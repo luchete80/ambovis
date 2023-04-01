@@ -401,7 +401,7 @@ void process_sensor_data(SensorData& sensorData) {
 
     convert_sensor_data(adc0, pressure, mpx_lev, sensorData);
     float p_dpt = get_dpt(sensorData.voltage, sensorData.v_level, vzero);
-    sensorData.flux = find_flux(p_dpt, dp, po_flux);
+    sensorData.flux = find_flux(p_dpt, dp, po_flux, DP_LENGTH);
 
     sensorData.flow_f = get_flow(sensorData, filter);
     update_vol(sensorData, millis());
