@@ -1,5 +1,7 @@
 #include "src/TimerOne/TimerOne.h"
 #include "src/TimerThree/TimerThree.h"
+#include <Wire.h>
+#include <Adafruit_ADS1X15.h>
 
 #include "menu.h"
 #include "display.h"
@@ -90,6 +92,7 @@ Mechanical_Ventilation_t mech_vent;
 AccelStepper* stepper;
 
 void init_display_tft(Adafruit_ILI9341& tft);
+void process_sensor_data(SensorData& sensorData);
 
 int bck_state ;     // current state of the button
 int last_bck_state ; // previous state of the button
@@ -249,7 +252,7 @@ void loop() {
 
         if (calibration_run) {
             if (time2> sensorData.last_read_sensor + TIME_SENSOR) {
-                readSensor(ads, sensorData, vzero, filter);
+                process_sensor_data(sensorData);
                 vcorr_count++;
                 verror_sum += (sensorData.voltage - 0.04 * sensorData.v_level);
             }
@@ -292,16 +295,8 @@ void loop() {
             }
 
             if (time2 > sensorData.last_read_sensor + TIME_SENSOR) {
-                readSensor(ads, sensorData, vzero, filter);
-
-                //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
-                if (sensorData.pressure_p > sensorData.pressure_max) {
-                    sensorData.pressure_max = sensorData.pressure_p;
-                }
-                if (sensorData.pressure_p < sensorData.pressure_min) {
-                    sensorData.pressure_min = sensorData.pressure_p;
-                }
-
+                process_sensor_data(sensorData);
+                check_pip_and_peep(sensorData);
             }//Read Sensor
 
             if (vent_status->cycle != vent_status->last_cycle) {
@@ -397,4 +392,18 @@ void init_display_tft(Adafruit_ILI9341& tft) {
     tft.setTextSize(4);
     tft.setCursor(10, 40);     tft.println("RespirAR");
     tft.setCursor(10, 80);     tft.println("FIUBA");
+}
+
+void process_sensor_data(SensorData& sensorData) {
+    int16_t adc0 = ads.readADC_SingleEnded(0);
+    int pressure = analogRead(PIN_PRESSURE);
+    int mpx_lev = analogRead(PIN_MPX_LEV);
+
+    convert_sensor_data(adc0, pressure, mpx_lev, sensorData);
+    float p_dpt = get_dpt(sensorData.voltage, sensorData.v_level, vzero);
+    sensorData.flux = find_flux(p_dpt, dp, po_flux);
+
+    sensorData.flow_f = get_flow(sensorData, filter);
+    update_vol(sensorData, millis());
+    sensorData.last_read_sensor = millis();
 }

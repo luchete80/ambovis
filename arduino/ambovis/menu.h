@@ -38,7 +38,6 @@ extern float dpip;
 extern byte dpip_b;
 extern bool autopid;
 extern bool filter;
-extern float flow_f;
 
 extern byte alarm_max_pressure;
 extern byte alarm_peep_pressure;

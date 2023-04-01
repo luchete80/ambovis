@@ -45,14 +45,14 @@ void init_display() {
   lcd.createChar(0,back);
 }
 
-void writeLine(int line, String message = "", int offsetLeft = 0) {
+void writeLine(int line, String message, int offsetLeft) {
   lcd.setCursor(0, line);
   lcd.print("");
   lcd.setCursor(offsetLeft, line);
   lcd.print(message);
 }
 
-void lcd_clearxy(int x, int y,int pos=1) {
+void lcd_clearxy(int x, int y,int pos) {
   for (int i=0;i<pos;i++) {
       lcd.setCursor(x+i, y);
       lcd.print(" ");
