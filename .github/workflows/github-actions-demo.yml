@@ -60,9 +60,9 @@ jobs:
         cd ../
 
         ls
-        cd ambovis/tests/unit-tests
+        cd ambovis/tests/unit-tests/sensorcalculation
         make > /dev/null
-        ./dummyTest.out
+        ./sensorcalculationTest.out
 
     # - name: Verify examples
     #   run: |

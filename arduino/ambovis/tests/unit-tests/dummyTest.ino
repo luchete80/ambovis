@@ -11,8 +11,6 @@ bool ended_whilemov;
 float vlevel;
 short alarm_state;
 bool drawing_cycle;
-//Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
-
 
 test(correct) {
     int x = 1;
