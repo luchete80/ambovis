@@ -36,9 +36,9 @@ bool debounce(bool last, int pin) {
 }
 
 bool check_buzzer_mute(
-        bool last_mute,
+        bool& last_mute,
         bool buzz_muted,
-        unsigned long mute_count,
+        unsigned long& mute_count,
         unsigned long time
         ) {
     bool curr_mute = debounce(last_mute, PIN_MUTE);
