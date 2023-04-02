@@ -1,16 +1,4 @@
 #include <AUnit.h>
-#include "../../pinout.h"
-#include "../../menu.h"
-#include "../../MechanicalVentilation.h"
-
-byte cycle_pos;
-float pressure_p;
-float _mlInsVol,_mlExsVol;
-int _mllastInsVol,_mllastExsVol;
-bool ended_whilemov;
-float vlevel;
-short alarm_state;
-bool drawing_cycle;
 
 test(correct) {
     int x = 1;

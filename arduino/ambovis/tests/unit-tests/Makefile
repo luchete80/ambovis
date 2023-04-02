@@ -1,3 +1,23 @@
-APP_NAME := dummyTest
-ARDUINO_LIBS := AUnit Adafruit_BusIO Adafruit-GFX-Library Adafruit_ILI9341 LiquidCrystal Adafruit_ADS1X15
-include ../../../EpoxyDuino/EpoxyDuino.mk
+tests:
+	set -e; \
+	for i in *Test/Makefile; do \
+		echo '==== Making:' $$(dirname $$i); \
+		$(MAKE) -C $$(dirname $$i) clean; \
+		$(MAKE) -C $$(dirname $$i); \
+	done
+
+runtests:
+	set -e; \
+	for i in *Test/Makefile; do \
+		echo '==== Running:' $$(dirname $$i); \
+		$(MAKE) -s -C $$(dirname $$i) clean; \
+		$(MAKE) -s -C $$(dirname $$i) all; \
+		$(MAKE) -C $$(dirname $$i) run; \
+	done
+
+clean:
+	set -e; \
+	for i in *Test/Makefile; do \
+		echo '==== Cleaning:' $$(dirname $$i); \
+		$(MAKE) -C $$(dirname $$i) clean; \
+	done
