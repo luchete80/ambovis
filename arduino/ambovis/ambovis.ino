@@ -93,6 +93,7 @@ AccelStepper* stepper;
 
 void init_display_tft(Adafruit_ILI9341& tft);
 void process_sensor_data(SensorData& sensorData);
+void search_home_position(AccelStepper* stepper);
 
 int bck_state ;     // current state of the button
 int last_bck_state ; // previous state of the button
@@ -406,4 +407,9 @@ void process_sensor_data(SensorData& sensorData) {
     sensorData.flow_f = get_flow(sensorData, filter);
     update_vol(sensorData, millis());
     sensorData.last_read_sensor = millis();
+}
+
+void search_home_position(AccelStepper* stepper) {
+    ccw_search_home(stepper);
+    cw_search_home(stepper);
 }
