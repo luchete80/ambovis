@@ -1,10 +1,15 @@
 .DS_Store
+.idea/
 arduino/ambovis/.idea/
 arduino/Paracambiarpornuevmenu/.idea/
 arduino/ambovis/CMakeLists.txt
 arduino/ambovis/cmake-build-debug/
 arduino/EpoxyDuino
+arduino/AUnit/
+arduino/Adafruit*
+arduino/LiquidCrystal/
 arduino/libs
 *.out
 *.o
+
 
