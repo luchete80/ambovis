@@ -296,7 +296,7 @@ void setup() {
   digitalWrite(PIN_EN, LOW);
 
   writeLine(1, "RespirAR FIUBA", 4);
-  writeLine(2, "v2.0.2", 8);
+  writeLine(2, "v2.0.1", 8);
 
   tft.begin();
   tft.fillScreen(ILI9341_BLACK);
