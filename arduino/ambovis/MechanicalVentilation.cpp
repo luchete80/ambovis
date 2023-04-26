@@ -132,6 +132,5 @@ void search_home_position(AccelStepper* stepper) {
         initial_homing++;
         delay(5);
     }
-
-    stepper->setCurrentPosition(STEPPER_LOWEST_POSITION);
+    stepper->setCurrentPosition(STEPPER_LOWEST_POSITION+40);
 }
