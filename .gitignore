@@ -9,7 +9,7 @@ arduino/AUnit/
 arduino/Adafruit*
 arduino/LiquidCrystal/
 arduino/libs
+.idea
+*.tmp
 *.out
 *.o
-
-
