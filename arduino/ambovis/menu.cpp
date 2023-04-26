@@ -722,7 +722,6 @@ void Menu_inic::check_encoder(Ventilation_Config_t& vent_config) {
       } else if ( encoderPos < min_sel ) {
           encoderPos=oldEncPos=min_sel;
       } else {
-
         oldEncPos = encoderPos;
         
             switch (m_curr_sel) {

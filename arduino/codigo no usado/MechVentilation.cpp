@@ -193,9 +193,9 @@ void MechVentilation :: update ( SensorData& sensorData )
         Cdyn=(Cdyn_pass[0]+Cdyn_pass[1]+Cdyn_pass[2])/3.;
         _mllastInsVol=int(sensorData.ml_ins_vol);
         _mllastExsVol=int(fabs(sensorData.ml_exs_vol));
-        
-        sensorData.ml_ins_vol=0.;
-        sensorData.ml_exs_vol=0.;
+        //_mlInsVol2=0;
+        _mlInsVol=0.;
+        _mlExsVol=0.;
         
         wait_NoMove=false;
         /* Stepper control: set acceleration and end-position */
