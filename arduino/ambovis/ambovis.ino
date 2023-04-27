@@ -121,10 +121,6 @@ void setup() {
     init_display_tft(tft);
     init_sensor(ads);
 
-    mech_vent.status.running = true;
-    mech_vent.status.current_state = State_Homing;
-    mech_vent.status.start_cycle_time_ms = 0;
-    mech_vent.status.ended_while_moving = false;
     Menu_inic menuini(mech_vent.config);
 
     wait_for_flux_disconnected();
