@@ -30,18 +30,6 @@ float find_flux(float p_dpt, float _dp[], byte _po_flux[], int size) {
 }
 
 float get_flow(SensorData & sensorData, bool filter) {
-//=======
-//void read_sensor(Adafruit_ADS1115& ads, SensorData& sensorData, float vzero, bool filter) {
-//    int16_t adc0 = ads.readADC_SingleEnded(0);
-//
-//    sensorData.pressure_p = (analogRead(PIN_PRESSURE)/ (1023.) - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
-//    sensorData.v_level = float(analogRead(PIN_MPX_LEV)) / 1024. * 1.1 * VOLTAGE_CONV;
-//    sensorData.voltage = (adc0 * 0.1875) * 0.001; //Volts
-//
-//    float p_dpt = ((sensorData.voltage - vzero) / sensorData.v_level - 0.04) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
-//    sensorData.flux = findFlux(p_dpt);
-//
-//>>>>>>> RESP-develop
     float flux_sum = 0.;
     float flow_f = sensorData.flux;
     if (filter) {
@@ -71,14 +59,9 @@ void convert_sensor_data(int16_t adc0, int pressure, int mpx_lev, SensorData& se
     sensorData.voltage = (float(adc0) * 0.1875) * 0.001; //Volts
 }
 
-float get_dpt(float voltage, float vzero, float v_level) {
+float get_dpt(float voltage, float v_level, float vzero) {
     return ((voltage - vzero) / v_level - 0.04) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
 }
-
-//void check_pip_and_peep(SensorData& sensorData) {
-//=======
-//    sensorData.last_read_sensor = millis();
-//}
 
 void eval_max_min_pressure(SensorData& sensorData) {
 
