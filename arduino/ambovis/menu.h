@@ -3,7 +3,7 @@
 
 #include "defaults.h"
 #include "alarms.h"
-#include <arduino.h>
+#include <Arduino.h>
 #include <LiquidCrystal.h>
 #include "MechanicalVentilation.h"
 
@@ -43,6 +43,7 @@ extern byte dpip_b;
 extern bool autopid;
 extern bool filter;
 extern float flow_f;
+extern unsigned long time2;
 
 void show_calibration_cycle(byte calib_cycle);
 void wait_for_flux_disconnected();
@@ -65,8 +66,8 @@ class Menu_inic {
   public:
     Menu_inic(Ventilation_Config_t& vent_config);
     void clear_n_sel( int menu );
-    void Menu_inic::check_encoder (Ventilation_Config_t& vent_config);
-    void Menu_inic::display_lcd (Ventilation_Config_t& config);
+    void check_encoder (Ventilation_Config_t& vent_config);
+    void display_lcd (Ventilation_Config_t& config);
     void check_bck_state();
 };
 

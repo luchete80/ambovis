@@ -31,7 +31,7 @@
 
 #define STEPPER_HOMING_DIRECTION    (1)
 #define STEPPER_HOMING_SPEED        (STEPPER_MICROSTEPS * 600)   // Steps/s
-#define STEPPER_LOWEST_POSITION     (-5)   // Steps
+#define STEPPER_LOWEST_POSITION     (0)   // Steps
 #define STEPPER_HIGHEST_POSITION    ( 183 * STEPPER_MICROSTEPS)   //270º ,2500 for 270º, 2850 for 220º, 2930 for 330º
 #define STEPPER_SPEED_DEFAULT       (STEPPER_MICROSTEPS *  1500)   // Steps/s
 #define STEPPER_SPEED_MAX_VCL       (75 * STEPPER_MICROSTEPS)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
@@ -73,7 +73,7 @@
 //general variables
 extern bool sleep_mode;
 extern bool put_to_sleep, wake_up;
-extern unsigned long time;
+extern unsigned long time2;
 
 // 5v to 1.1v dividiver, in order to use 1.1 arduino vref (more stable)
 // Vo = V1 x R2/(R1 + R2)
@@ -93,7 +93,7 @@ extern unsigned long time;
 #define BATTERY_READ 5
 #define FDIV    (float)(BATDIV_R1 + BATDIV_R2)/(float)BATDIV_R2
 #define FAC     1.1/1024.*FDIV
-//#define BAT_TEST
+#define BAT_TEST
 #define TIME_SHOW_BAT   15000 //MSECS
 //#define TEMP_TEST
 #define TIME_READ_TEMP  15000 //MSECS

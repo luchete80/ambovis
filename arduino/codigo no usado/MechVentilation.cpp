@@ -162,7 +162,29 @@ void MechVentilation :: update( SensorData& sensorData )
     {
         resetLimitsForInitInsufflation(_mllastInsVol, _mllastExsVol, sensorData);
 
-        _msecTimerStartCycle=millis();
+
+        last_pressure_max=pressure_max;
+        last_pressure_min=pressure_min;
+        pressure_max=0;
+        pressure_min=60;
+
+        // Close Solenoid Valve
+
+        totalCyclesInThisState = (_timeoutIns) / TIME_BASE;
+
+        _msecTimerStartCycle=millis();  //Luciano
+        
+        for (int i=0;i<2;i++) Cdyn_pass[i]=Cdyn_pass[i+1];
+        Cdyn_pass[2]=_mllastInsVol/(last_pressure_max-last_pressure_min);
+        Cdyn=(Cdyn_pass[0]+Cdyn_pass[1]+Cdyn_pass[2])/3.;
+        _mllastInsVol=int(sensorData.ml_ins_vol);
+        _mllastExsVol=int(fabs(sensorData.ml_exs_vol));
+        //_mlInsVol2=0;
+        _mlInsVol=0.;
+        _mlExsVol=0.;
+        
+        wait_NoMove=false;
+        /* Stepper control: set acceleration and end-position */
 
         _stepper->setSpeed(STEPPER_SPEED_MAX);
         _stepper->moveTo(-STEPPER_HIGHEST_POSITION);

@@ -18,12 +18,12 @@ byte back[8] = {
 void updateState() {
   // the button has been just pressed
   if (bck_state == LOW) {
-      startPressed = time;
+      startPressed = time2;
       idleTime = startPressed - endPressed;
       change_sleep=false;
       // the button has been just released
   } else {
-      endPressed = time;
+      endPressed = time2;
       holdTime = endPressed - startPressed;
   }
 }
@@ -31,10 +31,10 @@ void updateState() {
 void updateCounter() {
   // the button is still pressed
   if (bck_state == LOW) {
-      holdTime = time - startPressed;
+      holdTime = time2 - startPressed;
   // the button is still released
   } else {
-      idleTime = time - endPressed;
+      idleTime = time2 - endPressed;
   }
 }
 
@@ -69,12 +69,12 @@ void lcd_selxy(int x, int y) {
 
 void check_updn_button(int pin, byte *var, bool incr_decr) {
     if (digitalRead(pin)==LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
-      if (time - lastButtonPress > 150) {
+      if (time2 - lastButtonPress > 150) {
           if (incr_decr)
               *var=*var+1;
           else
               *var=*var-1;
-          lastButtonPress = time;
+          lastButtonPress = time2;
       }// if time > last button press
     }
 }
@@ -84,10 +84,10 @@ void check_bck_state() {
     if (bck_state != last_bck_state) { 
        updateState(); // button state changed. It runs only once.
         if (bck_state == LOW ) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
-            if (time - lastButtonPress > 150) {
+            if (time2 - lastButtonPress > 150) {
               pressed = 2;
               isitem_sel=false; 
-              lastButtonPress = time;
+              lastButtonPress = time2;
             }// if time > last button press
         } else {  //Button released
           }
@@ -110,17 +110,17 @@ void check_bck_state() {
     last_bck_state = bck_state;
   
   }
-  
+
   void check_encoder(Ventilation_Status_t status, Ventilation_Config_t& config) {
   check_updn_button(PIN_MENU_DN,&encoderPos,true);   //Increment
   check_updn_button(PIN_MENU_UP,&encoderPos,false);  //Decrement
   pressed=0;  //0 nothing , 1 enter, 2 bck
 
     if (digitalRead(PIN_MENU_EN) == LOW)  //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
-    if (time - lastButtonPress > 50) {
+    if (time2 - lastButtonPress > 50) {
       pressed = 1;
       isitem_sel=true; 
-      lastButtonPress = time;
+      lastButtonPress = time2;
     }// if time > last button press
 
     check_bck_state();
@@ -550,11 +550,11 @@ void display_lcd (Ventilation_Status_t& status, Ventilation_Config_t& config) {
   
     dtostrf((status.ml_last_ins_vol+status.ml_last_exp_vol)/2, 4, 0, tempstr);
     writeLine(0, String(tempstr), 16);
-  
+
     writeLine(2, String(config.perc_IE), 6);
 
     dtostrf(status.last_max_pressure, 2, 0, tempstr);
-    writeLine(1, String(tempstr), 16);  
+    writeLine(1, String(tempstr), 16);
 
     writeLine(2, "PEEP: ", 11);
     dtostrf(status.last_min_pressure, 2, 0, tempstr);
@@ -664,7 +664,7 @@ Menu_inic::Menu_inic(Ventilation_Config_t& vent_config) {
     last_update_display=millis();
     while (!fin){
         this->check_encoder(vent_config);
-        time=millis();
+        time2=millis();
         if (show_changed_options && ((millis() - last_update_display) > 50) ) {
             display_lcd(vent_config);  //WITHOUT CLEAR!
             last_update_display = millis();
@@ -681,11 +681,11 @@ void Menu_inic::check_encoder(Ventilation_Config_t& vent_config) {
     check_updn_button(PIN_MENU_UP,&encoderPos,false);  //Decrement
     pressed=0;  //0 nothing , 1 enter, 2 bck
     if (digitalRead(PIN_MENU_EN) == LOW) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) v
-        if (time - lastButtonPress > 150) {
+        if (time2 - lastButtonPress > 150) {
 
             pressed = 1;
             isitem_sel=true; 
-            lastButtonPress = time;
+            lastButtonPress = time2;
 
         }// if time > last button press
     }
@@ -745,7 +745,6 @@ void Menu_inic::check_encoder(Ventilation_Config_t& vent_config) {
       } else if ( encoderPos < min_sel ) {
           encoderPos=oldEncPos=min_sel;
       } else {
-        
         oldEncPos = encoderPos;
         
             switch (m_curr_sel) {
@@ -825,10 +824,10 @@ void Menu_inic::check_bck_state(){
     if (bck_state != last_bck_state) { 
        updateState(); // button state changed. It runs only once.
         if (bck_state == LOW ) { //SELECTION: Nothing(0),VENT_MODE(1)/BMP(2)/I:E(3)/VOL(4)/PIP(5)/PEEP(6) 
-            if (time - lastButtonPress > 150) {
+            if (time2 - lastButtonPress > 150) {
 
                   pressed = 2;
-                  lastButtonPress = time;
+                  lastButtonPress = time2;
                   if (isitem_sel){
                       isitem_sel=false; 
                   } else {

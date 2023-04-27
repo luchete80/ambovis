@@ -53,7 +53,7 @@ OneWire           oneWire(PIN_TEMP);
 DallasTemperature sensors(&oneWire);
 #endif
 
-unsigned long time;
+unsigned long time2;
 
 byte p_trim = 100;
 int max_accel, min_accel;
@@ -192,7 +192,7 @@ void setup() {
 ////////////////////////////////////////
 void loop() {
 
-    time = millis();
+    time2 = millis();
     if (!sleep_mode) {
         if (wake_up) {
             init_display();
@@ -201,12 +201,12 @@ void loop() {
             wake_up = false;
         }
 
-        buzzer_state = check_buzzer_mute(buzzer_state, time);
+        buzzer_state = check_buzzer_mute(buzzer_state, time2);
         check_encoder(mech_vent.status, mech_vent.config);
         Ventilation_Status_t* vent_status = &mech_vent.status;
 
         if (calibration_data.calibration_run) {
-            if (time > sensorData.last_read_sensor + TIME_SENSOR) {
+            if (time2 > sensorData.last_read_sensor + TIME_SENSOR) {
                 read_sensor(ads, sensorData, calibration_data.vzero, filter);
                 update_verror_sum(calibration_data, sensorData);
             }
@@ -225,7 +225,7 @@ void loop() {
                 clean_tft(tft);
             }
         } else {
-            if (time > lastSave + TIME_SAVE) {
+            if (time2 > lastSave + TIME_SAVE) {
                 SystemConfiguration_t toPersist;
                 toPersist.last_cycle = vent_status->last_cycle;
                 toPersist.alarm_vt = alarm_data.alarm_vt;
@@ -235,17 +235,18 @@ void loop() {
                 lastSave = millis();
             }
 
-            if (time > lastShowSensor + TIME_SHOW) {
+            if (time2 > lastShowSensor + TIME_SHOW) {
                 tft_draw(tft, sensorData, mech_vent.status, drawing_cycle, alarm_data);
-                lastShowSensor = time;
+                lastShowSensor = time2;
             }
 
-            if (time > sensorData.last_read_sensor + TIME_SENSOR) {
+            if (time2 > sensorData.last_read_sensor + TIME_SENSOR) {
                 read_sensor(ads, sensorData, calibration_data.vzero, filter);
                 eval_max_min_pressure(sensorData);
             }//Read Sensor
 
             if (vent_status->cycle != vent_status->last_cycle) {
+                Serial.println("Last press max " + String(vent_status->last_max_pressure));
                 Serial.println("Last press min " + String(vent_status->last_min_pressure));
                 Serial.println("alarm_pre state " + String(alarm_data.alarm_state));
                 alarm_data = check_alarms(mech_vent.status, alarm_data);
@@ -255,8 +256,8 @@ void loop() {
                 show_power_led();
 
                 #ifdef TEMP_TEST
-                if (time > lastReadTemp + TIME_READ_TEMP) {
-                    lastReadTemp = time;
+                if (time2 > lastReadTemp + TIME_READ_TEMP) {
+                    lastReadTemp = time2;
                     sensors.requestTemperatures();
                     temp=sensors.getTempCByIndex(0);
                     //Serial.println ("Temp: " + String(temp));
@@ -289,7 +290,7 @@ void loop() {
         if (put_to_sleep) {
             digitalWrite(PIN_LCD_EN, HIGH);
             put_to_sleep = false;
-            print_bat_time = time;
+            print_bat_time = time2;
             print_bat(tft, FAC);
             lcd.clear();
             digitalWrite(LCD_SLEEP, LOW);
@@ -297,19 +298,19 @@ void loop() {
             stop(mech_vent);
             //digitalWrite(PIN_BUZZER, !BUZZER_LOW); //Buzzer inverted
         }
-        if (time > print_bat_time + 5000) {
+        if (time2 > print_bat_time + 5000) {
             print_bat(tft, FAC);
-            print_bat_time = time;
+            print_bat_time = time2;
         }
         check_bck_state();
     }
 
     #ifdef BAT_TEST
-    if ( time > lastShowBat + TIME_SHOW_BAT ) {
-        lastShowBat = time;
+    if ( time2 > lastShowBat + TIME_SHOW_BAT ) {
+        lastShowBat = time2;
         Serial.println("last show bat " + String(lastShowBat));
-        float level = calc_bat(5, fac);
-        Serial.println(String(time)+", " +String(level));
+        float level = calc_bat(5, FAC);
+        Serial.println(String(time2)+", " +String(level));
     }
     #endif//BAT_TEST
 }//LOOP
