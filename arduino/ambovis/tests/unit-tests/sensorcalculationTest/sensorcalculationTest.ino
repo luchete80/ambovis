@@ -1,12 +1,10 @@
 #include <AUnit.h>
 #include <LiquidCrystal.h>
 #include <EEPROM.h>
+#include "../../../alarms.h"
 #include "../../../sensorcalculation.h"
 
-byte alarm_max_pressure;
-byte alarm_peep_pressure;
-short alarm_state;
-byte alarm_vt;
+AlarmData alarm_data;
 bool autopid;
 int bck_state;
 int curr_sel;
@@ -19,7 +17,6 @@ byte f_acc_b;
 bool filter;
 int holdTime;
 int idleTime;
-bool is_alarm_vt_on;
 bool isitem_sel;
 unsigned long lastButtonPress;
 int last_bck_state;
@@ -116,12 +113,12 @@ test(update_vol_when_flux_is_positive) {
     assertEqual(sensor1.ml_ins_vol, expected);
 }
 
-test(check_pip_and_peep) {
+test(eval_max_min_pressure) {
     SensorData sensor1;
     sensor1.pressure_min = 10.;
     sensor1.pressure_max = 100.;
     sensor1.pressure_p = 130.;
-    check_pip_and_peep(sensor1);
+    eval_max_min_pressure(sensor1);
     assertEqual(sensor1.pressure_max, 130.);
     assertEqual(sensor1.pressure_min, 10.);
 }

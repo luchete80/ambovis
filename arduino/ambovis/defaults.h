@@ -31,7 +31,7 @@
 
 #define STEPPER_HOMING_DIRECTION    (1)
 #define STEPPER_HOMING_SPEED        (STEPPER_MICROSTEPS * 600)   // Steps/s
-#define STEPPER_LOWEST_POSITION     (-5)   // Steps
+#define STEPPER_LOWEST_POSITION     (0)   // Steps
 #define STEPPER_HIGHEST_POSITION    ( 183 * STEPPER_MICROSTEPS)   //270º ,2500 for 270º, 2850 for 220º, 2930 for 330º
 #define STEPPER_SPEED_DEFAULT       (STEPPER_MICROSTEPS *  1500)   // Steps/s
 #define STEPPER_SPEED_MAX_VCL       (75 * STEPPER_MICROSTEPS)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
@@ -72,7 +72,6 @@
 
 //general variables
 extern bool sleep_mode;
-extern short alarm_state;
 extern bool put_to_sleep, wake_up;
 extern unsigned long time2;
 
@@ -92,10 +91,18 @@ extern unsigned long time2;
 #define BATDIV_R1           12000
 #define BATDIV_R2           470
 #define BATTERY_READ 5
-//#define BAT_TEST
+#define FDIV    (float)(BATDIV_R1 + BATDIV_R2)/(float)BATDIV_R2
+#define FAC     1.1/1024.*FDIV
+#define BAT_TEST
 #define TIME_SHOW_BAT   15000 //MSECS
 //#define TEMP_TEST
 #define TIME_READ_TEMP  15000 //MSECS
+#define CALIB_CYCLES  5
+
+#define MIN_CURVES_Y    60
+#define CLEAN_Y         200
+#define LEGEND_Y        260 //Begining of the legend on Y AXIS
+#define ILI9341_DARKGREY 0x7BEF /* 128, 128, 128 */
 
 // Alarm state
 enum alarm_state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};

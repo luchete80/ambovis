@@ -17,6 +17,10 @@ int findClosest(float target, float _dp[], int size) {
     return i;
 }
 
+void init_sensor(Adafruit_ADS1115& ads) {
+    ads.begin();
+}
+
 float find_flux(float p_dpt, float _dp[], byte _po_flux[], int size) {
     byte pos = findClosest(p_dpt, _dp, size);
     //flux should be shifted up (byte storage issue)
@@ -26,6 +30,18 @@ float find_flux(float p_dpt, float _dp[], byte _po_flux[], int size) {
 }
 
 float get_flow(SensorData & sensorData, bool filter) {
+//=======
+//void read_sensor(Adafruit_ADS1115& ads, SensorData& sensorData, float vzero, bool filter) {
+//    int16_t adc0 = ads.readADC_SingleEnded(0);
+//
+//    sensorData.pressure_p = (analogRead(PIN_PRESSURE)/ (1023.) - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
+//    sensorData.v_level = float(analogRead(PIN_MPX_LEV)) / 1024. * 1.1 * VOLTAGE_CONV;
+//    sensorData.voltage = (adc0 * 0.1875) * 0.001; //Volts
+//
+//    float p_dpt = ((sensorData.voltage - vzero) / sensorData.v_level - 0.04) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
+//    sensorData.flux = findFlux(p_dpt);
+//
+//>>>>>>> RESP-develop
     float flux_sum = 0.;
     float flow_f = sensorData.flux;
     if (filter) {
@@ -59,7 +75,13 @@ float get_dpt(float voltage, float vzero, float v_level) {
     return ((voltage - vzero) / v_level - 0.04) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
 }
 
-void check_pip_and_peep(SensorData& sensorData) {
+//void check_pip_and_peep(SensorData& sensorData) {
+//=======
+//    sensorData.last_read_sensor = millis();
+//}
+
+void eval_max_min_pressure(SensorData& sensorData) {
+
     //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
     if (sensorData.pressure_p > sensorData.pressure_max) {
         sensorData.pressure_max = sensorData.pressure_p;
@@ -67,4 +89,17 @@ void check_pip_and_peep(SensorData& sensorData) {
     if (sensorData.pressure_p < sensorData.pressure_min) {
         sensorData.pressure_min = sensorData.pressure_p;
     }
+}
+
+void update_cycle_verror_sum(Calibration_Data_t& calibration_data) {
+    float verror = calibration_data.verror_sum / float(calibration_data.vcorr_count);
+    calibration_data.vcorr_count = 0.;
+    calibration_data.verror_sum = 0.;
+    calibration_data.calib_cycle++;
+    calibration_data.verror_sum_outcycle += verror;
+}
+
+void update_verror_sum(Calibration_Data_t & calibration_data, SensorData sensorData) {
+    calibration_data.vcorr_count++;
+    calibration_data.verror_sum += (sensorData.voltage - 0.04 * sensorData.v_level);
 }
