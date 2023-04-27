@@ -39,10 +39,11 @@ void updateCounter() {
 }
 
 void init_display() {
-  lcd.begin(20, 4);
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.createChar(0,back);
+    digitalWrite(LCD_SLEEP, HIGH);
+    lcd.begin(20, 4);
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.createChar(0,back);
 }
 
 void writeLine(int line, String message = "", int offsetLeft = 0) {
@@ -137,7 +138,7 @@ void check_bck_state() {
                     encoderPos=oldEncPos=config.vent_mode;
                 } else if ( menu_number == 1 ) {
                     min_sel=20;max_sel=50;
-                    encoderPos=oldEncPos=alarm_max_pressure;
+                    encoderPos=oldEncPos=alarm_data.alarm_max_pressure;
              } else if ( menu_number == 2 ) {
                 //encoderPos=min_cd;
                 encoderPos = config.stepper_accel_max/200;
@@ -153,7 +154,7 @@ void check_bck_state() {
                     min_sel=DEFAULT_MIN_RPM;max_sel=DEFAULT_MAX_RPM;
                     } else if ( menu_number == 1 ) {
                         min_sel=5;max_sel=30;
-                        encoderPos=oldEncPos=alarm_peep_pressure;
+                        encoderPos=oldEncPos=alarm_data.alarm_peep_pressure;
                     } else if ( menu_number == 2 ){
 //                        encoderPos=min_speed/10;     
                         encoderPos=config.stepper_speed_max/200;
@@ -168,7 +169,7 @@ void check_bck_state() {
                   encoderPos=oldEncPos=config.perc_IE;
                   min_sel=1;max_sel=3;   
               } else if ( menu_number == 1 ) {
-                    encoderPos=byte(0.1*float(alarm_vt));
+                    encoderPos=byte(0.1*float(alarm_data.alarm_vt));
                     min_sel=10;max_sel=50;//vt
               } else if ( menu_number == 2 ) {
                     encoderPos=min_accel/10; 
@@ -325,13 +326,13 @@ void check_bck_state() {
             switch (curr_sel) {
               case 1:
                 if ( menu_number == 0 )     config.vent_mode           = encoderPos;
-                else if (menu_number == 1)  alarm_max_pressure  = encoderPos;
+                else if (menu_number == 1)  alarm_data.alarm_max_pressure  = encoderPos;
                 else if (menu_number == 2)  { config.stepper_accel_max = int((float)encoderPos*200.);}
                 else if (menu_number == 3)  {dpip_b = encoderPos; dpip  = float(encoderPos)/10.;}
                 break;
               case 2:
                 if ( menu_number == 0 )       config.respiratory_rate = encoderPos;
-                else  if (menu_number == 1)   alarm_peep_pressure     = encoderPos;
+                else  if (menu_number == 1)   alarm_data.alarm_peep_pressure     = encoderPos;
                 else  if (menu_number == 2)   config.stepper_speed_max = int((float)encoderPos*200.);
                 else if ( menu_number == 3 ){
                     Serial.print("encoderPos: ");Serial.println(encoderPos);
@@ -342,7 +343,7 @@ void check_bck_state() {
                 break;
               case 3:
                 if ( menu_number == 0 ) config.perc_IE=encoderPos;
-                else    if (menu_number == 1) alarm_vt=int(10.*(float)encoderPos);
+                else    if (menu_number == 1) alarm_data.alarm_vt=int(10.*(float)encoderPos);
                 else    if (menu_number == 2) min_accel  = int((float)encoderPos*10.);
                 if ( menu_number == 3 ){
                     pfmax=encoderPos;
@@ -557,7 +558,7 @@ void display_lcd (Ventilation_Status_t& status, Ventilation_Config_t& config) {
 
     writeLine(2, "PEEP: ", 11);
     dtostrf(status.last_min_pressure, 2, 0, tempstr);
-    writeLine(2, String(tempstr), 16);  
+    writeLine(2, String(tempstr), 16);
     
     dtostrf((status.ml_last_ins_vol+status.ml_last_exp_vol)/2.*config.respiratory_rate*0.001, 2, 1, tempstr);
     writeLine(3, "VM:" + String(tempstr), 0);
@@ -571,14 +572,14 @@ void display_lcd (Ventilation_Status_t& status, Ventilation_Config_t& config) {
                         lcd_clearxy(12,0,8);
     lcd_clearxy(8,1,2); lcd_clearxy(16,1,3);
                         lcd_clearxy(15,2,3);
-        
-    writeLine(0, "PIPAL:" + String(alarm_max_pressure), 1);
+
+    writeLine(0, "PIPAL:" + String(alarm_data.alarm_max_pressure), 1);
     
     dtostrf(status.c_dyn*1.01972, 2, 1, tempstr);
     writeLine(0, "CD:" + String(tempstr), 10); 
     
-    writeLine(1, "PEEPAL:" + String(alarm_peep_pressure), 1);
-    writeLine(1, "VTAL:" + String(alarm_vt), 11);
+    writeLine(1, "PEEPAL:" + String(alarm_data.alarm_peep_pressure), 1);
+    writeLine(1, "VTAL:" + String(alarm_data.alarm_vt), 11);
     
     dtostrf((float(p_trim-100)), 2, 0, tempstr);
     writeLine(2, "TRIM:" + String(tempstr) + "e-3", 1); 
@@ -623,6 +624,29 @@ void display_lcd (Ventilation_Status_t& status, Ventilation_Config_t& config) {
 
 }
 
+void show_calibration_cycle(byte calib_cycle) {
+    lcd.clear();
+    writeLine(1, "Calibracion flujo", 0);
+    writeLine(2, "Ciclo: " + String(calib_cycle) + "/" + String(CALIB_CYCLES), 0);
+}
+
+void wait_for_flux_disconnected() {
+    lcd.clear();
+    writeLine(1, "Desconecte flujo", 0);
+    writeLine(2, "y presione ok ", 0);
+    bool enterPressed = false;
+    delay(100); //Otherwise low enter button is read
+    long lastButtonPress = millis();
+    while (!enterPressed) {
+        if (digitalRead(PIN_MENU_EN) == LOW) {
+            if (millis() - lastButtonPress > 50) {
+                enterPressed = true;
+                lastButtonPress = millis();
+            }
+        }
+    }
+}
+
 //////////////////////////////////////
 /////// MENU INICIAL /////////////////
 //////////////////////////////////////
@@ -650,7 +674,6 @@ Menu_inic::Menu_inic(Ventilation_Config_t& vent_config) {
     isitem_sel=false;
     m_curr_sel=old_curr_sel=1;
     switching_menus = false;
-
 }
 
 void Menu_inic::check_encoder(Ventilation_Config_t& vent_config) {
@@ -777,7 +800,7 @@ void Menu_inic::display_lcd (Ventilation_Config_t& vent_config) {
      
     writeLine(0, "INGRESE PARAMS", 3);
     writeLine(1, "MOD: ",1);
-    
+
 //    Serial.println("modo: "+String(vent_config.vent_mode));
     if ( vent_config.vent_mode == VENTMODE_MAN ) {
         writeLine(1, "MAN", 6);

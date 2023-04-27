@@ -1,6 +1,7 @@
 #ifndef PINOUT_H
 #define PINOUT_H
 
+#include "Arduino.h"
 #include "defaults.h"
 
 // Stepper driver (FlexyStepper)
@@ -53,5 +54,7 @@
 #define PIN_PRESSURE    A3
 
 #define PIN_TEMP        37
+
+void initPins();
 
 #endif // ENCODER_H

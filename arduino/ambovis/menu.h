@@ -1,6 +1,8 @@
 #ifndef _MENU_H_
 #define _MENU_H_
 
+#include "defaults.h"
+#include "alarms.h"
 #include <Arduino.h>
 #include <LiquidCrystal.h>
 #include "MechanicalVentilation.h"
@@ -24,6 +26,8 @@ extern bool update_options;
 extern char tempstr[5];
 extern byte menu_number;
 extern byte p_trim;
+extern AlarmData alarm_data;
+extern bool isitem_sel;
 // These were imported from old mechVentilation
 extern int max_accel,min_accel,max_speed,min_speed,max_cd,min_cd,max_pidk,min_pidk;
 extern int max_pidi,min_pidi;
@@ -39,12 +43,10 @@ extern byte dpip_b;
 extern bool autopid;
 extern bool filter;
 extern float flow_f;
-
-extern byte alarm_max_pressure;
-extern byte alarm_peep_pressure;
-extern int alarm_vt;
 extern unsigned long time2;
 
+void show_calibration_cycle(byte calib_cycle);
+void wait_for_flux_disconnected();
 void writeLine(int line, String message = "", int offsetLeft = 0);
 void lcd_clearxy(int x, int y,int pos=1);
 void lcd_selxy(int x, int y);
@@ -54,8 +56,6 @@ void init_display();
 
 void check_updn_button(int pin, byte *var, bool incr_decr);
 void check_bck_state();
-
-extern bool isitem_sel;
 
 class Menu_inic {
   byte _mod,_bpm,_i_e;  

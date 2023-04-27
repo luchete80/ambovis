@@ -11,9 +11,13 @@ void initCycleTimes(Mechanical_Ventilation_t& mech_vent) {
 }
 
 void start(Mechanical_Ventilation_t& mech_vent) {
+    digitalWrite(PIN_EN, LOW); // necessary?
     digitalWrite(PIN_STEPPER, HIGH);
     delay(1000);
     mech_vent.status.running = true;
+    mech_vent.status.current_state = State_Homing;
+    mech_vent.status.start_cycle_time_ms = 0;
+    mech_vent.status.ended_while_moving = false;
     initCycleTimes(mech_vent);
 }
 
