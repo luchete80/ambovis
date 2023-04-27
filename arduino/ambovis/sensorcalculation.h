@@ -46,10 +46,8 @@ float find_flux(float p_dpt, float _dp[], byte _po_flux[], int size);
 float get_dpt(float voltage, float v_level, float vzero);
 void init_sensor(Adafruit_ADS1115& ads);
 void convert_sensor_data(int16_t adc0, int pressure, int mpx_lev, SensorData& sensorData);
-//void check_pip_and_peep(SensorData& sensorData);
 void update_verror_sum(Calibration_Data_t & calibration_data, SensorData sensorData);
 void update_cycle_verror_sum(Calibration_Data_t& calibration_data);
-//void read_sensor(Adafruit_ADS1115& ads, SensorData& result, float vzero, bool filter);
 void eval_max_min_pressure(SensorData& sensorData);
 
 
