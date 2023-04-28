@@ -1,11 +1,10 @@
 #ifndef _MENU_H_
 #define _MENU_H_
 
-#include "defaults.h"
+#include "alarms.h"
+#include <Arduino.h>
 #include <LiquidCrystal.h>
-#include "MechVentilation.h"
-#include <arduino.h>
-#include "pinout.h"
+#include "MechanicalVentilation.h"
 
 static byte MAIN_MENU = 0;
 static byte PARAMETERS_MENU = 1;
@@ -43,11 +42,19 @@ typedef struct menu_state {
     bool clear_display;
 } Menu_state_t;
 
+extern byte filter;
+extern byte autopid;
+
 void init_display();
-void initialize_menu(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state);
+void initialize_menu(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state,
+                     Ventilation_Config_t& config, Ventilation_Status_t& status, AlarmData& alarm_data);
 void writeLine(int line, String message = "", int offsetLeft = 0);
-void check_encoder(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state, unsigned long time);
-void display_lcd(Menu_state_t& menu_state);
+void check_encoder(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state,
+                   Ventilation_Config_t& config, AlarmData& alarm_data, unsigned long time);
+void display_lcd(Menu_state_t& menu_state, Ventilation_Config_t& config,
+                 Ventilation_Status_t& status, AlarmData& alarm_data);
 void check_bck_state(Keyboard_data_t& keyboard_data, unsigned long time);
+void show_calibration_cycle(byte calib_cycle);
+void wait_for_flux_disconnected();
 
 #endif

@@ -1,0 +1,5 @@
+20221013 - Problemas con el nuevo respirador. 
+						Si enciende solo con linea, la placa enciende correctamente . 
+						Si ademas el interruptor de baterias esta conectado (y estas tienen poca carga?), enciende incorrectamente (titila). 
+						Si las baterias tienen poca carga, y vuelve la energia, la placa nunca vuelve a linea.
+						
