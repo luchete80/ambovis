@@ -137,14 +137,8 @@ int8_t* get_value_to_edit(Menu_state_t& menu_state, Ventilation_Config_t& config
             return &alarm_data.alarm_vt;
         }
     }
-    if (menu_state.menu_number == SETTINGS_MENU) {
-        if (menu_state.menu_position == 0) { // FIL_OPT
-            return &filter;
-        }
-        if (menu_state.menu_position == 1) { // AUTO_OPT
-            return &autopid;
-        }
-    }
+    Serial.println("Error returning value_to_edit " + String(menu_state.menu_number));
+    return -1;
 }
 
 int8_t validate_boundaries(int8_t min, int8_t max, int8_t value) {
@@ -192,14 +186,7 @@ int8_t validate_parameter(Menu_state_t& menu_state, int8_t selection) {
             return validate_boundaries(10, 50, selection);
         }
     }
-    if (menu_state.menu_number == SETTINGS_MENU) {
-        if (menu_state.menu_position == 0) { // FIL_OPT
-            return validate_boundaries(0, 1, selection);
-        }
-        if (menu_state.menu_position == 1) { // AUTO_OPT
-            return validate_boundaries(0, 1, selection);
-        }
-    }
+    Serial.println("Error validate parameter " + String(menu_state.menu_number));
     return -1;
 }
 
@@ -213,9 +200,7 @@ int8_t validate_menu_position(int8_t& menu_number, int8_t selection) {
     if (menu_number == ALARMS_MENU) {
         return validate_boundaries(0, 2, selection);
     }
-    if (menu_number == SETTINGS_MENU) {
-        return validate_boundaries(0, 1, selection);
-    }
+    Serial.println("Error validate menu position " + String(menu_number));
     return -1;
 }
 
@@ -260,12 +245,8 @@ String value_to_display(int8_t menu, int8_t position, Menu_state_t& menu_state, 
             case 1: return isEditing(ALARMS_MENU, 1, itemSel, menu_state) ? selection : String(alarm_data.alarm_peep_pressure);
             case 2: return isEditing(ALARMS_MENU, 2, itemSel, menu_state) ? selection : String(alarm_data.alarm_vt);
         }
-    } else if (menu == SETTINGS_MENU) {
-        switch (position) {
-            case 0: return isEditing(SETTINGS_MENU, 0, itemSel, menu_state) ? selection : String(filter);
-            case 1: return isEditing(SETTINGS_MENU, 1, itemSel, menu_state) ? selection : String(autopid);
-        }
     }
+    Serial.println("Error value to display  " + String(menu) + " " + String(position));
     return String("ERR");
 }
 
@@ -289,12 +270,8 @@ void update_edited_value(int8_t& menu_number, int8_t& menu_position, bool& is_in
             case 1:lcd_update_value(8, 1, 3, String(edited_value)); break;
             case 2:lcd_update_value(6, 2, 3, String(edited_value)); break;
         }
-    } else if (menu_number == SETTINGS_MENU) {
-        switch(menu_position) {
-            case 0:lcd_update_value(8, 0, 3, String(edited_value) == "1" ? "ON" : "OFF"); break;
-            case 1:lcd_update_value(9, 1, 3, String(edited_value) == "1" ? "ON" : "OFF"); break;
-        }
     }
+    Serial.println("Error update edited value  " + String(menu_number) + " " + String(menu_position));
 }
 
 void show_calibration_cycle(byte calib_cycle) {
@@ -347,11 +324,8 @@ void show_cursor(int8_t& menu_number, int8_t& menu_position, bool& is_item_selec
             case 1: lcd_selxy(0, 1, is_item_selected); break; //PEEPAL:
             case 2: lcd_selxy(0, 2, is_item_selected); break; //VTAL:
         }
-    } else if (menu_number == SETTINGS_MENU) {
-        switch(menu_position) {
-            case 0: lcd_selxy(0, 0, is_item_selected); break; //FILTER:
-            case 1: lcd_selxy(0, 1, is_item_selected); break; //AUTOPID:
-        }
+    } else {
+        Serial.println("Error show cursor  " + String(menu_number) + " " + String(menu_position));
     }
 }
 
@@ -382,11 +356,8 @@ void move_cursor(int8_t& menu_number, int8_t& menu_position, int8_t& old_menu_po
             case 1: lcd_clearxy(0, 1); break;//PEEP
             case 2: lcd_clearxy(0, 2); break; //VT
         }
-    } else if (menu_number == SETTINGS_MENU) {
-        switch(old_menu_position) {
-            case 0: lcd_clearxy(0, 0); break;//FILTER
-            case 1: lcd_clearxy(0, 1); break;//AUTOPID
-        }
+    } else {
+        Serial.println("Error move cursor  " + String(menu_number) + " " + String(menu_position));
     }
     show_cursor(menu_number, menu_position, is_item_selected, is_initial_menu);
 }
@@ -482,7 +453,6 @@ void display_lcd(Menu_state_t& menu_state, Ventilation_Config_t& config,
     if (menu_state.menu_number == MAIN_MENU) {
         writeLine(0, "PARAMETROS", 1);
         writeLine(1, "ALARMAS", 1);
-        writeLine(2, "SETTINGS", 1);
     } else if (menu_state.menu_number == PARAMETERS_MENU) {
         if (menu_state.is_initial_menu) {
             writeLine(0, "Ingrese params", 1);
@@ -515,14 +485,6 @@ void display_lcd(Menu_state_t& menu_state, Ventilation_Config_t& config,
     
         writeLine(3, "CYCLE:" + String(status.last_cycle), 1);
 
-    } else if (menu_state.menu_number == SETTINGS_MENU) {
-        writeLine(0, "FILTER:" , 1);
-        String filterStr = value_to_display(SETTINGS_MENU, 0, menu_state, config, alarm_data);
-        if (filterStr == "1") writeLine(0, "ON", 8); else writeLine(0, "OFF", 8);
-
-        writeLine(1, "AUTOPID: ", 1);
-        String autopidStr = value_to_display(SETTINGS_MENU, 1, menu_state, config, alarm_data);
-        if (autopidStr == "1") writeLine(1, "ON", 9); else writeLine(1, "OFF", 9);
     }
     show_cursor(menu_state.menu_number, menu_state.menu_position,
                 menu_state.is_item_selected, menu_state.is_initial_menu);

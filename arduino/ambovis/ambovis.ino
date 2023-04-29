@@ -62,8 +62,6 @@ unsigned long last_update_display;
 //MECH VENTILATION
 AccelStepper *stepper;
 Mechanical_Ventilation_t mech_vent;
-byte autopid;
-byte filter;
 
 void setup() {
     Serial.begin(115200);
@@ -114,8 +112,6 @@ void setup() {
     mech_vent.status.last_cycle = systemConfiguration.last_cycle;
     mech_vent.status.cycle = systemConfiguration.last_cycle;
     alarm_data.alarm_vt = systemConfiguration.alarm_vt;
-    filter = systemConfiguration.filter;
-    autopid = systemConfiguration.autopid;
     lcd.clear();
 
     sleep_mode = false;
@@ -149,7 +145,7 @@ void loop() {
 
         if (calibration_data.calibration_run) {
             if (time2 > sensorData.last_read_sensor + TIME_SENSOR) {
-                read_sensor(ads, sensorData, calibration_data.vzero, filter);
+                read_sensor(ads, sensorData, calibration_data.vzero);
                 update_verror_sum(calibration_data, sensorData);
             }
 
@@ -171,8 +167,6 @@ void loop() {
                 SystemConfiguration_t toPersist;
                 toPersist.last_cycle = vent_status->last_cycle;
                 toPersist.alarm_vt = alarm_data.alarm_vt;
-                toPersist.autopid = autopid;
-                toPersist.filter = filter;
                 write_memory(toPersist);
                 lastSave = millis();
             }
@@ -183,7 +177,7 @@ void loop() {
             }
 
             if (time2 > sensorData.last_read_sensor + TIME_SENSOR) {
-                read_sensor(ads, sensorData, calibration_data.vzero, filter);
+                read_sensor(ads, sensorData, calibration_data.vzero);
                 eval_max_min_pressure(sensorData);
             }//Read Sensor
 
