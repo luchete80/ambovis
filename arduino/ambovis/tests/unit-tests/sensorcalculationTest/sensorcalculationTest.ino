@@ -4,41 +4,6 @@
 #include "../../../alarms.h"
 #include "../../../sensorcalculation.h"
 
-AlarmData alarm_data;
-int bck_state;
-int curr_sel;
-float dpip;
-byte dpip_b;
-byte encoderPos;
-int endPressed;
-float f_acc;
-byte f_acc_b;
-int holdTime;
-int idleTime;
-bool isitem_sel;
-unsigned long lastButtonPress;
-int last_bck_state;
-LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
-int max_accel, max_cd, max_pidd, max_pidi, max_pidk;
-byte max_sel;
-int max_speed;
-byte menu_number;
-int min_accel, min_pidd, min_pidi, min_pidk;
-byte min_sel;
-byte oldEncPos;
-int old_curr_sel;
-byte p_acc, p_trim;
-float peep_fac, pf_max, pf_min;
-byte pfmax, pfmin;
-bool put_to_sleep;
-bool show_changed_options;
-bool sleep_mode;
-int startPressed;
-char tempstr[5];
-unsigned long time2;
-bool update_options;
-bool wake_up;
-EpoxyEepromAvr EEPROM;
 
 SensorData sensorData;
 static float test_dp[] = { 0.1, 0.2, 0.3, 0.4, 0.5 };
@@ -69,14 +34,7 @@ test(convert_sensor_data) {
     assertEqual(sensorData.voltage, expected_voltage);
 }
 
-test(get_flow_when_filter_off) {
-    SensorData sensor1;
-    sensor1.flux = 10.;
-    float flow = get_flow(sensor1, false);
-    assertEqual(flow, 10.);
-}
-
-test(get_flow_when_filter_on) {
+test(get_flow) {
     SensorData sensor1;
     sensor1.flux = 10.;
     sensor1.flux_filter[0] = 1.;
@@ -85,7 +43,7 @@ test(get_flow_when_filter_on) {
     sensor1.flux_filter[3] = 4.;
     sensor1.flux_filter[4] = 5.;
     float expected = (24.) / 5.;
-    float flow = get_flow(sensor1, true);
+    float flow = get_flow(sensor1);
     assertEqual(flow, expected);
 }
 
@@ -130,3 +88,39 @@ void setup() {
 void loop() {
     aunit::TestRunner::run();
 }
+
+AlarmData alarm_data;
+int bck_state;
+int curr_sel;
+float dpip;
+byte dpip_b;
+byte encoderPos;
+int endPressed;
+float f_acc;
+byte f_acc_b;
+int holdTime;
+int idleTime;
+bool isitem_sel;
+unsigned long lastButtonPress;
+int last_bck_state;
+LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
+int max_accel, max_cd, max_pidd, max_pidi, max_pidk;
+byte max_sel;
+int max_speed;
+byte menu_number;
+int min_accel, min_pidd, min_pidi, min_pidk;
+byte min_sel;
+byte oldEncPos;
+int old_curr_sel;
+byte p_acc, p_trim;
+float peep_fac, pf_max, pf_min;
+byte pfmax, pfmin;
+bool put_to_sleep;
+bool show_changed_options;
+bool sleep_mode;
+int startPressed;
+char tempstr[5];
+unsigned long time2;
+bool update_options;
+bool wake_up;
+EpoxyEepromAvr EEPROM;
