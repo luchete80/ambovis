@@ -1,23 +1,36 @@
 #include "display.h"
 
-#define MIN_CURVES_Y    60
-#define CLEAN_Y         200
-#define LEGEND_Y        260 //Begining of the legend on Y AXIS
-#define ILI9341_DARKGREY 0x7BEF /* 128, 128, 128 */
 bool lcd_cleaned=false;
 int axispos[]={130,200}; //from each graph, from 0 to 320 (display height, IN PORTRAIT MODE)
-
 byte valsreaded=0;
 byte rx[128],ry[128];
 int yflux[2];
 char buffer[10];
 
-void check_alarms(Adafruit_ILI9341& tft);
+void check_alarms(Adafruit_ILI9341& tft, AlarmData& alarm_data);
 void drawY2(Adafruit_ILI9341& tft, bool drawing_cycle, uint16_t color);
 void print_vols(Adafruit_ILI9341& tft, Ventilation_Status_t vent_status);
 void printMessageWhenEndedWhileStepperMoving(Adafruit_ILI9341& tft, Ventilation_Status_t vent_status);
 
-void tft_draw(Adafruit_ILI9341& tft, SensorData& sensorData, Ventilation_Status_t& status, bool& drawing_cycle, float fac) {
+void clean_tft(Adafruit_ILI9341& tft) {
+    tft.fillScreen(ILI9341_BLACK);
+}
+
+void init_empty_tft(Adafruit_ILI9341& tft) {
+    digitalWrite(TFT_SLEEP, HIGH);
+    tft.begin();
+    clean_tft(tft);
+}
+
+void init_display_tft(Adafruit_ILI9341& tft) {
+    init_empty_tft(tft);
+    tft.setTextColor(ILI9341_BLUE);
+    tft.setTextSize(4);
+    tft.setCursor(10, 40);     tft.println("RespirAR");
+    tft.setCursor(10, 80);     tft.println("FIUBA");
+}
+
+void tft_draw(Adafruit_ILI9341& tft, SensorData& sensorData, Ventilation_Status_t& status, bool& drawing_cycle, AlarmData& alarm_data) {
     byte last_x=status.cycle_pos;
     rx[valsreaded]=status.cycle_pos;
     ry[valsreaded]=sensorData.pressure_p*2.;
@@ -35,7 +48,7 @@ void tft_draw(Adafruit_ILI9341& tft, SensorData& sensorData, Ventilation_Status_
         lcd_cleaned=true;
         valsreaded=0;
         print_vols(tft, status);
-        print_bat(tft, fac);
+        print_bat(tft, FAC);
 
         tft.fillRect(10,10,150,15, ILI9341_BLACK);
         if (!digitalRead(PIN_POWEROFF)) {
@@ -60,7 +73,7 @@ void tft_draw(Adafruit_ILI9341& tft, SensorData& sensorData, Ventilation_Status_
     } else {
         lcd_cleaned=false;
     }
-    check_alarms(tft);
+    check_alarms(tft, alarm_data);
 }
 
 void drawY2(Adafruit_ILI9341& tft, bool drawing_cycle, uint16_t color) {// THERE IS NO NEED TO REDRAW ALL IN EVERY FRAME WITH COLOR TFT
@@ -126,15 +139,15 @@ void showPipAlarm(Adafruit_ILI9341& tft) {
     tft.println("PIP AL");
 }
 
-void check_alarms(Adafruit_ILI9341& tft) {
-    if (is_alarm_vt_on) {
+void check_alarms(Adafruit_ILI9341& tft, AlarmData& alarm_data) {
+    if (alarm_data.is_alarm_vt_on) {
         showVTAlarm(tft);
     } else {
         digitalWrite(RED_LED,LOW);
     }
-    switch (alarm_state) {
+    switch (alarm_data.alarm_state) {
         case NO_ALARM:
-            if (!is_alarm_vt_on) {
+            if (!alarm_data.is_alarm_vt_on) {
                 digitalWrite(GREEN_LED,HIGH);
                 digitalWrite(RED_LED,LOW);
             }

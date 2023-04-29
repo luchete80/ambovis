@@ -16,14 +16,14 @@ enum State {
 };
 
 typedef struct ventilation_config {
-    byte vent_mode;
-    byte respiratory_rate;
-    short peak_ins_pressure;
-    short peak_exp_pressure;
-    byte perc_IE;
-    byte perc_volume;
-    int stepper_speed_max;
-    int stepper_accel_max;
+    int8_t vent_mode = VENTMODE_MAN;
+    int8_t respiratory_rate = DEFAULT_RPM;
+    short peak_ins_pressure = DEFAULT_PEAK_INSPIRATORY_PRESSURE;
+    short peak_exp_pressure = DEFAULT_PEAK_ESPIRATORY_PRESSURE;
+    int8_t perc_IE = 2;
+    int8_t perc_volume = 100;
+    int stepper_speed_max = STEPPER_MICROSTEPS * 1500;
+    int stepper_accel_max = STEPPER_MICROSTEPS * 1500;
 } Ventilation_Config_t;
 
 typedef struct ventilation_status {
