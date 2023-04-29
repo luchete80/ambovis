@@ -4,16 +4,11 @@
 
 #include "sensorcalculation.h"
 
-#define DP_LENGTH 55
-
-static float dp[] = { -3.074176245, -2.547210457, -2.087678384, -1.60054669, -1.216013465, -0.795599072, -0.630753349, -0.504544509, -0.365700986, -0.260808033, -0.176879848, -0.109004974, -0.05874157, -0.051474571, -0.043771552, -0.037061691, -0.029794693, -0.023012161, -0.017561913, -0.01441288, -0.012111664, -0.009325981, -0.007024765, -0.004602432, -0.002664566, 0.00090924, 0.00030358, 0, -0.000242233, -0.000837976, 0.001999305, 0.003937171, 0.006117271, 0.008176254, 0.011688636, 0.014830113, 0.020045692, 0.023566372, 0.028644966, 0.03312327, 0.039664506, 0.047781395, 0.052868293, 0.096530072, 0.151339196, 0.216332764, 0.295221736, 0.377891785, 0.491216024, 0.606462279, 0.877207832, 1.207061607, 1.563385753, 2.030351958, 2.444452733};
-static byte po_flux[] = {0, 10, 20, 30, 40, 50, 55, 60, 65, 70, 75, 80, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 100, 100, 100, 100, 100, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 120, 125, 130, 135, 140, 145, 150, 160, 170, 180, 190, 200};
-
-int findClosest(float target) {
-    int i = 0, j = DP_LENGTH - 1, mid = 0;
+int findClosest(float target, float _dp[], int size) {
+    int i = 0, j = size - 1, mid = 0;
     while ( j - i > 1 ) {
         mid = (i + j) / 2;
-        if (target < dp[mid]) {
+        if (target < _dp[mid]) {
             j = mid;
         } else {
             i = mid;
@@ -26,46 +21,47 @@ void init_sensor(Adafruit_ADS1115& ads) {
     ads.begin();
 }
 
-float findFlux(float p_dpt) {
-    byte pos = findClosest(p_dpt);
+float find_flux(float p_dpt, float _dp[], byte _po_flux[], int size) {
+    byte pos = findClosest(p_dpt, _dp, size);
     //flux should be shifted up (byte storage issue)
-    float flux = po_flux[pos] - 100 + ( float (po_flux[pos + 1] - 100) - float (po_flux[pos] - 100) ) * ( p_dpt - float(dp[pos]) ) / (float)( dp[pos + 1] - dp[pos]);
+    float flux = _po_flux[pos] - 100 + ( float (_po_flux[pos + 1] - 100) - float (_po_flux[pos] - 100) ) * ( p_dpt - float(_dp[pos]) ) / (float)( _dp[pos + 1] - _dp[pos]);
     flux *= 16.6667;
     return flux;
 }
 
-void read_sensor(Adafruit_ADS1115& ads, SensorData& sensorData, float vzero) {
-    int16_t adc0 = ads.readADC_SingleEnded(0);
-
-    sensorData.pressure_p = (analogRead(PIN_PRESSURE)/ (1023.) - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
-    sensorData.v_level = float(analogRead(PIN_MPX_LEV)) / 1024. * 1.1 * VOLTAGE_CONV;
-    sensorData.voltage = (adc0 * 0.1875) * 0.001; //Volts
-    Serial.println("voltage " + String(sensorData.voltage) + " v_level " + String(sensorData.v_level));
-    float p_dpt = ((sensorData.voltage - vzero) / sensorData.v_level - 0.04) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
-    sensorData.flux = findFlux(p_dpt);
-
-    Serial.println("p_dpt " + String(p_dpt) + " flux " + String(sensorData.flux));
+float get_flow(SensorData & sensorData) {
     float flux_sum = 0.;
-
-    //Apply filter
     for (int i = 0; i < 4; i++) {
         sensorData.flux_filter[i] = sensorData.flux_filter[i + 1];
         flux_sum += sensorData.flux_filter[i];
     }
     sensorData.flux_filter[4] = sensorData.flux;
     flux_sum += sensorData.flux_filter[4];
-    sensorData.flow_f = flux_sum / 5.;
+    float flow_f = flux_sum / 5.;
+    return flow_f;
+}
 
-    float vol = sensorData.flow_f * float((millis() - sensorData.last_read_sensor)) * 0.001;
+void update_vol(SensorData& sensorData, unsigned long time) {
+    float vol = sensorData.flow_f * float((time - sensorData.last_read_sensor)) * 0.001;
     if (sensorData.flux > 0) {
         sensorData.ml_ins_vol += vol;//flux in l and time in msec, results in ml
     } else {
         sensorData.ml_exs_vol -= vol; //flux in l and time in msec, results in ml
     }
-    sensorData.last_read_sensor = millis();
+}
+
+void convert_sensor_data(int16_t adc0, int pressure, int mpx_lev, SensorData& sensorData) {
+    sensorData.pressure_p = (pressure/ 1023. - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
+    sensorData.v_level = float(mpx_lev) / 1024. * 1.1 * VOLTAGE_CONV;
+    sensorData.voltage = (float(adc0) * 0.1875) * 0.001; //Volts
+}
+
+float get_dpt(float voltage, float v_level, float vzero) {
+    return ((voltage - vzero) / v_level - 0.04) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
 }
 
 void eval_max_min_pressure(SensorData& sensorData) {
+
     //CHECK PIP AND PEEP (OUTSIDE ANY CYCLE!!)
     if (sensorData.pressure_p > sensorData.pressure_max) {
         sensorData.pressure_max = sensorData.pressure_p;

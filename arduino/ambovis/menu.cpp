@@ -14,15 +14,15 @@ void init_display() {
     lcd.createChar(0, backDigit);
 }
 
-void writeLine(int line, String message = "", int offsetLeft = 0) {
+void writeLine(int line, String message, int offsetLeft) {
     lcd.setCursor(0, line);
     lcd.print("");
     lcd.setCursor(offsetLeft, line);
     lcd.print(message);
 }
 
-void lcd_clearxy(int x, int y,int pos=1) {
-    for (int i=0; i<pos; i++) {
+void lcd_clearxy(int x, int y, int pos = 1) {
+    for (int i=0;i<pos;i++) {
         lcd.setCursor(x+i, y);
         lcd.print(" ");
     }
@@ -138,7 +138,7 @@ int8_t* get_value_to_edit(Menu_state_t& menu_state, Ventilation_Config_t& config
         }
     }
     Serial.println("Error returning value_to_edit " + String(menu_state.menu_number));
-    return -1;
+    return (int8_t*) -1;
 }
 
 int8_t validate_boundaries(int8_t min, int8_t max, int8_t value) {
@@ -187,7 +187,7 @@ int8_t validate_parameter(Menu_state_t& menu_state, int8_t selection) {
         }
     }
     Serial.println("Error validate parameter " + String(menu_state.menu_number));
-    return -1;
+    return (int8_t) -1;
 }
 
 int8_t validate_menu_position(int8_t& menu_number, int8_t selection) {
@@ -201,7 +201,7 @@ int8_t validate_menu_position(int8_t& menu_number, int8_t selection) {
         return validate_boundaries(0, 2, selection);
     }
     Serial.println("Error validate menu position " + String(menu_number));
-    return -1;
+    return (int8_t) -1;;
 }
 
 bool forceParametersMenuAfterWait(long last_button_pressed, Menu_state_t& menu_state, unsigned long time) {

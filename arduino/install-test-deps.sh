@@ -10,6 +10,10 @@ then
     echo "$EPOXY_DIR directory exists."
 else
 	git clone --branch v1.5.0 https://github.com/bxparks/EpoxyDuino.git > /dev/null 2>&1
+	mv EpoxyDuino/EpoxyDuino.mk EpoxyDuino/EpoxyDuino.mk.bak
+	# Use custom makefile
+	# TODO: add a parameter to omit libraries
+	cp AmbovisEpoxyDuino.mk EpoxyDuino/EpoxyDuino.mk
     cd EpoxyDuino/cores/epoxy
     touch wiring_private.h
     cp pins_arduino_avr.h pins_arduino.h
@@ -28,8 +32,6 @@ typedef enum _BitOrder {\
 ' SPI.h
 
     cd ../../..
-	# Some local adjustments were made on the downloaded EpoxyDuino project.
-	# beware if this is downloaded again, the tests won't work. 
 fi
 
 if [ ! -d "$CUR_DIR/AUnit" ];
@@ -48,11 +50,16 @@ else
 	echo "LiquidCrystal already installed."
 fi
 
+if [ ! -d "$CUR_DIR/Adafruit_BusIO" ];
+then
+	git clone --branch 1.7.3 https://github.com/adafruit/Adafruit_BusIO.git > /dev/null 2>&1
+	cd Adafruit_BusIO/
+	sed -i.bak -e '31,32d' Adafruit_SPIDevice.h
+	cd ../
+fi
+
 git clone --branch 2.3.0 https://github.com/adafruit/Adafruit_ADS1X15.git > /dev/null 2>&1
-git clone --branch 1.7.3 https://github.com/adafruit/Adafruit_BusIO.git > /dev/null 2>&1
 git clone --branch 1.10.9 https://github.com/adafruit/Adafruit-GFX-Library.git > /dev/null 2>&1
 git clone --branch 1.5.6 https://github.com/adafruit/Adafruit_ILI9341.git > /dev/null 2>&1
         
-cd Adafruit_BusIO/
-sed -i.bak -e '31,32d' Adafruit_SPIDevice.h
-cd ../
+

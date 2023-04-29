@@ -1,21 +1,4 @@
 #include <AUnit.h>
-#include "../../pinout.h"
-#include "Adafruit_GFX.h"
-#include "Adafruit_ILI9341.h"
-#include "../../menu.h"
-#include "../../MechanicalVentilation.h"
-
-byte cycle_pos;
-float pressure_p;
-float _flux, flow_f;
-float _mlInsVol,_mlExsVol;
-int _mllastInsVol,_mllastExsVol;
-bool ended_whilemov;
-float vlevel;
-short alarm_state;
-bool drawing_cycle;
-Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
-
 
 test(correct) {
     int x = 1;

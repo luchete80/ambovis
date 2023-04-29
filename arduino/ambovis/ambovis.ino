@@ -32,6 +32,7 @@ unsigned long lastShowSensor = 0;
 //SENSORS
 Adafruit_ADS1115 ads;
 SensorData sensorData;
+void process_sensor_data(SensorData& sensorData, float vzero);
 
 //MUTE
 Buzzer_State_t buzzer_state;
@@ -54,6 +55,8 @@ unsigned long time2;
 //MENU
 bool display_needs_update = false;
 bool update_options = false;
+
+//KEYBOARD
 Keyboard_data_t keyboard_data;
 Menu_state_t menu_state;
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
@@ -145,7 +148,7 @@ void loop() {
 
         if (calibration_data.calibration_run) {
             if (time2 > sensorData.last_read_sensor + TIME_SENSOR) {
-                read_sensor(ads, sensorData, calibration_data.vzero);
+                process_sensor_data(sensorData, calibration_data.vzero);
                 update_verror_sum(calibration_data, sensorData);
             }
 
@@ -177,7 +180,7 @@ void loop() {
             }
 
             if (time2 > sensorData.last_read_sensor + TIME_SENSOR) {
-                read_sensor(ads, sensorData, calibration_data.vzero);
+                process_sensor_data(sensorData, calibration_data.vzero);
                 eval_max_min_pressure(sensorData);
             }//Read Sensor
 
@@ -257,4 +260,19 @@ void timer1Isr(void) {
 
 void timer3Isr(void) {
     stepper->run();
+}
+
+void process_sensor_data(SensorData& sensorData, float vzero) {
+    int16_t adc0 = ads.readADC_SingleEnded(0);
+    int pressure = analogRead(PIN_PRESSURE);
+    int mpx_lev = analogRead(PIN_MPX_LEV);
+
+    convert_sensor_data(adc0, pressure, mpx_lev, sensorData);
+    float p_dpt = get_dpt(sensorData.voltage, sensorData.v_level, vzero);
+    sensorData.flux = find_flux(p_dpt, dp, po_flux, DP_LENGTH);
+
+    sensorData.flow_f = get_flow(sensorData);
+    update_vol(sensorData, millis());
+    Serial.println("p_dpt " + String(p_dpt) + " flux " + String(sensorData.flux) + " ml_ins_vol " + String(sensorData.ml_ins_vol));
+    sensorData.last_read_sensor = millis();
 }

@@ -1,6 +1,7 @@
 .DS_Store
 .idea/
 arduino/ambovis/.idea/
+arduino/ambovis/tests/unit-tests/*/epoxyeepromdata
 arduino/Paracambiarpornuevmenu/.idea/
 arduino/ambovis/CMakeLists.txt
 arduino/ambovis/cmake-build-debug/

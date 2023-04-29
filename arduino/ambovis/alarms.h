@@ -12,9 +12,9 @@
 typedef struct alarm_data {
     bool is_alarm_vt_on = false;
     short alarm_state = 0;
-    byte alarm_max_pressure = 35;
-    byte alarm_peep_pressure = 5;
-    byte alarm_vt = 200;
+    int8_t alarm_max_pressure = 35;
+    int8_t alarm_peep_pressure = 5;
+    int8_t alarm_vt = 20;
 } AlarmData;
 
 typedef struct buzzer_state {
