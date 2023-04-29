@@ -192,7 +192,7 @@ int8_t validate_parameter(Menu_state_t& menu_state, int8_t selection) {
 
 int8_t validate_menu_position(int8_t& menu_number, int8_t selection) {
     if (menu_number == MAIN_MENU) {
-        return validate_boundaries(0, 2, selection);
+        return validate_boundaries(0, 1, selection);
     }
     if (menu_number == PARAMETERS_MENU) {
         return validate_boundaries(0, 2, selection);
@@ -302,7 +302,6 @@ void show_cursor(int8_t& menu_number, int8_t& menu_position, bool& is_item_selec
         switch(menu_position) {
             case 0: lcd_selxy(0, 0, false); break; //PARAMETERS
             case 1: lcd_selxy(0, 1, false); break; //ALARMS
-            case 2: lcd_selxy(0, 2, false); break; //SETTINGS
         }
     } else if (menu_number == PARAMETERS_MENU) {
         if (is_initial_menu) {
@@ -334,7 +333,6 @@ void move_cursor(int8_t& menu_number, int8_t& menu_position, int8_t& old_menu_po
         switch(old_menu_position) {
             case 0: lcd_clearxy(0, 0); break;
             case 1: lcd_clearxy(0, 1); break;
-            case 2: lcd_clearxy(0, 2); break;
         }
     } else if (menu_number == PARAMETERS_MENU) {
         if (is_initial_menu) {
