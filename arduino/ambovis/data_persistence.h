@@ -6,12 +6,13 @@
 #define AMBOVIS_DATA_PERSISTENCE_H
 
 #include <EEPROM.h>
+#include <Arduino.h>
 
 typedef struct system_configuration {
     unsigned long last_cycle;
-    bool filter;
-    bool autopid;
-    int alarm_vt;
+    byte filter;
+    byte autopid;
+    byte alarm_vt;
 } SystemConfiguration_t;
 
 SystemConfiguration_t read_memory();

@@ -14,7 +14,7 @@ typedef struct alarm_data {
     short alarm_state = 0;
     byte alarm_max_pressure = 35;
     byte alarm_peep_pressure = 5;
-    int alarm_vt = 200;
+    byte alarm_vt = 200;
 } AlarmData;
 
 typedef struct buzzer_state {

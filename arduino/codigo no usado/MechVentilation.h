@@ -201,6 +201,7 @@ extern bool display_needs_update;
 extern VentilationOptions_t options;
 extern MechVentilation * ventilation;
 extern unsigned long last_cycle;
+
 extern byte cycle_pos; //0 to 127
 extern bool autopid;
 extern bool filter;
@@ -216,6 +217,7 @@ extern int max_pidd,min_pidd;
 extern float f_acc;
 extern byte f_acc_b;
 extern byte p_acc;
+
 
 extern bool ended_whilemov;
 

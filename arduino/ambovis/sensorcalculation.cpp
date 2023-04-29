@@ -40,10 +40,11 @@ void read_sensor(Adafruit_ADS1115& ads, SensorData& sensorData, float vzero, boo
     sensorData.pressure_p = (analogRead(PIN_PRESSURE)/ (1023.) - 0.04 ) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;//MPX5010
     sensorData.v_level = float(analogRead(PIN_MPX_LEV)) / 1024. * 1.1 * VOLTAGE_CONV;
     sensorData.voltage = (adc0 * 0.1875) * 0.001; //Volts
-
+    Serial.println("voltage " + String(sensorData.voltage) + " v_level " + String(sensorData.v_level));
     float p_dpt = ((sensorData.voltage - vzero) / sensorData.v_level - 0.04) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
     sensorData.flux = findFlux(p_dpt);
 
+    Serial.println("p_dpt " + String(p_dpt) + " flux " + String(sensorData.flux));
     float flux_sum = 0.;
     if (filter) {
         for (int i = 0; i < 4; i++) {
