@@ -35,9 +35,13 @@ bool calc_alarm_vt_is_on(
 }
 
 AlarmData& check_alarms(Ventilation_Status_t vent_status, AlarmData& alarm_data) {
-    alarm_data.alarm_state = get_alarm_state(vent_status.last_max_pressure, vent_status.last_min_pressure,
-                                         alarm_data.alarm_max_pressure, alarm_data.alarm_peep_pressure);
-    alarm_data.is_alarm_vt_on = calc_alarm_vt_is_on(vent_status.ml_last_ins_vol, vent_status.ml_last_exp_vol, alarm_data.alarm_vt);
+    alarm_data.alarm_state = get_alarm_state(vent_status.last_max_pressure,
+                                             vent_status.last_min_pressure,
+                                             alarm_data.alarm_max_pressure,
+                                             alarm_data.alarm_peep_pressure);
+    alarm_data.is_alarm_vt_on = calc_alarm_vt_is_on(vent_status.ml_last_ins_vol,
+                                                    vent_status.ml_last_exp_vol,
+                                                    alarm_data.alarm_vt);
     return alarm_data;
 }
 

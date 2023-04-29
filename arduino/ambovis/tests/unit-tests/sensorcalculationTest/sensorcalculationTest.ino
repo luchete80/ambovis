@@ -90,36 +90,10 @@ void loop() {
 }
 
 AlarmData alarm_data;
-int bck_state;
-int curr_sel;
-float dpip;
-byte dpip_b;
-byte encoderPos;
-int endPressed;
-float f_acc;
-byte f_acc_b;
-int holdTime;
-int idleTime;
-bool isitem_sel;
-unsigned long lastButtonPress;
-int last_bck_state;
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
-int max_accel, max_cd, max_pidd, max_pidi, max_pidk;
-byte max_sel;
-int max_speed;
-byte menu_number;
-int min_accel, min_pidd, min_pidi, min_pidk;
-byte min_sel;
-byte oldEncPos;
-int old_curr_sel;
-byte p_acc, p_trim;
-float peep_fac, pf_max, pf_min;
-byte pfmax, pfmin;
 bool put_to_sleep;
 bool show_changed_options;
 bool sleep_mode;
-int startPressed;
-char tempstr[5];
 unsigned long time2;
 bool update_options;
 bool wake_up;
