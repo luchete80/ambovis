@@ -40,7 +40,7 @@ typedef struct calibration_data {
     byte calib_cycle = 0;
 } Calibration_Data_t;
 
-float get_flow(SensorData & sensorData, bool filter);
+float get_flow(SensorData & sensorData);
 void update_vol(SensorData& sensorData, unsigned long time);
 float find_flux(float p_dpt, float _dp[], byte _po_flux[], int size);
 float get_dpt(float voltage, float v_level, float vzero);

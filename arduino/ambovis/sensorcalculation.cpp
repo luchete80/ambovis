@@ -29,18 +29,15 @@ float find_flux(float p_dpt, float _dp[], byte _po_flux[], int size) {
     return flux;
 }
 
-float get_flow(SensorData & sensorData, bool filter) {
+float get_flow(SensorData & sensorData) {
     float flux_sum = 0.;
-    float flow_f = sensorData.flux;
-    if (filter) {
-        for (int i = 0; i < 4; i++) {
-            sensorData.flux_filter[i] = sensorData.flux_filter[i + 1];
-            flux_sum += sensorData.flux_filter[i];
-        }
-        sensorData.flux_filter[4] = sensorData.flux;
-        flux_sum += sensorData.flux_filter[4];
-        flow_f = flux_sum / 5.;
+    for (int i = 0; i < 4; i++) {
+        sensorData.flux_filter[i] = sensorData.flux_filter[i + 1];
+        flux_sum += sensorData.flux_filter[i];
     }
+    sensorData.flux_filter[4] = sensorData.flux;
+    flux_sum += sensorData.flux_filter[4];
+    float flow_f = flux_sum / 5.;
     return flow_f;
 }
 

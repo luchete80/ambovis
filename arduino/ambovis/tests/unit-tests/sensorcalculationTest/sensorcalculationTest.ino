@@ -5,7 +5,6 @@
 #include "../../../sensorcalculation.h"
 
 AlarmData alarm_data;
-bool autopid;
 int bck_state;
 int curr_sel;
 float dpip;
@@ -14,7 +13,6 @@ byte encoderPos;
 int endPressed;
 float f_acc;
 byte f_acc_b;
-bool filter;
 int holdTime;
 int idleTime;
 bool isitem_sel;
