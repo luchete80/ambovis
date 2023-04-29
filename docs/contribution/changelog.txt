@@ -1,0 +1,136 @@
+
+
+v1.0.1
+Caracrt. Nuevas
+- Agregado V (l/min) en menu pantalla ppal
+- Aumentados grados de la leva a 330º
+- Alarma de VT guardada en la EEPROM
+- Agregada opcion de filtro ON/OFF(se guarda en EEPROM)
+
+Bugs
+- Arreglado el texto (garbage) de tft junto a los vt 
+- Agregado el eje 0 en los graficos (antes se borraba)
+- Arregladas letras erroneas en menu ppal
+
+
+v1.0.2
+
+Bugs
+- Arreglado cálculo de VM
+- Arreglado el grafico de y=0 (No empieza de 0)
+
+Modificaciones
+- BPM Subida a 30 
+- "V:" pasado a "VM:"
+
+v1.0.3
+- Nuevo menu en paralelo botonera + encoder
+
+v1.0.4
+Upgrades
+- Removidas llamadas innecesarias a millis() (interrupciones)
+- Se quita refresh innecesario del display
+- Se pone en GND salida de pin BCK (amarillo nro 2)
+- Se quitan todos los Serial.print del menu y loop
+- Acelerado refresh de TFT de 80 a 50 ms
+- Cambiado el refresco en x de TFT de 5 a px
+
+v1.0.5
+- Tiempos de botones de Display vueltos hacia atras
+- refresh de display vuelto a poner
+- Bateria pasado a %
+
+v1.0.6
+- Porcentaje de bateria corregido (Vmin a 20.0V)
+- Pines Botones adaptados (sin el cancel aun)
+
+v1.0.7
+- Porcentaje de bateria corregido desde 20V (Vmin a 22.0V)
+- Pines Botones adaptados con el cancel
+
+v1.0.8
+- Se agrega seleccion de peep factor min y max (para 0 y 15 cmh2O)
+- Se calcula peep factor solo una vez
+- Se corrige error de PID K (se agrega la ordenada al origen)
+
+v1.0.9
+- Corregido bug de filtro
+- Se vuelve a autotrim (error -0.004mV)
+- Se invierte buzzer
+- Se aumenta tiempo de mute a 1 min
+
+v1.0.9 (pisado)
+- Vuelta a trim
+- Se el % de baterias abajo en el display 
+- Se activa e invierte buzzer
+
+v1.0.10
+- Se agrega menu 4 (dpip, factor peep se pasa a esta pantalla, presion de ac,factor de ac)
+
+
+- Modificaciones
+- Se bajan los maximos de pid de 1000 a 990
+- Se reordena la navegacion del menu de conf (izq a der, arr a a abajo)
+
+
+- A modificar (bugs)
+- Hacer visible el cursor en constantes pid "d" y "D"
+- Refresco al bajar un digito en variables
+
+
+- v-1.1.1
+Bugs Menu
+- Cursor posicion reparada en Menu PID opciones  "D" y "d" (no se mostraba) (L)
+- Valores por abajo de 100 ("p,i,d") del menu PID se muestran correctamente (L)
+*********************
+- Silenciado de buzzers en sleep
+
+-v-1.1.2
+Bugs Menu
+- Cursor y valor de ON/OFF en opcion filtro "F" menu nro 2  
+- Error en seleccion y guardado de constantes PID min y max (menu 3)
+- El menu principal (1) ahora tiene solo 4 selecciones validas (antes segun el modo tenia la seleccion de vol o pip anulada)
+- Orientadas leyendas de PIP en ambos modos menu ppak
+- Agregado "PIP: -" en caso VCV para mostrar que no es seleccionable 
+- Se saca nivel de tension del tft
+*********
+- Corregidos caracteres extraños menu luego sleep
+- Corregida leyenda nivel de bat (Superpuesto "%" en tft)
+
+-v-1.1.3
+- Se comienza con el menu inicial
+
+
+
+
+
+
+
+- CORRIDA 
+
+
+/////////////
+// botones //
+/////////////
+ORIGINAL
+
+izquierda	30
+derecha		34
+enter		28
+cancel		32
+
+#define PIN_MENU_UP     28
+#define PIN_MENU_DN     30
+#define PIN_MENU_EN     32
+
+Nuevo
+
+
+
+
+
+
+
+PENDIENTES: 
+- LED AMARILLO
+- 

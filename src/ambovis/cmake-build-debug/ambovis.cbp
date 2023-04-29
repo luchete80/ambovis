@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="ambovis"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="ambovis">
+				<Option output="/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug/ambovis" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/."/>
+					<Add directory="/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/src/TestingUtils"/>
+					<Add directory="/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/tests"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/bin/../include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/12.0.0/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug/Makefile&quot;  VERBOSE=1 ambovis"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="ambovis/fast">
+				<Option output="/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug/ambovis" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/."/>
+					<Add directory="/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/src/TestingUtils"/>
+					<Add directory="/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/tests"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/bin/../include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/12.0.0/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug/Makefile&quot;  VERBOSE=1 ambovis/fast"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/tests/test.ino">
+			<Option target="ambovis"/>
+		</Unit>
+		<Unit filename="/Users/mirian.quinteros/repositories/arduino/ambovis/arduino/ambovis/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>
