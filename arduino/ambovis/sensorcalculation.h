@@ -39,7 +39,7 @@ float findFlux(float p_dpt);
 void init_sensor(Adafruit_ADS1115& ads);
 void update_verror_sum(Calibration_Data_t & calibration_data, SensorData sensorData);
 void update_cycle_verror_sum(Calibration_Data_t& calibration_data);
-void read_sensor(Adafruit_ADS1115& ads, SensorData& result, float vzero, bool filter);
+void read_sensor(Adafruit_ADS1115& ads, SensorData& result, float vzero);
 void eval_max_min_pressure(SensorData& sensorData);
 
 #endif //AMBOVIS_DPFLUX_H

@@ -9,8 +9,7 @@
 static byte MAIN_MENU = 0;
 static byte PARAMETERS_MENU = 1;
 static byte ALARMS_MENU = 2;
-static byte SETTINGS_MENU = 3;
-static byte MENU_NUMBER_LIST[] = {PARAMETERS_MENU, ALARMS_MENU, SETTINGS_MENU};
+static byte MENU_NUMBER_LIST[] = {PARAMETERS_MENU, ALARMS_MENU};
 static byte ENTER_PRESSED = 1;
 static byte BACK_PRESSED = 2;
 extern LiquidCrystal lcd;
@@ -41,9 +40,6 @@ typedef struct menu_state {
     bool is_initial_menu;
     bool clear_display;
 } Menu_state_t;
-
-extern byte filter;
-extern byte autopid;
 
 void init_display();
 void initialize_menu(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state,
