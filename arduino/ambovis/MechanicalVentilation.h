@@ -58,6 +58,7 @@ void start(Mechanical_Ventilation_t& mech_vent);
 void stop(Mechanical_Ventilation_t& mech_vent);
 void update(Mechanical_Ventilation_t& mech_vent, SensorData& sensor);
 void update_config(Mechanical_Ventilation_t& mech_vent);
-void search_home_position(AccelStepper* stepper);
+void ccw_search_home(AccelStepper* stepper);
+void cw_search_home(AccelStepper* stepper);
 
 #endif /* MECHANICAL_VENTILATION_H */

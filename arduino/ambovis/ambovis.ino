@@ -65,6 +65,7 @@ unsigned long last_update_display;
 //MECH VENTILATION
 AccelStepper *stepper;
 Mechanical_Ventilation_t mech_vent;
+void search_home_position(AccelStepper* stepper);
 
 void setup() {
     Serial.begin(115200);
@@ -275,4 +276,9 @@ void process_sensor_data(SensorData& sensorData, float vzero) {
     update_vol(sensorData, millis());
     Serial.println("p_dpt " + String(p_dpt) + " flux " + String(sensorData.flux) + " ml_ins_vol " + String(sensorData.ml_ins_vol));
     sensorData.last_read_sensor = millis();
+}
+
+void search_home_position(AccelStepper* stepper) {
+    ccw_search_home(stepper);
+    cw_search_home(stepper);
 }

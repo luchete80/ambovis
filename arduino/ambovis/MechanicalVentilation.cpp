@@ -88,8 +88,8 @@ void update(Mechanical_Ventilation_t& mech_vent, SensorData& sensor) {
             status->ended_while_moving = status->ending_while_moving;
             status->start_cycle_time_ms = millis();
             mech_vent.stepper->setAcceleration(config->stepper_accel_max);
-            mech_vent.stepper->setSpeed(STEPPER_SPEED_EXSUFF);
             mech_vent.stepper->moveTo(STEPPER_LOWEST_POSITION);
+            mech_vent.stepper->setSpeed(STEPPER_SPEED_EXSUFF);
             status->current_state = State_Exufflation;
         }
         break;
@@ -116,11 +116,9 @@ void update_config(Mechanical_Ventilation_t& mech_vent) {
     initCycleTimes(mech_vent);
 }
 
-void search_home_position(AccelStepper* stepper) {
+void ccw_search_home(AccelStepper* stepper) {
     stepper->setSpeed(STEPPER_HOMING_SPEED);
-
     long initial_homing = -1;
-
     while (digitalRead(PIN_ENDSTOP)) {  // Make the Stepper move CCW until the switch is activated
         stepper->moveTo(initial_homing);  // Set the position to move to
         initial_homing--;  // Decrease by 1 for next move if needed
@@ -128,8 +126,11 @@ void search_home_position(AccelStepper* stepper) {
         delay(5);
     }
     stepper->setCurrentPosition(0);  // Set the current position as zero for now
-    initial_homing = 1;
+}
 
+void cw_search_home(AccelStepper* stepper) {
+    stepper->setSpeed(STEPPER_HOMING_SPEED);
+    long initial_homing = 1;
     while (!digitalRead(PIN_ENDSTOP)) { // Make the Stepper move CW until the switch is deactivated
         stepper->moveTo(initial_homing);
         stepper->run();
