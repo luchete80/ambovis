@@ -1,9 +1,5 @@
 #include "display.h"
 
-#define AY0 130
-#define AY1 200
-#define LEGEND_Y 260
-
 char buffer[10];
 
 void show_alarms(Adafruit_ILI9341& tft, AlarmData& alarm_data);

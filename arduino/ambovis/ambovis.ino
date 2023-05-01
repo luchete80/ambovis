@@ -22,12 +22,7 @@ bool sleep_mode = false;
 bool put_to_sleep = false;
 bool wake_up = false;
 
-
 //TFT DISPLAY
-//unsigned long print_bat_time;
-//Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
-//bool drawing_cycle = 0;
-//unsigned long lastShowSensor = 0;
 Display_Data_t display;
 
 //SENSORS
