@@ -22,12 +22,13 @@ bool sleep_mode = false;
 bool put_to_sleep = false;
 bool wake_up = false;
 
-unsigned long print_bat_time;
 
 //TFT DISPLAY
-Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
-bool drawing_cycle = 0;
-unsigned long lastShowSensor = 0;
+//unsigned long print_bat_time;
+//Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
+//bool drawing_cycle = 0;
+//unsigned long lastShowSensor = 0;
+Display_Data_t display;
 
 //SENSORS
 Adafruit_ADS1115 ads;
@@ -77,7 +78,7 @@ void setup() {
     writeLine(1, "RespirAR FIUBA", 4);
     writeLine(2, "v2.0.2", 8);
 
-    init_display_tft(tft);
+    init_display_tft(display);
     init_sensor(ads);
     initialize_menu(keyboard_data, menu_state, mech_vent.config, mech_vent.status, alarm_data);
     wait_for_flux_disconnected();
@@ -91,13 +92,13 @@ void setup() {
     start(mech_vent);
     update(mech_vent, sensorData);
 
-    clean_tft(tft);
+    clean_tft(display);
     lcd.clear();
     writeLine(1, "Iniciando...", 0);
     search_home_position(stepper);
     display_lcd(menu_state, mech_vent.config, mech_vent.status, alarm_data);
 
-    lastShowSensor = last_update_display = millis();
+    display.lastShowSensor = last_update_display = millis();
     sensorData.last_read_sensor = millis();
 
     #ifdef BAT_TEST
@@ -137,7 +138,7 @@ void loop() {
         if (wake_up) {
             init_display();
             display_lcd(menu_state, mech_vent.config, mech_vent.status, alarm_data);
-            init_display_tft(tft);
+            init_display_tft(display);
             start(mech_vent);
             wake_up = false;
         }
@@ -163,7 +164,7 @@ void loop() {
                 calibration_data.vzero = calibration_data.verror_sum_outcycle / float(CALIB_CYCLES);
                 Serial.println("Calibration verror: " + String(calibration_data.vzero));
                 lcd.clear();
-                clean_tft(tft);
+                clean_tft(display);
             }
         } else {
             if (time2 > lastSave + TIME_SAVE) {
@@ -174,9 +175,9 @@ void loop() {
                 lastSave = millis();
             }
 
-            if (time2 > lastShowSensor + TIME_SHOW) {
-                tft_draw(tft, sensorData, mech_vent.status, drawing_cycle, alarm_data);
-                lastShowSensor = time2;
+            if (time2 > display.lastShowSensor + TIME_SHOW) {
+                tft_draw(display, sensorData, mech_vent.status, alarm_data);
+                display.lastShowSensor = time2;
             }
 
             if (time2 > sensorData.last_read_sensor + TIME_SENSOR) {
@@ -201,8 +202,8 @@ void loop() {
                     temp=sensors.getTempCByIndex(0);
                     //Serial.println ("Temp: " + String(temp));
                 }
-                tft.fillRect(200, 100, 20, 40, ILI9341_BLUE);
-                print_float(tft, 100, 200, temp);
+                display.tft.fillRect(200, 100, 20, 40, ILI9341_BLUE);
+                print_float(display.tft, 100, 200, temp);
                 #endif //TEMP_TEST
             }//change cycle
 
@@ -229,17 +230,17 @@ void loop() {
         if (put_to_sleep) {
             digitalWrite(PIN_LCD_EN, HIGH);
             put_to_sleep = false;
-            print_bat_time = time2;
-            print_bat(tft, FAC);
+            display.print_bat_time = time2;
+            print_bat(display);
             lcd.clear();
             digitalWrite(LCD_SLEEP, LOW);
             digitalWrite(TFT_SLEEP, LOW);
             stop(mech_vent);
             //digitalWrite(PIN_BUZZER, !BUZZER_LOW); //Buzzer inverted
         }
-        if (time2 > print_bat_time + 5000) {
-            print_bat(tft, FAC);
-            print_bat_time = time2;
+        if (time2 > display.print_bat_time + 5000) {
+            print_bat(display);
+            display.print_bat_time = time2;
         }
         check_bck_state(keyboard_data, time2);
     }
@@ -248,7 +249,7 @@ void loop() {
     if ( time2 > lastShowBat + TIME_SHOW_BAT ) {
         lastShowBat = time2;
         Serial.println("last show bat " + String(lastShowBat));
-        float level = calc_bat(5, FAC);
+        float level = calc_bat(5);
         Serial.println(String(time2)+", " +String(level));
     }
     #endif//BAT_TEST

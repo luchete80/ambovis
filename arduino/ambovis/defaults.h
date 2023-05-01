@@ -99,9 +99,19 @@ extern unsigned long time2;
 #define TIME_READ_TEMP  15000 //MSECS
 #define CALIB_CYCLES  5
 
-#define MIN_CURVES_Y    60
-#define CLEAN_Y         200
-#define LEGEND_Y        260 //Begining of the legend on Y AXIS
+#define LEGEND_Y 260
+#define LEGEND_X 40
+#define AY0 130
+#define AY1 200
+#define ALARM_POS_X 150
+#define BAT_X 130
+#define BAT_VAL_X 180
+#define BAT_Y 260
+#define END_X 240
+#define CLEAN_X 20
+#define CLEAN_Y_UP 60
+#define CLEAN_Y_DOWN 100
+#define HALF_X 120
 #define ILI9341_DARKGREY 0x7BEF /* 128, 128, 128 */
 
 // Alarm state
