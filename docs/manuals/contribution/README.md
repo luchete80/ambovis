@@ -35,7 +35,7 @@ Si bien los releases parecen útiles para conservar versiones de código funcion
 
 Cuando el primer release ocurra, podremos enfocarnos en resolver los problemas que vienen después y tal vez sea momento de moverse a la estrategia de branching GitFlow o alguna otra. Sin embargo, en el estadío actual conviene que el sistema sea lo más simple posible y no mantener tantas ramas sincronizadas. Ya sea porque la adopción resultaría más rápida y porque es mejor no complicar el desarrollo antes de necesitarlo.
 
-![Aquí la descripción de la imagen por si no carga](https://github.com/luchete80/ambovis/docs/assets/gitflow.png)
+![Aquí la descripción de la imagen por si no carga](https://github.com/luchete80/ambovis/tree/RESP-141/docs/assets/gitflow.png)
 
 Pasos para Crear nuevos Branch:
 
