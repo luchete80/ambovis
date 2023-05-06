@@ -32,6 +32,9 @@ export OPENSSL_PWD=<password>
 
 Si se desea usar el monitor serie, se puede acceder a él a traves de la interfaz grafica de Arduino CC una vez que el codigo esta subido.
 
+Ver: https://github.com/arduino/arduino-cli/issues/38
+
+
 Windows
 
 Instalar arduino-cli https://arduino.github.io/arduino-cli/0.32/installation/
