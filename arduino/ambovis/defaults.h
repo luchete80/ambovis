@@ -104,6 +104,7 @@ extern unsigned long time2;
 #define LEGEND_Y        260 //Begining of the legend on Y AXIS
 #define ILI9341_DARKGREY 0x7BEF /* 128, 128, 128 */
 
+#define DP_LENGTH 55
 // Alarm state
 enum alarm_state {NO_ALARM=0,PEEP_ALARM=1,PIP_ALARM=2,PEEP_PIP_ALARM=3};
 
