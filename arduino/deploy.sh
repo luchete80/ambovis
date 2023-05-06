@@ -49,15 +49,17 @@ static byte po_flux[] = {$FLUX};
 
   echo "Compiling..."
   arduino-cli compile  --fqbn arduino:avr:mega:cpu=atmega2560 ambovis -v
-  [ $? -eq 0 ]  || exit 1
+  if [ $? -eq 0 ]; then 
+    arduino-cli board list
+    read -p 'Copy and paste the port name from the list: ' port 
 
-  arduino-cli board list
-  read -p 'Copy and paste the port name from the list: ' port 
-
-  echo "Uploading to arduino board"
-  # arduino-cli upload -p $port --fqbn arduino:avr:mega:cpu=atmega2560 ambovis
-
-  setDummyPrivateData
+    echo "Uploading to arduino board"
+    arduino-cli upload -p $port --fqbn arduino:avr:mega:cpu=atmega2560 ambovis
+    setDummyPrivateData
+  else
+    setDummyPrivateData
+    exit 1
+  fi
 }
 
 trap ctrl_c INT
