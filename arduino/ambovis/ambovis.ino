@@ -56,6 +56,10 @@ unsigned long time2;
 bool display_needs_update = false;
 bool update_options = false;
 
+//INTERRUPTIONS
+bool run_stepper;
+bool update_ventilation;
+
 //KEYBOARD
 Keyboard_data_t keyboard_data;
 Menu_state_t menu_state;
@@ -146,7 +150,14 @@ void loop() {
         buzzer_state = check_buzzer_mute(buzzer_state, time2);
         check_encoder(keyboard_data, menu_state, mech_vent.config, alarm_data, time2);
         Ventilation_Status_t* vent_status = &mech_vent.status;
-
+        if (run_stepper) {
+            stepper->run();
+            run_stepper = false;
+        }
+        if (update_ventilation) {
+            update(mech_vent, sensorData);
+            update_ventilation = false;
+        }
         if (calibration_data.calibration_run) {
             if (time2 > sensorData.last_read_sensor + TIME_SENSOR) {
                 process_sensor_data(sensorData, calibration_data.vzero);
@@ -188,9 +199,7 @@ void loop() {
             if (vent_status->cycle != vent_status->last_cycle) {
                 Serial.println("Last press max " + String(vent_status->last_max_pressure));
                 Serial.println("Last press min " + String(vent_status->last_min_pressure));
-                Serial.println("alarm_pre state " + String(alarm_data.alarm_state));
                 alarm_data = check_alarms(mech_vent.status, alarm_data);
-                Serial.println("alarm_post state " + String(alarm_data.alarm_state));
                 vent_status->last_cycle = vent_status->cycle;
                 vent_status->update_display = true;
                 show_power_led();
@@ -256,11 +265,11 @@ void loop() {
 }//LOOP
 
 void timer1Isr(void) {
-    update(mech_vent, sensorData);
+    update_ventilation = true;
 }
 
 void timer3Isr(void) {
-    stepper->run();
+    run_stepper = true;
 }
 
 void process_sensor_data(SensorData& sensorData, float vzero) {
