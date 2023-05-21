@@ -54,7 +54,6 @@ unsigned long time2;
 
 //MENU
 bool display_needs_update = false;
-bool update_options = false;
 
 //KEYBOARD
 Keyboard_data_t keyboard_data;
