@@ -108,6 +108,10 @@ void setup() {
     delay(1000); // wait for stability on some boards to prevent garbage Serial
     Serial.begin(115200); // ESP8266 default of 74880 not supported on Linux
     while(!Serial);
+
+    Serial.println(F("----"));
+    Serial.println(F("START alarm tests:"));
+    Serial.println(F("----"));
 }
 
 void loop() {
