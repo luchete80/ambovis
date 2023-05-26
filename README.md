@@ -12,7 +12,7 @@ En este repositorio encontrará el codigo escrito en C++ junto con la documentac
   - Links a recursos de lectura
 - [Calidad de software](docs/test/README.md)
   - Pruebas manuales
-  - [Pruebas unitarias](docs/test/pruebas_unitarias.md)
+  - [Pruebas unitarias](docs/test/unit_tests.md)
   - Logs
 - [Contribución](docs/contributing/README.md)
 

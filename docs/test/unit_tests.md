@@ -48,5 +48,5 @@ Como guía rápida, seguir estos pasos:
 3. En cada carpeta se encuentra un archivo `.ino` con las pruebas. Cada archivo puede contener uno o más casos de prueba, donde se instancia el componente de interés, se aplican condiciones previas, se ejecuta una acción y se verifica el resultado. 
 4. Para crear pruebas sobre un nuevo componente, crear una carpeta aparte con el mismo patrón `<componente>Test`, junto con un `Makefile` y un `.ino`.
 
-[Ver más](calidad_de_software.md)
+[Ver más](software_quality.md)
 

@@ -22,7 +22,7 @@ Si se desea desestimar la edición del valor, se puede presionar `BACK` y el val
 
 Inmediatamente despues del encendido del respirador, luego de mostrar la ifnormacion de la version del software, se mostrará la pantalla de inicio para ingresar los parametros básicos.
 
-![menu inicial](pics/menu_inicial.png)
+![menu inicial](pics/menu_init.png)
 
 ####Pantalla principal
 
