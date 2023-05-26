@@ -142,7 +142,7 @@ CMAKE_OBJDUMP:FILEPATH=/Library/Developer/CommandLineTools/usr/bin/objdump
 //Build architectures for OSX
 CMAKE_OSX_ARCHITECTURES:STRING=
 
-//Minimum OS X version to target for deployment (at runtime); newer
+//Minimum OS X version to target for development (at runtime); newer
 // APIs weak linked. Set to empty string for default value.
 CMAKE_OSX_DEPLOYMENT_TARGET:STRING=10.15
 

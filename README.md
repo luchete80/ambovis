@@ -4,17 +4,17 @@
 El VMM es un proyecto nacido en la Facultad de Ingeniería de la Universidad de Buenos Aires y tiene como objetivo crear un prototipo de respirador de bajo costo. [Leer más](https://)
 
 En este repositorio encontrará el codigo escrito en C++ junto con la documentación de:
-- [Manuales](https://docs/manuals/README.md)
-  - Preparación del entorno y ejecución del código
-  - Uso del dipositivo
-- [Recursos de investigación](https://docs/resources/README.md)
+- [Manuales](docs/manuals)
+  - [Preparación del entorno y ejecución del código](docs/manuals/development/README.md)
+  - [Uso del menú del dipositivo](docs/manuals/menu/README.md)
+- [Recursos de investigación](docs/resources/README.md)
   - Esquemáticos
   - Links a recursos de lectura
-- [Calidad de software](https://docs/test/README.md)
+- [Calidad de software](docs/test/README.md)
   - Pruebas manuales
-  - Pruebas unitarias
+  - [Pruebas unitarias](docs/test/pruebas_unitarias.md)
   - Logs
-- [Contribución](https://docs/contributing/README.md)
+- [Contribución](docs/contributing/README.md)
 
 ##Funcionalidades
 
