@@ -10,6 +10,7 @@ arduino/AUnit/
 arduino/Adafruit*
 arduino/LiquidCrystal/
 arduino/libs
+src/ambovis/cmake-build-debug/
 .idea
 *.tmp
 *.out
