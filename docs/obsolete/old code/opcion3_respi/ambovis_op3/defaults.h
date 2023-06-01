@@ -192,6 +192,6 @@ extern byte alarm_state;
 extern bool put_to_sleep,wake_up;
 //PID LIMITS
 extern bool change_pid_params;
-extern unsigned long time;
+extern unsigned long time2;
 
 #endif // DEFAULTS_H
