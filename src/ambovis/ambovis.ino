@@ -186,11 +186,11 @@ void loop() {
             }//Read Sensor
 
             if (vent_status->cycle != vent_status->last_cycle) {
-                Serial.println("Last press max " + String(vent_status->last_max_pressure));
-                Serial.println("Last press min " + String(vent_status->last_min_pressure));
-                Serial.println("alarm_pre state " + String(alarm_data.alarm_state));
+//                Serial.println("Last press max " + String(vent_status->last_max_pressure));
+//                Serial.println("Last press min " + String(vent_status->last_min_pressure));
+//                Serial.println("alarm_pre state " + String(alarm_data.alarm_state));
                 alarm_data = check_alarms(mech_vent.status, alarm_data);
-                Serial.println("alarm_post state " + String(alarm_data.alarm_state));
+//                Serial.println("alarm_post state " + String(alarm_data.alarm_state));
                 vent_status->last_cycle = vent_status->cycle;
                 vent_status->update_display = true;
                 show_power_led();
@@ -274,7 +274,7 @@ void process_sensor_data(SensorData& sensorData, float vzero) {
 
     sensorData.flow_f = get_flow(sensorData);
     update_vol(sensorData, millis());
-    Serial.println("p_dpt " + String(p_dpt) + " flux " + String(sensorData.flux) + " ml_ins_vol " + String(sensorData.ml_ins_vol));
+//    Serial.println("p_dpt " + String(p_dpt) + " flux " + String(sensorData.flux) + " ml_ins_vol " + String(sensorData.ml_ins_vol));
     sensorData.last_read_sensor = millis();
 }
 
