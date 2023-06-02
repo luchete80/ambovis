@@ -39,14 +39,13 @@ void newInsufflationActions(Ventilation_Status_t& status, SensorData& sensor) {
     status.c_dyn = (status.c_dyn_pass[0] + status.c_dyn_pass[1] + status.c_dyn_pass[2]) / 3.;
     status.ml_last_ins_vol = int(sensor.ml_ins_vol);
     status.ml_last_exp_vol = int(fabs(sensor.ml_exs_vol));
-    Serial.println("New Insufflation - Max Pressure " + String(status.last_max_pressure) + ", LastMlInsVols " + String(status.ml_last_ins_vol));
+//    Serial.println("New Insufflation - Max Pressure " + String(status.last_max_pressure) + ", LastMlInsVols " + String(status.ml_last_ins_vol));
 
     sensor.ml_ins_vol=0.;
     sensor.ml_exs_vol=0.;
 }
 
 void update(Mechanical_Ventilation_t& mech_vent, SensorData& sensor) {
-
     Ventilation_Status_t* status = &mech_vent.status;
     Ventilation_Config_t* config = &mech_vent.config;
 
