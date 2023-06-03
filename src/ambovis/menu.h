@@ -6,20 +6,14 @@
 #include <LiquidCrystal.h>
 #include "MechanicalVentilation.h"
 
-static byte MAIN_MENU = 0;
-static byte PARAMETERS_MENU = 1;
-static byte ALARMS_MENU = 2;
 static byte MENU_NUMBER_LIST[] = {PARAMETERS_MENU, ALARMS_MENU};
-static byte ENTER_PRESSED = 1;
-static byte BACK_PRESSED = 2;
 extern LiquidCrystal lcd;
 
 typedef struct keyboard_data {
     unsigned long last_button_pressed;
     int bck_state;     // current state of the back button
     int last_bck_state; // previous state of the button
-    int start_pressed;    // the moment the button was pressed
-    int end_pressed;      // the moment the button was released
+    unsigned long start_pressed;    // the moment the button was pressed
     int hold_time;        // how long the button was hold
     int8_t selection;
     int8_t old_selection;
@@ -42,9 +36,9 @@ typedef struct menu_state {
 } Menu_state_t;
 
 void init_display();
-void initialize_menu(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state,
-                     Ventilation_Config_t& config, Ventilation_Status_t& status, AlarmData& alarm_data);
+void initialize_menu(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state, Ventilation_Config_t& config);
 void writeLine(int line, String message = "", int offsetLeft = 0);
+void check_buttons(Keyboard_data_t& keyboard_data, unsigned long time);
 void check_encoder(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state,
                    Ventilation_Config_t& config, AlarmData& alarm_data, unsigned long time);
 void display_lcd(Menu_state_t& menu_state, Ventilation_Config_t& config,
