@@ -8,8 +8,8 @@ function fetchPasskey {
 }
 
 function decryptData {
-  $global:DP = & openssl enc -in C:\Ardu\ambovis-RESP-137-v2\arduino\EncryptedDp -d -aes256 -pass "env:OPENSSL_PWD" -pbkdf2
-  $global:FLUX = & openssl enc -in C:\Ardu\ambovis-RESP-137-v2\arduino\EncryptedFlux -d -aes256 -pass "env:OPENSSL_PWD" -pbkdf2
+  $global:DP = & openssl enc -in EncryptedDp -d -aes256 -pass "env:OPENSSL_PWD" -pbkdf2
+  $global:FLUX = & openssl enc -in EncryptedFlux -d -aes256 -pass "env:OPENSSL_PWD" -pbkdf2
 }
 
 function setDummyPrivateData {
@@ -17,7 +17,7 @@ function setDummyPrivateData {
   Set-Content private_data.h "
 #ifndef AMBOVIS_PRIVATE_DATA_H
 #define AMBOVIS_PRIVATE_DATA_H  
-static float dp[] = {-2.0, -1.8, -1.6, -1.4, -1.2, -1.0, -0.8, -0.6, -0.4, -0.2};
+static float dp[] = {0., 0., 0., 0., 0., 0., 0., 0., 0., 0.};
 static byte po_flux[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 #endif"
   Set-Location ..
@@ -29,10 +29,10 @@ function closeGracefully() {
   exit 1
 }
 
-function comienzo {
+function initProcess {
   if (!(Get-Command 'arduino-cli' -ErrorAction SilentlyContinue)) {
     Write-Host "arduino-cli could not be found"
-   exit
+    exit
   }
 
   if (-not $env:OPENSSL_PWD) {
@@ -53,7 +53,7 @@ function comienzo {
   Set-Location ..
   
   Write-Host "Compiling..."
-  arduino-cli compile  --fqbn arduino:avr:mega:cpu=atmega2560 ambovis -v
+  arduino-cli compile --fqbn arduino:avr:mega:cpu=atmega2560 ambovis -v
   if ($LASTEXITCODE -eq 0) { 
     arduino-cli board list
     $port = Read-Host 'Copy and paste the port name from the list: '
@@ -67,7 +67,7 @@ function comienzo {
 }
 
 try {
-    comienzo
+    initProcess
 } finally {
     closeGracefully
 }
