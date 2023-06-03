@@ -44,25 +44,24 @@ void lcd_selxy(int x, int y, bool isItemSelected) {
 }
 
 void check_bck_state(Keyboard_data_t& keyboard_data, unsigned long time) {
-    keyboard_data.bck_state=digitalRead(PIN_MENU_BCK);
+    keyboard_data.bck_state = digitalRead(PIN_MENU_BCK);
 
     if (keyboard_data.bck_state != keyboard_data.last_bck_state) {
         if (keyboard_data.bck_state == LOW) {
             keyboard_data.start_pressed = time;
             keyboard_data.change_sleep = false;
-            if (time - keyboard_data.last_button_pressed > 150) {
+            if (time - keyboard_data.last_button_pressed > TIME_BACK_BTN) {
                 keyboard_data.pressed = BACK_PRESSED;
                 keyboard_data.last_button_pressed = time;
             }
         } else {
-            keyboard_data.end_pressed = time;
-            keyboard_data.hold_time = keyboard_data.end_pressed - keyboard_data.start_pressed;
+            keyboard_data.hold_time = time - keyboard_data.start_pressed;
         }
     } else {
         if (keyboard_data.bck_state == LOW) {
             keyboard_data.hold_time = time - keyboard_data.start_pressed;
         } // button state not changed. It runs in a loop.
-        if (keyboard_data.hold_time > 2000 && !keyboard_data.change_sleep) {
+        if (keyboard_data.hold_time > TIME_HOLD_BACK_BTN && !keyboard_data.change_sleep) {
             if (!sleep_mode) {
                 sleep_mode=true;
                 put_to_sleep=true;
@@ -79,14 +78,14 @@ void check_bck_state(Keyboard_data_t& keyboard_data, unsigned long time) {
 
 void check_buttons(Keyboard_data_t& keyboard_data, unsigned long time) {
     if (digitalRead(PIN_MENU_DN) == LOW) {
-        if (time - keyboard_data.last_button_pressed > 150) {
+        if (time - keyboard_data.last_button_pressed > TIME_BACK_BTN) {
             keyboard_data.selection+=1;
             keyboard_data.last_button_pressed = time;
         }
     }
 
     if (digitalRead(PIN_MENU_UP) == LOW) {
-        if (time - keyboard_data.last_button_pressed > 150) {
+        if (time - keyboard_data.last_button_pressed > TIME_BACK_BTN) {
             keyboard_data.selection-=1;
             keyboard_data.last_button_pressed = time;
         }
@@ -94,7 +93,7 @@ void check_buttons(Keyboard_data_t& keyboard_data, unsigned long time) {
 
     keyboard_data.pressed = 0;
     if (digitalRead(PIN_MENU_EN) == LOW) {
-        if (millis() - keyboard_data.last_button_pressed > 120) {
+        if (millis() - keyboard_data.last_button_pressed > TIME_BACK_BTN) {
             keyboard_data.pressed = ENTER_PRESSED;
             keyboard_data.last_button_pressed = millis();
         }
@@ -106,39 +105,21 @@ void check_buttons(Keyboard_data_t& keyboard_data, unsigned long time) {
 }
 
 int8_t* get_value_to_edit(Menu_state_t& menu_state, Ventilation_Config_t& config, AlarmData& alarm_data) {
-    if (menu_state.menu_number == PARAMETERS_MENU) {
-        if (menu_state.is_initial_menu) {
-            if (menu_state.menu_position == 0) { // BPM
-                return &config.respiratory_rate;
-            }
-            if (menu_state.menu_position == 1) { // IE
-                return &config.perc_IE;
-            }
-        } else {
-            if (menu_state.menu_position == 0) { // PERC_V_OPT
-                return &config.perc_volume;
-            }
-            if (menu_state.menu_position == 1) { // BPM_OPT
-                return &config.respiratory_rate;
-            }
-            if (menu_state.menu_position == 2) { // IE_OPT
-                return &config.perc_IE;
-            }
-        }
+    int8_t* values[3][3];
+    values[0][0] = &config.respiratory_rate;
+    values[0][1] = &config.perc_IE;
+    values[1][0] = &config.perc_volume;
+    values[1][1] = &config.respiratory_rate;
+    values[1][2] = &config.perc_IE;
+    values[2][0] = &alarm_data.alarm_max_pressure;
+    values[2][1] = &alarm_data.alarm_peep_pressure;
+    values[2][2] = &alarm_data.alarm_vt;
+
+    if (menu_state.is_initial_menu) {
+        return values[0][menu_state.menu_position];
+    } else {
+        return values[menu_state.menu_number][menu_state.menu_position];
     }
-    if (menu_state.menu_number == ALARMS_MENU) {
-        if (menu_state.menu_position == 0) { // PIP_ALARM_OPT
-            return &alarm_data.alarm_max_pressure;
-        }
-        if (menu_state.menu_position == 1) { // PEEP_ALARM_OPT
-            return &alarm_data.alarm_peep_pressure;
-        }
-        if (menu_state.menu_position == 2) { // VT_ALARM_OPT
-            return &alarm_data.alarm_vt;
-        }
-    }
-    Serial.println("Error returning value_to_edit " + String(menu_state.menu_number));
-    return (int8_t*) -1;
 }
 
 int8_t validate_boundaries(int8_t min, int8_t max, int8_t value) {
@@ -152,56 +133,30 @@ int8_t validate_boundaries(int8_t min, int8_t max, int8_t value) {
 }
 
 int8_t validate_parameter(Menu_state_t& menu_state, int8_t selection) {
-    if (menu_state.menu_number == PARAMETERS_MENU) {
-        if (menu_state.is_initial_menu) {
-            if (menu_state.menu_position == 0) { // BPM
-                return validate_boundaries(DEFAULT_MIN_RPM, DEFAULT_MAX_RPM, selection);
-            }
-            if (menu_state.menu_position == 1) { // IE
-                return validate_boundaries(1, 3, selection);
-            }
-            if (menu_state.menu_position == 2) { // READY
-                return selection;
-            }
-        } else {
-            if (menu_state.menu_position == 0) { // PERC_V_OPT
-                return validate_boundaries(40, 100, selection);
-            }
-            if (menu_state.menu_position == 1) { // BPM_OPT
-                return validate_boundaries(DEFAULT_MIN_RPM, DEFAULT_MAX_RPM, selection);
-            }
-            if (menu_state.menu_position == 2) { // IE_OPT
-                return validate_boundaries(1, 3, selection);
-            }
-        }
+    int8_t values[3][3];
+    values[0][0] = validate_boundaries(DEFAULT_MIN_RPM, DEFAULT_MAX_RPM, selection);
+    values[0][1] = validate_boundaries(1, 3, selection);
+    values[0][2] = selection;
+    values[1][0] = validate_boundaries(40, 100, selection);
+    values[1][1] = validate_boundaries(DEFAULT_MIN_RPM, DEFAULT_MAX_RPM, selection);
+    values[1][2] = validate_boundaries(1, 3, selection);
+    values[2][0] = validate_boundaries(20, 50, selection);
+    values[2][1] = validate_boundaries(5, 30, selection);
+    values[2][2] = validate_boundaries(10, 50, selection);
+
+    if (menu_state.is_initial_menu) {
+        return values[0][menu_state.menu_position];
+    } else {
+        return values[menu_state.menu_number][menu_state.menu_position];
     }
-    if (menu_state.menu_number == ALARMS_MENU) {
-        if (menu_state.menu_position == 0) { // PIP_ALARM_OPT
-            return validate_boundaries(20, 50, selection);
-        }
-        if (menu_state.menu_position == 1) { // PEEP_ALARM_OPT
-            return validate_boundaries(5, 30, selection);
-        }
-        if (menu_state.menu_position == 2) { // VT_ALARM_OPT
-            return validate_boundaries(10, 50, selection);
-        }
-    }
-    Serial.println("Error validate parameter " + String(menu_state.menu_number));
-    return (int8_t) -1;
 }
 
 int8_t validate_menu_position(int8_t& menu_number, int8_t selection) {
-    if (menu_number == MAIN_MENU) {
-        return validate_boundaries(0, 1, selection);
-    }
-    if (menu_number == PARAMETERS_MENU) {
-        return validate_boundaries(0, 2, selection);
-    }
-    if (menu_number == ALARMS_MENU) {
-        return validate_boundaries(0, 2, selection);
-    }
-    Serial.println("Error validate menu position " + String(menu_number));
-    return (int8_t) -1;;
+    int8_t values[3];
+    values[MAIN_MENU] = validate_boundaries(0, 1, selection);
+    values[PARAMETERS_MENU] = validate_boundaries(0, 2, selection);
+    values[ALARMS_MENU] = validate_boundaries(0, 2, selection);
+    return values[menu_number];
 }
 
 bool forceParametersMenuAfterWait(long last_button_pressed, Menu_state_t& menu_state, unsigned long time) {
@@ -227,17 +182,10 @@ String value_to_display(int8_t menu, int8_t position, Menu_state_t& menu_state, 
     bool itemSel = menu_state.is_item_selected;
     String selection = String(menu_state.edited_value);
     if (menu == PARAMETERS_MENU) {
-        if (menu_state.is_initial_menu) {
-            switch (position) {
-                case 0: return isEditing(PARAMETERS_MENU, 0, itemSel, menu_state) ? selection : String(config.respiratory_rate);
-                case 1: return isEditing(PARAMETERS_MENU, 1, itemSel, menu_state) ? selection : String(config.perc_IE);
-            }
-        } else {
-            switch (position) {
-                case 0: return isEditing(PARAMETERS_MENU, 0, itemSel, menu_state) ? selection : String(config.perc_volume);
-                case 1: return isEditing(PARAMETERS_MENU, 1, itemSel, menu_state) ? selection : String(config.respiratory_rate);
-                case 2: return isEditing(PARAMETERS_MENU, 2, itemSel, menu_state) ? selection : String(config.perc_IE);
-            }
+        switch (position) {
+            case 0: return isEditing(PARAMETERS_MENU, 0, itemSel, menu_state) ? selection : String(config.perc_volume);
+            case 1: return isEditing(PARAMETERS_MENU, 1, itemSel, menu_state) ? selection : String(config.respiratory_rate);
+            case 2: return isEditing(PARAMETERS_MENU, 2, itemSel, menu_state) ? selection : String(config.perc_IE);
         }
     } else if (menu == ALARMS_MENU) {
         switch (position) {
@@ -271,7 +219,6 @@ void update_edited_value(int8_t& menu_number, int8_t& menu_position, bool& is_in
             case 2:lcd_update_value(6, 2, 3, String(edited_value)); break;
         }
     }
-    Serial.println("Error update edited value  " + String(menu_number) + " " + String(menu_position));
 }
 
 void show_calibration_cycle(byte calib_cycle) {
@@ -286,7 +233,7 @@ void wait_for_flux_disconnected() {
     writeLine(2, "y presione ok ", 0);
     bool enterPressed = false;
     delay(100); //Otherwise low enter button is read
-    long lastButtonPress = millis();
+    long lastButtonPress = 0;
     while (!enterPressed) {
         if (digitalRead(PIN_MENU_EN) == LOW) {
             if (millis() - lastButtonPress > 50) {
@@ -298,64 +245,33 @@ void wait_for_flux_disconnected() {
 }
 
 void show_cursor(int8_t& menu_number, int8_t& menu_position, bool& is_item_selected, bool& is_initial_menu) {
-    if (menu_number == MAIN_MENU) {
-        switch(menu_position) {
-            case 0: lcd_selxy(0, 0, false); break; //PARAMETERS
-            case 1: lcd_selxy(0, 1, false); break; //ALARMS
-        }
-    } else if (menu_number == PARAMETERS_MENU) {
-        if (is_initial_menu) {
-            switch(menu_position) {
-                case 0: lcd_selxy(0, 2, is_item_selected); break; //BPM:
-                case 1: lcd_selxy(7, 2, is_item_selected); break; //IE:1:
-                case 2: lcd_selxy(0, 3, is_item_selected); break; //READY
-            }
-        } else {
-            switch(menu_position) {
-                case 0: lcd_selxy(9, 0, is_item_selected); break; //V:
-                case 1: lcd_selxy(0, 1, is_item_selected); break; //BPM:
-                case 2: lcd_selxy(7, 1, is_item_selected); break; //IE:1:
-            }
-        }
-    } else if (menu_number == ALARMS_MENU) {
-        switch(menu_position) {
-            case 0: lcd_selxy(0, 0, is_item_selected); break; //PIPAL:
-            case 1: lcd_selxy(0, 1, is_item_selected); break; //PEEPAL:
-            case 2: lcd_selxy(0, 2, is_item_selected); break; //VTAL:
-        }
+    int initial_menu[][2] = { { 0, 2 }, { 7, 2 }, { 0, 3 } };
+    int general_menu[][3][2] = {
+            { { 0, 0 }, { 0, 1 }, { 0, 2 } }, // Main menu
+            { { 9, 0 }, { 0, 1 }, { 7, 1 } }, //Parameters
+            { { 0, 0 }, { 0, 1 }, { 0, 2 } } }; //Alarms
+
+    if (menu_number == PARAMETERS_MENU && is_initial_menu) {
+        lcd_selxy(initial_menu[menu_position][0], initial_menu[menu_position][1], is_item_selected);
     } else {
-        Serial.println("Error show cursor  " + String(menu_number) + " " + String(menu_position));
+        lcd_selxy(general_menu[menu_number][menu_position][0],
+                  general_menu[menu_number][menu_position][1],
+                  is_item_selected);
     }
 }
 
 void move_cursor(int8_t& menu_number, int8_t& menu_position, int8_t& old_menu_position, bool& is_item_selected, bool& is_initial_menu) {
-    if (menu_number == MAIN_MENU) {
-        switch(old_menu_position) {
-            case 0: lcd_clearxy(0, 0); break;
-            case 1: lcd_clearxy(0, 1); break;
-        }
-    } else if (menu_number == PARAMETERS_MENU) {
-        if (is_initial_menu) {
-            switch(old_menu_position) {
-                case 0: lcd_clearxy(0, 2); break; //BPM
-                case 1: lcd_clearxy(7, 2); break; //IE
-                case 2: lcd_clearxy(0, 3); break; //READY
-            }
-        } else {
-            switch(old_menu_position) {
-                case 0: lcd_clearxy(9, 0); break; //V:
-                case 1: lcd_clearxy(0, 1); break; //BPM:
-                case 2: lcd_clearxy(7, 1); break; //IE:
-            }
-        }
-    } else if (menu_number == ALARMS_MENU) {
-        switch(old_menu_position) {
-            case 0: lcd_clearxy(0, 0); break;//PIP
-            case 1: lcd_clearxy(0, 1); break;//PEEP
-            case 2: lcd_clearxy(0, 2); break; //VT
-        }
+    int initial_menu[][2] = { { 0, 2 }, { 7, 2 }, { 0, 3 } };
+    int general_menu[][3][2] = {
+            { { 0, 0 }, { 0, 1 }, { 0, 2 } }, //main menu
+            { { 9, 0 }, { 0, 1 }, { 7, 1 } }, //Parameters
+            { { 0, 0 }, { 0, 1 }, { 0, 2 } } }; //Alarms
+
+    if (menu_number == PARAMETERS_MENU && is_initial_menu) {
+        lcd_clearxy(initial_menu[old_menu_position][0], initial_menu[old_menu_position][1]);
     } else {
-        Serial.println("Error move cursor  " + String(menu_number) + " " + String(menu_position));
+        lcd_clearxy(general_menu[menu_number][old_menu_position][0],
+                    general_menu[menu_number][old_menu_position][1]);
     }
     show_cursor(menu_number, menu_position, is_item_selected, is_initial_menu);
 }
@@ -363,8 +279,6 @@ void move_cursor(int8_t& menu_number, int8_t& menu_position, int8_t& old_menu_po
 void check_encoder(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state,
                    Ventilation_Config_t& config, AlarmData& alarm_data, unsigned long time) {
     keyboard_data.old_selection = menu_state.edited_value;
-    check_buttons(keyboard_data, time);
-
     if (forceParametersMenuAfterWait(keyboard_data.last_button_pressed, menu_state, time)) {
         return;
     }
@@ -441,6 +355,17 @@ void check_encoder(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state,
     }
 }
 
+void display_initial_menu(Menu_state_t& menu_state, Ventilation_Config_t& config) {
+    bool itemSel = menu_state.is_item_selected;
+    String selection = String(menu_state.edited_value);
+
+    writeLine(0, "INGRESE PARAMS", 1);
+    writeLine(1, "MOD:MAN", 1);
+    writeLine(2, "BPM:" + (isEditing(PARAMETERS_MENU, 0, itemSel, menu_state) ? selection : String(config.respiratory_rate)), 1);
+    writeLine(2, "IE:1:" + (isEditing(PARAMETERS_MENU, 1, itemSel, menu_state) ? selection : String(config.perc_IE)), 8);
+    writeLine(3, "FIN", 1);
+}
+
 void display_lcd(Menu_state_t& menu_state, Ventilation_Config_t& config,
                  Ventilation_Status_t& status, AlarmData& alarm_data) {
     if (menu_state.clear_display) {
@@ -452,27 +377,20 @@ void display_lcd(Menu_state_t& menu_state, Ventilation_Config_t& config,
         writeLine(0, "PARAMETROS", 1);
         writeLine(1, "ALARMAS", 1);
     } else if (menu_state.menu_number == PARAMETERS_MENU) {
-        if (menu_state.is_initial_menu) {
-            writeLine(0, "Ingrese params", 1);
-            writeLine(1, "MOD:MAN", 1);
-            writeLine(2, "BPM:" + value_to_display(PARAMETERS_MENU, 0, menu_state, config, alarm_data), 1);
-            writeLine(2, "IE:1:" + value_to_display(PARAMETERS_MENU, 1, menu_state, config, alarm_data), 8);
-            writeLine(3, "READY", 1);
-        } else {
-            writeLine(0, "MOD:MAN", 1);
-            writeLine(0, "V:" + value_to_display(PARAMETERS_MENU, 0, menu_state, config, alarm_data)+"%", 10);
-            writeLine(1, "BPM:" + value_to_display(PARAMETERS_MENU, 1, menu_state, config, alarm_data), 1);
-            writeLine(1, "IE:1:" + value_to_display(PARAMETERS_MENU, 2, menu_state, config, alarm_data), 8);
-            dtostrf(status.last_max_pressure, 3, 0, temp_str);
-            writeLine(2, "PIP:" + String(temp_str), 1);
+        writeLine(0, "MOD:MAN", 1);
+        writeLine(0, "V:" + value_to_display(PARAMETERS_MENU, 0, menu_state, config, alarm_data)+"%", 10);
+        writeLine(1, "BPM:" + value_to_display(PARAMETERS_MENU, 1, menu_state, config, alarm_data), 1);
+        writeLine(1, "IE:1:" + value_to_display(PARAMETERS_MENU, 2, menu_state, config, alarm_data), 8);
+        dtostrf(status.last_max_pressure, 3, 0, temp_str);
+        writeLine(2, "PIP:" + String(temp_str), 1);
 
-            dtostrf(status.last_min_pressure, 3, 0, temp_str);
-            writeLine(2, "PEEP:" + String(temp_str), 9);
+        dtostrf(status.last_min_pressure, 3, 0, temp_str);
+        writeLine(2, "PEEP:" + String(temp_str), 9);
 
-            float e = (status.ml_last_ins_vol + status.ml_last_exp_vol)/2.*config.respiratory_rate*0.001;
-            dtostrf(e, 6, 1, temp_str);
-            writeLine(3, "VM:" + String(temp_str), 1);
-        }
+        float e = (status.ml_last_ins_vol + status.ml_last_exp_vol)/2.*config.respiratory_rate*0.001;
+        dtostrf(e, 6, 1, temp_str);
+        writeLine(3, "VM:" + String(temp_str), 1);
+
     } else if (menu_state.menu_number == ALARMS_MENU) {
         writeLine(0, "PIPAL:" + value_to_display(ALARMS_MENU, 0, menu_state, config, alarm_data), 1);
         Serial.println("cdyn " + String(status.c_dyn));
@@ -489,27 +407,26 @@ void display_lcd(Menu_state_t& menu_state, Ventilation_Config_t& config,
                 menu_state.is_item_selected, menu_state.is_initial_menu);
 }
 
-void initialize_menu(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state,
-                     Ventilation_Config_t& config, Ventilation_Status_t& status,
-                     AlarmData& alarm_data) {
+void initialize_menu(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state, Ventilation_Config_t& config) {
     menu_state.menu_number = PARAMETERS_MENU;
-    menu_state.menu_position = 0;
-    menu_state.old_menu_position = 0;
     menu_state.is_initial_menu = true;
     menu_state.initial_menu_completed = false;
 
+    AlarmData temp;
     lcd.clear();
     keyboard_data.last_button_pressed = 0;
-    display_lcd(menu_state, config, status, alarm_data);
 
-    unsigned long last_update_display = millis();
+    display_initial_menu(menu_state, config);
+    unsigned long last_update_display = 0;
     while (!menu_state.initial_menu_completed) {
-        check_encoder(keyboard_data, menu_state, config, alarm_data, millis());
+        check_buttons(keyboard_data, millis());
+        check_encoder(keyboard_data, menu_state, config, temp, millis());
         if (menu_state.show_changed_options && (millis() - last_update_display) > 60) {
-            display_lcd(menu_state, config, status, alarm_data);
+            display_initial_menu(menu_state, config);
             last_update_display = millis();
         }
     }
     keyboard_data.selection = 0;
+    menu_state.menu_position = 0;
     menu_state.is_initial_menu = false;
 }

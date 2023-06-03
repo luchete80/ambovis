@@ -54,7 +54,6 @@ unsigned long time2;
 
 //MENU
 bool display_needs_update = false;
-bool update_options = false;
 
 //KEYBOARD
 Keyboard_data_t keyboard_data;
@@ -80,7 +79,10 @@ void setup() {
 
     init_display_tft(tft);
     init_sensor(ads);
-    initialize_menu(keyboard_data, menu_state, mech_vent.config, mech_vent.status, alarm_data);
+
+    menu_state.menu_position = 0;
+    menu_state.old_menu_position = 0;
+    initialize_menu(keyboard_data, menu_state, mech_vent.config);
     wait_for_flux_disconnected();
 
     stepper = new AccelStepper(
@@ -144,6 +146,7 @@ void loop() {
         }
 
         buzzer_state = check_buzzer_mute(buzzer_state, time2);
+        check_buttons(keyboard_data, time2);
         check_encoder(keyboard_data, menu_state, mech_vent.config, alarm_data, time2);
         Ventilation_Status_t* vent_status = &mech_vent.status;
 
