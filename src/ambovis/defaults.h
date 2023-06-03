@@ -93,7 +93,7 @@ extern unsigned long time2;
 #define BATTERY_READ 5
 #define FDIV    (float)(BATDIV_R1 + BATDIV_R2)/(float)BATDIV_R2
 #define FAC     1.1/1024.*FDIV
-#define BAT_TEST
+//#define BAT_TEST
 #define TIME_SHOW_BAT   15000 //MSECS
 //#define TEMP_TEST
 #define TIME_READ_TEMP  15000 //MSECS

@@ -10,7 +10,7 @@ jobs:
       run: |
         sudo apt update > /dev/null 2>&1
         # sudo apt install -y libcurl4-openssl-dev
-        cd arduino/
+        cd src/
 
         echo "Clone EpoxyDuino..."
         git clone --branch v1.5.0 https://github.com/bxparks/EpoxyDuino.git > /dev/null 2>&1

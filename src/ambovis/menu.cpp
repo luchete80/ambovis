@@ -270,8 +270,9 @@ void update_edited_value(int8_t& menu_number, int8_t& menu_position, bool& is_in
             case 1:lcd_update_value(8, 1, 3, String(edited_value)); break;
             case 2:lcd_update_value(6, 2, 3, String(edited_value)); break;
         }
+    } else {
+        Serial.println("Error update edited value  " + String(menu_number) + " " + String(menu_position));
     }
-    Serial.println("Error update edited value  " + String(menu_number) + " " + String(menu_position));
 }
 
 void show_calibration_cycle(byte calib_cycle) {
@@ -433,7 +434,7 @@ void check_encoder(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state,
             menu_state.menu_position = menu_state.edited_value;
             menu_state.show_changed_options = menu_state.old_menu_position != menu_state.menu_position;
             if (menu_state.show_changed_options) {
-                Serial.println("move to menu pos  " + String(menu_state.menu_position));
+//                Serial.println("move to menu pos  " + String(menu_state.menu_position));
                 move_cursor(menu_state.menu_number, menu_state.menu_position, menu_state.old_menu_position,
                             menu_state.is_item_selected, menu_state.is_initial_menu);
             }
@@ -447,7 +448,7 @@ void display_lcd(Menu_state_t& menu_state, Ventilation_Config_t& config,
         menu_state.clear_display = false;
         lcd.clear();
     }
-    char temp_str[5];
+    char temp_str[7];
     if (menu_state.menu_number == MAIN_MENU) {
         writeLine(0, "PARAMETROS", 1);
         writeLine(1, "ALARMAS", 1);
@@ -463,19 +464,19 @@ void display_lcd(Menu_state_t& menu_state, Ventilation_Config_t& config,
             writeLine(0, "V:" + value_to_display(PARAMETERS_MENU, 0, menu_state, config, alarm_data)+"%", 10);
             writeLine(1, "BPM:" + value_to_display(PARAMETERS_MENU, 1, menu_state, config, alarm_data), 1);
             writeLine(1, "IE:1:" + value_to_display(PARAMETERS_MENU, 2, menu_state, config, alarm_data), 8);
-
-            dtostrf(status.last_max_pressure, 2, 0, temp_str);
+            dtostrf(status.last_max_pressure, 3, 0, temp_str);
             writeLine(2, "PIP:" + String(temp_str), 1);
 
-            dtostrf(status.last_min_pressure, 2, 0, temp_str);
+            dtostrf(status.last_min_pressure, 3, 0, temp_str);
             writeLine(2, "PEEP:" + String(temp_str), 9);
 
-            dtostrf((status.ml_last_ins_vol + status.ml_last_exp_vol)/2.*config.respiratory_rate*0.001, 2, 1, temp_str);
+            float e = (status.ml_last_ins_vol + status.ml_last_exp_vol)/2.*config.respiratory_rate*0.001;
+            dtostrf(e, 6, 1, temp_str);
             writeLine(3, "VM:" + String(temp_str), 1);
         }
     } else if (menu_state.menu_number == ALARMS_MENU) {
         writeLine(0, "PIPAL:" + value_to_display(ALARMS_MENU, 0, menu_state, config, alarm_data), 1);
-        dtostrf(status.c_dyn*1.01972, 2, 1, temp_str);
+        dtostrf(status.c_dyn*1.01972, 4, 1, temp_str);
         writeLine(0, "CD:" + String(temp_str), 10);
     
         writeLine(1, "PEEPAL:" + value_to_display(ALARMS_MENU, 1, menu_state, config, alarm_data), 1);
