@@ -416,6 +416,7 @@ void initialize_menu(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state, V
     lcd.clear();
     keyboard_data.last_button_pressed = 0;
 
+    display_initial_menu(menu_state, config);
     unsigned long last_update_display = 0;
     while (!menu_state.initial_menu_completed) {
         check_buttons(keyboard_data, millis());
