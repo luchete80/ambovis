@@ -87,8 +87,8 @@ void update(Mechanical_Ventilation_t& mech_vent, SensorData& sensor) {
             status->ended_while_moving = status->ending_while_moving;
             status->start_cycle_time_ms = millis();
             mech_vent.stepper->setAcceleration(config->stepper_accel_max);
-            mech_vent.stepper->moveTo(STEPPER_LOWEST_POSITION);
             mech_vent.stepper->setSpeed(STEPPER_SPEED_EXSUFF);
+            mech_vent.stepper->moveTo(STEPPER_LOWEST_POSITION);
             status->current_state = State_Exufflation;
         }
         break;

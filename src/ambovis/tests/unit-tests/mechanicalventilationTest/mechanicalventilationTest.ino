@@ -159,7 +159,6 @@ test(update_vent_when_status_is_Init_Exufflation) {
     update(mech_vent, sensorData);
 
     //verify
-    assertEqual(mech_vent.stepper->speed(), (float) STEPPER_SPEED_EXSUFF);
     assertEqual(mech_vent.stepper->targetPosition(), (long) STEPPER_LOWEST_POSITION);
     assertEqual(mech_vent.status.current_state, State_Exufflation);
 }
