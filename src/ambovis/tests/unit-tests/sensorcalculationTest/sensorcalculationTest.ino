@@ -19,7 +19,7 @@ test(find_flux) {
 }
 
 test(get_dpt) {
-    float expected = ((5.-3.) / .5 - 0.04) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;
+    float expected = (((5.0 - 3.0) / 0.5) - 0.04) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;
     float x = get_dpt(5., 0.5, 3.);
     assertEqual(x, expected);
 }

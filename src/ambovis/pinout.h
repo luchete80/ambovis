@@ -55,6 +55,6 @@
 
 #define PIN_TEMP        37
 
-void initPins();
+void init_pins();
 
 #endif // ENCODER_H

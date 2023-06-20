@@ -42,9 +42,10 @@
 #define STEPPER_HOMING_SPEED        (STEPPER_MICROSTEPS * 600)   // Steps/s
 #define STEPPER_LOWEST_POSITION     (0)   // Steps
 #define STEPPER_HIGHEST_POSITION    ( 183 * STEPPER_MICROSTEPS)   //270º ,2500 for 270º, 2850 for 220º, 2930 for 330º
-#define STEPPER_SPEED_DEFAULT       (STEPPER_MICROSTEPS *  1500)   // Steps/s
+#define STEPPER_SPEED_MAX           (STEPPER_MICROSTEPS *  1500)   // Steps/s
 #define STEPPER_SPEED_MAX_VCL       (75 * STEPPER_MICROSTEPS)   // Steps/s  //THIS IS FOR 1600 steps in a revolution. DO NOT GO BEYOND THIS!
 #define STEPPER_SPEED_EXSUFF        (450 * STEPPER_MICROSTEPS)
+#define STEPPER_ACCEL_MAX           (STEPPER_MICROSTEPS * 1500)
 
 // Valores por defecto
 #define DEFAULT_FRAC_CYCLE_VCL_INSUFF 0.75
@@ -55,6 +56,8 @@
 #define DEFAULT_POR_INSPIRATORIO 33.3333F // %
 #define DEFAULT_PEAK_INSPIRATORY_PRESSURE 20.
 #define DEFAULT_PEAK_ESPIRATORY_PRESSURE 5
+#define DEFAULT_PERC_VOLUME 100
+#define DEFAULT_IE 2
 
 // Presión
 #define DEFAULT_PA_TO_CM_H20 0.0102F
@@ -66,14 +69,6 @@
 
 // Válvula de emergencia
 #define VALVE_MAX_PRESSURE 60 // cm H2O
-
-// PID constants
-// PID settings and gains
-#define PID_MIN -20000 // TODO: check direction implementation
-#define PID_MAX 20000
-
-#define PID_TS TIME_BASE
-#define PID_BANGBANG 8
 
 #define VENTMODE_VCL 0
 #define VENTMODE_PCL 1

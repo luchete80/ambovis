@@ -3,7 +3,7 @@
 //
 #include "pinout.h"
 
-void initPins() {
+void init_pins() {
     pinMode(PIN_STEPPER, OUTPUT);
     digitalWrite(PIN_STEPPER, LOW);
 

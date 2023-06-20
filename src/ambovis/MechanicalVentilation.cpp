@@ -1,13 +1,13 @@
 #include "MechanicalVentilation.h"
 
-void initCycleTimes(Mechanical_Ventilation_t& mech_vent) {
+void init_cycle_times(Mechanical_Ventilation_t& mech_vent) {
     Ventilation_Status_t* status = &mech_vent.status;
     Ventilation_Config_t* config = &mech_vent.config;
 
-    status->timeout_cycle = ((float) 60) * 1000.0f / (float) config->respiratory_rate;
-    status->time_ins = status->timeout_cycle / (float(config->perc_IE + 1));
+    status->timeout_cycle = ( 60.0f * 1000.0f / (float) config->respiratory_rate);
+    status->time_ins = status->timeout_cycle / (float) (config->perc_IE + 1);
     status->time_exp = status->timeout_cycle - status->time_ins;
-    Serial.println(String(status->timeout_cycle) + " " + String(status->time_ins) + " " + String(status->time_exp));
+//    Serial.println(String(status->timeout_cycle) + " " + String(status->time_ins) + " " + String(status->time_exp));
 }
 
 void start(Mechanical_Ventilation_t& mech_vent) {
@@ -18,7 +18,7 @@ void start(Mechanical_Ventilation_t& mech_vent) {
     mech_vent.status.current_state = State_Homing;
     mech_vent.status.start_cycle_time_ms = 0;
     mech_vent.status.ended_while_moving = false;
-    initCycleTimes(mech_vent);
+    init_cycle_times(mech_vent);
 }
 
 void stop(Mechanical_Ventilation_t& mech_vent) {
@@ -26,7 +26,7 @@ void stop(Mechanical_Ventilation_t& mech_vent) {
     digitalWrite(PIN_STEPPER, LOW);
 }
 
-void newInsufflationActions(Ventilation_Status_t& status, SensorData& sensor) {
+void new_insufflation_actions(Ventilation_Status_t& status, SensorData& sensor) {
     status.last_max_pressure = sensor.pressure_max;
     status.last_min_pressure = sensor.pressure_min;
     sensor.pressure_max = 0;
@@ -55,19 +55,19 @@ void update(Mechanical_Ventilation_t& mech_vent, SensorData& sensor) {
     if (status->current_state == State_Exufflation) {
         extra_time = status->time_ins;
     }
-    status->cycle_pos = byte( (float) ( (status->ms_timer_cnt + extra_time) / (float) status->timeout_cycle * 127.0f) );
+    status->cycle_pos = byte( (float) ( (status->ms_timer_cnt + extra_time) / status->timeout_cycle * 127.0f) );
 
     switch (status->current_state) {
         case Init_Insufflation: {
             if ( !status->running ) {
                 return;
             }
-            newInsufflationActions(mech_vent.status, sensor);
+            new_insufflation_actions(mech_vent.status, sensor);
             status->start_cycle_time_ms = millis();
 
-            mech_vent.stepper->setSpeed(config->stepper_speed_max);
+            mech_vent.stepper->setSpeed(STEPPER_SPEED_MAX);
             mech_vent.stepper->moveTo(-STEPPER_HIGHEST_POSITION);
-            mech_vent.stepper->setAcceleration(config->stepper_accel_max);
+            mech_vent.stepper->setAcceleration(STEPPER_ACCEL_MAX);
             status->current_state = State_Insufflation;
             status->update_display = true;
             status->ending_while_moving = false;
@@ -86,8 +86,8 @@ void update(Mechanical_Ventilation_t& mech_vent, SensorData& sensor) {
         case Init_Exufflation: {
             status->ended_while_moving = status->ending_while_moving;
             status->start_cycle_time_ms = millis();
-            mech_vent.stepper->setAcceleration(config->stepper_accel_max);
-            mech_vent.stepper->setSpeed(STEPPER_SPEED_EXSUFF);
+            mech_vent.stepper->setAcceleration(STEPPER_ACCEL_MAX);
+            mech_vent.stepper->setSpeed(STEPPER_SPEED_EXSUFF); // maybe useless because moveTo recalculates speed
             mech_vent.stepper->moveTo(STEPPER_LOWEST_POSITION);
             status->current_state = State_Exufflation;
         }
@@ -112,7 +112,7 @@ void update(Mechanical_Ventilation_t& mech_vent, SensorData& sensor) {
 }
 
 void update_config(Mechanical_Ventilation_t& mech_vent) {
-    initCycleTimes(mech_vent);
+    init_cycle_times(mech_vent);
 }
 
 void ccw_search_home(AccelStepper* stepper) {

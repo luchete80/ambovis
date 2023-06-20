@@ -6,12 +6,13 @@ byte backDigit[8] = {
         0b00001, 0b11111
 };
 
-void init_display() {
+void init_display_lcd() {
     digitalWrite(LCD_SLEEP, HIGH);
     lcd.begin(20, 4);
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.createChar(0, backDigit);
+    delay(100);
 }
 
 void writeLine(int line, String message, int offsetLeft) {
@@ -104,8 +105,8 @@ void check_buttons(Keyboard_data_t& keyboard_data, unsigned long time) {
     }
 }
 
-int8_t* get_value_to_edit(Menu_state_t& menu_state, Ventilation_Config_t& config, AlarmData& alarm_data) {
-    int8_t* values[3][3];
+uint8_t* get_value_to_edit(Menu_state_t& menu_state, Ventilation_Config_t& config, AlarmData& alarm_data) {
+    uint8_t* values[3][3];
     values[0][0] = &config.respiratory_rate;
     values[0][1] = &config.perc_IE;
     values[1][0] = &config.perc_volume;
@@ -122,7 +123,7 @@ int8_t* get_value_to_edit(Menu_state_t& menu_state, Ventilation_Config_t& config
     }
 }
 
-int8_t validate_boundaries(int8_t min, int8_t max, int8_t value) {
+uint8_t validate_boundaries(uint8_t min, uint8_t max, uint8_t value) {
     if (value < min) {
         return min;
     } else if (value > max) {
@@ -132,8 +133,8 @@ int8_t validate_boundaries(int8_t min, int8_t max, int8_t value) {
     }
 }
 
-int8_t validate_parameter(Menu_state_t& menu_state, int8_t selection) {
-    int8_t values[3][3];
+uint8_t validate_parameter(Menu_state_t& menu_state, uint8_t selection) {
+    uint8_t values[3][3];
     values[0][0] = validate_boundaries(DEFAULT_MIN_RPM, DEFAULT_MAX_RPM, selection);
     values[0][1] = validate_boundaries(1, 3, selection);
     values[0][2] = selection;
@@ -151,8 +152,8 @@ int8_t validate_parameter(Menu_state_t& menu_state, int8_t selection) {
     }
 }
 
-int8_t validate_menu_position(int8_t& menu_number, int8_t selection) {
-    int8_t values[3];
+uint8_t validate_menu_position(uint8_t& menu_number, uint8_t selection) {
+    uint8_t values[3];
     values[MAIN_MENU] = validate_boundaries(0, 1, selection);
     values[PARAMETERS_MENU] = validate_boundaries(0, 2, selection);
     values[ALARMS_MENU] = validate_boundaries(0, 2, selection);
@@ -174,11 +175,11 @@ bool forceParametersMenuAfterWait(long last_button_pressed, Menu_state_t& menu_s
     return false;
 }
 
-bool isEditing(int8_t m, int8_t p, bool is_item_selected, Menu_state_t& menu_state) {
+bool isEditing(uint8_t m, uint8_t p, bool is_item_selected, Menu_state_t& menu_state) {
     return is_item_selected && menu_state.menu_number == m && menu_state.menu_position == p;
 }
 
-String value_to_display(int8_t menu, int8_t position, Menu_state_t& menu_state, Ventilation_Config_t& config, AlarmData& alarm_data) {
+String value_to_display(uint8_t menu, uint8_t position, Menu_state_t& menu_state, Ventilation_Config_t& config, AlarmData& alarm_data) {
     bool itemSel = menu_state.is_item_selected;
     String selection = String(menu_state.edited_value);
     if (menu == PARAMETERS_MENU) {
@@ -198,7 +199,7 @@ String value_to_display(int8_t menu, int8_t position, Menu_state_t& menu_state, 
     return String("ERR");
 }
 
-void update_edited_value(int8_t& menu_number, int8_t& menu_position, bool& is_initial_menu, int8_t& edited_value) {
+void update_edited_value(uint8_t& menu_number, uint8_t& menu_position, bool& is_initial_menu, uint8_t& edited_value) {
     if (menu_number == PARAMETERS_MENU) {
         if (is_initial_menu) {
             switch(menu_position) {
@@ -244,7 +245,7 @@ void wait_for_flux_disconnected() {
     }
 }
 
-void show_cursor(int8_t& menu_number, int8_t& menu_position, bool& is_item_selected, bool& is_initial_menu) {
+void show_cursor(uint8_t& menu_number, uint8_t& menu_position, bool& is_item_selected, bool& is_initial_menu) {
     int initial_menu[][2] = { { 0, 2 }, { 7, 2 }, { 0, 3 } };
     int general_menu[][3][2] = {
             { { 0, 0 }, { 0, 1 }, { 0, 2 } }, // Main menu
@@ -260,7 +261,7 @@ void show_cursor(int8_t& menu_number, int8_t& menu_position, bool& is_item_selec
     }
 }
 
-void move_cursor(int8_t& menu_number, int8_t& menu_position, int8_t& old_menu_position, bool& is_item_selected, bool& is_initial_menu) {
+void move_cursor(uint8_t& menu_number, uint8_t& menu_position, uint8_t& old_menu_position, bool& is_item_selected, bool& is_initial_menu) {
     int initial_menu[][2] = { { 0, 2 }, { 7, 2 }, { 0, 3 } };
     int general_menu[][3][2] = {
             { { 0, 0 }, { 0, 1 }, { 0, 2 } }, //main menu
