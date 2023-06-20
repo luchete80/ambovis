@@ -81,7 +81,6 @@ test(update_vent_when_status_is_Init_Insufflation) {
     //prepare
     mech_vent.config.respiratory_rate = 20;
     mech_vent.config.perc_IE = 2;
-    mech_vent.config.stepper_speed_max = 10;
     mech_vent.stepper->setMaxSpeed(100);
     start(mech_vent);
     mech_vent.status.current_state = Init_Insufflation;
