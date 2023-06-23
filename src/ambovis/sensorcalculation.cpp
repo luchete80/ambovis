@@ -57,6 +57,7 @@ void convert_sensor_data(int16_t adc0, int pressure, int mpx_lev, SensorData& se
 }
 
 float get_dpt(float voltage, float v_level, float vzero) {
+//    Serial.println("v="+String(voltage) + ",v_level="+ String(v_level));
     return ((voltage - vzero)/v_level - 0.04) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20; //WITH TRIM
 }
 
