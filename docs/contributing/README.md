@@ -1,12 +1,12 @@
-#Cómo contribuir a este proyecto?
+# Cómo contribuir a este proyecto?
 
 La preparación del entorno local puede consultarse [aquí](../manuals/development/README.md) 
 
-###Versionado del Código Fuente
+### Versionado del Código Fuente
 
 Git es un sistema de control de versiones distribuido, esto es que toda la base de código y el historial se encuentran disponibles en la computadora de cada desarrollador, lo que permite que cada uno pueda gestionar de forma fácil la ramificación y fusión del código. Git como control de versiones permite realizar el seguimiento de cada cambio en el código, además que permite ver el historial de cambios cuando algo en el código sale mal.
 
-####Estrategia de ramificación _(Branching strategy)_
+#### Estrategia de ramificación _(Branching strategy)_
 
 Una estrategia de ramificación define cómo un equipo utiliza las ramas para lograr un proceso de desarrollo concurrente, a través de un conjunto de reglas y convenciones que establecen:
 
@@ -16,7 +16,7 @@ Una estrategia de ramificación define cómo un equipo utiliza las ramas para lo
 - ¿Y a qué rama debería hacer la fusión?
 
 Para el caso del proyecto **RespirAR** y en el estadio actual, elegiremos _GitHub Flow_.
-####GitHub Flow
+#### GitHub Flow
 
 GitHub Flow se basa en un flujo de trabajo basado en ramas que permite a equipos de desarrollo enfocarse principalmente en la entrega continua. A diferencia de Git Flow, no existen los branches de “_releases_”, ya que está pensado para que la implementación en producción ocurra con frecuencia, incluso varias veces al día si es posible.
 
@@ -25,9 +25,9 @@ En el repositorio tendremos dos tipos de branches:
 - **_main_** (o **_master_**): la rama de código principal, es el que contiene el código que está listo para producción.
 - **features**: las ramas de funcionalidades que permiten el desarrollo en paralelo.
 
-![Github-flow](pics/github-flow.png)
+![Github-flow](images/github-flow.png)
 
-###Pasos para crear nuevas ramas
+### Pasos para crear nuevas ramas
 
 Cada `feature branch` debe salir de `master` realizando los siguientes pasos:
 
@@ -48,11 +48,11 @@ git push origin COD-XXX_nombre_descriptivo
 ```
 Con estos pasos ya tenemos la rama publicada en el servidor. Con esa rama lista, y si es necesario probada en el dispositivo o las pruebas que considere el autor, se puede crear un `pull request` contra la rama `master`. Esto es crear una solicitud de revisión de los cambios para ser fusionados a `master`. Lo debe revisar algún otro miembro del equipo, quien dejará sus comentarios en la herramienta visual de Github o en el mejor de los casos aprobará la solicitud.
 
-###Pasos para crear un Pull request
+### Pasos para crear un Pull request
 
 Ver documentación de [Github](https://docs.github.com/es/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request)
 
-####Ramas atrasadas o con conflictos
+#### Ramas atrasadas o con conflictos
 En caso de que un _pull request_ esté abierto por cierto tiempo y otro desarrollador haya fusionado cambios a _master_ con cambios en las mismas líneas de código modificadas por el creador del _pull request_, se mostrará un mensaje de conflicto y no se podrá fusionar hasta que los conflictos estén resueltos. Así mismo, es una buena práctica mantener la rama de trabajo actualizada con los últimos cambios de _master_.
 
 Para hacer estas dos cosas se deben traer los cambios de master a la rama actual:
@@ -64,13 +64,13 @@ git merge master or git rebase master
 ```
 Si un mensaje de error es arrojado, hay que resolver los conflictos. Esta [guía](https://docs.github.com/es/github-ae@latest/pull-requests/collaborating-with-pull-requests/addressing-merge-conflicts/resolving-a-merge-conflict-using-the-command-line) puede ser útil.
 
-###Protección de la rama master
+### Protección de la rama master
 
 La importancia de un `pull request` radica en que permite a los desarrolladores enviar sus cambios de código a un repositorio central y solicitar que sus cambios sean incorporados en el proyecto principal. De esta manera, el equipo encargado del mantenimiento del proyecto puede revisar los cambios y asegurarse de que se ajusten a los estándares de calidad y funcionalidad requeridos antes de ser integrados en la rama principal del repositorio.
 
 **Este proyecto está configurado para requerir la aprobación de al menos un miembro de los administradores.**
 
-###Tag y release
+### Tag y release
 
 Los tags son una forma de identificar versiones específicas de un proyecto y pueden usarse para marcar puntos de referencia importantes, como lanzamientos, versiones estables o hitos específicos del proyecto.
 
@@ -83,7 +83,7 @@ git tag v1.0.2 HEAD
 
 Asi mismo, los administradores decidirán las frecuencias de _release_, es decir, versiones publicadas del software con un _changelog_ asociado. Estas versiones publicadas son basicamente determinados tags que han pasado por diferentes estadíos de pruebas y revisión exitosas.
 
-###Referencias
+### Referencias
 
 1. [Estrategias de ramificación](https://openwebinars.net/blog/estrategias-de-branching-gitflow-gitlab-flow-oneflow-github-flow/)
 2. [Pull Requests](https://docs.github.com/es/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request)

@@ -4,16 +4,17 @@
 El VMM es un proyecto nacido en la Facultad de Ingeniería de la Universidad de Buenos Aires y tiene como objetivo crear un prototipo de respirador de bajo costo. [Leer más](https://)
 
 En este repositorio encontrará el codigo escrito en C++ junto con la documentación de:
-- [Manuales](docs/manuals)
+- [Manuales](docs/manuals/README.md)
   - [Preparación del entorno y ejecución del código](docs/manuals/development/README.md)
   - [Uso del menú del dipositivo](docs/manuals/menu/README.md)
 - [Recursos de investigación](docs/resources/README.md)
-  - Esquemáticos
-  - Links a recursos de lectura
+  - [Esquemáticos](docs/resources/schematics)
+  - [Recursos de lectura](docs/resources/help%20sources)
+  - [Simulador arduino tft](docs/resources/tft_simulator.md)
 - [Calidad de software](docs/test/README.md)
-  - Pruebas manuales
+  - [Pruebas manuales](docs/test)
   - [Pruebas unitarias](docs/test/unit_tests.md)
-  - Logs
+  - [Logs](docs/test/logs)
 - [Contribución](docs/contributing/README.md)
 
 ## Funcionalidades
@@ -28,8 +29,6 @@ Las funcionalidades cubiertas por el sistema hasta el momento son:
 - Visualización de carga de batería
 - Visualizacion de alarmas: en pantalla, sonido y por indicador luminoso
 - Guardado en memoria de ciertas configuraciones
-
-[Ver más](http://masinfo)
 
 ## Contacto
 

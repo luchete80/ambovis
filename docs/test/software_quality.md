@@ -1,4 +1,4 @@
-##Proceso de control de calidad del software
+## Proceso de control de calidad del software
 
 Un proceso de control de calidad es un conjunto de actividades que se realizan con el fin de garantizar que el software producido cumpla con los estándares y requisitos de calidad establecidos.
 
@@ -14,10 +14,10 @@ El costo y la complejidad de las pruebas de calidad del software para sistemas e
 
 La propuesta de este proyecto es integrar una serie de prácticas regularmente utilizadas en el desarrollo de otro tipo de sistemas para gozar de los beneficios que brindan.
 
-###Pruebas unitarias
+### Pruebas unitarias
 
 Permiten garantizar que cada unidad de código funcione como se espera y que cualquier cambio posterior no cause problemas en otras partes del sistema. Para lograr esto, se escriben casos de prueba que cubren todos los posibles escenarios de uso y se ejecutan de forma automatizada.
 
-####Flujo integrado con pruebas unitarias
+#### Flujo integrado con pruebas unitarias
 
 ![tests-flow](images/development_flow.png)

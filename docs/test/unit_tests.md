@@ -1,19 +1,19 @@
-#Pruebas unitarias
+# Pruebas unitarias
 
 Permiten garantizar que cada unidad de código funcione como se espera y que cualquier cambio posterior no cause problemas en otras partes del sistema. Para lograr esto, se escriben casos de prueba que cubran la mayor cantidad de posibles escenarios de uso y se ejecutan de forma automatizada.
 
-###Herramientas
+### Herramientas
 
-####Entorno de ejecución de pruebas
+#### Entorno de ejecución de pruebas
 - EpoxyDuino: permite emular un subconjunto de instrucciones de Arduino en una computadora con sistema operativo basado en POSIX, [Ver más](https://github.com/bxparks/EpoxyDuino)
 
-####Librerías
+#### Librerías
 - AUnit: permite escribir y ejecutar pruebas unitarias para código arduino, [Ver más](https://github.com/bxparks/AUnit)
 - EpoxyEeprom: permite emular la librería `EEPROM` para EpoxyDuino.
 
-###Instalación y ejecución de pruebas unitarias
+### Instalación y ejecución de pruebas unitarias
 
-####Local
+#### Local
 Solo podrá ejecutarse en Linux/MacOS debido a limitaciones de las herramientas:
 
 1. Instalar `git` por línea de comandos 
@@ -32,13 +32,13 @@ Ejecutar conjunto de pruebas de un solo componente:
 
 ![Test output sample](images/aunit-test-sample.png)
 
-####Github Actions
+#### Github Actions
 
 El proyecto esta configurado para que automáticamente al enviar un commit a cualquier rama se ejecuten las pruebas unitarias.
 
 En la página de GitHub pueden verse las ejecuciones en la pestaña [Actions](https://github.com/luchete80/ambovis/actions) y si las pruebas fueron todas exitosas, se mostrará el ícono verde. En caso de error, se mostrará en rojo.
 
-###Crear o modificar pruebas unitarias
+### Crear o modificar pruebas unitarias
 
 Las pruebas estan escritas en C++, y el dialecto para crear pruebas simples puede ser consultado en la [documentación de AUnit](https://github.com/bxparks/AUnit#Usage).
 
