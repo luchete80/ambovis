@@ -1,6 +1,6 @@
-#Proyecto RespirAR UBA
+# Proyecto RespirAR UBA
 
-##Ventilador Mecánico Mínimo (VMM)
+## Ventilador Mecánico Mínimo (VMM)
 El VMM es un proyecto nacido en la Facultad de Ingeniería de la Universidad de Buenos Aires y tiene como objetivo crear un prototipo de respirador de bajo costo. [Leer más](https://)
 
 En este repositorio encontrará el codigo escrito en C++ junto con la documentación de:
@@ -16,7 +16,7 @@ En este repositorio encontrará el codigo escrito en C++ junto con la documentac
   - Logs
 - [Contribución](docs/contributing/README.md)
 
-##Funcionalidades
+## Funcionalidades
 
 Las funcionalidades cubiertas por el sistema hasta el momento son:
 - Funcionamiento del sistema con alimentación alterna o por batería
@@ -31,6 +31,6 @@ Las funcionalidades cubiertas por el sistema hasta el momento son:
 
 [Ver más](http://masinfo)
 
-##Contacto
+## Contacto
 
 Por consultas, enviar un email a [respirar@fi.uba.ar](mailto:respirar@fi.uba.ar?subject=[RespirAR])
