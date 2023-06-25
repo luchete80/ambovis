@@ -14,7 +14,6 @@ En este repositorio encontrará el codigo escrito en C++ junto con la documentac
 - [Calidad de software](docs/test/README.md)
   - [Pruebas manuales](docs/test)
   - [Pruebas unitarias](docs/test/unit_tests.md)
-  - [Logs](docs/test/logs)
 - [Contribución](docs/contributing/README.md)
 
 ## Funcionalidades

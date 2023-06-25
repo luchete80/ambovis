@@ -38,6 +38,8 @@ El proyecto esta configurado para que automáticamente al enviar un commit a cua
 
 En la página de GitHub pueden verse las ejecuciones en la pestaña [Actions](https://github.com/luchete80/ambovis/actions) y si las pruebas fueron todas exitosas, se mostrará el ícono verde. En caso de error, se mostrará en rojo.
 
+La configuración del script de Github Actions se encuentra en `[root project folder]/.github/workflows/github-actions-demo.yml`
+
 ### Crear o modificar pruebas unitarias
 
 Las pruebas estan escritas en C++, y el dialecto para crear pruebas simples puede ser consultado en la [documentación de AUnit](https://github.com/bxparks/AUnit#Usage).
