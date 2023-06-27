@@ -233,7 +233,7 @@ void wait_for_flux_disconnected() {
     writeLine(1, "Desconecte flujo", 0);
     writeLine(2, "y presione ok ", 0);
     bool enterPressed = false;
-    delay(100); //Otherwise low enter button is read
+    delay(1000); //Otherwise low enter button is read
     long lastButtonPress = 0;
     while (!enterPressed) {
         if (digitalRead(PIN_MENU_EN) == LOW) {

@@ -276,7 +276,7 @@ void process_sensor_data(SensorData& sensorData, float vzero) {
 
     sensorData.flow_f = get_flow(sensorData);
     update_vol(sensorData, millis());
-//    Serial.println("p_dpt " + String(p_dpt) + " flux " + String(sensorData.flux) + " ml_ins_vol " + String(sensorData.ml_ins_vol));
+//    Serial.println(String(sensorData.flow_f) + ", " + String(p_dpt) + ", " + String(sensorData.flux) + ", " + String(sensorData.ml_ins_vol) + ", " +String(sensorData.v_level));
     sensorData.last_read_sensor = millis();
 }
 
