@@ -68,7 +68,6 @@ void tft_draw(Adafruit_ILI9341& tft, SensorData& sensorData, Ventilation_Status_
 
         tft.setRotation(1);
         tft.fillRect(0, 0, 60, 100, ILI9341_BLACK); //FOR ALARMS, UPPER RIGHT
-        tft.fillRect(0, 240, 320, 10, ILI9341_GREEN);//x,y,lengthx,lentgthy
 
     } else {
         lcd_cleaned=false;

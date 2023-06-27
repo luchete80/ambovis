@@ -27,7 +27,7 @@ unsigned long print_bat_time;
 //TFT DISPLAY
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 bool drawing_cycle = 0;
-unsigned long lastShowSensor = 0;
+unsigned long last_show_sensor = 0;
 
 //SENSORS
 Adafruit_ADS1115 ads;
@@ -44,7 +44,7 @@ AlarmData alarm_data;
 Calibration_Data_t calibration_data;
 
 //PERSISTENCE
-unsigned long lastSave = 0;
+unsigned long last_save = 0;
 
 #ifdef BAT_TEST
 unsigned long lastShowBat = 0;
@@ -54,7 +54,6 @@ unsigned long time2;
 
 //MENU
 bool display_needs_update = false;
-bool update_options = false;
 
 //INTERRUPTIONS
 bool run_stepper;
@@ -74,17 +73,19 @@ void search_home_position(AccelStepper* stepper);
 void setup() {
     Serial.begin(115200);
     analogReference(INTERNAL1V1); // use AREF for reference voltage
-    initPins();
+    init_pins();
     show_power_led();
-    init_display();
+    init_display_lcd();
 
-    delay(100);
     writeLine(1, "RespirAR FIUBA", 4);
     writeLine(2, "v2.0.2", 8);
 
     init_display_tft(tft);
     init_sensor(ads);
-    initialize_menu(keyboard_data, menu_state, mech_vent.config, mech_vent.status, alarm_data);
+
+    menu_state.menu_position = 0;
+    menu_state.old_menu_position = 0;
+    initialize_menu(keyboard_data, menu_state, mech_vent.config);
     wait_for_flux_disconnected();
 
     stepper = new AccelStepper(
@@ -102,7 +103,7 @@ void setup() {
     search_home_position(stepper);
     display_lcd(menu_state, mech_vent.config, mech_vent.status, alarm_data);
 
-    lastShowSensor = last_update_display = millis();
+    last_show_sensor = last_update_display = millis();
     sensorData.last_read_sensor = millis();
 
     #ifdef BAT_TEST
@@ -140,7 +141,7 @@ void loop() {
     time2 = millis();
     if (!sleep_mode) {
         if (wake_up) {
-            init_display();
+            init_display_lcd();
             display_lcd(menu_state, mech_vent.config, mech_vent.status, alarm_data);
             init_display_tft(tft);
             start(mech_vent);
@@ -148,6 +149,7 @@ void loop() {
         }
 
         buzzer_state = check_buzzer_mute(buzzer_state, time2);
+        check_buttons(keyboard_data, time2);
         check_encoder(keyboard_data, menu_state, mech_vent.config, alarm_data, time2);
         Ventilation_Status_t* vent_status = &mech_vent.status;
         if (run_stepper) {
@@ -178,17 +180,17 @@ void loop() {
                 clean_tft(tft);
             }
         } else {
-            if (time2 > lastSave + TIME_SAVE) {
+            if (time2 > last_save + TIME_SAVE) {
                 SystemConfiguration_t toPersist;
                 toPersist.last_cycle = vent_status->last_cycle;
                 toPersist.alarm_vt = alarm_data.alarm_vt;
                 write_memory(toPersist);
-                lastSave = millis();
+                last_save = millis();
             }
 
-            if (time2 > lastShowSensor + TIME_SHOW) {
+            if (time2 > last_show_sensor + TIME_SHOW) {
                 tft_draw(tft, sensorData, mech_vent.status, drawing_cycle, alarm_data);
-                lastShowSensor = time2;
+                last_show_sensor = time2;
             }
 
             if (time2 > sensorData.last_read_sensor + TIME_SENSOR) {
@@ -285,7 +287,7 @@ void process_sensor_data(SensorData& sensorData, float vzero) {
 
     sensorData.flow_f = get_flow(sensorData);
     update_vol(sensorData, millis());
-//    Serial.println("p_dpt " + String(p_dpt) + " flux " + String(sensorData.flux) + " ml_ins_vol " + String(sensorData.ml_ins_vol));
+//    Serial.println(String(sensorData.flow_f) + ", " + String(p_dpt) + ", " + String(sensorData.flux) + ", " + String(sensorData.ml_ins_vol) + ", " +String(sensorData.v_level));
     sensorData.last_read_sensor = millis();
 }
 

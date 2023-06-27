@@ -19,7 +19,7 @@ test(find_flux) {
 }
 
 test(get_dpt) {
-    float expected = ((5.-3.) / .5 - 0.04) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;
+    float expected = (((5.0 - 3.0) / 0.5) - 0.04) / 0.09 * 1000 * DEFAULT_PA_TO_CM_H20;
     float x = get_dpt(5., 0.5, 3.);
     assertEqual(x, expected);
 }
@@ -96,9 +96,7 @@ void loop() {
 AlarmData alarm_data;
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
 bool put_to_sleep;
-bool show_changed_options;
 bool sleep_mode;
 unsigned long time2;
-bool update_options;
 bool wake_up;
 EpoxyEepromAvr EEPROM;

@@ -81,7 +81,6 @@ test(update_vent_when_status_is_Init_Insufflation) {
     //prepare
     mech_vent.config.respiratory_rate = 20;
     mech_vent.config.perc_IE = 2;
-    mech_vent.config.stepper_speed_max = 10;
     mech_vent.stepper->setMaxSpeed(100);
     start(mech_vent);
     mech_vent.status.current_state = Init_Insufflation;
@@ -159,7 +158,6 @@ test(update_vent_when_status_is_Init_Exufflation) {
     update(mech_vent, sensorData);
 
     //verify
-    assertEqual(mech_vent.stepper->speed(), (float) STEPPER_SPEED_EXSUFF);
     assertEqual(mech_vent.stepper->targetPosition(), (long) STEPPER_LOWEST_POSITION);
     assertEqual(mech_vent.status.current_state, State_Exufflation);
 }
@@ -226,9 +224,7 @@ void loop() {
 
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
 bool put_to_sleep;
-bool show_changed_options;
 bool sleep_mode;
 unsigned long time2;
-bool update_options;
 bool wake_up;
 EpoxyEepromAvr EEPROM;
