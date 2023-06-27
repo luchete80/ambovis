@@ -74,7 +74,7 @@ void setup() {
     init_display_lcd();
 
     writeLine(1, "RespirAR FIUBA", 4);
-    writeLine(2, "v2.0.2", 8);
+    writeLine(2, "v2.0.3", 8);
 
     init_display_tft(tft);
     init_sensor(ads);
