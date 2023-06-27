@@ -78,7 +78,7 @@ void setup() {
     init_display_lcd();
 
     writeLine(1, "RespirAR FIUBA", 4);
-    writeLine(2, "v2.0.2", 8);
+    writeLine(2, "v2.0.4", 8);
 
     init_display_tft(tft);
     init_sensor(ads);
@@ -152,10 +152,7 @@ void loop() {
         check_buttons(keyboard_data, time2);
         check_encoder(keyboard_data, menu_state, mech_vent.config, alarm_data, time2);
         Ventilation_Status_t* vent_status = &mech_vent.status;
-        if (run_stepper) {
-            stepper->run();
-            run_stepper = false;
-        }
+
         if (update_ventilation) {
             update(mech_vent, sensorData);
             update_ventilation = false;
@@ -273,7 +270,7 @@ void timer1Isr(void) {
 }
 
 void timer3Isr(void) {
-    run_stepper = true;
+    stepper->run();
 }
 
 void process_sensor_data(SensorData& sensorData, float vzero) {
