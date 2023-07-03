@@ -394,7 +394,6 @@ void display_lcd(Menu_state_t& menu_state, Ventilation_Config_t& config,
 
     } else if (menu_state.menu_number == ALARMS_MENU) {
         writeLine(0, "PIPAL:" + value_to_display(ALARMS_MENU, 0, menu_state, config, alarm_data), 1);
-        Serial.println("cdyn " + String(status.c_dyn));
         dtostrf(status.c_dyn*1.01972, 4, 1, temp_str);
         writeLine(0, "CD:" + String(temp_str), 10);
     

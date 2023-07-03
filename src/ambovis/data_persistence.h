@@ -11,7 +11,6 @@
 typedef struct system_configuration {
     unsigned long last_cycle;
     byte filter;
-    byte autopid;
     byte alarm_vt;
 } SystemConfiguration_t;
 
