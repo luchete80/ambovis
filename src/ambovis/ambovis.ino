@@ -52,6 +52,7 @@ unsigned long lastShowBat = 0;
 
 unsigned long time2;
 
+<<<<<<< HEAD
 //MENU
 bool display_needs_update = false;
 
@@ -60,6 +61,9 @@ bool run_stepper;
 bool update_ventilation;
 
 //KEYBOARD
+=======
+//KEYBOARD & MENU
+>>>>>>> RESP-develop
 Keyboard_data_t keyboard_data;
 Menu_state_t menu_state;
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
@@ -97,7 +101,6 @@ void setup() {
     start(mech_vent);
     update(mech_vent, sensorData);
 
-    clean_tft(tft);
     lcd.clear();
     writeLine(1, "Iniciando...", 0);
     search_home_position(stepper);
@@ -196,11 +199,7 @@ void loop() {
             }//Read Sensor
 
             if (vent_status->cycle != vent_status->last_cycle) {
-//                Serial.println("Last press max " + String(vent_status->last_max_pressure));
-//                Serial.println("Last press min " + String(vent_status->last_min_pressure));
-//                Serial.println("alarm_pre state " + String(alarm_data.alarm_state));
                 alarm_data = check_alarms(mech_vent.status, alarm_data);
-//                Serial.println("alarm_post state " + String(alarm_data.alarm_state));
                 vent_status->last_cycle = vent_status->cycle;
                 vent_status->update_display = true;
                 show_power_led();

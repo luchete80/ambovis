@@ -24,8 +24,6 @@ typedef struct sensor_data {
     float ml_ins_vol = 0.;
     float ml_exs_vol = 0.;
     unsigned long last_read_sensor = 0L;
-    float cdyn_pass[3] = {0.};
-    float cdyn_avg = 0.;
 } SensorData;
 
 typedef struct calibration_data {

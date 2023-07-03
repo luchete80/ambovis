@@ -84,9 +84,9 @@ test(update_vent_when_status_is_Init_Insufflation) {
     mech_vent.stepper->setMaxSpeed(100);
     start(mech_vent);
     mech_vent.status.current_state = Init_Insufflation;
-    mech_vent.status.c_dyn_pass[0] = 1.;
-    mech_vent.status.c_dyn_pass[1] = 2.;
-    mech_vent.status.c_dyn_pass[2] = 3.;
+    mech_vent.status.c_dyn_pass[0] = 1;
+    mech_vent.status.c_dyn_pass[1] = 2;
+    mech_vent.status.c_dyn_pass[2] = 3;
     mech_vent.status.ml_last_ins_vol = 100;
 
     //prepare sensor data
@@ -109,7 +109,7 @@ test(update_vent_when_status_is_Init_Insufflation) {
     assertEqual(mech_vent.status.last_max_pressure, 100);
     assertEqual(mech_vent.status.last_min_pressure, 50);
     assertEqual(mech_vent.status.c_dyn_pass[2], 2); // ml_last_ins_vol / (pressure_max - pressure_min)
-    assertEqual(mech_vent.status.c_dyn, (float) (7./3.)); //c_dyn_pass[0] + c_dyn_pass[1] + c_dyn_pass[2] / 3.
+    assertEqual(mech_vent.status.c_dyn, byte(7/3.)); //c_dyn_pass[0] + c_dyn_pass[1] + c_dyn_pass[2] / 3.
     assertEqual(mech_vent.status.ml_last_ins_vol, int(1.9)); // ml_ins_vol
 }
 

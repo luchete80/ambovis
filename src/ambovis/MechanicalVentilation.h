@@ -35,12 +35,12 @@ typedef struct ventilation_status {
     unsigned int time_ins;
     unsigned int time_exp;
     volatile unsigned long start_cycle_time_ms;
-    int c_dyn_pass[3];
+    byte c_dyn_pass[3];
     int ml_last_ins_vol;
     int ml_last_exp_vol;
     int last_max_pressure;
     int last_min_pressure;
-    float c_dyn;
+    byte c_dyn;
     volatile bool ending_while_moving;
     volatile bool ended_while_moving;
     volatile bool update_display;
