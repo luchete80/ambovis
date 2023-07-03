@@ -52,18 +52,11 @@ unsigned long lastShowBat = 0;
 
 unsigned long time2;
 
-<<<<<<< HEAD
-//MENU
-bool display_needs_update = false;
-
 //INTERRUPTIONS
 bool run_stepper;
 bool update_ventilation;
 
-//KEYBOARD
-=======
 //KEYBOARD & MENU
->>>>>>> RESP-develop
 Keyboard_data_t keyboard_data;
 Menu_state_t menu_state;
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
@@ -283,7 +276,8 @@ void process_sensor_data(SensorData& sensorData, float vzero) {
 
     sensorData.flow_f = get_flow(sensorData);
     update_vol(sensorData, millis());
-//    Serial.println(String(sensorData.flow_f) + ", " + String(p_dpt) + ", " + String(sensorData.flux) + ", " + String(sensorData.ml_ins_vol) + ", " +String(sensorData.v_level));
+//    Serial.println(String(sensorData.flow_f) + ", " + String(p_dpt) + ", " + String(sensorData.flux) + ", " + String(sensorData.ml_ins_vol));
+//    + ", " +String(sensorData.v_level)
     sensorData.last_read_sensor = millis();
 }
 
