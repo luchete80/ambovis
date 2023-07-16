@@ -1,84 +1,50 @@
 #ifndef _MENU_H_
 #define _MENU_H_
 
-#include "defaults.h"
-
-#ifdef LCD_I2C
-#include "src/LiquidCrystal_I2C/LiquidCrystal_I2C.h"
-#else
+#include "alarms.h"
+#include <Arduino.h>
 #include <LiquidCrystal.h>
-#endif
+#include "MechanicalVentilation.h"
 
-
-
-#ifdef LCD_I2C
-extern LiquidCrystal_I2C lcd;
-//LiquidCrystal_I2C lcd(0x3F, 20, 4);
-#else
-//LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
+static byte MENU_NUMBER_LIST[] = {PARAMETERS_MENU, ALARMS_MENU};
 extern LiquidCrystal lcd;
-#endif
 
-extern byte max_sel,min_sel; //According to current selection
-extern unsigned long lastButtonPress;
+typedef struct keyboard_data {
+    unsigned long last_button_pressed;
+    int bck_state;     // current state of the back button
+    int last_bck_state; // previous state of the button
+    unsigned long start_pressed;    // the moment the button was pressed
+    int hold_time;        // how long the button was hold
+    uint8_t selection;
+    uint8_t old_selection;
+    bool change_sleep;
+    byte pressed;
+} Keyboard_data_t;
 
-extern int bck_state ;     // current state of the button
-extern int last_bck_state ; // previous state of the button
-extern int startPressed ;    // the moment the button was pressed
-extern int endPressed ;      // the moment the button was released
-extern int holdTime ;        // how long the button was hold
-extern int idleTime ;        // how long the button was idle
-//bool bck_pressed;
+typedef struct menu_state {
+    uint8_t edited_value;
+    uint8_t* value_to_edit;
+    bool is_item_selected;
+    bool show_changed_options; // Includes cursor change
+    bool update_options; // only when a parameter value is modified
+    uint8_t menu_number;
+    uint8_t menu_position;
+    uint8_t old_menu_position;
+    bool initial_menu_completed;
+    bool is_initial_menu;
+    bool clear_display;
+} Menu_state_t;
 
-extern int curr_sel, old_curr_sel;
-extern byte encoderPos; //this variable stores our current value of encoder position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
-extern byte oldEncPos; //stores the last encoder position value so we can compare to the current reading and see if it has changed (so we know when to print to the serial monitor)
-extern byte old_menu_pos,old_menu_num;
-extern bool show_changed_options; //Only for display
-extern bool update_options;
-extern char tempstr[5],tempstr2[5];
-extern byte menu_number;
-extern byte p_trim;
-
-
+void init_display_lcd();
+void initialize_menu(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state, Ventilation_Config_t& config);
 void writeLine(int line, String message = "", int offsetLeft = 0);
-void lcd_clearxy(int x, int y,int pos=1);
-void lcd_selxy(int x, int y);
-void check_encoder();
-void display_lcd ();
-void init_display();
-
-void check_updn_button(int pin, byte *var, bool incr_decr);
-void check_bck_state();
-
-extern bool isitem_sel;
-
-class Menu{
-  
-  byte cant_opciones_mod;
-  byte opciones_mod[3];
-  
-  public:
-
-  Menu(){};
-  ~Menu(){};
-  
-  
-  };
-  
-class Menu_inic:public Menu{
-  byte _mod,_bpm,_i_e;  
-  unsigned long last_update_display;
-  bool fin=false;
-  bool switching_menus;
-  int m_curr_sel;
-  public:
-    Menu_inic(byte *mode, byte *bpm, byte *i_e);
-    void clear_n_sel( int menu );
-    void Menu_inic::check_encoder ( );
-    void Menu_inic::display_lcd ( );
-    void check_bck_state();
-    
-};
+void check_buttons(Keyboard_data_t& keyboard_data, unsigned long time);
+void check_encoder(Keyboard_data_t& keyboard_data, Menu_state_t& menu_state,
+                   Ventilation_Config_t& config, AlarmData& alarm_data, unsigned long time);
+void display_lcd(Menu_state_t& menu_state, Ventilation_Config_t& config,
+                 Ventilation_Status_t& status, AlarmData& alarm_data);
+void check_bck_state(Keyboard_data_t& keyboard_data, unsigned long time);
+void show_calibration_cycle(byte calib_cycle);
+void wait_for_flux_disconnected();
 
 #endif

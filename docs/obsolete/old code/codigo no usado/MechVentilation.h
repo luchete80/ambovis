@@ -11,9 +11,8 @@
 #include <inttypes.h>
 #include "pinout.h"
 #include "defaults.h"
+#include "sensorcalculation.h"
 #include "src/AutoPID/AutoPID.h"
-#include "Sensors.h"
-
 
 #ifdef ACCEL_STEPPER
 #include "src/AccelStepper/AccelStepper.h"
@@ -73,12 +72,11 @@ public:
     void start(void);
     /** Stop mechanical ventilation. */
     void stop(void);
-    void update(void);
+    void update( SensorData& sensorData );
 
     /** Recruitment */
     void activateRecruitment(void);
     void deactivateRecruitment(void);
-    byte _mode;
     /**
      * getters
      */
@@ -189,46 +187,38 @@ private:
     bool _running = false;
     bool _sensor_error_detected;
     bool _startWasTriggeredByPatient = false;
-    //float _currentFlow = 0.0;
-    //float _currentVolume = 0.0;
     float timeoutCycle;
 };
 
 extern unsigned int _timeoutIns;
 extern unsigned int _timeoutEsp;
-    
 extern byte stepper_time;
 extern unsigned long last_vent_time;
 extern float _mlInsVol,_mlExsVol;
+
 extern int _mllastInsVol,_mllastExsVol;
-//_mlInsVol2;
-//extern float _stepperSpeed;
-extern float pressure_sec,psec_max,last_psec_max;
-extern unsigned long _msecTimerStartCycle; //CADA semiciclo
 extern bool display_needs_update;
-extern byte flux_count;
-extern unsigned long flux_filter_time;
-extern float flux_sum;
 extern VentilationOptions_t options;
 extern MechVentilation * ventilation;
 extern unsigned long last_cycle;
-extern byte alarm_max_pressure,alarm_peep_pressure;
-extern int alarm_vt;
+
 extern byte cycle_pos; //0 to 127
-extern byte Cdyn;
 extern bool autopid;
 extern bool filter;
 extern byte pfmin,pfmax;
 extern float peep_fac;
 extern float pf_min,pf_max;
-extern float dpip;extern byte dpip_b;
+extern float dpip;
+extern byte dpip_b;
 extern int max_accel,min_accel,max_speed,min_speed,max_cd,min_cd,max_pidk,min_pidk;
 extern int max_pidi,min_pidi;
 extern int max_pidd,min_pidd;
 
-extern float f_acc;extern byte f_acc_b;
+extern float f_acc;
+extern byte f_acc_b;
 extern byte p_acc;
 
+
 extern bool ended_whilemov;
-    
+
 #endif /* INC_MECHANICAL_VENTILATION_H */
