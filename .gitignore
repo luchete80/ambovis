@@ -9,6 +9,7 @@ src/EpoxyEeprom
 src/AUnit/
 src/Adafruit*
 src/LiquidCrystal
+.idea
 *.tmp
 *.out
 *.o
