@@ -4,7 +4,7 @@
 - Sistema Operativo: Windows, Linux/MacOS
 - Arduino ATMega 2560
 
-Ver configuración de la placa asociada al Arduino [aquí](../../resources/schematics).
+Ver configuración de la placa asociada al Arduino [aquí](../resources/schematics).
 
 ### Frameworks de Desarrollo
 Para comenzar con el desarrollo de este proyecto, se recomienda instalar:
@@ -26,3 +26,4 @@ Las librerías pueden ser instaladas usando Arduino IDE en Herramientas -> Admin
 El procedimiento de despliegue es a través de un script. 
 
 Hay opciones en bash para Linux/MacOS, en powershell para Windows, y python para cualquier sistema operativo con python3 (previamente instalando los requisitos listados en `requirements.txt`.
+[Ver más](deployment.md)

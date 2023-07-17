@@ -5,7 +5,7 @@ El VMM es un proyecto nacido en la Facultad de Ingeniería de la Universidad de 
 
 En este repositorio encontrará el codigo escrito en C++ junto con la documentación de:
 - [Manuales](docs/manuals/README.md)
-  - [Preparación del entorno y ejecución del código](docs/manuals/development/README.md)
+  - [Preparación del entorno y ejecución del código](docs/manuals/development-setup.md)
   - [Uso del menú del dipositivo](docs/manuals/menu/README.md)
 - [Recursos de investigación](docs/resources/README.md)
   - [Esquemáticos](docs/resources/schematics)
