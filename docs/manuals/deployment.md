@@ -50,7 +50,7 @@ Windows: no es necesario exportar la variable, el script lo hace automáticament
 
 Si la password es incorrecta, el código no compilará, deteniendo la ejecución del script.
 
-Si se desea usar el monitor serie, se puede acceder a él a través de la interfaz gráfica de Arduino IDE una vez que el código esta subido a la placa.
+Si se desea usar el monitor serie, se puede acceder a él a través de la interfaz gráfica de Arduino IDE una vez que el código esta subido a la placa. **Si al momento de querer subir el código, el monitor serie esta abierto, el script mostrará un error dado que el puerto esta siendo usado.**
 
 ### Algunos comandos útiles
 
@@ -61,6 +61,32 @@ Listar los boards aceptados por arduino cli
 Listar los puertos detectados
 
 `arduino-cli board list`
+
+## Portabilidad con Python 3
+
+Se añadió un script para python 3 y archivos encriptados específicos para esta versión.
+
+Para instalar los paquetes necesarios, ejecutar:
+
+`pip install -r requirements.txt`
+
+Una vez conectada la placa Arduino a la  computadora, ejecutar
+
+`python3 deploy.py`
+
+El script verificará que esté instalado arduino-cli, en caso de error, seguir los pasos indicados aquí https://arduino.github.io/arduino-cli/0.32/installation/
+
+Si todo esta bien, mostrará el prompt para ingresar la contraseña:
+
+![passwrod-prompt.png](images/password-prompt.png)
+
+Una vez ingresada, se mostrará los puertos disponibles para usar. Seleccion el puerto donde está conectada la placa:
+
+![available-ports.png](images/available-ports.png)
+
+En nuestro caso, elegimos `/dev/cu.usbserial-14340` y presionamos enter.
+
+![uploading-code.png](images/uploading-code.png)
 
 ### Referencias:
 
