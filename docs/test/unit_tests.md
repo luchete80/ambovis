@@ -17,7 +17,7 @@ Permiten garantizar que cada unidad de código funcione como se espera y que cua
 Solo podrá ejecutarse en Linux/MacOS debido a limitaciones de las herramientas:
 
 1. Instalar `git` por línea de comandos 
-2. En `src/` ejecutar `sh install-dependencies.sh` que instalará EpoxyDuino, AUnit y otras librerías y configuraciones necesarias.
+2. En `src/` ejecutar `sh install-test-deps.sh` que instalará EpoxyDuino, AUnit y otras librerías y configuraciones necesarias.
 3. Abrir una terminal nueva e ir a `src/ambovis/tests/unit-tests`
 4. Para compilar, ejecutar `make`
 5. Para ejecutar todos los tests bajo la carpeta `unit-tests/`, ejecutar el comando `make runtests`
@@ -38,7 +38,7 @@ El proyecto esta configurado para que automáticamente al enviar un commit a cua
 
 En la página de GitHub pueden verse las ejecuciones en la pestaña [Actions](https://github.com/luchete80/ambovis/actions) y si las pruebas fueron todas exitosas, se mostrará el ícono verde. En caso de error, se mostrará en rojo.
 
-La configuración del script de Github Actions se encuentra en `[root project folder]/.github/workflows/github-actions-demo.yml`
+La configuración del script de Github Actions se encuentra en `[root project folder]/.github/workflows/github-actions-ambovis.yml`
 
 ### Crear o modificar pruebas unitarias
 
