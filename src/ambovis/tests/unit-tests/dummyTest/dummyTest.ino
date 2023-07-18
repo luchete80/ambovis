@@ -15,6 +15,7 @@ void setup() {
     Serial.begin(115200); // ESP8266 default of 74880 not supported on Linux
     while(!Serial); // for the Arduino Leonardo/Micro only
 
+    Serial.println(F("----"));
     Serial.println(F("This test should produce the following: arr"));
     Serial.println(
             F("1 passed, 1 failed, 0 skipped, 0 timed out, out of 2 test(s).")

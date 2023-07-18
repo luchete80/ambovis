@@ -219,6 +219,8 @@ void update_edited_value(uint8_t& menu_number, uint8_t& menu_position, bool& is_
             case 1:lcd_update_value(8, 1, 3, String(edited_value)); break;
             case 2:lcd_update_value(6, 2, 3, String(edited_value)); break;
         }
+    } else {
+        Serial.println("Error update edited value  " + String(menu_number) + " " + String(menu_position));
     }
 }
 
