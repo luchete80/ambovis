@@ -209,7 +209,8 @@ void setup() {
     Serial.begin(115200); // ESP8266 default of 74880 not supported on Linux
     while(!Serial); // for the Arduino Leonardo/Micro only
 
-    Serial.println(F("MechanicalVentilation tests:"));
+    Serial.println(F("----"));
+    Serial.println(F("START MechanicalVentilation tests:"));
     Serial.println(F("----"));
     accelStepper = new AccelStepper(AccelStepper::DRIVER,
                                      PIN_STEPPER_STEP,

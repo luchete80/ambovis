@@ -52,6 +52,10 @@ unsigned long lastShowBat = 0;
 
 unsigned long time2;
 
+//INTERRUPTIONS
+bool run_stepper;
+bool update_ventilation;
+
 //KEYBOARD & MENU
 Keyboard_data_t keyboard_data;
 Menu_state_t menu_state;
@@ -71,7 +75,7 @@ void setup() {
     init_display_lcd();
 
     writeLine(1, "RespirAR FIUBA", 4);
-    writeLine(2, "v2.1.0", 8);
+    writeLine(2, "v2.1.1", 8);
 
     init_display_tft(tft);
     init_sensor(ads);
@@ -145,6 +149,10 @@ void loop() {
         check_encoder(keyboard_data, menu_state, mech_vent.config, alarm_data, time2);
         Ventilation_Status_t* vent_status = &mech_vent.status;
 
+        if (update_ventilation) {
+            update(mech_vent, sensorData);
+            update_ventilation = false;
+        }
         if (calibration_data.calibration_run) {
             if (time2 > sensorData.last_read_sensor + TIME_SENSOR) {
                 process_sensor_data(sensorData, calibration_data.vzero);
@@ -250,7 +258,7 @@ void loop() {
 }//LOOP
 
 void timer1Isr(void) {
-    update(mech_vent, sensorData);
+    update_ventilation = true;
 }
 
 void timer3Isr(void) {
@@ -268,7 +276,8 @@ void process_sensor_data(SensorData& sensorData, float vzero) {
 
     sensorData.flow_f = get_flow(sensorData);
     update_vol(sensorData, millis());
-//    Serial.println(String(sensorData.flow_f) + ", " + String(p_dpt) + ", " + String(sensorData.flux) + ", " + String(sensorData.ml_ins_vol) + ", " +String(sensorData.v_level));
+//    Serial.println(String(sensorData.flow_f) + ", " + String(p_dpt) + ", " + String(sensorData.flux) + ", " + String(sensorData.ml_ins_vol));
+//    + ", " +String(sensorData.v_level)
     sensorData.last_read_sensor = millis();
 }
 

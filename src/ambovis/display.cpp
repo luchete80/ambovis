@@ -37,6 +37,7 @@ void tft_draw(Adafruit_ILI9341& tft, SensorData& sensorData, Ventilation_Status_
 
     yflux[0]=yflux[1];
     yflux[1]=int(sensorData.flow_f*0.035);
+//    Serial.println(String(status.cycle_pos) + " | " + String(ry[valsreaded]) + " | " + String(yflux[1]));
 
     tft.setRotation(1);
     if (valsreaded > 0) {
