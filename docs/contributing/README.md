@@ -1,6 +1,6 @@
 # Cómo contribuir a este proyecto?
 
-La preparación del entorno local puede consultarse [aquí](../manuals/development/README.md) 
+La preparación del entorno local puede consultarse [aquí](../manuals/development-setup.md) 
 
 ### Versionado del Código Fuente
 
@@ -79,9 +79,10 @@ Los administradores del proyecto seran los responsables de crear los tags del c�
 ```
 git tag <semver> <commit sha>
 git tag v1.0.2 HEAD
+git push origin v1.0.2
 ```
 
-Asi mismo, los administradores decidirán las frecuencias de _release_, es decir, versiones publicadas del software con un _changelog_ asociado. Estas versiones publicadas son basicamente determinados tags que han pasado por diferentes estadíos de pruebas y revisión exitosas.
+Asi mismo, los administradores decidirán las frecuencias de _release_, es decir, versiones publicadas del software con un _changelog_ asociado. Estas versiones publicadas son básicamente determinados tags que han pasado por diferentes estadíos de pruebas y revisión exitosas.
 
 ### Referencias
 
