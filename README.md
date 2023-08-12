@@ -1,7 +1,7 @@
 # Proyecto RespirAR UBA
 
 ## Ventilador Mecánico Mínimo (VMM)
-El VMM es un proyecto nacido en la Facultad de Ingeniería de la Universidad de Buenos Aires y tiene como objetivo crear un prototipo de respirador de bajo costo. [Leer más](https://)
+El VMM es un proyecto nacido en la Facultad de Ingeniería de la Universidad de Buenos Aires y tiene como objetivo crear un prototipo de respirador de bajo costo. [Leer más](https://www.fi.uba.ar/noticias/desarrollo-de-insumos-y-equipamiento-medico-3984)
 
 En este repositorio encontrará el codigo escrito en C++ junto con la documentación de:
 - [Manuales](docs/manuals/README.md)
